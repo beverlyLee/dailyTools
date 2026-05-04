@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dream-journal-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DB_PATH=/app/data/dream-journal.db
+    volumes:
+      - ./backend/data:/app/data
+    networks:
+      - dream-journal-network
+    restart: unless-stopped
+
+networks:
+  dream-journal-network:
+    driver: bridge

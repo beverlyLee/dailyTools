@@ -1,0 +1,31 @@
+import { StorageCondition } from '../entities/medicine.entity';
+export declare class CreateMedicineDto {
+    name: string;
+    genericName?: string;
+    brand?: string;
+    barcode?: string;
+    dosageForm?: string;
+    strength?: string;
+    quantity?: number;
+    unit?: string;
+    totalQuantity?: number;
+    remainingQuantity?: number;
+    productionDate?: string;
+    expiryDate?: string;
+    batchNumber?: string;
+    storageCondition?: StorageCondition;
+    usageInstructions?: string;
+    indications?: string;
+    contraindications?: string;
+    sideEffects?: string;
+    notes?: string;
+    purchaseLocation?: string;
+    purchaseDate?: string;
+    purchasePrice?: number;
+    isPrescription?: boolean;
+    prescribingDoctor?: string;
+    prescriptionNumber?: string;
+    tags?: string[];
+    images?: string[];
+    isFavorite?: boolean;
+}

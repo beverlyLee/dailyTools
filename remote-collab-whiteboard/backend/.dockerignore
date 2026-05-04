@@ -1,0 +1,13 @@
+.git
+.gitignore
+*.md
+.env
+.env.*
+.idea
+.vscode
+*.log
+.DS_Store
+go.sum.old
+vendor/
+test/
+docs/

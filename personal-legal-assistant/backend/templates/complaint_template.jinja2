@@ -1,0 +1,35 @@
+民事起诉状
+
+原告：{{ plaintiff_name }}，{{ plaintiff_gender }}，{{ plaintiff_birth_date|format_date }}出生，{{ plaintiff_ethnicity }}，{{ plaintiff_occupation }}，住址：{{ plaintiff_address }}，联系电话：{{ plaintiff_phone }}。
+{% if plaintiff_agent %}
+委托代理人：{{ plaintiff_agent.name }}，{{ plaintiff_agent.organization }}律师事务所律师。
+{% endif %}
+
+被告：{{ defendant_name }}，{{ defendant_gender }}，{{ defendant_birth_date|format_date }}出生，{{ defendant_ethnicity }}，{{ defendant_occupation }}，住址：{{ defendant_address }}，联系电话：{{ defendant_phone }}。
+{% if defendant_agent %}
+委托代理人：{{ defendant_agent.name }}，{{ defendant_agent.organization }}律师事务所律师。
+{% endif %}
+
+诉讼请求：
+
+{% for claim in claims %}
+{{ loop.index }}. {{ claim }}
+{% endfor %}
+
+事实与理由：
+
+{{ facts_and_reasons }}
+
+综上所述，{{ facts_and_reasons_summary if facts_and_reasons_summary else '为维护原告的合法权益' }}，特依据《中华人民共和国民事诉讼法》相关规定向贵院提起诉讼，请依法判决。
+
+此致
+{{ court_name }}
+
+附：本诉状副本 {{ copy_count|default(1) }} 份
+证据材料：
+{% for evidence in evidence_list %}
+{{ loop.index }}. {{ evidence.name }}（{{ evidence.description }}）
+{% endfor %}
+
+具状人：{{ plaintiff_name }}
+{% if filing_date %}{{ filing_date|format_date }}{% else %}{{ current_date|format_date }}{% endif %}

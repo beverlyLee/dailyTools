@@ -1,0 +1,32 @@
+# Django 核心
+Django==4.2.7
+
+# Django REST Framework
+djangorestframework==3.14.0
+
+# CORS 跨域支持
+django-cors-headers==4.3.0
+
+# 数据库过滤
+django-filter==23.4
+
+# API 文档
+drf-yasg==1.21.7
+
+# Celery 任务队列
+celery==5.3.4
+redis==5.0.1
+
+# 图片处理
+Pillow==10.1.0
+
+# 日期处理
+python-dateutil==2.8.2
+
+# 生产环境（可选）
+# gunicorn==21.2.0
+# whitenoise==6.6.0
+
+# OCR 依赖（可选，安装困难时可跳过）
+# paddlepaddle==2.5.2
+# paddleocr==2.7.0.3

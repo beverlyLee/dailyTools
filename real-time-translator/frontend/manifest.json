@@ -1,0 +1,133 @@
+{
+    "name": "实时翻译助手",
+    "appid": "__UNI__REAL_TRANSLATOR",
+    "description": "跨境商务实时翻译应用，支持多语种语音翻译",
+    "versionName": "1.0.0",
+    "versionCode": "100",
+    "transformPx": false,
+    "app-plus": {
+        "usingComponents": true,
+        "nvueStyleCompiler": "uni-app",
+        "compilerVersion": 3,
+        "splashscreen": {
+            "alwaysShowBeforeRender": true,
+            "waiting": true,
+            "autoclose": true,
+            "delay": 0
+        },
+        "modules": {
+            "Recorder": {},
+            "Speech": {},
+            "Geolocation": {}
+        },
+        "distribute": {
+            "android": {
+                "permissions": [
+                    "android.permission.RECORD_AUDIO",
+                    "android.permission.WRITE_EXTERNAL_STORAGE",
+                    "android.permission.READ_EXTERNAL_STORAGE",
+                    "android.permission.INTERNET",
+                    "android.permission.ACCESS_NETWORK_STATE",
+                    "android.permission.MODIFY_AUDIO_SETTINGS"
+                ]
+            },
+            "ios": {
+                "plist": {
+                    "NSMicrophoneUsageDescription": "需要访问麦克风进行语音翻译",
+                    "NSCameraUsageDescription": "需要访问相机进行功能扩展",
+                    "NSPhotoLibraryUsageDescription": "需要访问相册保存翻译截图",
+                    "NSLocalNetworkUsageDescription": "需要访问局域网连接本地翻译服务"
+                }
+            },
+            "splashscreen": {
+                "androidStyle": "default",
+                "iosStyle": "default"
+            }
+        }
+    },
+    "quickapp": {},
+    "mp-weixin": {
+        "appid": "",
+        "setting": {
+            "urlCheck": false,
+            "es6": true,
+            "enhance": true,
+            "postcss": true,
+            "preloadBackgroundData": false,
+            "minified": true,
+            "newFeature": false,
+            "coverView": true,
+            "nodeModules": false,
+            "autoAudits": false,
+            "showShadowRootInWxmlPanel": true,
+            "scopeDataCheck": false,
+            "uglifyFileName": false,
+            "checkInvalidKey": true,
+            "checkSiteMap": true,
+            "uploadWithSourceMap": true,
+            "compileHotReLoad": false,
+            "lazyloadPlaceholderEnable": false,
+            "useMultiFrameRuntime": true,
+            "useApiHook": true,
+            "useApiHostProcess": true,
+            "babelSetting": {
+                "ignore": [],
+                "disablePlugins": [],
+                "outputPath": ""
+            },
+            "enableEngineNative": false,
+            "useIsolateContext": true,
+            "userConfirmedBundleSwitch": false,
+            "packNpmManually": false,
+            "packNpmRelationList": [],
+            "minifyWXSS": true,
+            "disableUseStrict": false,
+            "minifyWXML": true,
+            "showES6CompileOption": false,
+            "useCompilerPlugins": false
+        },
+        "usingComponents": true,
+        "permission": {
+            "scope.record": {
+                "desc": "用于语音翻译功能"
+            }
+        },
+        "requiredPrivateInfos": []
+    },
+    "mp-alipay": {
+        "usingComponents": true
+    },
+    "mp-baidu": {
+        "usingComponents": true
+    },
+    "mp-toutiao": {
+        "usingComponents": true
+    },
+    "uniStatistics": {
+        "enable": false
+    },
+    "vueVersion": "3",
+    "h5": {
+        "devServer": {
+            "port": 5173,
+            "disableHostCheck": true,
+            "proxy": {
+                "/api": {
+                    "target": "http://localhost:8000",
+                    "changeOrigin": true,
+                    "secure": false
+                }
+            }
+        },
+        "title": "实时翻译助手",
+        "template": "index.html",
+        "router": {
+            "mode": "hash",
+            "base": "./"
+        },
+        "optimization": {
+            "prefetch": true,
+            "preload": true
+        }
+    }
+}

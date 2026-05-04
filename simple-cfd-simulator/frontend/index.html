@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简易 CFD 流体模拟器 - Lattice Boltzmann Method</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>简易 CFD 流体模拟器</h1>
+            <p class="subtitle">基于 Lattice Boltzmann Method (D2Q9 模型)</p>
+        </header>
+
+        <div class="main-content">
+            <div class="control-panel">
+                <div class="control-section">
+                    <h3>模拟参数</h3>
+                    
+                    <div class="control-group">
+                        <label for="reynoldsNumber">雷诺数 (Re):</label>
+                        <input type="number" id="reynoldsNumber" value="1000" min="100" max="10000" step="100">
+                        <span class="hint">典型值: 100-5000</span>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="inletVelocity">入口速度:</label>
+                        <input type="number" id="inletVelocity" value="0.1" min="0.01" max="0.5" step="0.01">
+                        <span class="hint">典型值: 0.05-0.3</span>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="gridWidth">网格宽度:</label>
+                        <input type="number" id="gridWidth" value="256" min="128" max="512" step="32">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="gridHeight">网格高度:</label>
+                        <input type="number" id="gridHeight" value="128" min="64" max="256" step="32">
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>障碍物设置</h3>
+                    
+                    <div class="control-group">
+                        <label for="obstacleType">障碍物类型:</label>
+                        <select id="obstacleType">
+                            <option value="circle" selected>圆形</option>
+                            <option value="rectangle">矩形</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group" id="circleParams">
+                        <label for="obstacleX">中心 X 坐标:</label>
+                        <input type="number" id="obstacleX" value="64" min="0" step="1">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="obstacleY">中心 Y 坐标:</label>
+                        <input type="number" id="obstacleY" value="64" min="0" step="1">
+                    </div>
+
+                    <div class="control-group" id="radiusGroup">
+                        <label for="obstacleRadius">半径:</label>
+                        <input type="number" id="obstacleRadius" value="16" min="5" step="1">
+                    </div>
+
+                    <div class="control-group hidden" id="rectangleParams">
+                        <label for="obstacleWidth">宽度:</label>
+                        <input type="number" id="obstacleWidth" value="32" min="10" step="1">
+                    </div>
+
+                    <div class="control-group hidden" id="heightGroup">
+                        <label for="obstacleHeight">高度:</label>
+                        <input type="number" id="obstacleHeight" value="32" min="10" step="1">
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>渲染设置</h3>
+                    
+                    <div class="control-group">
+                        <label for="renderMode">渲染模式:</label>
+                        <select id="renderMode">
+                            <option value="vorticity" selected>涡量图</option>
+                            <option value="velocity">速度矢量图</option>
+                            <option value="both">两者都显示</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="stepsPerFrame">每帧步数:</label>
+                        <input type="number" id="stepsPerFrame" value="10" min="1" max="100" step="1">
+                        <span class="hint">越大越快，越大越不流畅</span>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="vectorDensity">矢量密度:</label>
+                        <input type="number" id="vectorDensity" value="8" min="4" max="32" step="2">
+                        <span class="hint">间隔显示的网格数</span>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>控制按钮</h3>
+                    
+                    <div class="button-group">
+                        <button id="initBtn" class="btn btn-primary">初始化模拟</button>
+                        <button id="startBtn" class="btn btn-success" disabled>开始</button>
+                        <button id="pauseBtn" class="btn btn-warning" disabled>暂停</button>
+                        <button id="resetBtn" class="btn btn-danger" disabled>重置</button>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="snapshotBtn" class="btn btn-info" disabled>保存快照</button>
+                        <button id="loadSnapshotBtn" class="btn btn-secondary">加载快照</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>状态信息</h3>
+                    <div class="status-info">
+                        <p><strong>模拟 ID:</strong> <span id="simulationId">-</span></p>
+                        <p><strong>当前步数:</strong> <span id="currentStep">0</span></p>
+                        <p><strong>FPS:</strong> <span id="fps">0</span></p>
+                        <p><strong>状态:</strong> <span id="status" class="status-idle">空闲</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visualization-panel">
+                <div class="canvas-container">
+                    <canvas id="simulationCanvas"></canvas>
+                    <div class="color-bar">
+                        <div class="color-gradient" id="colorGradient"></div>
+                        <div class="color-labels">
+                            <span id="minValue">-0.1</span>
+                            <span id="maxValue">0.1</span>
+                        </div>
+                        <div class="color-label">涡量</div>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ff0000;"></div>
+                        <span>正涡量 (顺时针)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #0000ff;"></div>
+                        <span>负涡量 (逆时针)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #000000;"></div>
+                        <span>障碍物</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="snapshot-modal" id="snapshotModal">
+            <div class="modal-content">
+                <h3>选择快照</h3>
+                <select id="snapshotSelect" size="10">
+                </select>
+                <div class="modal-buttons">
+                    <button id="loadBtn" class="btn btn-primary">加载</button>
+                    <button id="closeModalBtn" class="btn btn-secondary">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/js/main.js"></script>
+</body>
+</html>

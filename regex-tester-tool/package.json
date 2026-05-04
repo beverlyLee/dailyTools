@@ -1,0 +1,21 @@
+{
+  "name": "regex-tester-tool",
+  "version": "1.0.0",
+  "description": "正则表达式测试器应用，支持实时匹配、正则解释、常用库收藏和替换测试功能",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["regex", "tester", "electron", "monaco-editor"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^28.0.0"
+  },
+  "dependencies": {
+    "monaco-editor": "^0.45.0",
+    "sql.js": "^1.9.0"
+  }
+}

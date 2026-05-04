@@ -1,0 +1,25 @@
+{
+  "name": "dream-journal-analyzer-frontend",
+  "version": "1.0.0",
+  "description": "个人梦境记录与分析应用前端",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": ["dream", "journal", "vue"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0",
+    "pinia": "^2.1.7",
+    "axios": "^1.6.8"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "vite": "^5.2.8",
+    "@vue/compiler-sfc": "^3.4.21"
+  }
+}

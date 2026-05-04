@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三体运动模拟器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            color: #fff;
+            overflow: hidden;
+        }
+        
+        #app {
+            display: flex;
+            height: 100vh;
+        }
+        
+        #canvas-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        #canvas-container canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        #control-panel {
+            width: 400px;
+            background: rgba(15, 15, 25, 0.95);
+            border-left: 1px solid rgba(100, 150, 255, 0.2);
+            padding: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 20px;
+            border-bottom: 1px solid rgba(100, 150, 255, 0.3);
+        }
+        
+        .panel-title {
+            font-size: 1.5em;
+            color: #7aa7ff;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .panel-subtitle {
+            font-size: 0.85em;
+            color: #666;
+            text-align: center;
+            margin-top: 5px;
+        }
+        
+        .panel-content {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 0.9em;
+            margin-bottom: 12px;
+            color: #5a87ff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        
+        .preset-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .preset-btn {
+            background: rgba(50, 60, 80, 0.4);
+            border: 1px solid rgba(100, 150, 255, 0.2);
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .preset-btn:hover {
+            background: rgba(70, 80, 100, 0.6);
+            border-color: rgba(100, 150, 255, 0.5);
+            transform: translateX(2px);
+        }
+        
+        .preset-name {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        
+        .preset-desc {
+            font-size: 0.8em;
+            color: #888;
+        }
+        
+        .body-configs-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .body-config {
+            background: rgba(30, 35, 50, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid rgba(100, 150, 255, 0.15);
+        }
+        
+        .body-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(100, 150, 255, 0.1);
+        }
+        
+        .body-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .body-name {
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .form-group {
+            margin-bottom: 10px;
+        }
+        
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 0.8em;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+        
+        .vector-inputs {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .vector-inputs .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 8px 10px;
+            background: rgba(20, 25, 40, 0.8);
+            border: 1px solid rgba(100, 150, 255, 0.25);
+            border-radius: 4px;
+            color: #fff;
+            font-size: 0.85em;
+            font-family: inherit;
+        }
+        
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #7aa7ff;
+            box-shadow: 0 0 8px rgba(122, 167, 255, 0.2);
+        }
+        
+        .control-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-family: inherit;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4a6cf7, #6a8cf7);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #5a7cff, #7a9cff);
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: rgba(50, 60, 80, 0.6);
+            color: #ccc;
+            border: 1px solid rgba(100, 150, 255, 0.3);
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(70, 80, 100, 0.8);
+            color: #fff;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #3aa675, #4aba85);
+            color: white;
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            background: linear-gradient(135deg, #4aba85, #5acca5);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            color: white;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+        }
+        
+        .slider-container {
+            margin-bottom: 15px;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            color: #aaa;
+        }
+        
+        .slider-value {
+            color: #7aa7ff;
+            font-weight: 600;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(50, 60, 80, 0.6);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #7aa7ff;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #9ac4ff;
+            transform: scale(1.1);
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85em;
+            color: #aaa;
+        }
+        
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #7aa7ff;
+            cursor: pointer;
+        }
+        
+        .status-bar {
+            background: rgba(20, 25, 40, 0.8);
+            padding: 15px 20px;
+            border-top: 1px solid rgba(100, 150, 255, 0.2);
+        }
+        
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .status-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #666;
+        }
+        
+        .status-dot.status-running {
+            background: #3aa675;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .status-dot.status-paused {
+            background: #f59e0b;
+        }
+        
+        .status-dot.status-idle {
+            background: #666;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .status-text {
+            font-size: 0.85em;
+            color: #aaa;
+        }
+        
+        .stat-value {
+            font-size: 0.85em;
+            color: #7aa7ff;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+        
+        .dt-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        
+        .dt-container .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-overlay.hidden {
+            display: none;
+        }
+        
+        .modal {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(100, 150, 255, 0.2);
+        }
+        
+        .modal-title {
+            font-size: 1.2em;
+            color: #7aa7ff;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .modal-close:hover {
+            background: rgba(100, 150, 255, 0.1);
+            color: #fff;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(100, 150, 255, 0.1);
+        }
+        
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            background: rgba(30, 35, 50, 0.5);
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(100, 150, 255, 0.1);
+        }
+        
+        .history-item:hover {
+            background: rgba(50, 60, 80, 0.6);
+            border-color: rgba(100, 150, 255, 0.3);
+        }
+        
+        .history-name {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        
+        .history-time {
+            font-size: 0.8em;
+            color: #888;
+        }
+        
+        .analysis-result {
+            background: rgba(30, 35, 50, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid rgba(136, 255, 170, 0.2);
+        }
+        
+        .analysis-result.hidden {
+            display: none;
+        }
+        
+        .analysis-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 0.85em;
+        }
+        
+        .analysis-label {
+            color: #888;
+        }
+        
+        .analysis-value {
+            color: #88ffaa;
+            font-family: 'Courier New', monospace;
+        }
+        
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        #loading-overlay.hidden {
+            display: none;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(122, 167, 255, 0.2);
+            border-top-color: #7aa7ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: #7aa7ff;
+            font-size: 1.1em;
+        }
+        
+        .info-box {
+            background: rgba(122, 167, 255, 0.1);
+            border-left: 3px solid #7aa7ff;
+            padding: 12px;
+            border-radius: 0 4px 4px 0;
+            margin-top: 15px;
+        }
+        
+        .info-box-title {
+            color: #7aa7ff;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.85em;
+        }
+        
+        .info-box-content {
+            font-size: 0.8em;
+            color: #aaa;
+            line-height: 1.5;
+        }
+        
+        .separator {
+            height: 1px;
+            background: rgba(100, 150, 255, 0.15);
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在初始化三体运动模拟器...</div>
+    </div>
+
+    <div id="app">
+        <div id="canvas-container"></div>
+        
+        <div id="control-panel">
+            <div class="panel-header">
+                <div class="panel-title">三体运动模拟器</div>
+                <div class="panel-subtitle">Three-Body Motion Simulator</div>
+            </div>
+            
+            <div class="panel-content">
+                <div class="section">
+                    <div class="section-title">📋 预设场景</div>
+                    <div class="preset-container" id="preset-buttons"></div>
+                </div>
+                
+                <div class="separator"></div>
+                
+                <div class="section">
+                    <div class="section-title">⚙️ 模拟参数</div>
+                    <div class="dt-container">
+                        <div class="form-group">
+                            <label>时间步长 dt (s)</label>
+                            <input type="number" id="dt-input" value="1.0" step="0.1" min="0.01">
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container" style="margin-top: 15px;">
+                        <div class="slider-label">
+                            <span>模拟速度</span>
+                            <span class="slider-value" id="speed-value">10x</span>
+                        </div>
+                        <input type="range" id="speed-slider" min="1" max="100" value="10">
+                    </div>
+                    
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="show-trajectory" checked>
+                        <label for="show-trajectory">显示运动轨迹</label>
+                    </div>
+                </div>
+                
+                <div class="separator"></div>
+                
+                <div class="section">
+                    <div class="section-title">🌍 天体配置</div>
+                    <div class="body-configs-container" id="body-configs"></div>
+                </div>
+                
+                <div class="separator"></div>
+                
+                <div class="section">
+                    <div class="section-title">🎮 控制</div>
+                    <div class="control-buttons">
+                        <button class="btn btn-primary" id="btn-init">初始化</button>
+                        <button class="btn btn-success" id="btn-start" disabled>开始</button>
+                        <button class="btn btn-warning" id="btn-pause" disabled>暂停</button>
+                        <button class="btn btn-danger" id="btn-reset">重置</button>
+                    </div>
+                    
+                    <div class="control-buttons">
+                        <button class="btn btn-secondary" id="btn-save">💾 保存</button>
+                        <button class="btn btn-secondary" id="btn-load-history">📂 历史</button>
+                        <button class="btn btn-secondary" id="btn-analyze">📊 分析</button>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <div class="info-box-title">操作提示</div>
+                    <div class="info-box-content">
+                        • 鼠标左键拖动：旋转视角<br>
+                        • 鼠标滚轮：缩放<br>
+                        • 鼠标右键拖动：平移视角
+                    </div>
+                </div>
+                
+                <div id="analysis-result" class="analysis-result hidden"></div>
+            </div>
+            
+            <div class="status-bar">
+                <div class="status-row">
+                    <div class="status-indicator">
+                        <div class="status-dot" id="status-dot"></div>
+                        <span class="status-text" id="status-text">初始化中</span>
+                    </div>
+                </div>
+                <div class="status-row">
+                    <span class="status-text">模拟时间</span>
+                    <span class="stat-value" id="current-time">0.0 s</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-text">数据点</span>
+                    <span class="stat-value" id="data-points">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="save-modal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">保存模拟</div>
+                <button class="modal-close" id="btn-cancel-save">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>模拟名称</label>
+                    <input type="text" id="save-name" placeholder="输入模拟名称">
+                </div>
+                <div class="form-group">
+                    <label>备注 (可选)</label>
+                    <input type="text" id="save-notes" placeholder="输入备注信息">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-cancel-save-2">取消</button>
+                <button class="btn btn-primary" id="btn-confirm-save">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="history-modal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">历史记录</div>
+                <button class="modal-close" id="btn-close-history">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="history-list" id="history-list"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>

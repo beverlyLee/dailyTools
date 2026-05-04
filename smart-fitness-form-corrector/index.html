@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智能健身动作矫正 - Smart Fitness Form Corrector</title>
+  <link rel="stylesheet" href="src/styles/main.css">
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <h1>🏋️ 智能健身动作矫正</h1>
+      <p class="subtitle">实时姿态分析与动作指导</p>
+    </header>
+
+    <main class="main-content">
+      <section class="control-panel">
+        <div class="exercise-selector">
+          <label for="exerciseSelect">选择动作：</label>
+          <select id="exerciseSelect">
+            <option value="squat">深蹲 (Squat)</option>
+            <option value="pushup">俯卧撑 (Push-up)</option>
+            <option value="plank">平板支撑 (Plank)</option>
+            <option value="lunge">弓步蹲 (Lunge)</option>
+          </select>
+        </div>
+
+        <div class="camera-controls">
+          <button id="startBtn" class="btn btn-primary">
+            📷 开始摄像头
+          </button>
+          <button id="stopBtn" class="btn btn-secondary" disabled>
+            ⏹️ 停止
+          </button>
+          <button id="toggleFeedback" class="btn btn-info">
+            🔊 语音反馈: 开启
+          </button>
+        </div>
+
+        <div class="status-panel">
+          <div class="status-item">
+            <span class="label">摄像头状态：</span>
+            <span id="cameraStatus" class="status offline">未连接</span>
+          </div>
+          <div class="status-item">
+            <span class="label">模型状态：</span>
+            <span id="modelStatus" class="status loading">加载中...</span>
+          </div>
+          <div class="status-item">
+            <span class="label">动作状态：</span>
+            <span id="poseStatus" class="status unknown">未检测</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="video-section">
+        <div class="video-container">
+          <video id="video" autoplay muted playsinline></video>
+          <canvas id="canvas"></canvas>
+          <div id="loadingOverlay" class="overlay">
+            <div class="spinner"></div>
+            <p>正在加载姿态估计模型...</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="feedback-section">
+        <div class="feedback-display">
+          <h3>实时反馈</h3>
+          <div id="feedbackText" class="feedback-text">
+            等待开始检测...
+          </div>
+        </div>
+
+        <div class="angle-display">
+          <h3>关键关节角度</h3>
+          <div class="angle-grid">
+            <div class="angle-item">
+              <span class="angle-label">左膝</span>
+              <span id="leftKneeAngle" class="angle-value">--°</span>
+            </div>
+            <div class="angle-item">
+              <span class="angle-label">右膝</span>
+              <span id="rightKneeAngle" class="angle-value">--°</span>
+            </div>
+            <div class="angle-item">
+              <span class="angle-label">左髋</span>
+              <span id="leftHipAngle" class="angle-value">--°</span>
+            </div>
+            <div class="angle-item">
+              <span class="angle-label">右髋</span>
+              <span id="rightHipAngle" class="angle-value">--°</span>
+            </div>
+            <div class="angle-item">
+              <span class="angle-label">左肩</span>
+              <span id="leftShoulderAngle" class="angle-value">--°</span>
+            </div>
+            <div class="angle-item">
+              <span class="angle-label">右肩</span>
+              <span id="rightShoulderAngle" class="angle-value">--°</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-display">
+          <h3>训练统计</h3>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">正确次数</span>
+              <span id="correctCount" class="stat-value correct">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">需要改进</span>
+              <span id="improveCount" class="stat-value improve">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">持续时间</span>
+              <span id="sessionTime" class="stat-value">00:00</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>基于 TensorFlow.js + MoveNet 实现 | 纯前端运行，无需后端</p>
+    </footer>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

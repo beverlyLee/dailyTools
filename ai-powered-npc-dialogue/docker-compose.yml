@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-volcengine}
+      - VOLCENGINE_API_KEY=${VOLCENGINE_API_KEY:-}
+      - VOLCENGINE_ENDPOINT_ID=${VOLCENGINE_ENDPOINT_ID:-doubao-seed-2-0-code-preview-260215}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama2}
+      - CORS_ORIGINS=["http://localhost:3000", "http://localhost:5173", "http://frontend:3000"]
+    volumes:
+      - backend_data:/app/data
+      - ./backend:/app
+    depends_on:
+      - ollama
+    networks:
+      - npc-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - npc-network
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - npc-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  backend_data:
+  ollama_data:
+
+networks:
+  npc-network:
+    driver: bridge

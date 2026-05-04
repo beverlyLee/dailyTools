@@ -1,0 +1,68 @@
+索赔函
+
+致：{{ respondent_name }}
+地址：{{ respondent_address }}
+联系电话：{{ respondent_contact }}
+
+索赔人：{{ claimant_name }}
+地址：{{ claimant_address }}
+联系电话：{{ claimant_contact }}
+日期：{{ claim_date|format_date if claim_date else current_date|format_date }}
+
+关于：{{ claim_subject|default('索赔事宜') }}
+
+尊敬的{{ respondent_name }}：
+
+您好！
+
+现就以下事宜，我方向贵方提出索赔：
+
+一、索赔事由
+
+{{ claim_reason }}
+
+二、索赔金额
+
+我方要求贵方赔偿金额为：{{ claim_amount|format_money }}（大写：{{ claim_amount_cn|default('') }}）。
+
+具体明细如下：
+{% for item in claim_details %}
+{{ loop.index }}. {{ item.description }}：{{ item.amount|format_money }}
+{% endfor %}
+
+三、事实与依据
+
+{{ factual_basis }}
+
+四、法律依据
+
+{{ legal_basis|default('根据《中华人民共和国民法典》及相关法律法规的规定，贵方应当承担相应的赔偿责任。') }}
+
+五、索赔要求
+
+1. 请贵方于{{ deadline_date|format_date }}日前，将上述赔偿款项支付至以下账户：
+   户名：{{ payment_account_name|default(claimant_name) }}
+   账号：{{ payment_account_number|default('') }}
+   开户行：{{ payment_bank|default('') }}
+
+2. 如贵方未在上述期限内履行赔偿义务，我方将保留采取进一步法律行动的权利，包括但不限于向人民法院提起诉讼，并要求贵方承担由此产生的全部费用（包括但不限于律师费、诉讼费、保全费、差旅费等）。
+
+六、附件
+
+{% if evidence_attachments %}
+随本函附上以下证据材料：
+{% for attachment in evidence_attachments %}
+{{ loop.index }}. {{ attachment.name }}（{{ attachment.description }}）
+{% endfor %}
+{% endif %}
+
+请贵方收到本函后，尽快与我方联系，协商解决此事。
+
+联系人：{{ contact_person|default(claimant_name) }}
+联系电话：{{ claimant_contact }}
+电子邮箱：{{ contact_email|default('') }}
+
+特此函告！
+
+索赔人（签字或盖章）：__________________
+日期：{{ claim_date|format_date if claim_date else current_date|format_date }}

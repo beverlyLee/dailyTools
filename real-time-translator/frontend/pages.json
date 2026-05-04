@@ -1,0 +1,68 @@
+{
+    "pages": [
+        {
+            "path": "pages/index/index",
+            "style": {
+                "navigationBarTitleText": "实时翻译",
+                "navigationStyle": "default"
+            }
+        },
+        {
+            "path": "pages/history/history",
+            "style": {
+                "navigationBarTitleText": "翻译历史"
+            }
+        },
+        {
+            "path": "pages/phrases/phrases",
+            "style": {
+                "navigationBarTitleText": "商务短语"
+            }
+        },
+        {
+            "path": "pages/settings/settings",
+            "style": {
+                "navigationBarTitleText": "设置"
+            }
+        }
+    ],
+    "globalStyle": {
+        "navigationBarTextStyle": "white",
+        "navigationBarTitleText": "实时翻译助手",
+        "navigationBarBackgroundColor": "#409EFF",
+        "backgroundColor": "#F5F5F5",
+        "backgroundTextStyle": "dark"
+    },
+    "tabBar": {
+        "color": "#999999",
+        "selectedColor": "#409EFF",
+        "backgroundColor": "#FFFFFF",
+        "borderStyle": "black",
+        "list": [
+            {
+                "pagePath": "pages/index/index",
+                "text": "翻译",
+                "iconPath": "static/icons/translate.png",
+                "selectedIconPath": "static/icons/translate-active.png"
+            },
+            {
+                "pagePath": "pages/phrases/phrases",
+                "text": "短语",
+                "iconPath": "static/icons/phrase.png",
+                "selectedIconPath": "static/icons/phrase-active.png"
+            },
+            {
+                "pagePath": "pages/history/history",
+                "text": "历史",
+                "iconPath": "static/icons/history.png",
+                "selectedIconPath": "static/icons/history-active.png"
+            },
+            {
+                "pagePath": "pages/settings/settings",
+                "text": "设置",
+                "iconPath": "static/icons/setting.png",
+                "selectedIconPath": "static/icons/setting-active.png"
+            }
+        ]
+    }
+}

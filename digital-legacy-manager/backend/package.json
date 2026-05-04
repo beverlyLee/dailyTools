@@ -1,0 +1,25 @@
+{
+  "name": "digital-legacy-backend",
+  "version": "1.0.0",
+  "description": "Personal Digital Legacy Management System Backend",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test"
+  },
+  "keywords": ["digital-legacy", "encryption", "dead-mans-switch"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "sql.js": "^1.10.3",
+    "uuid": "^9.0.1",
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0"
+  }
+}

@@ -1,0 +1,25 @@
+[package]
+name = "video-to-gif-converter"
+version = "0.1.0"
+description = "视频转 GIF/WebM 转换器"
+authors = ["you"]
+license = ""
+edition = "2021"
+rust-version = "1.70"
+
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
+[dependencies]
+tauri = { version = "1.6", features = ["shell-all", "http-all", "dialog-all", "fs-all"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sqlx = { version = "0.7", features = ["runtime-tokio", "sqlite"] }
+chrono = { version = "0.4", features = ["serde"] }
+tokio = { version = "1.35", features = ["full"] }
+dirs = "5.0"
+thiserror = "1.0"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

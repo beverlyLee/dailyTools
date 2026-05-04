@@ -1,0 +1,78 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "宠物健康管理"
+      }
+    },
+    {
+      "path": "pages/vaccine/vaccine",
+      "style": {
+        "navigationBarTitleText": "疫苗计划"
+      }
+    },
+    {
+      "path": "pages/symptom/symptom",
+      "style": {
+        "navigationBarTitleText": "症状自查"
+      }
+    },
+    {
+      "path": "pages/medical/medical",
+      "style": {
+        "navigationBarTitleText": "病历记录"
+      }
+    },
+    {
+      "path": "pages/hospital/hospital",
+      "style": {
+        "navigationBarTitleText": "附近医院"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "宠物健康管理",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#4A90D9",
+    "borderStyle": "black",
+    "backgroundColor": "#F8F8F8",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "iconPath": "static/tabbar/home.png",
+        "selectedIconPath": "static/tabbar/home-active.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/vaccine/vaccine",
+        "iconPath": "static/tabbar/vaccine.png",
+        "selectedIconPath": "static/tabbar/vaccine-active.png",
+        "text": "疫苗"
+      },
+      {
+        "pagePath": "pages/symptom/symptom",
+        "iconPath": "static/tabbar/symptom.png",
+        "selectedIconPath": "static/tabbar/symptom-active.png",
+        "text": "自查"
+      },
+      {
+        "pagePath": "pages/medical/medical",
+        "iconPath": "static/tabbar/medical.png",
+        "selectedIconPath": "static/tabbar/medical-active.png",
+        "text": "病历"
+      },
+      {
+        "pagePath": "pages/hospital/hospital",
+        "iconPath": "static/tabbar/hospital.png",
+        "selectedIconPath": "static/tabbar/hospital-active.png",
+        "text": "医院"
+      }
+    ]
+  }
+}

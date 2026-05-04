@@ -1,0 +1,207 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #f5f5dc 0%, #f0e6d2 100%);
+  min-height: 100vh;
+}
+
+.app-container {
+  min-height: 100vh;
+}
+
+.main-layout {
+  background: transparent;
+}
+
+.header {
+  background: linear-gradient(90deg, #8B4513, #A0522D);
+  padding: 0 32px;
+  box-shadow: 0 2px 8px rgba(139, 69, 19, 0.3);
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #FFF8DC;
+  letter-spacing: 2px;
+}
+
+.logo-icon {
+  margin-right: 12px;
+}
+
+.content {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.footer {
+  text-align: center;
+  background: rgba(139, 69, 19, 0.1);
+  color: #8B4513;
+}
+
+/* 卡片样式 */
+.custom-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.15);
+  border: 1px solid #DEB887;
+}
+
+.card-header {
+  background: linear-gradient(90deg, #FFFAF0, #FFF8DC);
+  border-bottom: 1px solid #DEB887;
+  border-radius: 12px 12px 0 0;
+}
+
+/* 按钮样式 */
+.primary-button {
+  background: linear-gradient(90deg, #CD853F, #A0522D);
+  border-color: #A0522D;
+  border-radius: 8px;
+  height: 44px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.primary-button:hover {
+  background: linear-gradient(90deg, #A0522D, #8B4513);
+  border-color: #8B4513;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
+}
+
+.danger-button {
+  background: linear-gradient(90deg, #DC143C, #B22222);
+  border-color: #B22222;
+  border-radius: 8px;
+}
+
+.success-button {
+  background: linear-gradient(90deg, #228B22, #2E8B57);
+  border-color: #2E8B57;
+  border-radius: 8px;
+}
+
+/* 上传区域 */
+.upload-area {
+  border: 2px dashed #DEB887;
+  border-radius: 12px;
+  background: #FFFAF0;
+  transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+  border-color: #CD853F;
+  background: #FFF8DC;
+}
+
+/* 画布容器 */
+.canvas-container {
+  border: 2px solid #DEB887;
+  border-radius: 12px;
+  background: #FFFFFF;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* 工具面板 */
+.tool-panel {
+  background: #FFFAF0;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.tool-title {
+  color: #8B4513;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+/* 服饰选择 */
+.fashion-item {
+  border: 2px solid transparent;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.fashion-item:hover {
+  border-color: #CD853F;
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.2);
+}
+
+.fashion-item.selected {
+  border-color: #CD853F;
+  box-shadow: 0 0 0 2px rgba(205, 133, 63, 0.5);
+}
+
+/* 加载动画 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-content {
+  background: #FFFFFF;
+  padding: 32px 48px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.loading-text {
+  margin-top: 16px;
+  color: #8B4513;
+  font-size: 16px;
+}
+
+/* 历史记录 */
+.history-item {
+  border: 1px solid #DEB887;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #FFFAF0;
+  transition: all 0.3s ease;
+}
+
+.history-item:hover {
+  border-color: #CD853F;
+  box-shadow: 0 2px 8px rgba(139, 69, 19, 0.15);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .content {
+    padding: 16px;
+  }
+  
+  .header {
+    padding: 0 16px;
+  }
+  
+  .logo {
+    font-size: 20px;
+  }
+}

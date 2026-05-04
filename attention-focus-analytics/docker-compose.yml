@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: attention-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - RESCUETIME_API_KEY=${RESCUETIME_API_KEY:-}
+      - TOGGL_API_TOKEN=${TOGGL_API_TOKEN:-}
+    volumes:
+      - backend-data:/app
+    networks:
+      - attention-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: attention-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - attention-network
+
+volumes:
+  backend-data:
+
+networks:
+  attention-network:
+    driver: bridge

@@ -1,0 +1,85 @@
+.tips-box {
+  background: linear-gradient(135deg, #FFFAF0, #FFF8DC);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #DEB887;
+}
+
+.keypoints-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(82, 196, 26, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(82, 196, 26, 0.3);
+}
+
+/* 上传区域动画 */
+.upload-section:hover .upload-icon {
+  animation: bounce 0.6s ease;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* 模特选择过渡效果 */
+.model-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.model-item.selected {
+  transform: scale(1.02);
+}
+
+/* 标签页样式 */
+.tabs-container .ant-tabs-nav {
+  margin-bottom: 20px;
+}
+
+.tabs-container .ant-tabs-tab {
+  padding: 12px 24px;
+  font-size: 15px;
+}
+
+.tabs-container .ant-tabs-tab-active {
+  color: #8B4513 !important;
+}
+
+.tabs-container .ant-tabs-ink-bar {
+  background: linear-gradient(90deg, #CD853F, #A0522D);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .upload-section {
+    padding: 24px;
+  }
+  
+  .upload-icon {
+    font-size: 48px;
+  }
+  
+  .upload-title {
+    font-size: 16px;
+  }
+  
+  .model-image {
+    height: 150px;
+  }
+  
+  .tips-box {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .model-item {
+    margin-bottom: 16px;
+  }
+}

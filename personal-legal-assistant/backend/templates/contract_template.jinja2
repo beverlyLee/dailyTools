@@ -1,0 +1,85 @@
+借款合同
+
+合同编号：{{ contract_number|default('') }}
+
+甲方（出借人）：{{ party_a_name }}
+身份证号：{{ party_a_id_number|default('') }}
+住址：{{ party_a_address }}
+联系电话：{{ party_a_contact }}
+
+乙方（借款人）：{{ party_b_name }}
+身份证号：{{ party_b_id_number|default('') }}
+住址：{{ party_b_address }}
+联系电话：{{ party_b_contact }}
+
+{% if guarantor_name %}
+丙方（担保人）：{{ guarantor_name }}
+身份证号：{{ guarantor_id_number|default('') }}
+住址：{{ guarantor_address }}
+联系电话：{{ guarantor_contact|default('') }}
+{% endif %}
+
+鉴于乙方因资金周转需要，向甲方申请借款，甲方同意出借。为明确双方权利义务，根据《中华人民共和国民法典》及相关法律法规，甲乙双方在平等、自愿、诚实信用的基础上，经协商一致，订立本合同，以资共同遵守。
+
+第一条 借款金额
+乙方向甲方借款人民币：{{ principal_amount|format_money }}（大写：{{ principal_amount_cn|default('') }}）。
+
+第二条 借款用途
+本合同项下借款用于：{{ purpose }}。
+乙方不得将借款用于违法活动，不得擅自改变借款用途。
+
+第三条 借款期限
+本合同项下借款期限为：{{ borrowing_term }}，自{{ start_date|format_date }}起至{{ end_date|format_date }}止。
+实际借款日期以银行转账凭证或乙方出具的收条所载日期为准。
+
+第四条 借款利率与利息
+1. 本合同项下借款利率为：年利率 {{ interest_rate|format_percent }}（即月利率 {{ (interest_rate/12)|format_percent(4) }}）。
+2. 利息自借款实际发放之日起计算，按{{ interest_calculation_method|default('月') }}计息。
+3. 利息支付方式：{{ interest_payment_method|default('到期一次性支付本息') }}。
+
+第五条 还款方式
+乙方应按以下方式还款：
+{{ repayment_method }}
+
+还款账户信息：
+户名：{{ repayment_account_name|default(party_a_name) }}
+账号：{{ repayment_account_number|default('') }}
+开户行：{{ repayment_bank|default('') }}
+
+{% if collateral_description %}
+第六条 担保条款
+1. {{ collateral_description }}
+2. 担保范围：本合同项下的借款本金、利息、违约金、损害赔偿金以及甲方为实现债权而发生的费用（包括但不限于律师费、诉讼费、保全费、差旅费等）。
+{% endif %}
+
+第七条 违约责任
+1. 乙方未按本合同约定按时足额支付利息或偿还本金的，视为乙方违约。
+2. 乙方逾期还款的，应自逾期之日起，以逾期金额为基数，按日利率 {{ default_penalty_rate|default('0.05')|float/100|format_percent(2) }} 向甲方支付逾期违约金。
+3. 乙方逾期还款超过 {{ default_grace_period|default(30) }} 天的，甲方有权宣布本合同项下借款全部提前到期，并要求乙方立即偿还全部借款本金、利息及违约金。
+4. 乙方擅自改变借款用途的，甲方有权提前收回借款，并要求乙方支付借款总额 {{ default_usage_penalty|default(20)|float/100|format_percent }} 的违约金。
+
+第八条 争议解决
+因本合同引起的或与本合同有关的任何争议，双方应首先通过友好协商解决；协商不成的，任何一方均可向{{ dispute_resolution_court|default('甲方所在地') }}人民法院提起诉讼。
+
+第九条 其他条款
+1. 本合同自双方签字（或盖章）之日起生效。
+2. 本合同未尽事宜，双方可另行签订补充协议，补充协议与本合同具有同等法律效力。
+3. 本合同一式{{ copy_count|default(2) }}份，甲乙双方各执{{ copy_per_party|default(1) }}份，具有同等法律效力。
+{% if guarantor_name %}
+4. 丙方作为担保人，对本合同项下乙方的全部债务承担{{ guarantee_type|default('连带') }}责任保证。保证期间为借款到期之日起{{ guarantee_period|default('两年') }}。
+{% endif %}
+
+（以下无正文，为签字页）
+
+甲方（出借人）签字：__________________
+日期：{{ signing_date|format_date if signing_date else current_date|format_date }}
+地点：{{ signing_place|default('') }}
+
+乙方（借款人）签字：__________________
+日期：{{ signing_date|format_date if signing_date else current_date|format_date }}
+地点：{{ signing_place|default('') }}
+{% if guarantor_name %}
+丙方（担保人）签字：__________________
+日期：{{ signing_date|format_date if signing_date else current_date|format_date }}
+地点：{{ signing_place|default('') }}
+{% endif %}

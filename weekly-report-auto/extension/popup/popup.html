@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智能周报生成器</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      width: 380px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f7fa;
+      color: #333;
+    }
+    
+    .container {
+      padding: 16px;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .header h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a73e8;
+    }
+    
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    
+    .status-badge.connected {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .status-badge.disconnected {
+      background: #ffebee;
+      color: #c62828;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #5f6368;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .card-title::before {
+      content: '';
+      width: 4px;
+      height: 14px;
+      background: #1a73e8;
+      border-radius: 2px;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background: #1a73e8;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #1557b0;
+    }
+    
+    .btn-secondary {
+      background: #f1f3f4;
+      color: #5f6368;
+    }
+    
+    .btn-secondary:hover {
+      background: #e8eaed;
+    }
+    
+    .btn-success {
+      background: #34a853;
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #2d8c45;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    
+    .btn-group .btn {
+      flex: 1;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    
+    .stat-item {
+      text-align: center;
+      padding: 10px;
+      background: #f8fafc;
+      border-radius: 6px;
+    }
+    
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a73e8;
+    }
+    
+    .stat-label {
+      font-size: 11px;
+      color: #5f6368;
+      margin-top: 2px;
+    }
+    
+    .data-sources {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .source-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      background: #f8fafc;
+      border-radius: 6px;
+    }
+    
+    .source-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .source-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    
+    .source-icon.wework {
+      background: #00b159;
+      color: white;
+    }
+    
+    .source-icon.dingtalk {
+      background: #0088ff;
+      color: white;
+    }
+    
+    .source-icon.git {
+      background: #f05032;
+      color: white;
+    }
+    
+    .source-name {
+      font-size: 13px;
+      font-weight: 500;
+    }
+    
+    .source-count {
+      font-size: 11px;
+      color: #5f6368;
+    }
+    
+    .progress-container {
+      margin-top: 10px;
+    }
+    
+    .progress-bar {
+      height: 6px;
+      background: #e0e0e0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1a73e8, #34a853);
+      transition: width 0.3s;
+    }
+    
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #5f6368;
+      margin-top: 4px;
+    }
+    
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      padding-top: 12px;
+      border-top: 1px solid #e0e0e0;
+    }
+    
+    .footer a {
+      font-size: 11px;
+      color: #1a73e8;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    
+    .footer a:hover {
+      text-decoration: underline;
+    }
+    
+    .toast {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      background: #333;
+      color: white;
+      border-radius: 8px;
+      font-size: 13px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 1000;
+    }
+    
+    .toast.show {
+      opacity: 1;
+    }
+    
+    .loading-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ffffff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .section-empty {
+      text-align: center;
+      padding: 20px;
+      color: #9aa0a6;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📋 智能周报生成器</h1>
+      <span class="status-badge disconnected" id="backendStatus">未连接</span>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">数据统计</div>
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-item">
+          <div class="stat-value">0</div>
+          <div class="stat-label">聊天记录</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">0</div>
+          <div class="stat-label">Git提交</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">0</div>
+          <div class="stat-label">文档片段</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">0</div>
+          <div class="stat-label">已生成周报</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">数据源</div>
+      <div class="data-sources" id="dataSources">
+        <div class="section-empty">请先采集数据</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">数据采集</div>
+      <div class="btn-group">
+        <button class="btn btn-secondary" id="scrapeChatBtn">
+          <span>💬</span> 抓取聊天记录
+        </button>
+        <button class="btn btn-secondary" id="fetchGitBtn">
+          <span>🔀</span> 获取Git提交
+        </button>
+      </div>
+      
+      <div class="progress-container" id="progressContainer" style="display: none;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <div class="progress-text">
+          <span id="progressLabel">采集中...</span>
+          <span id="progressPercent">0%</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">生成周报</div>
+      <button class="btn btn-primary" id="generateReportBtn">
+        <span>✨</span> 智能生成周报
+      </button>
+      <div style="margin-top: 10px; font-size: 11px; color: #5f6368;">
+        将基于本周的聊天记录和Git提交自动生成结构化周报
+      </div>
+    </div>
+    
+    <div class="footer">
+      <a id="openSettingsBtn">⚙️ 设置</a>
+      <a id="openSidePanelBtn">📊 打开侧边栏</a>
+      <a id="exportDataBtn">📤 导出数据</a>
+    </div>
+  </div>
+  
+  <div class="toast" id="toast"></div>
+
+  <script src="../js/api.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

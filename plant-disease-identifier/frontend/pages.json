@@ -1,0 +1,84 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "植物病害识别"
+      }
+    },
+    {
+      "path": "pages/identify/identify",
+      "style": {
+        "navigationBarTitleText": "病害识别"
+      }
+    },
+    {
+      "path": "pages/result/result",
+      "style": {
+        "navigationBarTitleText": "识别结果"
+      }
+    },
+    {
+      "path": "pages/plants/plants",
+      "style": {
+        "navigationBarTitleText": "我的植物"
+      }
+    },
+    {
+      "path": "pages/plant-detail/plant-detail",
+      "style": {
+        "navigationBarTitleText": "植物详情"
+      }
+    },
+    {
+      "path": "pages/add-plant/add-plant",
+      "style": {
+        "navigationBarTitleText": "添加植物"
+      }
+    },
+    {
+      "path": "pages/knowledge/knowledge",
+      "style": {
+        "navigationBarTitleText": "防治知识库"
+      }
+    },
+    {
+      "path": "pages/disease-detail/disease-detail",
+      "style": {
+        "navigationBarTitleText": "病害详情"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "植物病害识别",
+    "navigationBarBackgroundColor": "#2B9939",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "color": "#666666",
+    "selectedColor": "#2B9939",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "static/tabbar/home.png",
+        "selectedIconPath": "static/tabbar/home-active.png"
+      },
+      {
+        "pagePath": "pages/identify/identify",
+        "text": "识别",
+        "iconPath": "static/tabbar/camera.png",
+        "selectedIconPath": "static/tabbar/camera-active.png"
+      },
+      {
+        "pagePath": "pages/plants/plants",
+        "text": "我的",
+        "iconPath": "static/tabbar/user.png",
+        "selectedIconPath": "static/tabbar/user-active.png"
+      }
+    ]
+  }
+}

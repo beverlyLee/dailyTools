@@ -1,0 +1,245 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-05-03",
+  "description": "国内常用碳排放因子库",
+  
+  "transport": {
+    "description": "出行类碳排放因子（单位：kg CO₂/公里）",
+    
+    "bus": {
+      "name": "公交车",
+      "unit": "公里",
+      "factor": 0.08,
+      "description": "城市公交车平均碳排放因子"
+    },
+    
+    "metro": {
+      "name": "地铁",
+      "unit": "公里",
+      "factor": 0.05,
+      "description": "城市轨道交通平均碳排放因子"
+    },
+    
+    "taxi": {
+      "name": "出租车",
+      "unit": "公里",
+      "factor": 0.21,
+      "description": "出租车平均碳排放因子（燃油车）"
+    },
+    
+    "private_car": {
+      "name": "私家车",
+      "unit": "公里",
+      "factor": 0.24,
+      "description": "私家车平均碳排放因子（燃油车）"
+    },
+    
+    "electric_car": {
+      "name": "电动汽车",
+      "unit": "公里",
+      "factor": 0.08,
+      "description": "电动汽车碳排放因子（包含发电环节）"
+    },
+    
+    "high_speed_rail": {
+      "name": "高铁/动车",
+      "unit": "公里",
+      "factor": 0.04,
+      "description": "高速铁路碳排放因子"
+    },
+    
+    "train": {
+      "name": "普通列车",
+      "unit": "公里",
+      "factor": 0.06,
+      "description": "普通铁路列车碳排放因子"
+    },
+    
+    "flight_domestic": {
+      "name": "国内航班",
+      "unit": "公里",
+      "factor": 0.255,
+      "description": "国内航班碳排放因子（经济舱）"
+    },
+    
+    "flight_international": {
+      "name": "国际航班",
+      "unit": "公里",
+      "factor": 0.195,
+      "description": "国际航班碳排放因子（经济舱）"
+    },
+    
+    "bicycle": {
+      "name": "自行车",
+      "unit": "公里",
+      "factor": 0,
+      "description": "自行车零碳排放"
+    },
+    
+    "walking": {
+      "name": "步行",
+      "unit": "公里",
+      "factor": 0,
+      "description": "步行零碳排放"
+    }
+  },
+  
+  "diet": {
+    "description": "饮食类碳排放因子（单位：kg CO₂/千克食物）",
+    
+    "beef": {
+      "name": "牛肉",
+      "unit": "千克",
+      "factor": 60,
+      "description": "牛肉生产碳排放因子"
+    },
+    
+    "pork": {
+      "name": "猪肉",
+      "unit": "千克",
+      "factor": 12,
+      "description": "猪肉生产碳排放因子"
+    },
+    
+    "chicken": {
+      "name": "鸡肉",
+      "unit": "千克",
+      "factor": 6.9,
+      "description": "鸡肉生产碳排放因子"
+    },
+    
+    "fish": {
+      "name": "鱼类",
+      "unit": "千克",
+      "factor": 5,
+      "description": "鱼类生产碳排放因子"
+    },
+    
+    "eggs": {
+      "name": "鸡蛋",
+      "unit": "千克",
+      "factor": 4.8,
+      "description": "鸡蛋生产碳排放因子"
+    },
+    
+    "milk": {
+      "name": "牛奶",
+      "unit": "千克",
+      "factor": 3.2,
+      "description": "牛奶生产碳排放因子"
+    },
+    
+    "rice": {
+      "name": "大米",
+      "unit": "千克",
+      "factor": 2.7,
+      "description": "大米生产碳排放因子"
+    },
+    
+    "wheat": {
+      "name": "小麦",
+      "unit": "千克",
+      "factor": 1.7,
+      "description": "小麦生产碳排放因子"
+    },
+    
+    "vegetables": {
+      "name": "蔬菜",
+      "unit": "千克",
+      "factor": 2,
+      "description": "蔬菜生产碳排放因子"
+    },
+    
+    "fruits": {
+      "name": "水果",
+      "unit": "千克",
+      "factor": 1.1,
+      "description": "水果生产碳排放因子"
+    },
+    
+    "nuts": {
+      "name": "坚果",
+      "unit": "千克",
+      "factor": 2.5,
+      "description": "坚果生产碳排放因子"
+    },
+    
+    "processed_food": {
+      "name": "加工食品",
+      "unit": "千克",
+      "factor": 3,
+      "description": "加工食品平均碳排放因子"
+    },
+    
+    "takeout": {
+      "name": "外卖餐食",
+      "unit": "份",
+      "factor": 2.5,
+      "description": "外卖餐食平均碳排放因子（包含包装）"
+    },
+    
+    "restaurant_meal": {
+      "name": "堂食餐食",
+      "unit": "份",
+      "factor": 2,
+      "description": "堂食餐食平均碳排放因子"
+    }
+  },
+  
+  "home": {
+    "description": "家庭能源类碳排放因子",
+    
+    "electricity": {
+      "name": "电力",
+      "unit": "千瓦时",
+      "factor": 0.785,
+      "description": "中国电网平均碳排放因子"
+    },
+    
+    "natural_gas": {
+      "name": "天然气",
+      "unit": "立方米",
+      "factor": 2.16,
+      "description": "天然气燃烧碳排放因子"
+    },
+    
+    "coal": {
+      "name": "煤炭",
+      "unit": "千克",
+      "factor": 2.66,
+      "description": "煤炭燃烧碳排放因子"
+    },
+    
+    "water_heating": {
+      "name": "热水",
+      "unit": "立方米",
+      "factor": 0.5,
+      "description": "热水生产平均碳排放因子"
+    }
+  },
+  
+  "shopping": {
+    "description": "购物类碳排放因子",
+    
+    "clothing": {
+      "name": "服装",
+      "unit": "件",
+      "factor": 15,
+      "description": "服装生产平均碳排放因子"
+    },
+    
+    "electronics": {
+      "name": "电子产品",
+      "unit": "千克",
+      "factor": 50,
+      "description": "电子产品生产平均碳排放因子"
+    },
+    
+    "packaging": {
+      "name": "包装材料",
+      "unit": "千克",
+      "factor": 3,
+      "description": "包装材料生产平均碳排放因子"
+    }
+  }
+}

@@ -1,0 +1,262 @@
+.style-transfer-page {
+  min-height: 100%;
+}
+
+.canvas-card {
+  min-height: 700px;
+}
+
+.canvas-controls {
+  display: flex;
+  align-items: center;
+}
+
+.canvas-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f5f5dc 0%, #f0e6d2 100%);
+  border-radius: 8px;
+  padding: 20px;
+  min-height: 600px;
+}
+
+.canvas-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 800px;
+  height: 600px;
+  background: #FFF8DC;
+  border: 2px dashed #DEB887;
+  border-radius: 8px;
+}
+
+.canvas-placeholder p {
+  color: #A0522D;
+  font-size: 16px;
+}
+
+.inpaint-tips {
+  margin-top: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #FFF8DC, #FFFAF0);
+  border: 1px solid #DEB887;
+  border-radius: 8px;
+}
+
+.inpaint-tips p {
+  margin: 0 0 12px 0;
+  color: #8B4513;
+  font-weight: 500;
+}
+
+/* 服饰网格 */
+.fashion-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.fashion-tabs .ant-tabs-nav {
+  margin-bottom: 16px;
+}
+
+.fashion-tabs .ant-tabs-tab {
+  padding: 8px 20px;
+  font-size: 14px;
+}
+
+.fashion-tabs .ant-tabs-tab-active {
+  color: #8B4513 !important;
+}
+
+.fashion-tabs .ant-tabs-ink-bar {
+  background: linear-gradient(90deg, #CD853F, #A0522D);
+}
+
+/* 参数设置 */
+.parameter-section {
+  margin-bottom: 16px;
+}
+
+.parameter-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #8B4513;
+  margin-bottom: 8px;
+}
+
+.parameter-hint {
+  font-size: 12px;
+  color: #A0522D;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+.action-buttons {
+  margin-top: 16px;
+}
+
+/* 工具区域 */
+.tool-section {
+  margin-bottom: 16px;
+}
+
+.tool-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #8B4513;
+  margin-bottom: 8px;
+}
+
+.tool-desc {
+  font-size: 12px;
+  color: #A0522D;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.inpaint-input-section {
+  margin-top: 16px;
+}
+
+/* 滑块样式 */
+.ant-slider-track {
+  background: linear-gradient(90deg, #CD853F, #A0522D);
+}
+
+.ant-slider-handle::after {
+  box-shadow: 0 0 0 2px #CD853F;
+}
+
+.ant-slider:hover .ant-slider-handle::after {
+  box-shadow: 0 0 0 2px #A0522D;
+}
+
+/* 按钮组样式 */
+.ant-btn-group > .ant-btn-primary {
+  background: linear-gradient(90deg, #CD853F, #A0522D);
+  border-color: #A0522D;
+}
+
+.ant-btn-group > .ant-btn-primary:hover {
+  background: linear-gradient(90deg, #A0522D, #8B4513);
+  border-color: #8B4513;
+}
+
+/* 加载遮罩 */
+.loading-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-content {
+  background: #FFFFFF;
+  padding: 48px 64px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.loading-text {
+  margin-top: 24px;
+  color: #8B4513;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.loading-tip {
+  margin-top: 8px;
+  color: #A0522D;
+  font-size: 14px;
+}
+
+/* 对比预览 */
+.compare-container {
+  display: flex;
+  gap: 24px;
+}
+
+.compare-item {
+  flex: 1;
+}
+
+.compare-title {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #8B4513;
+  margin-bottom: 12px;
+}
+
+.compare-image {
+  border: 2px solid #DEB887;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #FFFFFF;
+}
+
+/* 响应式调整 */
+@media (max-width: 1400px) {
+  .fashion-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 992px) {
+  .canvas-wrapper {
+    padding: 10px;
+  }
+  
+  .canvas-placeholder {
+    width: 100%;
+    height: 400px;
+  }
+  
+  .loading-content {
+    padding: 32px 40px;
+    margin: 0 20px;
+  }
+}
+
+/* 动画效果 */
+.fashion-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fashion-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(139, 69, 19, 0.25);
+}
+
+.fashion-card.selected {
+  border-color: #CD853F;
+  box-shadow: 0 0 0 3px rgba(205, 133, 63, 0.3);
+}
+
+/* 文本域样式 */
+.ant-input-textarea {
+  border-radius: 8px;
+  border-color: #DEB887;
+}
+
+.ant-input-textarea:focus,
+.ant-input-textarea-focused {
+  border-color: #CD853F;
+  box-shadow: 0 0 0 2px rgba(205, 133, 63, 0.2);
+}
+
+/* 卡片标题样式 */
+.ant-card-head-title {
+  font-weight: 600;
+  color: #8B4513;
+}

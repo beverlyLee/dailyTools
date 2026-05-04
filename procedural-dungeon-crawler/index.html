@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>程序化地牢探险游戏</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      background-color: #1a1a2e;
+      font-family: 'Courier New', monospace;
+      color: #eee;
+      box-sizing: border-box;
+    }
+    
+    #main-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      max-width: 1200px;
+    }
+    
+    #game-container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    #game-area {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    #game-canvas {
+      border: 3px solid #4a4a6a;
+      background-color: #0f0f1f;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+    
+    #ui-container {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      max-width: 800px;
+    }
+    
+    #stats-panel, #log-panel {
+      background-color: #16213e;
+      border: 1px solid #4a4a6a;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+    
+    #stats-panel {
+      flex: 1;
+      min-width: 180px;
+    }
+    
+    #log-panel {
+      flex: 2;
+      max-height: 200px;
+      overflow-y: auto;
+      min-width: 300px;
+    }
+    
+    #help-panel {
+      background-color: #16213e;
+      border: 1px solid #4a4a6a;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 350px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+    
+    .stat-row {
+      margin-bottom: 12px;
+    }
+    
+    .stat-label {
+      color: #a0a0c0;
+      margin-right: 10px;
+      display: inline-block;
+      min-width: 70px;
+    }
+    
+    .stat-value {
+      color: #e94560;
+      font-weight: bold;
+    }
+    
+    .stat-value.good {
+      color: #4ade80;
+    }
+    
+    .log-entry {
+      margin-bottom: 6px;
+      padding-left: 12px;
+      border-left: 3px solid #4a4a6a;
+      line-height: 1.4;
+      font-size: 13px;
+    }
+    
+    .log-entry.damage {
+      border-left-color: #ef4444;
+    }
+    
+    .log-entry.success {
+      border-left-color: #4ade80;
+    }
+    
+    .log-entry.info {
+      border-left-color: #60a5fa;
+    }
+    
+    .log-entry.warning {
+      border-left-color: #fbbf24;
+    }
+    
+    #controls {
+      text-align: center;
+      color: #a0a0c0;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    
+    h1 {
+      color: #e94560;
+      text-align: center;
+      margin-bottom: 5px;
+      margin-top: 0;
+      font-size: 28px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    h2 {
+      color: #fbbf24;
+      font-size: 16px;
+      margin-top: 0;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #4a4a6a;
+      padding-bottom: 8px;
+    }
+    
+    h3 {
+      color: #a0a0c0;
+      font-size: 14px;
+      margin-top: 15px;
+      margin-bottom: 8px;
+    }
+    
+    .legend-section {
+      margin-bottom: 15px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    
+    .legend-char {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+      margin-right: 10px;
+      background-color: #1a1a2e;
+      border-radius: 4px;
+      border: 1px solid #4a4a6a;
+    }
+    
+    .legend-text {
+      flex: 1;
+    }
+    
+    .key-hint {
+      display: inline-block;
+      background-color: #2a2a4e;
+      border: 1px solid #4a4a6a;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin: 2px;
+      font-weight: bold;
+      color: #fbbf24;
+    }
+    
+    .mechanism-box {
+      background-color: #1a1a2e;
+      border: 1px solid #4a4a6a;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    
+    .mechanism-box h4 {
+      color: #60a5fa;
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    
+    .mechanism-box p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #c0c0e0;
+    }
+    
+    .warning-box {
+      background-color: rgba(239, 68, 68, 0.1);
+      border: 1px solid #ef4444;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    
+    .warning-box h4 {
+      color: #ef4444;
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    
+    .warning-box p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #fca5a5;
+    }
+    
+    #subtitle {
+      text-align: center;
+      color: #a0a0c0;
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+    
+    .floor-level {
+      text-align: center;
+      color: #fbbf24;
+      font-weight: bold;
+      margin-bottom: 10px;
+      padding: 8px;
+      background-color: #1a1a2e;
+      border-radius: 4px;
+      border: 1px solid #4a4a6a;
+    }
+    
+    .hp-bar {
+      width: 100%;
+      height: 8px;
+      background-color: #2a2a4e;
+      border-radius: 4px;
+      margin-top: 5px;
+      overflow: hidden;
+    }
+    
+    .hp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ef4444, #f97316);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    
+    .hp-fill.high {
+      background: linear-gradient(90deg, #22c55e, #4ade80);
+    }
+    
+    .hp-fill.medium {
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+    
+    .xp-bar {
+      width: 100%;
+      height: 6px;
+      background-color: #2a2a4e;
+      border-radius: 4px;
+      margin-top: 3px;
+      overflow: hidden;
+    }
+    
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <div id="main-container">
+    <h1>程序化地牢探险</h1>
+    <p id="subtitle">探索无尽的地下迷宫，击败怪物，寻找出路！</p>
+    
+    <div id="game-container">
+      <div id="game-area">
+        <div class="floor-level" id="floor-level">地牢第 1 层</div>
+        <canvas id="game-canvas" width="800" height="600"></canvas>
+        
+        <div id="ui-container">
+          <div id="stats-panel">
+            <h2>角色状态</h2>
+            <div class="stat-row">
+              <span class="stat-label">生命值:</span>
+              <span id="hp" class="stat-value">100/100</span>
+              <div class="hp-bar">
+                <div id="hp-fill" class="hp-fill high" style="width: 100%"></div>
+              </div>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">攻击力:</span>
+              <span id="attack" class="stat-value">10</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">防御力:</span>
+              <span id="defense" class="stat-value">5</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">等级:</span>
+              <span id="level" class="stat-value">1</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">经验:</span>
+              <span id="xp" class="stat-value">0/100</span>
+              <div class="xp-bar">
+                <div id="xp-fill" class="xp-fill" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="log-panel">
+            <h2>游戏日志</h2>
+            <div id="log"></div>
+          </div>
+        </div>
+        
+        <div id="controls">
+          <p>
+            <span class="key-hint">↑ ↓ ← →</span> 或 <span class="key-hint">W A S D</span> 移动
+            <span class="key-hint">空格</span> 等待一回合
+            <span class="key-hint">.</span> 或 <span class="key-hint">Shift + ></span> 下楼
+            <span class="key-hint">R</span> 重新开始
+          </p>
+        </div>
+      </div>
+      
+      <div id="help-panel">
+        <h2>游戏玩法指南</h2>
+        
+        <div class="legend-section">
+          <h3>地图图例</h3>
+          <div class="legend-item">
+            <span class="legend-char" style="color: #fbbf24;">@</span>
+            <span class="legend-text"><strong>你</strong> - 玩家角色</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-char" style="color: #4ade80;">g</span>
+            <span class="legend-text"><strong>哥布林</strong> - 弱小但数量多</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-char" style="color: #84cc16;">o</span>
+            <span class="legend-text"><strong>兽人</strong> - 强壮且危险</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-char" style="color: #d1d5db;">S</span>
+            <span class="legend-text"><strong>骷髅</strong> - 高攻击低防御</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-char" style="color: #60a5fa;">s</span>
+            <span class="legend-text"><strong>史莱姆</strong> - 最弱小的敌人</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-char" style="color: #a78bfa;">b</span>
+            <span class="legend-text"><strong>蝙蝠</strong> - 快速移动</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-char" style="color: #fbbf24;">></span>
+            <span class="legend-text"><strong>楼梯</strong> - 通往下一层</span>
+          </div>
+        </div>
+        
+        <div class="mechanism-box">
+          <h4>🎮 战斗系统</h4>
+          <p>
+            <strong>移动到敌人旁边</strong>即可攻击！<br>
+            每回合你可以：<br>
+            • 移动（自动攻击相邻敌人）<br>
+            • 等待（不移动，但敌人会行动）<br><br>
+            敌人看到你后会追击，近身会攻击！
+          </p>
+        </div>
+        
+        <div class="mechanism-box">
+          <h4>⚔️ 属性说明</h4>
+          <p>
+            <strong>攻击力</strong>：影响造成的伤害<br>
+            <strong>防御力</strong>：减少受到的伤害<br>
+            <strong>经验值</strong>：击败敌人获得<br>
+            <strong>升级</strong>：经验满后升级，属性大幅提升，满血恢复！
+          </p>
+        </div>
+        
+        <div class="mechanism-box">
+          <h4>👁️ 视野系统</h4>
+          <p>
+            你只能看到<strong>周围8格</strong>的区域。<br>
+            探索过的区域会变灰，但能记住地形。<br>
+            敌人可能在黑暗中等待你！
+          </p>
+        </div>
+        
+        <div class="mechanism-box">
+          <h4>🏰 多层地牢</h4>
+          <p>
+            找到楼梯 <span style="color: #fbbf24;">></span> 后：<br>
+            • 移动到楼梯上<br>
+            • 按 <span class="key-hint">.</span> 或 <span class="key-hint">Shift + ></span><br>
+            • 进入下一层，敌人更强！<br><br>
+            层数越深，危险越大，奖励也越多！
+          </p>
+        </div>
+        
+        <div class="warning-box">
+          <h4>☠️ 永久死亡</h4>
+          <p>
+            <strong>这是一个 Roguelike 游戏！</strong><br>
+            一旦你的生命值降至0，游戏结束。<br>
+            所有进度都会丢失，你需要重新开始。<br><br>
+            小心行事，谨慎探索！
+          </p>
+        </div>
+        
+        <div class="mechanism-box">
+          <h4>🎯 游戏目标</h4>
+          <p>
+            1. 探索地牢，击败所有敌人<br>
+            2. 找到楼梯，深入更深层<br>
+            3. 不断升级，变得更强<br>
+            4. 活着走出地牢！
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

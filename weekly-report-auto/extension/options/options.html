@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智能周报生成器 - 设置</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f7fa;
+      padding: 40px;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      margin-bottom: 32px;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      color: #1a73e8;
+      margin-bottom: 8px;
+    }
+    
+    .header p {
+      color: #5f6368;
+      font-size: 14px;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #202124;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+    
+    .label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #202124;
+      margin-bottom: 8px;
+    }
+    
+    .label .optional {
+      color: #9aa0a6;
+      font-weight: 400;
+      margin-left: 4px;
+    }
+    
+    .input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    
+    .input:focus {
+      outline: none;
+      border-color: #1a73e8;
+    }
+    
+    .input::placeholder {
+      color: #9aa0a6;
+    }
+    
+    .select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: white;
+      cursor: pointer;
+    }
+    
+    .select:focus {
+      outline: none;
+      border-color: #1a73e8;
+    }
+    
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .slider {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      background: #e0e0e0;
+      border-radius: 3px;
+      outline: none;
+    }
+    
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #1a73e8;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    .slider::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+    }
+    
+    .slider-value {
+      min-width: 60px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a73e8;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #1a73e8;
+      cursor: pointer;
+    }
+    
+    .checkbox-item label {
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background: #1a73e8;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #1557b0;
+    }
+    
+    .btn-secondary {
+      background: #f1f3f4;
+      color: #5f6368;
+    }
+    
+    .btn-secondary:hover {
+      background: #e8eaed;
+    }
+    
+    .btn-danger {
+      background: #ea4335;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #d33425;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    
+    .hint {
+      font-size: 12px;
+      color: #5f6368;
+      margin-top: 6px;
+    }
+    
+    .warning {
+      background: #fff3e0;
+      border-left: 4px solid #fb8c00;
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 20px;
+    }
+    
+    .warning-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e65100;
+      margin-bottom: 4px;
+    }
+    
+    .warning-text {
+      font-size: 13px;
+      color: #ef6c00;
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 28px;
+      background: #333;
+      color: white;
+      border-radius: 8px;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 1000;
+    }
+    
+    .toast.show {
+      opacity: 1;
+    }
+    
+    .section-divider {
+      height: 1px;
+      background: #e0e0e0;
+      margin: 24px 0;
+    }
+    
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .status-badge.connected {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .status-badge.disconnected {
+      background: #ffebee;
+      color: #c62828;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>⚙️ 智能周报生成器 - 设置</h1>
+      <p>配置您的OpenAI API密钥和其他偏好设置</p>
+    </div>
+    
+    <div class="warning" id="apiKeyWarning" style="display: none;">
+      <div class="warning-title">⚠️ API密钥未配置</div>
+      <div class="warning-text">请配置您的OpenAI API密钥以使用周报生成功能</div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">🔌 后端服务状态</div>
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <div style="margin-bottom: 4px; font-size: 14px;">后端服务 (http://localhost:5000)</div>
+          <span class="status-badge disconnected" id="backendStatus">
+            <span class="status-dot"></span>
+            <span>未连接</span>
+          </span>
+        </div>
+        <button class="btn btn-secondary" id="testConnectionBtn">测试连接</button>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">🔑 OpenAI API 配置</div>
+      
+      <div class="form-group">
+        <label class="label" for="apiKey">API Key</label>
+        <input 
+          type="password" 
+          class="input" 
+          id="apiKey" 
+          placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        >
+        <div class="hint">
+          您的API密钥存储在本地浏览器中，不会上传到其他服务器。
+          <a href="https://platform.openai.com/api-keys" target="_blank" style="color: #1a73e8;">获取API密钥</a>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="label" for="model">模型选择</label>
+        <select class="select" id="model">
+          <option value="gpt-4-turbo-preview">GPT-4 Turbo (推荐)</option>
+          <option value="gpt-4">GPT-4</option>
+          <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+          <option value="gpt-3.5-turbo-16k">GPT-3.5 Turbo 16K</option>
+        </select>
+        <div class="hint">选择适合您需求的模型。GPT-4系列效果更好但成本更高。</div>
+      </div>
+      
+      <div class="form-group">
+        <label class="label" for="maxTokens">最大输出 Token</label>
+        <div class="slider-container">
+          <input type="range" class="slider" id="maxTokens" min="500" max="8000" step="500" value="4000">
+          <span class="slider-value" id="maxTokensValue">4000</span>
+        </div>
+        <div class="hint">控制生成报告的最大长度。较高的值可以生成更详细的报告。</div>
+      </div>
+      
+      <div class="form-group">
+        <label class="label" for="temperature">创造力 (Temperature)</label>
+        <div class="slider-container">
+          <input type="range" class="slider" id="temperature" min="0" max="100" step="5" value="70">
+          <span class="slider-value" id="temperatureValue">0.7</span>
+        </div>
+        <div class="hint">
+          较低的值使输出更确定性和一致；较高的值使输出更有创意和多样性。
+          建议周报生成使用 0.5-0.8。
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">📋 报告设置</div>
+      
+      <div class="form-group">
+        <label class="label">默认包含的章节</label>
+        <div class="checkbox-group">
+          <div class="checkbox-item">
+            <input type="checkbox" id="sectionWorkDone" checked>
+            <label for="sectionWorkDone">本周完成的工作</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="sectionIssues" checked>
+            <label for="sectionIssues">遇到的问题与解决方案</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="sectionPlans" checked>
+            <label for="sectionPlans">下周工作计划</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="sectionMeetings">
+            <label for="sectionMeetings">重要会议与讨论</label>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="label" for="backendUrl">后端服务地址 <span class="optional">(可选)</span></label>
+        <input 
+          type="text" 
+          class="input" 
+          id="backendUrl" 
+          placeholder="http://localhost:5000"
+          value="http://localhost:5000"
+        >
+        <div class="hint">后端服务的地址。默认运行在 localhost:5000。</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">💾 数据管理</div>
+      
+      <div class="form-group">
+        <label class="label">导出数据</label>
+        <div class="btn-group">
+          <button class="btn btn-secondary" id="exportAllBtn">
+            <span>📤</span> 导出所有数据
+          </button>
+          <button class="btn btn-secondary" id="exportChatsBtn">
+            <span>💬</span> 仅导出聊天记录
+          </button>
+          <button class="btn btn-secondary" id="exportReportsBtn">
+            <span>📄</span> 仅导出周报
+          </button>
+        </div>
+      </div>
+      
+      <div class="section-divider"></div>
+      
+      <div class="form-group">
+        <label class="label">清除数据 <span style="color: #ea4335; font-size: 12px;">(危险操作)</span></label>
+        <div class="hint" style="margin-bottom: 12px;">
+          清除的数据将无法恢复，请谨慎操作。
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-danger" id="clearChatsBtn">
+            <span>🗑️</span> 清除聊天记录
+          </button>
+          <button class="btn btn-danger" id="clearAllBtn">
+            <span>⚠️</span> 清除所有数据
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">💡 自定义 Prompt</div>
+      
+      <div class="form-group">
+        <label class="label" for="customSystemPrompt">自定义系统提示词 <span class="optional">(可选)</span></label>
+        <textarea 
+          class="input" 
+          id="customSystemPrompt" 
+          rows="8" 
+          placeholder="在这里输入您的自定义系统提示词...&#10;&#10;例如：&#10;你是一位专业的技术周报撰写助手。请重点突出技术实现细节，&#10;减少不必要的客套话，保持简洁专业的风格..."
+        ></textarea>
+        <div class="hint">
+          自定义提示词将覆盖默认提示词。留空则使用默认提示词。
+          <a href="#" id="resetPromptBtn" style="color: #1a73e8; margin-left: 8px;">重置为默认</a>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: 500; margin-bottom: 4px;">使用学习到的偏好</div>
+            <div class="hint" style="margin-top: 0;">系统将根据您的反馈历史自动调整Prompt</div>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="useLearnedPreferences" checked>
+            <label for="useLearnedPreferences">启用</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="btn-group" style="margin-top: 32px; justify-content: flex-end;">
+      <button class="btn btn-secondary" id="resetBtn">重置为默认</button>
+      <button class="btn btn-primary" id="saveBtn">
+        <span>💾</span> 保存设置
+      </button>
+    </div>
+  </div>
+  
+  <div class="toast" id="toast"></div>
+
+  <script src="options.js"></script>
+</body>
+</html>

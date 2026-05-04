@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文本差异比较工具</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="toolbar">
+      <div class="toolbar-left">
+        <h1>文本差异比较工具</h1>
+      </div>
+      <div class="toolbar-center">
+        <button id="btn-compare" class="btn btn-primary">比较差异</button>
+        <button id="btn-save-history" class="btn btn-secondary">保存到历史</button>
+        <button id="btn-show-history" class="btn btn-secondary">历史记录</button>
+      </div>
+      <div class="toolbar-right">
+        <span id="diff-stats" class="diff-stats"></span>
+      </div>
+    </header>
+    
+    <main class="main-content">
+      <div class="editor-container">
+        <div class="editor-panel">
+          <div class="panel-header">
+            <span class="panel-title" id="left-title">左侧文本</span>
+            <div class="panel-actions">
+              <button id="btn-open-left" class="btn btn-sm">打开文件</button>
+              <button id="btn-save-left" class="btn btn-sm">保存</button>
+              <button id="btn-clear-left" class="btn btn-sm">清空</button>
+            </div>
+          </div>
+          <div id="editor-left" class="editor"></div>
+        </div>
+        
+        <div class="divider">
+          <div class="divider-actions">
+            <button id="btn-merge-all-right" class="btn btn-icon" title="将所有更改合并到右侧">→</button>
+            <button id="btn-merge-all-left" class="btn btn-icon" title="将所有更改合并到左侧">←</button>
+          </div>
+        </div>
+        
+        <div class="editor-panel">
+          <div class="panel-header">
+            <span class="panel-title" id="right-title">右侧文本</span>
+            <div class="panel-actions">
+              <button id="btn-open-right" class="btn btn-sm">打开文件</button>
+              <button id="btn-save-right" class="btn btn-sm">保存</button>
+              <button id="btn-clear-right" class="btn btn-sm">清空</button>
+            </div>
+          </div>
+          <div id="editor-right" class="editor"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <div id="history-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>比较历史</h2>
+        <button id="btn-close-history" class="btn btn-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="history-list" class="history-list"></div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="merge-hint" class="merge-hint hidden">
+    <span class="merge-hint-text">点击差异区域可合并更改</span>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

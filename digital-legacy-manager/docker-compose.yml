@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: digital-legacy-backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - FRONTEND_URL=http://localhost:8080
+    restart: unless-stopped
+    networks:
+      - digital-legacy-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: digital-legacy-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    environment:
+      - API_URL=http://localhost:3000/api
+    restart: unless-stopped
+    networks:
+      - digital-legacy-network
+
+networks:
+  digital-legacy-network:
+    driver: bridge
+
+volumes:
+  data:

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch Image Processor - 批量图片处理器</title>
+  <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <div class="logo">
+        <h1>批量图片处理器</h1>
+        <span class="version">v1.0.0</span>
+      </div>
+      <nav class="nav-tabs">
+        <button class="nav-tab active" data-tab="images">图片选择</button>
+        <button class="nav-tab" data-tab="rename">重命名规则</button>
+        <button class="nav-tab" data-tab="processing">处理设置</button>
+        <button class="nav-tab" data-tab="watermark">水印设置</button>
+        <button class="nav-tab" data-tab="preview">预览</button>
+        <button class="nav-tab" data-tab="history">历史记录</button>
+      </nav>
+    </header>
+
+    <main class="main-content">
+      <section id="images-tab" class="tab-content active">
+        <div class="images-container">
+          <div class="images-toolbar">
+            <button id="select-files-btn" class="btn btn-primary">
+              <span class="icon">📁</span> 选择图片
+            </button>
+            <button id="clear-files-btn" class="btn btn-secondary">
+              <span class="icon">🗑️</span> 清空列表
+            </button>
+            <div class="files-info">
+              <span id="files-count">已选择: 0 张图片</span>
+            </div>
+          </div>
+          
+          <div class="images-list-container">
+            <div id="images-empty" class="empty-state">
+              <div class="empty-icon">🖼️</div>
+              <h3>还没有选择图片</h3>
+              <p>点击上方"选择图片"按钮添加需要处理的图片</p>
+              <p class="supported-formats">支持格式: JPG, PNG, WEBP, BMP, TIFF</p>
+            </div>
+            
+            <div id="images-list" class="images-grid hidden">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="rename-tab" class="tab-content">
+        <div class="rename-container">
+          <div class="rename-toolbar">
+            <h2>重命名规则</h2>
+            <div class="rule-actions">
+              <select id="rule-select" class="form-select">
+                <option value="">-- 选择规则 --</option>
+              </select>
+              <button id="save-rule-btn" class="btn btn-primary">保存规则</button>
+              <button id="delete-rule-btn" class="btn btn-danger">删除规则</button>
+            </div>
+          </div>
+
+          <div class="rename-preview">
+            <h3>预览</h3>
+            <div class="preview-filenames">
+              <div class="preview-item">
+                <span class="preview-label">原始:</span>
+                <span class="preview-original">DSC_0001.jpg</span>
+              </div>
+              <div class="preview-item">
+                <span class="preview-label">重命名后:</span>
+                <span id="preview-new-filename" class="preview-new">IMG_20240115_0001.jpg</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="rename-components">
+            <div class="component-group">
+              <div class="component-header">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="use-sequence" checked>
+                  <span>序号</span>
+                </label>
+              </div>
+              <div class="component-options" id="sequence-options">
+                <div class="form-group">
+                  <label>起始值:</label>
+                  <input type="number" id="sequence-start" value="1" min="0" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label>填充位数:</label>
+                  <input type="number" id="sequence-padding" value="4" min="1" max="10" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label>前缀:</label>
+                  <input type="text" id="sequence-prefix" value="" placeholder="可选" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label>后缀:</label>
+                  <input type="text" id="sequence-suffix" value="" placeholder="可选" class="form-input">
+                </div>
+              </div>
+            </div>
+
+            <div class="component-group">
+              <div class="component-header">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="use-date">
+                  <span>日期</span>
+                </label>
+              </div>
+              <div class="component-options hidden" id="date-options">
+                <div class="form-group">
+                  <label>日期来源:</label>
+                  <select id="date-source" class="form-select">
+                    <option value="file_modified">文件修改时间</option>
+                    <option value="file_created">文件创建时间</option>
+                    <option value="exif_date_time">EXIF 拍摄时间</option>
+                    <option value="exif_original">EXIF 原始时间</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>日期格式:</label>
+                  <select id="date-format" class="form-select">
+                    <option value="%Y%m%d">20240115</option>
+                    <option value="%Y-%m-%d">2024-01-15</option>
+                    <option value="%d%m%Y">15012024</option>
+                    <option value="%Y%m%d_%H%M%S">20240115_143025</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="component-group">
+              <div class="component-header">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="use-exif">
+                  <span>EXIF 信息</span>
+                </label>
+              </div>
+              <div class="component-options hidden" id="exif-options">
+                <div class="form-group">
+                  <label>EXIF 字段 (逗号分隔):</label>
+                  <input type="text" id="exif-fields" value="Make,Model" placeholder="Make,Model,ISO" class="form-input">
+                  <p class="form-hint">支持: Make, Model, Lens, ISO, Aperture, Shutter, Focal, DateTime</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="component-group">
+              <div class="component-header">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="use-custom-text">
+                  <span>自定义文本</span>
+                </label>
+              </div>
+              <div class="component-options hidden" id="custom-text-options">
+                <div class="form-group">
+                  <label>文本内容:</label>
+                  <input type="text" id="custom-text" value="" placeholder="输入自定义文本" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label>位置:</label>
+                  <select id="custom-text-position" class="form-select">
+                    <option value="prefix">前缀</option>
+                    <option value="suffix">后缀</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="component-group">
+              <div class="component-header">
+                <span>分隔符:</span>
+              </div>
+              <div class="component-options">
+                <div class="form-group">
+                  <select id="separator" class="form-select">
+                    <option value="_">下划线 (_)</option>
+                    <option value="-">连字符 (-)</option>
+                    <option value=".">点号 (.)</option>
+                    <option value=" ">空格</option>
+                    <option value="">无分隔符</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="processing-tab" class="tab-content">
+        <div class="processing-container">
+          <h2>图片处理设置</h2>
+          
+          <div class="processing-section">
+            <h3>尺寸调整</h3>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="enable-resize">
+                <span>启用尺寸调整</span>
+              </label>
+            </div>
+            <div class="resize-options hidden" id="resize-options">
+              <div class="form-group">
+                <label>宽度 (px):</label>
+                <input type="number" id="resize-width" value="" placeholder="留空保持比例" min="1" class="form-input">
+              </div>
+              <div class="form-group">
+                <label>高度 (px):</label>
+                <input type="number" id="resize-height" value="" placeholder="留空保持比例" min="1" class="form-input">
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="resize-keep-aspect" checked>
+                  <span>保持宽高比</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="processing-section">
+            <h3>裁剪</h3>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="enable-crop">
+                <span>启用裁剪</span>
+              </label>
+            </div>
+            <div class="crop-options hidden" id="crop-options">
+              <div class="form-group">
+                <label>X 起始:</label>
+                <input type="number" id="crop-x" value="0" min="0" class="form-input">
+              </div>
+              <div class="form-group">
+                <label>Y 起始:</label>
+                <input type="number" id="crop-y" value="0" min="0" class="form-input">
+              </div>
+              <div class="form-group">
+                <label>宽度:</label>
+                <input type="number" id="crop-width" value="" min="1" class="form-input">
+              </div>
+              <div class="form-group">
+                <label>高度:</label>
+                <input type="number" id="crop-height" value="" min="1" class="form-input">
+              </div>
+            </div>
+          </div>
+
+          <div class="processing-section">
+            <h3>旋转</h3>
+            <div class="rotation-options">
+              <div class="form-group">
+                <label>旋转角度:</label>
+                <select id="rotation-angle" class="form-select">
+                  <option value="0">不旋转</option>
+                  <option value="90">顺时针 90°</option>
+                  <option value="180">180°</option>
+                  <option value="270">逆时针 90°</option>
+                  <option value="custom">自定义角度</option>
+                </select>
+              </div>
+              <div class="form-group hidden" id="custom-rotation-group">
+                <label>自定义角度:</label>
+                <input type="number" id="custom-rotation-angle" value="0" step="0.1" class="form-input">
+              </div>
+            </div>
+          </div>
+
+          <div class="processing-section">
+            <h3>输出格式</h3>
+            <div class="format-options">
+              <div class="form-group">
+                <label>输出格式:</label>
+                <select id="output-format" class="form-select">
+                  <option value="original">保持原格式</option>
+                  <option value="jpg">JPEG</option>
+                  <option value="png">PNG</option>
+                  <option value="webp">WebP</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>质量:</label>
+                <input type="range" id="output-quality" min="10" max="100" value="90" class="form-range">
+                <span id="quality-value">90%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="watermark-tab" class="tab-content">
+        <div class="watermark-container">
+          <h2>水印设置</h2>
+          
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="enable-watermark">
+              <span>启用水印</span>
+            </label>
+          </div>
+
+          <div class="watermark-options hidden" id="watermark-options">
+            <div class="form-group">
+              <label>水印类型:</label>
+              <select id="watermark-type" class="form-select">
+                <option value="text">文字水印</option>
+                <option value="image">图片水印</option>
+              </select>
+            </div>
+
+            <div id="text-watermark-options" class="watermark-type-options">
+              <div class="form-group">
+                <label>水印文字:</label>
+                <input type="text" id="watermark-text" value="Sample Watermark" class="form-input">
+              </div>
+              <div class="form-group">
+                <label>字体大小:</label>
+                <input type="number" id="watermark-text-size" value="32" min="8" max="200" class="form-input">
+              </div>
+            </div>
+
+            <div id="image-watermark-options" class="watermark-type-options hidden">
+              <div class="form-group">
+                <label>水印图片:</label>
+                <button id="select-watermark-image" class="btn btn-secondary">选择图片</button>
+                <span id="watermark-image-path" class="file-path">未选择</span>
+              </div>
+              <div class="form-group">
+                <label>水印大小:</label>
+                <input type="number" id="watermark-image-size" value="100" min="20" max="500" class="form-input">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>位置:</label>
+              <select id="watermark-position" class="form-select">
+                <option value="top_left">左上角</option>
+                <option value="top_center">顶部居中</option>
+                <option value="top_right">右上角</option>
+                <option value="center_left">左侧居中</option>
+                <option value="center">居中</option>
+                <option value="center_right">右侧居中</option>
+                <option value="bottom_left">左下角</option>
+                <option value="bottom_center">底部居中</option>
+                <option value="bottom_right">右下角</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>透明度:</label>
+              <input type="range" id="watermark-opacity" min="0" max="100" value="50" class="form-range">
+              <span id="opacity-value">50%</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="preview-tab" class="tab-content">
+        <div class="preview-container">
+          <h2>处理预览</h2>
+          
+          <div class="preview-toolbar">
+            <button id="generate-preview-btn" class="btn btn-primary">
+              <span class="icon">👁️</span> 生成预览
+            </button>
+            <select id="preview-image-select" class="form-select">
+              <option value="">-- 选择图片 --</option>
+            </select>
+          </div>
+
+          <div class="preview-compare">
+            <div class="preview-panel">
+              <h3>原图</h3>
+              <div class="preview-image-container" id="original-preview">
+                <div class="preview-placeholder">选择图片后显示原图</div>
+              </div>
+              <div class="preview-info" id="original-info">
+                尺寸: -- | 大小: --
+              </div>
+            </div>
+
+            <div class="preview-panel">
+              <h3>处理后</h3>
+              <div class="preview-image-container" id="processed-preview">
+                <div class="preview-placeholder">点击"生成预览"查看效果</div>
+              </div>
+              <div class="preview-info" id="processed-info">
+                尺寸: -- | 大小: --
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="history-tab" class="tab-content">
+        <div class="history-container">
+          <h2>处理历史</h2>
+          
+          <div class="history-toolbar">
+            <button id="refresh-history-btn" class="btn btn-secondary">
+              <span class="icon">🔄</span> 刷新
+            </button>
+          </div>
+
+          <div id="history-empty" class="empty-state">
+            <div class="empty-icon">📜</div>
+            <h3>暂无处理记录</h3>
+            <p>处理过的图片记录将显示在这里</p>
+          </div>
+
+          <div id="history-list" class="history-list hidden">
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="output-settings">
+        <div class="form-group">
+          <label>输出目录:</label>
+          <input type="text" id="output-dir" value="" placeholder="默认: ./output" class="form-input" readonly>
+          <button id="select-output-dir-btn" class="btn btn-secondary">选择</button>
+        </div>
+      </div>
+      <button id="process-btn" class="btn btn-primary btn-large">
+        <span class="icon">⚡</span> 开始批量处理
+      </button>
+    </footer>
+  </div>
+
+  <div id="processing-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>正在处理图片...</h2>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+      <p id="progress-text">准备中...</p>
+      <p id="progress-stats">0 / 0</p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden">
+    <span id="toast-message"></span>
+  </div>
+
+  <script src="src/app.js"></script>
+</body>
+</html>

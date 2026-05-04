@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "智能周报生成器",
+  "version": "1.0.0",
+  "description": "基于NLP和RAG技术的智能周报生成Chrome扩展",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "sidePanel",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://work.weixin.qq.com/*",
+    "https://im.dingtalk.com/*",
+    "https://www.dingtalk.com/*",
+    "http://localhost:5000/*",
+    "http://localhost:5001/*",
+    "http://127.0.0.1:5000/*",
+    "http://127.0.0.1:5001/*"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "智能周报生成器"
+  },
+  "side_panel": {
+    "default_path": "sidepanel/sidepanel.html"
+  },
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://work.weixin.qq.com/*"],
+      "js": ["content-scripts/wework-scraper.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://im.dingtalk.com/*", "https://www.dingtalk.com/*"],
+      "js": ["content-scripts/dingtalk-scraper.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_page": "options/options.html"
+}

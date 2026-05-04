@@ -1,0 +1,56 @@
+{
+  "name": "batch-image-processor",
+  "version": "1.0.0",
+  "description": "Batch Image Processor with rename rules and image processing",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "concurrently \"npm run start:backend\" \"npm run start\"",
+    "start:backend": "cd ../backend && python run.py",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "keywords": [
+    "image",
+    "processor",
+    "batch",
+    "rename",
+    "opencv"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "electron": "^28.2.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "axios": "^1.6.5",
+    "path-browserify": "^1.0.1"
+  },
+  "build": {
+    "appId": "com.batchimage.processor",
+    "productName": "Batch Image Processor",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**/*",
+      "public/**/*",
+      "index.html"
+    ],
+    "mac": {
+      "category": "public.app-category.graphics-design"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}

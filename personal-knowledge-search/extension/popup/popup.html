@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Second Brain Capture</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <header class="popup-header">
+      <div class="header-icon">🧠</div>
+      <div class="header-title">
+        <h1>Second Brain</h1>
+        <p class="subtitle">Knowledge Capture</p>
+      </div>
+    </header>
+
+    <div class="popup-content">
+      <div id="status-section" class="status-section hidden">
+        <div class="status-indicator" id="status-indicator"></div>
+        <span id="status-text">Ready</span>
+      </div>
+
+      <div id="capture-section" class="capture-section">
+        <h2 class="section-title">Capture Content</h2>
+        
+        <button id="capture-page-btn" class="capture-btn primary">
+          <span class="btn-icon">📄</span>
+          <span class="btn-text">Capture Page</span>
+          <span class="btn-hint">Ctrl+Shift+C</span>
+        </button>
+
+        <button id="capture-screenshot-btn" class="capture-btn secondary">
+          <span class="btn-icon">📸</span>
+          <span class="btn-text">Capture Screenshot</span>
+          <span class="btn-hint">Ctrl+Shift+S</span>
+        </button>
+
+        <div id="selection-section" class="selection-section hidden">
+          <div class="section-divider"></div>
+          <h3 class="section-subtitle">Selected Text</h3>
+          <div id="selection-preview" class="selection-preview"></div>
+          <button id="capture-selection-btn" class="capture-btn tertiary">
+            <span class="btn-icon">✂️</span>
+            <span class="btn-text">Capture Selection</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="stats-section" class="stats-section hidden">
+        <div class="section-divider"></div>
+        <h2 class="section-title">Knowledge Base</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Documents</span>
+            <span class="stat-value" id="stat-documents">0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Vectors</span>
+            <span class="stat-value" id="stat-vectors">0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Cards Due</span>
+            <span class="stat-value" id="stat-cards">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="settings-section">
+        <button id="toggle-settings-btn" class="toggle-btn">
+          <span id="settings-icon">⚙️</span>
+          <span>Settings</span>
+          <span id="settings-arrow">▼</span>
+        </button>
+
+        <div id="settings-panel" class="settings-panel hidden">
+          <div class="form-group">
+            <label for="api-url" class="form-label">API URL</label>
+            <input type="text" id="api-url" class="form-input" placeholder="http://localhost:8000/api/v1">
+          </div>
+          
+          <div class="form-group">
+            <label for="default-tags" class="form-label">Default Tags (comma-separated)</label>
+            <input type="text" id="default-tags" class="form-input" placeholder="webpage, saved">
+          </div>
+
+          <div class="form-actions">
+            <button id="save-settings-btn" class="btn primary">Save Settings</button>
+            <button id="open-dashboard-btn" class="btn secondary">Open Dashboard</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="loading-overlay" class="loading-overlay hidden">
+      <div class="spinner"></div>
+      <p id="loading-text">Capturing...</p>
+    </div>
+
+    <div id="success-message" class="message-box success hidden">
+      <span class="message-icon">✓</span>
+      <span id="success-text">Captured successfully!</span>
+    </div>
+
+    <div id="error-message" class="message-box error hidden">
+      <span class="message-icon">✕</span>
+      <span id="error-text">Error occurred</span>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: plant-disease-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./backend/models:/app/models
+      - plant-disease-data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=sqlite:///./data/plant_disease.db
+    networks:
+      - plant-disease-network
+
+volumes:
+  plant-disease-data:
+
+networks:
+  plant-disease-network:
+    driver: bridge

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>正则表达式测试器</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.min.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <h1>正则表达式测试器</h1>
+      <div class="header-controls">
+        <button id="toggle-library" class="btn btn-secondary">
+          <span class="icon">📚</span> 常用库
+        </button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="left-panel">
+        <div class="regex-input-section">
+          <div class="section-header">
+            <h2>正则表达式</h2>
+            <div class="regex-flags">
+              <label>
+                <input type="checkbox" id="flag-g" checked>
+                <span>全局 (g)</span>
+              </label>
+              <label>
+                <input type="checkbox" id="flag-i">
+                <span>忽略大小写 (i)</span>
+              </label>
+              <label>
+                <input type="checkbox" id="flag-m">
+                <span>多行 (m)</span>
+              </label>
+              <label>
+                <input type="checkbox" id="flag-s">
+                <span>点号匹配所有 (s)</span>
+              </label>
+            </div>
+          </div>
+          <div class="regex-input-wrapper">
+            <span class="regex-delimiter">/</span>
+            <input type="text" id="regex-input" placeholder="输入正则表达式..." autocomplete="off">
+            <span class="regex-delimiter">/</span>
+            <span id="regex-flags-display" class="flags-display">g</span>
+          </div>
+          <div class="regex-actions">
+            <button id="save-to-library" class="btn btn-primary">
+              <span class="icon">⭐</span> 收藏到常用库
+            </button>
+          </div>
+        </div>
+
+        <div class="test-text-section">
+          <div class="section-header">
+            <h2>测试文本</h2>
+            <div class="match-info">
+              <span id="match-count">匹配: 0</span>
+              <span id="match-details"></span>
+            </div>
+          </div>
+          <div id="test-text-editor" class="editor-container"></div>
+        </div>
+
+        <div class="replace-section" id="replace-section">
+          <div class="section-header">
+            <h2>替换测试</h2>
+            <label class="toggle-switch">
+              <input type="checkbox" id="enable-replace">
+              <span class="slider"></span>
+              <span class="toggle-label">启用替换</span>
+            </label>
+          </div>
+          <div class="replace-inputs">
+            <div class="replace-input-group">
+              <label>替换为:</label>
+              <input type="text" id="replace-input" placeholder="输入替换字符串...">
+            </div>
+            <div class="replace-result">
+              <label>替换结果:</label>
+              <div id="replace-result-preview" class="result-preview">
+                <pre><code></code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="explanation-section">
+          <div class="section-header">
+            <h2>正则解释</h2>
+          </div>
+          <div id="explanation-content" class="explanation-content">
+            <p class="placeholder">输入正则表达式后，这里将显示通俗易懂的解释...</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-panel" id="library-panel">
+        <div class="library-header">
+          <h2>常用正则库</h2>
+          <button id="close-library" class="btn btn-icon">&times;</button>
+        </div>
+        <div class="library-filters">
+          <input type="text" id="library-search" placeholder="搜索正则表达式...">
+          <select id="library-category">
+            <option value="all">所有分类</option>
+          </select>
+        </div>
+        <div id="library-list" class="library-list">
+          <div class="loading">加载中...</div>
+        </div>
+        <div class="library-actions">
+          <button id="add-new-pattern" class="btn btn-primary">
+            <span class="icon">+</span> 添加新正则
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <div id="modal-overlay" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 id="modal-title">添加正则表达式</h3>
+          <button id="close-modal" class="btn btn-icon">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="pattern-form">
+            <div class="form-group">
+              <label for="pattern-name">名称 *</label>
+              <input type="text" id="pattern-name" required placeholder="例如: 邮箱地址">
+            </div>
+            <div class="form-group">
+              <label for="pattern-pattern">正则表达式 *</label>
+              <input type="text" id="pattern-pattern" required placeholder="例如: [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}">
+            </div>
+            <div class="form-group">
+              <label for="pattern-flags">标志</label>
+              <input type="text" id="pattern-flags" placeholder="例如: gi">
+            </div>
+            <div class="form-group">
+              <label for="pattern-category">分类</label>
+              <select id="pattern-category">
+                <option value="general">常规</option>
+                <option value="网络">网络</option>
+                <option value="联系方式">联系方式</option>
+                <option value="时间">时间</option>
+                <option value="身份">身份</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="pattern-description">描述</label>
+              <textarea id="pattern-description" rows="3" placeholder="描述这个正则表达式的用途..."></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button id="cancel-modal" class="btn btn-secondary">取消</button>
+          <button id="save-pattern" class="btn btn-primary">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+  <script>
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+  </script>
+  <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+{
+  "name": "household-bill-splitter-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "14.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "axios": "^1.6.0",
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.0.0"
+  },
+  "optionalDependencies": {
+    "@next/swc-darwin-arm64": "14.1.0",
+    "@next/swc-darwin-x64": "14.1.0",
+    "@next/swc-linux-arm64-gnu": "14.1.0",
+    "@next/swc-linux-x64-gnu": "14.1.0",
+    "@next/swc-win32-x64-msvc": "14.1.0"
+  }
+}

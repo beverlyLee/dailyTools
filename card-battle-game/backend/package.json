@@ -1,0 +1,25 @@
+{
+  "name": "card-battle-game-backend",
+  "version": "1.0.0",
+  "description": "Card Battle Game Backend with Node.js, Socket.IO and SQLite",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest --verbose"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "sqlite3": "^5.1.6",
+    "uuid": "^9.0.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["card-game", "ccg", "socket.io", "nodejs"],
+  "author": "",
+  "license": "MIT"
+}

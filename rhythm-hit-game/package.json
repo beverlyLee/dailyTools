@@ -1,0 +1,32 @@
+{
+  "name": "rhythm-hit-game",
+  "version": "1.0.0",
+  "description": "节奏打击游戏 - Rhythm Hit Game",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "build": "tsc",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "rhythm",
+    "game",
+    "music",
+    "audio-analysis"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "meyda": "^5.6.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
+  }
+}

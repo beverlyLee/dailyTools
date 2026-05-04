@@ -1,0 +1,76 @@
+授权委托书
+
+委托人（甲方）：{{ principal_name }}
+性别：{{ principal_gender }}
+出生日期：{{ principal_birth_date|format_date }}
+民族：{{ principal_ethnicity }}
+身份证号码：{{ principal_id_number }}
+住址：{{ principal_address }}
+联系电话：{{ principal_contact|default('') }}
+
+受托人（乙方）：{{ agent_name }}
+性别：{{ agent_gender }}
+出生日期：{{ agent_birth_date|format_date }}
+民族：{{ agent_ethnicity }}
+身份证号码：{{ agent_id_number }}
+住址：{{ agent_address }}
+联系电话：{{ agent_contact|default('') }}
+
+{% if agent_organization %}
+工作单位：{{ agent_organization }}
+职务：{{ agent_position|default('') }}
+{% endif %}
+
+委托人因{{ authorization_purpose }}一案，根据《中华人民共和国民事诉讼法》及相关法律规定，特委托{{ agent_name }}作为我的代理人，参与本案的相关法律事务。
+
+一、委托权限
+
+受托人享有以下委托权限：
+
+{% if authorization_scope and authorization_scope is iterable and authorization_scope is not string %}
+{% for scope in authorization_scope %}
+{{ loop.index }}. {{ scope }}
+{% endfor %}
+{% else %}
+{{ authorization_scope|default('一般代理') }}
+{% endif %}
+
+{% if is_special_authorization %}
+特别授权：
+1. 代为提起诉讼、申请仲裁；
+2. 代为提出、承认、变更、放弃诉讼请求或仲裁请求；
+3. 代为进行和解、调解；
+4. 代为提起上诉、反诉；
+5. 代为申请执行；
+6. 代为签收法律文书；
+7. 代为办理与本案相关的其他法律事务。
+{% endif %}
+
+二、委托期限
+
+本授权委托书的有效期为：
+自{{ authorization_start_date|format_date if authorization_start_date else '本委托书签署之日' }}起，至{{ authorization_end_date|format_date if authorization_end_date else '本案终结时止' }}止。
+
+三、其他事项
+
+1. 受托人在委托权限范围内所签署的法律文件，委托人均予以承认，并承担相应的法律后果。
+2. 受托人不得超越委托权限行事，否则由此产生的法律责任由受托人自行承担。
+3. 如需转委托，须经委托人书面同意。
+4. 本委托书一式{{ copy_count|default(3) }}份，委托人、受托人各执{{ copy_per_party|default(1) }}份，{{ receiving_organization|default('人民法院') }}留存{{ copy_for_org|default(1) }}份，具有同等法律效力。
+
+委托人（签字并按手印）：__________________
+日期：{{ issuing_date|format_date if issuing_date else current_date|format_date }}
+地点：{{ issuing_place|default('') }}
+
+受托人（签字）：__________________
+日期：{{ issuing_date|format_date if issuing_date else current_date|format_date }}
+地点：{{ issuing_place|default('') }}
+
+{% if principal_work_unit %}
+委托人工作单位：{{ principal_work_unit }}
+{% endif %}
+
+{% if remarks %}
+备注：
+{{ remarks }}
+{% endif %}

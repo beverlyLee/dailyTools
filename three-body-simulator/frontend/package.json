@@ -1,0 +1,17 @@
+{
+  "name": "three-body-simulator-frontend",
+  "version": "1.0.0",
+  "description": "Three.js frontend for three-body motion simulation",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "card-battle-game-frontend",
+  "version": "1.0.0",
+  "description": "Card Battle Game Frontend with React and Konva.js",
+  "private": true,
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "konva": "^9.2.0",
+    "react-konva": "^18.2.10",
+    "socket.io-client": "^4.7.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.4",
+    "vite": "^4.4.9"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": ["card-game", "ccg", "react", "konva"],
+  "author": "",
+  "license": "MIT"
+}

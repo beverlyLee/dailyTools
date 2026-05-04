@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手写数学公式识别</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>手写数学公式识别</h1>
+            <p>在下方画板中手写数学公式，点击识别按钮转换为LaTeX代码</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="canvas-section">
+                <div class="toolbar">
+                    <button id="clear-btn" class="btn btn-secondary">清空</button>
+                    <button id="undo-btn" class="btn btn-secondary">撤销</button>
+                    <button id="recognize-btn" class="btn btn-primary">识别</button>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="drawing-canvas"></canvas>
+                </div>
+            </div>
+            
+            <div class="result-section">
+                <div class="result-item">
+                    <h3>LaTeX 代码</h3>
+                    <div class="code-container">
+                        <pre id="latex-output"></pre>
+                        <button id="copy-latex-btn" class="btn btn-small">复制</button>
+                    </div>
+                </div>
+                
+                <div class="result-item">
+                    <h3>渲染预览</h3>
+                    <div id="math-preview" class="math-preview"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="history-section">
+            <h3>历史记录</h3>
+            <div id="history-list" class="history-list"></div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="js/storage.js"></script>
+    <script src="js/canvas.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

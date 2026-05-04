@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: music-taste-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID:-}
+      - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET:-}
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-this-in-production}
+    volumes:
+      - backend-data:/app/data
+      - backend-cache:/app/cache
+    networks:
+      - music-taste-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: music-taste-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - music-taste-network
+    restart: unless-stopped
+
+volumes:
+  backend-data:
+  backend-cache:
+
+networks:
+  music-taste-network:
+    driver: bridge

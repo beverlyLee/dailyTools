@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: ai-music-composer-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./data/music_composer.db
+      - MUSIC_GENERATION_MODEL=${MUSIC_GENERATION_MODEL:-baidu}
+      - BAIDU_API_KEY=${BAIDU_API_KEY:-}
+      - BAIDU_SECRET_KEY=${BAIDU_SECRET_KEY:-}
+      - BAIDU_ACCESS_TOKEN=${BAIDU_ACCESS_TOKEN:-}
+      - KUNLUN_API_KEY=${KUNLUN_API_KEY:-}
+    volumes:
+      - ./data:/app/data
+    networks:
+      - ai-music-network
+
+  frontend:
+    build: ./frontend
+    container_name: ai-music-composer-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - ai-music-network
+
+networks:
+  ai-music-network:
+    driver: bridge
+
+volumes:
+  data:

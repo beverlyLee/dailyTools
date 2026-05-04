@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>分子动力学模拟器</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      background-color: #0a0a0f;
+      color: #e0e0e0;
+    }
+    
+    #app {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+    }
+    
+    #canvas-container {
+      flex: 1;
+      position: relative;
+    }
+    
+    #canvas-container canvas {
+      width: 100%;
+      height: 100%;
+    }
+    
+    #sidebar {
+      width: 380px;
+      background-color: #12121a;
+      border-left: 1px solid #2a2a3a;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    #sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    #sidebar::-webkit-scrollbar-track {
+      background: #1a1a2a;
+    }
+    
+    #sidebar::-webkit-scrollbar-thumb {
+      background: #3a3a4a;
+      border-radius: 3px;
+    }
+    
+    .panel {
+      background-color: #1a1a25;
+      border-radius: 10px;
+      padding: 15px;
+      border: 1px solid #2a2a3a;
+    }
+    
+    .panel-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #64b5f6;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .form-group {
+      margin-bottom: 12px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: #a0a0a0;
+      margin-bottom: 5px;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 8px 12px;
+      background-color: #252535;
+      border: 1px solid #3a3a4a;
+      border-radius: 5px;
+      color: #e0e0e0;
+      font-size: 13px;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #64b5f6;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .form-row .form-group {
+      flex: 1;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .btn-primary {
+      background-color: #1976d2;
+      color: white;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      background-color: #1565c0;
+    }
+    
+    .btn-success {
+      background-color: #2e7d32;
+      color: white;
+    }
+    
+    .btn-success:hover:not(:disabled) {
+      background-color: #1b5e20;
+    }
+    
+    .btn-warning {
+      background-color: #f57c00;
+      color: white;
+    }
+    
+    .btn-warning:hover:not(:disabled) {
+      background-color: #ef6c00;
+    }
+    
+    .btn-danger {
+      background-color: #c62828;
+      color: white;
+    }
+    
+    .btn-danger:hover:not(:disabled) {
+      background-color: #b71c1c;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid #2a2a3a;
+    }
+    
+    .stat-item:last-child {
+      border-bottom: none;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #a0a0a0;
+    }
+    
+    .stat-value {
+      font-size: 12px;
+      font-weight: 600;
+      color: #e0e0e0;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .stat-value.good {
+      color: #4caf50;
+    }
+    
+    .stat-value.warning {
+      color: #ff9800;
+    }
+    
+    #status-bar {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 10px;
+      color: white;
+      font-size: 12px;
+      max-width: 250px;
+    }
+    
+    #status-bar h3 {
+      color: #64b5f6;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    
+    #energy-chart {
+      width: 100%;
+      height: 120px;
+      background-color: #252535;
+      border-radius: 5px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .chart-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #808080;
+      margin-top: 5px;
+    }
+    
+    .legend {
+      display: flex;
+      gap: 15px;
+      font-size: 11px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+    }
+    
+    #trajectory-list {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .trajectory-item {
+      padding: 10px;
+      background-color: #252535;
+      border-radius: 5px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .trajectory-item:hover {
+      background-color: #303045;
+    }
+    
+    .trajectory-item.active {
+      background-color: #1a237e;
+      border: 1px solid #3f51b5;
+    }
+    
+    .trajectory-name {
+      font-weight: 500;
+      font-size: 13px;
+    }
+    
+    .trajectory-info {
+      font-size: 11px;
+      color: #808080;
+      margin-top: 3px;
+    }
+    
+    #playback-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    #playback-controls input[type="range"] {
+      flex: 1;
+      height: 6px;
+      background: #252535;
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    
+    #playback-controls input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #64b5f6;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #303045;
+      border-top-color: #64b5f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="canvas-container">
+      <div id="status-bar" class="hidden">
+        <h3 id="simulation-status">未开始模拟</h3>
+        <div id="simulation-info"></div>
+      </div>
+      <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+      </div>
+    </div>
+    
+    <div id="sidebar">
+      <div class="panel">
+        <div class="panel-title">模拟配置</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>晶格大小 (n×n×n)</label>
+            <input type="number" id="lattice-size" value="4" min="2" max="10">
+          </div>
+          <div class="form-group">
+            <label>密度</label>
+            <input type="number" id="density" value="0.8" step="0.1" min="0.1" max="2.0">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>初始温度</label>
+            <input type="number" id="temperature" value="1.0" step="0.1" min="0.1" max="10.0">
+          </div>
+          <div class="form-group">
+            <label>时间步长 (fs)</label>
+            <input type="number" id="timestep" value="0.001" step="0.0001">
+          </div>
+        </div>
+        <div class="btn-group">
+          <button id="create-simulation-btn" class="btn btn-primary">创建模拟</button>
+          <button id="close-simulation-btn" class="btn btn-danger hidden">关闭模拟</button>
+        </div>
+      </div>
+      
+      <div class="panel hidden" id="simulation-controls">
+        <div class="panel-title">模拟控制</div>
+        <div class="form-group">
+          <label>每帧步数</label>
+          <input type="number" id="steps-per-frame" value="10" min="1" max="1000">
+        </div>
+        <div class="btn-group">
+          <button id="start-btn" class="btn btn-success">开始</button>
+          <button id="pause-btn" class="btn btn-warning hidden">暂停</button>
+          <button id="step-btn" class="btn btn-primary">单步</button>
+        </div>
+        <div class="form-group" style="margin-top: 12px;">
+          <label>目标温度 (速度缩放)</label>
+          <div class="form-row">
+            <input type="number" id="target-temp" value="1.0" step="0.1">
+            <button id="scale-temp-btn" class="btn btn-warning" style="flex: 0 0 auto;">应用</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel hidden" id="current-state-panel">
+        <div class="panel-title">当前状态</div>
+        <div class="stat-item">
+          <span class="stat-label">步数</span>
+          <span class="stat-value" id="stat-step">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">模拟时间</span>
+          <span class="stat-value" id="stat-time">0.0000</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">温度</span>
+          <span class="stat-value" id="stat-temp">0.000000</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">压力</span>
+          <span class="stat-value" id="stat-pressure">0.000000</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">势能</span>
+          <span class="stat-value" id="stat-pe">0.000000</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">动能</span>
+          <span class="stat-value" id="stat-ke">0.000000</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">总能量</span>
+          <span class="stat-value" id="stat-te">0.000000</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">能量守恒误差</span>
+          <span class="stat-value" id="stat-error">0.000000%</span>
+        </div>
+      </div>
+      
+      <div class="panel hidden" id="energy-chart-panel">
+        <div class="panel-title">能量趋势</div>
+        <div id="energy-chart"></div>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #f44336;"></div>
+            <span>势能</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #4caf50;"></div>
+            <span>动能</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #2196f3;"></div>
+            <span>总能量</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel">
+        <div class="panel-title">轨迹回放</div>
+        <div class="btn-group">
+          <button id="refresh-trajectories-btn" class="btn btn-primary">刷新列表</button>
+          <button id="stop-playback-btn" class="btn btn-danger hidden">停止回放</button>
+        </div>
+        <div id="trajectory-list" style="margin-top: 10px;">
+          <p style="color: #808080; font-size: 12px;">点击"刷新列表"加载已保存的轨迹</p>
+        </div>
+        <div id="playback-panel" class="hidden" style="margin-top: 10px;">
+          <div id="playback-controls">
+            <button id="play-playback-btn" class="btn btn-success">▶</button>
+            <input type="range" id="playback-slider" min="0" max="0" value="0">
+            <span id="playback-frame" style="font-size: 11px; min-width: 40px;">0/0</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel">
+        <div class="panel-title">系统信息</div>
+        <div class="stat-item">
+          <span class="stat-label">原子数</span>
+          <span class="stat-value" id="stat-num-atoms">-</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">盒子尺寸</span>
+          <span class="stat-value" id="stat-box-size">-</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">密度</span>
+          <span class="stat-value" id="stat-density">-</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">截断半径</span>
+          <span class="stat-value">2.5σ</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

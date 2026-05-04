@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Real-time collaborative whiteboard with infinite canvas" />
+    <title>Collaborative Whiteboard</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="header">
+        <div class="header-left">
+          <div class="logo">
+            <div class="logo-icon">W</div>
+            <span>Whiteboard</span>
+          </div>
+          <div class="room-info">
+            <span class="room-label">Room:</span>
+            <span class="room-code" id="room-code">--</span>
+            <div class="room-actions">
+              <button class="action-btn" id="copy-btn">Copy Link</button>
+              <button class="action-btn" id="share-btn">Share</button>
+            </div>
+          </div>
+        </div>
+        <div class="header-right">
+          <div id="status-indicator">Connecting...</div>
+        </div>
+      </header>
+
+      <div class="toolbar-container">
+        <div class="toolbar" id="toolbar"></div>
+      </div>
+
+      <div class="canvas-container">
+        <canvas id="whiteboard"></canvas>
+        
+        <div class="zoom-controls">
+          <button class="zoom-btn" id="zoom-in">+</button>
+          <div class="zoom-level" id="zoom-level">100%</div>
+          <div class="zoom-divider"></div>
+          <button class="zoom-btn" id="zoom-out">−</button>
+          <div class="zoom-divider"></div>
+          <button class="zoom-btn" id="zoom-reset">⌂</button>
+        </div>
+        
+        <div class="hint">
+          <span class="hint-kbd">Scroll</span> to zoom, 
+          <span class="hint-kbd">Alt + Drag</span> or 
+          <span class="hint-kbd">Middle Mouse</span> to pan
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

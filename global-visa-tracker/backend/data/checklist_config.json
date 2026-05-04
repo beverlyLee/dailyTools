@@ -1,0 +1,892 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2024-01-01",
+  "countries": {
+    "usa": {
+      "name": "United States of America",
+      "visa_types": {
+        "b1_b2": {
+          "name": "B1/B2 Tourist/Business Visa",
+          "processing_time": "3-10 business days",
+          "validity": "10 years (multiple entries)",
+          "documents": {
+            "mandatory": [
+              {
+                "id": "ds160",
+                "name": "DS-160 Confirmation Page",
+                "description": "Online Nonimmigrant Visa Application confirmation page with barcode",
+                "requirements": [
+                  "Printed confirmation page with 10-digit barcode",
+                  "Application ID must be visible",
+                  "Recent photograph must match"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["application_id", "surname", "given_name", "date_of_birth"]
+              },
+              {
+                "id": "passport",
+                "name": "Valid Passport",
+                "description": "Machine-readable passport valid for at least 6 months beyond intended stay",
+                "requirements": [
+                  "Validity must exceed 6 months after departure date",
+                  "At least one blank visa page required",
+                  "Machine-readable zone (MRZ) must be clear"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["passport_number", "surname", "given_name", "date_of_birth", "expiry_date", "nationality"]
+              },
+              {
+                "id": "photo",
+                "name": "Visa Photograph",
+                "description": "2x2 inch (51x51 mm) color photograph taken within last 6 months",
+                "requirements": [
+                  "White or off-white background",
+                  "Neutral facial expression, eyes open",
+                  "No head covering unless for religious purposes",
+                  "Digital copy must be 600x600 pixels, 24-bit color"
+                ],
+                "sample_url": null,
+                "ocr_fields": []
+              },
+              {
+                "id": "interview_letter",
+                "name": "Interview Appointment Letter",
+                "description": "Confirmation of scheduled visa interview at US Embassy/Consulate",
+                "requirements": [
+                  "Printed appointment confirmation",
+                  "CGI reference number visible",
+                  "Interview date and time clear"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["appointment_date", "reference_number", "location"]
+              },
+              {
+                "id": "fee_receipt",
+                "name": "Visa Fee Receipt",
+                "description": "Proof of payment of non-refundable MRV application fee",
+                "requirements": [
+                  "Original payment receipt",
+                  "MRV fee number visible",
+                  "Payment amount matches current fee"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["receipt_number", "amount", "payment_date"]
+              }
+            ],
+            "recommended": [
+              {
+                "id": "itinerary",
+                "name": "Travel Itinerary",
+                "description": "Detailed plan of your trip including flight reservations (if booked)",
+                "requirements": [
+                  "Flight confirmation numbers (if booked)",
+                  "Hotel reservations or accommodation details",
+                  "Purpose of visit and dates of travel"
+                ],
+                "sample_url": null,
+                "ocr_fields": []
+              },
+              {
+                "id": "employment_proof",
+                "name": "Employment Verification",
+                "description": "Letter from employer confirming current employment and approved leave",
+                "requirements": [
+                  "Company letterhead with contact details",
+                  "Position and salary information",
+                  "Dates of approved leave",
+                  "Statement confirming return to employment"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["company_name", "position", "salary", "leave_dates"]
+              },
+              {
+                "id": "financial_proof",
+                "name": "Financial Documents",
+                "description": "Evidence of sufficient funds to cover expenses during stay",
+                "requirements": [
+                  "Bank statements for last 3-6 months",
+                  "Pay stubs or income proof",
+                  "Tax returns (if applicable)",
+                  "Minimum balance of $100 per day of stay recommended"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["account_balance", "monthly_income"]
+              },
+              {
+                "id": "previous_visa",
+                "name": "Previous US Visas",
+                "description": "Copies of any previously issued US visas (if applicable)",
+                "requirements": [
+                  "Clear copies of all pages with US visas",
+                  "I-94 records if available"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["visa_number", "issue_date", "expiry_date"]
+              }
+            ],
+            "conditional": [
+              {
+                "id": "student_letter",
+                "name": "Student Status Letter",
+                "description": "For students currently enrolled in educational institutions",
+                "requirements": [
+                  "Letter from school confirming enrollment",
+                  "Transcripts or academic records",
+                  "Tuition payment receipts (if applicable)"
+                ],
+                "condition": "applicant_type == 'student'",
+                "sample_url": null,
+                "ocr_fields": ["school_name", "enrollment_status", "student_id"]
+              },
+              {
+                "id": "retirement_proof",
+                "name": "Retirement Verification",
+                "description": "For retired applicants showing proof of retirement income",
+                "requirements": [
+                  "Pension statements",
+                  "Retirement account statements",
+                  "Letter from former employer (if applicable)"
+                ],
+                "condition": "applicant_type == 'retired'",
+                "sample_url": null,
+                "ocr_fields": ["monthly_pension", "retirement_date"]
+              },
+              {
+                "id": "business_invitation",
+                "name": "Business Invitation Letter",
+                "description": "For B1 business travelers with invitation from US company",
+                "requirements": [
+                  "Letter on US company letterhead",
+                  "Purpose of business trip",
+                  "Contact details of US host",
+                  "Financial responsibility statement"
+                ],
+                "condition": "purpose == 'business'",
+                "sample_url": null,
+                "ocr_fields": ["company_name", "contact_person", "purpose_details"]
+              }
+            ]
+          },
+          "application_steps": [
+            "Complete DS-160 online application form",
+            "Pay MRV application fee",
+            "Schedule interview appointment",
+            "Gather all required documents",
+            "Attend visa interview at Embassy/Consulate",
+            "Track application status online",
+            "Collect passport when ready"
+          ]
+        },
+        "f1": {
+          "name": "F1 Student Visa",
+          "processing_time": "5-15 business days",
+          "validity": "Duration of program + 60 days grace period",
+          "documents": {
+            "mandatory": [
+              {
+                "id": "ds160",
+                "name": "DS-160 Confirmation Page",
+                "description": "Online Nonimmigrant Visa Application confirmation page",
+                "requirements": [
+                  "Printed confirmation page with barcode",
+                  "Recent photograph must match"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["application_id", "surname", "given_name"]
+              },
+              {
+                "id": "i20",
+                "name": "Form I-20",
+                "description": "Certificate of Eligibility for Nonimmigrant Student Status issued by SEVP-approved school",
+                "requirements": [
+                  "Original signed Form I-20",
+                  "SEVIS ID and school code must be visible",
+                  "Program start and end dates clear",
+                  "Student and Designated School Official (DSO) signatures required"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["sevis_id", "school_name", "program_start_date", "program_end_date", "tuition_amount"]
+              },
+              {
+                "id": "sevis_fee",
+                "name": "SEVIS Fee Receipt",
+                "description": "Proof of payment of I-901 SEVIS fee",
+                "requirements": [
+                  "I-901 payment confirmation",
+                  "SEVIS ID must match I-20"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["sevis_id", "payment_date", "receipt_number"]
+              },
+              {
+                "id": "passport",
+                "name": "Valid Passport",
+                "description": "Machine-readable passport valid for at least 6 months beyond program end date",
+                "requirements": [
+                  "Validity must exceed 6 months after program completion",
+                  "At least one blank visa page required"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["passport_number", "surname", "given_name", "date_of_birth", "expiry_date"]
+              },
+              {
+                "id": "photo",
+                "name": "Visa Photograph",
+                "description": "2x2 inch color photograph taken within last 6 months",
+                "requirements": [
+                  "White background, neutral expression",
+                  "Digital copy must be 600x600 pixels"
+                ],
+                "sample_url": null,
+                "ocr_fields": []
+              },
+              {
+                "id": "interview_letter",
+                "name": "Interview Appointment Letter",
+                "description": "Confirmation of scheduled visa interview",
+                "requirements": [
+                  "Printed appointment confirmation",
+                  "Interview date and location clear"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["appointment_date", "location"]
+              }
+            ],
+            "recommended": [
+              {
+                "id": "academic_records",
+                "name": "Academic Documents",
+                "description": "Transcripts, diplomas, and standardized test scores",
+                "requirements": [
+                  "Official transcripts from all schools attended",
+                  "Diplomas or degree certificates",
+                  "TOEFL/IELTS scores (if required)",
+                  "GRE/GMAT scores (for graduate programs)"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["gpa", "degree", "test_scores"]
+              },
+              {
+                "id": "financial_proof",
+                "name": "Financial Documentation",
+                "description": "Evidence of sufficient funds for first year of study and living expenses",
+                "requirements": [
+                  "Bank statements for last 6 months",
+                  "Affidavit of support (if sponsored)",
+                  "Scholarship letters (if applicable)",
+                  "Must show funds for: tuition + living expenses + travel"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["account_balance", "sponsor_name", "scholarship_amount"]
+              },
+              {
+                "id": "intent_proof",
+                "name": "Ties to Home Country",
+                "description": "Documents demonstrating intent to return home after studies",
+                "requirements": [
+                  "Property ownership documents",
+                  "Family ties documentation",
+                  "Employment offers in home country",
+                  "Bank accounts and investments in home country"
+                ],
+                "sample_url": null,
+                "ocr_fields": []
+              }
+            ],
+            "conditional": []
+          },
+          "application_steps": [
+            "Receive and review Form I-20 from SEVP-approved school",
+            "Pay SEVIS I-901 fee",
+            "Complete DS-160 online application",
+            "Pay MRV visa application fee",
+            "Schedule visa interview appointment",
+            "Prepare all required documents",
+            "Attend visa interview",
+            "Receive visa (if approved)"
+          ]
+        }
+      }
+    },
+    "schengen": {
+      "name": "Schengen Area (EU)",
+      "visa_types": {
+        "tourist": {
+          "name": "Schengen Tourist Visa (Type C)",
+          "processing_time": "5-15 calendar days",
+          "validity": "Up to 90 days within 180-day period",
+          "documents": {
+            "mandatory": [
+              {
+                "id": "application_form",
+                "name": "Schengen Visa Application Form",
+                "description": "Completed and signed application form",
+                "requirements": [
+                  "Form must be filled in English or local language",
+                  "All fields must be completed",
+                  "Applicant's signature required"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["surname", "given_name", "passport_number", "nationality"]
+              },
+              {
+                "id": "passport",
+                "name": "Valid Passport",
+                "description": "Passport issued within last 10 years, valid for 3 months beyond return date",
+                "requirements": [
+                  "Issued within last 10 years",
+                  "Valid for 3 months after intended departure",
+                  "At least 2 blank visa pages",
+                  "Previous Schengen visas (if any)"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["passport_number", "surname", "given_name", "date_of_birth", "issue_date", "expiry_date", "nationality"]
+              },
+              {
+                "id": "photos",
+                "name": "Passport Photographs",
+                "description": "2 identical photos (35x45 mm) taken within last 3 months",
+                "requirements": [
+                  "Light background (white or light grey)",
+                  "Neutral expression, eyes open",
+                  "No head covering unless religious",
+                  "Must show full face from crown to chin"
+                ],
+                "sample_url": null,
+                "ocr_fields": []
+              },
+              {
+                "id": "travel_insurance",
+                "name": "Travel Medical Insurance",
+                "description": "Insurance covering entire Schengen area with minimum €30,000 coverage",
+                "requirements": [
+                  "Minimum coverage of €30,000",
+                  "Valid for entire Schengen Area",
+                  "Covers entire duration of stay",
+                  "Includes medical evacuation and repatriation"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["insurance_company", "policy_number", "coverage_amount", "valid_from", "valid_to"]
+              },
+              {
+                "id": "flight_itinerary",
+                "name": "Flight Reservation",
+                "description": "Confirmed round-trip flight reservation (not necessarily paid)",
+                "requirements": [
+                  "Flight numbers for arrival and departure",
+                  "Dates must match intended stay",
+                  "Reservation holder name matches applicant",
+                  "Confirmation number visible"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["flight_number", "departure_date", "return_date", "reservation_number"]
+              },
+              {
+                "id": "accommodation",
+                "name": "Accommodation Proof",
+                "description": "Hotel reservations, rental agreement, or invitation letter",
+                "requirements": [
+                  "Hotel booking confirmation with applicant's name",
+                  "Addresses and contact details of accommodation",
+                  "Covers entire duration of stay in each country",
+                  "If staying with friends/family: official invitation letter"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["hotel_name", "address", "check_in", "check_out", "confirmation_number"]
+              },
+              {
+                "id": "financial_means",
+                "name": "Proof of Sufficient Funds",
+                "description": "Evidence of financial means for entire stay",
+                "requirements": [
+                  "Bank statements for last 3 months",
+                  "Minimum €50 per day of stay",
+                  "Credit card statements (if applicable)",
+                  "Traveler's cheques (if applicable)"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["account_balance", "average_balance", "account_holder"]
+              },
+              {
+                "id": "employment_status",
+                "name": "Employment/Status Letter",
+                "description": "Letter confirming employment, student status, or retirement",
+                "requirements": [
+                  "For employed: letter from employer with position, salary, leave approval",
+                  "For students: letter from school confirming enrollment",
+                  "For retired: pension statements",
+                  "For self-employed: business registration and tax returns"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["employer", "position", "salary", "employment_status"]
+              }
+            ],
+            "recommended": [
+              {
+                "id": "previous_schengen",
+                "name": "Previous Schengen Visas",
+                "description": "Copies of all previously issued Schengen visas (last 5 years)",
+                "requirements": [
+                  "Clear copies of all visa pages",
+                  "Entry/exit stamps if applicable"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["visa_number", "issue_date", "expiry_date"]
+              },
+              {
+                "id": "cover_letter",
+                "name": "Cover Letter",
+                "description": "Personal letter explaining purpose of trip and itinerary",
+                "requirements": [
+                  "Purpose of visit clearly stated",
+                  "Detailed day-by-day itinerary",
+                  "Places to be visited mentioned",
+                  "Contact information in home country"
+                ],
+                "sample_url": null,
+                "ocr_fields": []
+              },
+              {
+                "id": "itinerary_details",
+                "name": "Detailed Itinerary",
+                "description": "Day-by-day plan of travel within Schengen area",
+                "requirements": [
+                  "Countries to be visited",
+                  "Cities and towns",
+                  "Dates in each location",
+                  "Transport between locations"
+                ],
+                "sample_url": null,
+                "ocr_fields": []
+              }
+            ],
+            "conditional": [
+              {
+                "id": "invitation_letter",
+                "name": "Official Invitation Letter",
+                "description": "For visits to friends/family: officially stamped invitation",
+                "requirements": [
+                  "Must be from Schengen country authorities",
+                  "Includes host's ID and address",
+                  "States financial responsibility (if applicable)"
+                ],
+                "condition": "visit_type == 'family_friend'",
+                "sample_url": null,
+                "ocr_fields": ["host_name", "host_address", "invitation_date"]
+              },
+              {
+                "id": "business_invitation",
+                "name": "Business Invitation",
+                "description": "For business visits: invitation from Schengen company",
+                "requirements": [
+                  "Letter on company letterhead",
+                  "Purpose of business meeting",
+                  "Contact details of inviting company",
+                  "Financial arrangement details"
+                ],
+                "condition": "visit_type == 'business'",
+                "sample_url": null,
+                "ocr_fields": ["company_name", "contact_person", "business_purpose"]
+              }
+            ]
+          },
+          "application_steps": [
+            "Identify which Schengen country to apply to",
+            "Check if visa appointment is required",
+            "Complete Schengen visa application form",
+            "Gather all required documents",
+            "Book appointment at visa application center",
+            "Attend appointment and submit biometrics",
+            "Pay visa application fee",
+            "Track application status online",
+            "Collect passport when decision is made"
+          ]
+        }
+      }
+    },
+    "uk": {
+      "name": "United Kingdom",
+      "visa_types": {
+        "standard_visitor": {
+          "name": "Standard Visitor Visa",
+          "processing_time": "3-15 working days",
+          "validity": "Up to 6 months per visit, can be valid for 2, 5, or 10 years",
+          "documents": {
+            "mandatory": [
+              {
+                "id": "passport",
+                "name": "Valid Passport",
+                "description": "Passport with at least one blank page, valid for entire stay",
+                "requirements": [
+                  "At least one blank page for visa",
+                  "Valid for entire duration of stay",
+                  "Previous UK visas (if any)"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["passport_number", "surname", "given_name", "date_of_birth", "expiry_date", "nationality"]
+              },
+              {
+                "id": "application_form",
+                "name": "Online Application Confirmation",
+                "description": "Printed confirmation of completed online visa application",
+                "requirements": [
+                  "GWF reference number visible",
+                  "Application date and time",
+                  "Applicant details correct"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["gwf_number", "application_date", "surname", "given_name"]
+              },
+              {
+                "id": "appointment_letter",
+                "name": "Appointment Confirmation",
+                "description": "Confirmation of booked visa application center appointment",
+                "requirements": [
+                  "Appointment date and time",
+                  "Visa application center location",
+                  "Booking reference number"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["appointment_date", "center_location", "booking_reference"]
+              },
+              {
+                "id": "fee_receipt",
+                "name": "Visa Fee Payment Receipt",
+                "description": "Proof of payment of UK visa application fee",
+                "requirements": [
+                  "Payment confirmation",
+                  "Amount paid",
+                  "Payment date"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["receipt_number", "amount", "payment_date"]
+              },
+              {
+                "id": "photos",
+                "name": "Passport Photographs",
+                "description": "1 color photo (45x35mm) meeting UKVI requirements",
+                "requirements": [
+                  "Taken within last month",
+                  "Plain light grey or cream background",
+                  "No sunglasses or tinted glasses",
+                  "No head covering unless religious"
+                ],
+                "sample_url": null,
+                "ocr_fields": []
+              }
+            ],
+            "recommended": [
+              {
+                "id": "financial_proof",
+                "name": "Financial Evidence",
+                "description": "Proof you have enough money for your stay in the UK",
+                "requirements": [
+                  "Bank statements for last 6 months",
+                  "Pay slips for last 3 months",
+                  "Evidence of savings or investments",
+                  "Minimum £100 per day of stay recommended"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["account_balance", "monthly_income", "account_holder"]
+              },
+              {
+                "id": "employment_letter",
+                "name": "Employment Verification",
+                "description": "Letter from employer confirming your employment",
+                "requirements": [
+                  "Company letterhead",
+                  "Job title and salary",
+                  "Dates of approved leave",
+                  "Contact details for verification"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["company_name", "position", "salary", "leave_dates"]
+              },
+              {
+                "id": "accommodation",
+                "name": "Accommodation Details",
+                "description": "Proof of where you will stay during your visit",
+                "requirements": [
+                  "Hotel booking confirmations",
+                  "Rental agreements (if applicable)",
+                  "If staying with friends: their address and consent",
+                  "Address and contact details for all stays"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["hotel_name", "address", "check_in", "check_out"]
+              },
+              {
+                "id": "travel_itinerary",
+                "name": "Travel Plans",
+                "description": "Evidence of your intended travel arrangements",
+                "requirements": [
+                  "Flight bookings or reservations",
+                  "Train or ferry bookings (if applicable)",
+                  "Planned activities and places to visit",
+                  "Timeline of your trip"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["flight_number", "departure_date", "return_date"]
+              }
+            ],
+            "conditional": [
+              {
+                "id": "student_letter",
+                "name": "Student Status Letter",
+                "description": "For students: confirmation of enrollment",
+                "requirements": [
+                  "Letter from educational institution",
+                  "Confirmation of current enrollment",
+                  "Course details and expected completion date"
+                ],
+                "condition": "applicant_type == 'student'",
+                "sample_url": null,
+                "ocr_fields": ["institution_name", "course_name", "enrollment_status"]
+              },
+              {
+                "id": "sponsor_letter",
+                "name": "Sponsor Letter",
+                "description": "If someone is sponsoring your visit: letter from them",
+                "requirements": [
+                  "Sponsor's full name and address",
+                  "Relationship to applicant",
+                  "Details of what they are sponsoring",
+                  "Evidence of their financial ability"
+                ],
+                "condition": "has_sponsor == true",
+                "sample_url": null,
+                "ocr_fields": ["sponsor_name", "sponsor_relationship", "sponsorship_details"]
+              }
+            ]
+          },
+          "application_steps": [
+            "Check if you need a UK Standard Visitor visa",
+            "Prepare your documents and information",
+            "Apply online through GOV.UK",
+            "Pay the visa application fee",
+            "Book and attend biometrics appointment",
+            "Upload or submit your documents",
+            "Wait for decision (track online)",
+            "Collect passport or receive by courier"
+          ]
+        }
+      }
+    },
+    "japan": {
+      "name": "Japan",
+      "visa_types": {
+        "tourist": {
+          "name": "Temporary Visitor Visa (Tourist)",
+          "processing_time": "5-7 working days",
+          "validity": "Up to 90 days stay, single or multiple entries",
+          "documents": {
+            "mandatory": [
+              {
+                "id": "passport",
+                "name": "Valid Passport",
+                "description": "Passport with at least 6 months validity and blank visa page",
+                "requirements": [
+                  "Valid for at least 6 months beyond stay",
+                  "At least one blank visa page",
+                  "Signature of holder present"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["passport_number", "surname", "given_name", "date_of_birth", "expiry_date", "nationality"]
+              },
+              {
+                "id": "application_form",
+                "name": "Visa Application Form",
+                "description": "Completed and signed Japan visa application form",
+                "requirements": [
+                  "Form must be typed or neatly handwritten",
+                  "All fields must be completed",
+                  "Applicant's signature required",
+                  "Photo must be affixed to form"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["surname", "given_name", "passport_number", "nationality", "occupation"]
+              },
+              {
+                "id": "photo",
+                "name": "Passport Photograph",
+                "description": "1 photo (4.5x4.5 cm) taken within last 6 months",
+                "requirements": [
+                  "Plain white background",
+                  "Front view, neutral expression",
+                  "No hat or head covering unless religious",
+                  "Must be affixed to application form"
+                ],
+                "sample_url": null,
+                "ocr_fields": []
+              },
+              {
+                "id": "itinerary",
+                "name": "Schedule of Stay",
+                "description": "Detailed itinerary showing planned activities in Japan",
+                "requirements": [
+                  "Dates of arrival and departure",
+                  "Places to visit (cities, attractions)",
+                  "Accommodation for each night",
+                  "Contact person in Japan (if any)"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["arrival_date", "departure_date", "cities_to_visit"]
+              },
+              {
+                "id": "flight_proof",
+                "name": "Flight Reservation",
+                "description": "Confirmed round-trip flight itinerary",
+                "requirements": [
+                  "Flight numbers for arrival and departure",
+                  "Dates must match itinerary",
+                  "Passenger name must match passport"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["flight_number", "departure_date", "return_date", "airline"]
+              },
+              {
+                "id": "hotel_booking",
+                "name": "Hotel Reservation",
+                "description": "Confirmed hotel bookings for entire stay",
+                "requirements": [
+                  "Hotel name and address",
+                  "Check-in and check-out dates",
+                  "Guest name matches applicant",
+                  "Confirmation number visible"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["hotel_name", "address", "check_in", "check_out", "confirmation_number"]
+              },
+              {
+                "id": "financial_proof",
+                "name": "Financial Documents",
+                "description": "Evidence of sufficient funds for stay in Japan",
+                "requirements": [
+                  "Bank statements for last 3 months",
+                  "Minimum ¥200,000 per month of stay",
+                  "Certificate of bank balance",
+                  "Income tax returns (if employed)"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["account_balance", "monthly_income", "bank_name"]
+              },
+              {
+                "id": "employment_proof",
+                "name": "Employment Certificate",
+                "description": "Letter from employer confirming employment",
+                "requirements": [
+                  "Company letterhead",
+                  "Position and length of employment",
+                  "Approved leave dates",
+                  "Employer's contact information"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["company_name", "position", "length_of_employment", "leave_dates"]
+              }
+            ],
+            "recommended": [
+              {
+                "id": "invitation_letter",
+                "name": "Invitation Letter",
+                "description": "If visiting friends/family: invitation letter from Japan",
+                "requirements": [
+                  "Full name and address of inviter",
+                  "Relationship to applicant",
+                  "Purpose and duration of visit",
+                  "Guarantee of return (if applicable)"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["inviter_name", "inviter_address", "relationship", "visit_purpose"]
+              },
+              {
+                "id": "guarantor_letter",
+                "name": "Guarantor Letter",
+                "description": "If someone in Japan is acting as guarantor",
+                "requirements": [
+                  "Guarantor's full name and address",
+                  "Relationship to applicant",
+                  "Guarantee of expenses and return",
+                  "Guarantor's financial documents"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["guarantor_name", "guarantor_address", "guarantee_details"]
+              },
+              {
+                "id": "previous_visas",
+                "name": "Previous Japan Visas",
+                "description": "Copies of any previously issued Japan visas",
+                "requirements": [
+                  "Clear copies of all visa pages",
+                  "Entry/exit stamps if applicable"
+                ],
+                "sample_url": null,
+                "ocr_fields": ["visa_number", "issue_date", "expiry_date"]
+              }
+            ],
+            "conditional": [
+              {
+                "id": "student_status",
+                "name": "Student Status Certificate",
+                "description": "For students: proof of current enrollment",
+                "requirements": [
+                  "Letter from school or university",
+                  "Confirmation of enrollment",
+                  "Course details and expected completion"
+                ],
+                "condition": "applicant_type == 'student'",
+                "sample_url": null,
+                "ocr_fields": ["school_name", "enrollment_status", "course_name"]
+              },
+              {
+                "id": "retirement_proof",
+                "name": "Retirement Documents",
+                "description": "For retired applicants: proof of retirement income",
+                "requirements": [
+                  "Pension statements",
+                  "Retirement account statements",
+                  "Savings or investment proof"
+                ],
+                "condition": "applicant_type == 'retired'",
+                "sample_url": null,
+                "ocr_fields": ["monthly_pension", "retirement_date"]
+              }
+            ]
+          },
+          "application_steps": [
+            "Check visa requirements for your nationality",
+            "Prepare all required documents",
+            "Complete visa application form",
+            "Submit application at Japanese Embassy/Consulate or through agency",
+            "Pay visa application fee",
+            "Wait for processing (typically 5-7 working days)",
+            "Collect passport when notified"
+          ]
+        }
+      }
+    }
+  },
+  "general_notes": {
+    "photograph_requirements": {
+      "standard_size": "35x45mm or 2x2 inches",
+      "background": "White or light-colored plain background",
+      "expression": "Neutral expression with eyes open and mouth closed",
+      "clothing": "Normal everyday clothing; no uniforms unless religious attire",
+      "headwear": "No hats or head coverings unless for religious or medical reasons"
+    },
+    "common_rejection_reasons": [
+      "Incomplete application form or missing information",
+      "Insufficient financial evidence",
+      "Lack of strong ties to home country",
+      "Invalid or expired passport",
+      "Incorrect visa category for purpose of travel",
+      "Missing supporting documents",
+      "Previous immigration violations",
+      "Criminal history concerns"
+    ],
+    "processing_times": {
+      "standard": "5-15 working days",
+      "express": "2-5 working days (if available)",
+      "peak_season": "May take longer during holiday seasons"
+    }
+  }
+}

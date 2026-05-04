@@ -1,0 +1,291 @@
+.history-page {
+  min-height: 100%;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.history-card {
+  border-radius: 12px;
+  border: 1px solid #DEB887;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.history-card:hover {
+  border-color: #CD853F;
+  box-shadow: 0 8px 24px rgba(139, 69, 19, 0.2);
+}
+
+.history-card .ant-card-body {
+  padding: 16px;
+}
+
+.history-image-container {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+}
+
+.history-image-row {
+  display: flex;
+}
+
+.history-image-col {
+  flex: 1;
+  position: relative;
+}
+
+.image-label {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 1;
+}
+
+.history-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+}
+
+.history-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.history-image-container:hover .history-overlay {
+  opacity: 1;
+}
+
+.history-info {
+  margin-top: 8px;
+}
+
+.history-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.fashion-name {
+  font-weight: 600;
+  color: #8B4513;
+  font-size: 14px;
+}
+
+.history-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #A0522D;
+}
+
+.meta-icon {
+  margin-right: 4px;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #DEB887;
+}
+
+/* 预览弹窗 */
+.preview-modal .ant-modal-body {
+  padding: 24px;
+}
+
+.preview-col {
+  text-align: center;
+}
+
+.preview-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #8B4513;
+  margin-bottom: 12px;
+}
+
+.preview-image {
+  width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  border: 2px solid #DEB887;
+  border-radius: 8px;
+}
+
+.preview-details {
+  margin-top: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, #FFFAF0, #FFF8DC);
+  border-radius: 12px;
+  border: 1px solid #DEB887;
+}
+
+.preview-details h4 {
+  margin: 0 0 16px 0;
+  color: #8B4513;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.detail-label {
+  color: #A0522D;
+  font-size: 14px;
+}
+
+.detail-value {
+  color: #8B4513;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* 空状态 */
+.empty-state {
+  padding: 80px 20px;
+}
+
+/* 分页样式 */
+.pagination-container .ant-pagination-item-active {
+  border-color: #CD853F;
+  background: linear-gradient(90deg, #CD853F, #A0522D);
+}
+
+.pagination-container .ant-pagination-item-active a {
+  color: white;
+}
+
+.pagination-container .ant-pagination-item:hover {
+  border-color: #CD853F;
+}
+
+.pagination-container .ant-pagination-item:hover a {
+  color: #CD853F;
+}
+
+.pagination-container .ant-pagination-prev:hover .ant-pagination-item-link,
+.pagination-container .ant-pagination-next:hover .ant-pagination-item-link {
+  border-color: #CD853F;
+  color: #CD853F;
+}
+
+/* 标签样式 */
+.ant-tag-red {
+  background: linear-gradient(90deg, #ff4d4f, #ff7875);
+  border: none;
+  color: white;
+}
+
+.ant-tag-purple {
+  background: linear-gradient(90deg, #722ed1, #9254de);
+  border: none;
+  color: white;
+}
+
+/* 响应式调整 */
+@media (max-width: 1200px) {
+  .history-card .ant-card-cover {
+    max-height: 200px;
+  }
+  
+  .history-image {
+    height: 140px;
+  }
+}
+
+@media (max-width: 992px) {
+  .preview-image {
+    max-height: 300px;
+  }
+  
+  .preview-details {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 576px) {
+  .history-image {
+    height: 120px;
+  }
+  
+  .history-overlay {
+    opacity: 1;
+    background: transparent;
+    position: relative;
+    margin-top: 8px;
+  }
+  
+  .history-overlay .ant-btn-group {
+    width: 100%;
+  }
+  
+  .history-overlay .ant-btn {
+    flex: 1;
+  }
+}
+
+/* 动画效果 */
+.history-card {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 按钮组样式 */
+.history-overlay .ant-btn-primary {
+  background: linear-gradient(90deg, #CD853F, #A0522D);
+  border-color: #A0522D;
+}
+
+.history-overlay .ant-btn-primary:hover {
+  background: linear-gradient(90deg, #A0522D, #8B4513);
+  border-color: #8B4513;
+}
+
+.history-overlay .ant-btn-dangerous {
+  background: linear-gradient(90deg, #ff4d4f, #ff7875);
+  border-color: #ff4d4f;
+}
+
+.history-overlay .ant-btn-dangerous:hover {
+  background: linear-gradient(90deg, #cc0000, #ff1a1a);
+  border-color: #cc0000;
+}

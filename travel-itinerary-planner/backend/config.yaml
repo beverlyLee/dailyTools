@@ -1,0 +1,15 @@
+server:
+  port: 8080
+  mode: debug
+
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: postgres
+  dbname: travel_planner
+  sslmode: disable
+
+log:
+  level: debug
+  format: console
