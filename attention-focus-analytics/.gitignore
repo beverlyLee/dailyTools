@@ -1,0 +1,28 @@
+# 前端依赖（必加，最占文件数）
+node_modules/
+.pnp/
+.pnp.js
+
+# Python 虚拟环境
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+
+# Git 仓库
+.git/
+
+# 构建产物
+dist/
+build/
+.next/
+.nuxt/
+output/
+
+# 编辑器/系统文件
+.idea/
+.vscode/
+.DS_Store
+*.log
