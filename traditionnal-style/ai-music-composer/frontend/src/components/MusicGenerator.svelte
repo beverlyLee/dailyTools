@@ -23,11 +23,15 @@
     '宫廷+典雅'
   ]
 
-  $: combinedRatio = folkRatio + modernRatio
-  $: if (combinedRatio > 1) {
-    folkRatio = folkRatio / combinedRatio
-    modernRatio = modernRatio / combinedRatio
+  function normalizeRatios() {
+    let combined = folkRatio + modernRatio
+    if (combined > 1) {
+      folkRatio = folkRatio / combined
+      modernRatio = modernRatio / combined
+    }
   }
+
+  $: normalizeRatios()
 
   function applyPreset(preset) {
     keywords = preset
