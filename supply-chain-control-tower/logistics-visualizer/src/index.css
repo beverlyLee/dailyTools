@@ -1,0 +1,193 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: #f0f2f5;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.layout-container {
+  min-height: 100vh;
+}
+
+.layout-header {
+  background: #001529;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.layout-header .logo {
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.layout-content {
+  padding: 24px;
+  background: #f0f2f5;
+}
+
+.topology-container {
+  width: 100%;
+  height: 600px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  background: #fff;
+  position: relative;
+}
+
+.topology-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot.healthy {
+  background-color: #52c41a;
+}
+
+.status-dot.degraded {
+  background-color: #faad14;
+}
+
+.status-dot.error {
+  background-color: #ff4d4f;
+}
+
+.status-dot.unknown {
+  background-color: #bfbfbf;
+}
+
+.alerts-panel {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.alert-item {
+  margin-bottom: 12px;
+  border-left: 4px solid;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 4px;
+}
+
+.alert-item.high {
+  border-left-color: #ff4d4f;
+}
+
+.alert-item.medium {
+  border-left-color: #faad14;
+}
+
+.alert-item.low {
+  border-left-color: #1890ff;
+}
+
+.order-progress {
+  width: 100%;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.order-progress-bar {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.flow-animation {
+  position: absolute;
+  pointer-events: none;
+}
+
+.stats-card {
+  text-align: center;
+  padding: 20px;
+}
+
+.stats-card .stat-value {
+  font-size: 28px;
+  font-weight: bold;
+  color: #1890ff;
+}
+
+.stats-card .stat-label {
+  font-size: 14px;
+  color: #666;
+  margin-top: 8px;
+}
+
+.carrier-detail-modal .ant-modal-body {
+  padding: 0;
+}
+
+.carrier-info {
+  padding: 24px;
+}
+
+.carrier-performance {
+  padding: 0 24px 24px;
+}
+
+.inventory-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inventory-bar {
+  flex: 1;
+  height: 20px;
+  background: #f0f0f0;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.inventory-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.inventory-fill.normal {
+  background: #52c41a;
+}
+
+.inventory-fill.low {
+  background: #faad14;
+}
+
+.inventory-fill.out_of_stock {
+  background: #ff4d4f;
+}
+
+.inventory-fill.overstock {
+  background: #1890ff;
+}

@@ -1,0 +1,26 @@
+{
+  "name": "local-fulltext-search",
+  "version": "0.1.0",
+  "description": "本地全文搜索引擎库 - TypeScript 宿主",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "node --experimental-wasm-modules test/index.test.js"
+  },
+  "keywords": [
+    "fulltext",
+    "search",
+    "rust",
+    "wasm"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "fulltext_search_core": "file:../core/pkg"
+  }
+}

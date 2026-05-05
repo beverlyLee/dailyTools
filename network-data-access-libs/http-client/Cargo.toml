@@ -1,0 +1,33 @@
+[package]
+name = "http_client"
+version = "0.1.0"
+edition = "2021"
+authors = ["Developer"]
+description = "A memory-safe HTTP client library with async support, connection pooling, interceptors, and type safety"
+license = "MIT"
+
+[dependencies]
+reqwest = { version = "0.11", features = ["json", "rustls-tls-native-roots"] }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_urlencoded = "0.7"
+url = "2.2"
+thiserror = "1.0"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+async-trait = "0.1"
+base64 = "0.21"
+
+# FFI dependencies
+libc = "0.2"
+cbindgen = "0.26"
+
+# WASM dependencies (optional feature)
+[features]
+default = []
+wasm = ["reqwest/wasm-bindgen"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "http_client"

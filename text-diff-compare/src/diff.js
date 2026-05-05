@@ -169,6 +169,135 @@ function computeLineDiff(lines1, lines2) {
   return result;
 }
 
+function getDetailedLineDiff(text1, text2) {
+  const lines1 = text1.split('\n');
+  const lines2 = text2.split('\n');
+  const lineDiffs = computeLineDiff(lines1, lines2);
+  
+  const result = {
+    blocks: [],
+    leftLineCount: lines1.length,
+    rightLineCount: lines2.length,
+    insertions: 0,
+    deletions: 0,
+    modifications: 0
+  };
+  
+  let leftLine = 0;
+  let rightLine = 0;
+  
+  for (let i = 0; i < lineDiffs.length; i++) {
+    const diff = lineDiffs[i];
+    const block = {
+      type: diff.type,
+      leftLines: [],
+      rightLines: [],
+      leftStartLine: leftLine,
+      rightStartLine: rightLine
+    };
+    
+    if (diff.type === 'equal') {
+      for (const line of diff.lines) {
+        block.leftLines.push({ text: line, lineNumber: leftLine, type: 'equal' });
+        block.rightLines.push({ text: line, lineNumber: rightLine, type: 'equal' });
+        leftLine++;
+        rightLine++;
+      }
+    } else if (diff.type === 'delete') {
+      const nextDiff = lineDiffs[i + 1];
+      if (nextDiff && nextDiff.type === 'insert') {
+        block.type = 'modify';
+        for (const line of diff.lines) {
+          block.leftLines.push({ text: line, lineNumber: leftLine, type: 'delete' });
+          leftLine++;
+          result.deletions++;
+        }
+        for (const line of nextDiff.lines) {
+          block.rightLines.push({ text: line, lineNumber: rightLine, type: 'insert' });
+          rightLine++;
+          result.insertions++;
+        }
+        result.modifications++;
+        i++;
+      } else {
+        for (const line of diff.lines) {
+          block.leftLines.push({ text: line, lineNumber: leftLine, type: 'delete' });
+          leftLine++;
+          result.deletions++;
+        }
+      }
+    } else if (diff.type === 'insert') {
+      for (const line of diff.lines) {
+        block.rightLines.push({ text: line, lineNumber: rightLine, type: 'insert' });
+        rightLine++;
+        result.insertions++;
+      }
+    }
+    
+    if (block.leftLines.length > 0 || block.rightLines.length > 0) {
+      result.blocks.push(block);
+    }
+  }
+  
+  return result;
+}
+
+function mergeSingleChange(direction, blockIndex, leftText, rightText) {
+  const detailedDiff = getDetailedLineDiff(leftText, rightText);
+  const block = detailedDiff.blocks[blockIndex];
+  
+  if (!block) return { leftText, rightText, changed: false };
+  
+  const leftLines = leftText.split('\n');
+  const rightLines = rightText.split('\n');
+  
+  let changed = false;
+  
+  if (direction === 'right') {
+    if (block.type === 'delete' || block.type === 'modify') {
+      const deleteStart = block.leftStartLine;
+      const deleteCount = block.leftLines.length;
+      leftLines.splice(deleteStart, deleteCount);
+      changed = true;
+    }
+    if (block.type === 'insert' || block.type === 'modify') {
+      const insertStart = block.leftStartLine;
+      const insertLines = block.rightLines.map(l => l.text);
+      leftLines.splice(insertStart, 0, ...insertLines);
+      changed = true;
+    }
+  } else if (direction === 'left') {
+    if (block.type === 'insert' || block.type === 'modify') {
+      const deleteStart = block.rightStartLine;
+      const deleteCount = block.rightLines.length;
+      rightLines.splice(deleteStart, deleteCount);
+      changed = true;
+    }
+    if (block.type === 'delete' || block.type === 'modify') {
+      const insertStart = block.rightStartLine;
+      const insertLines = block.leftLines.map(l => l.text);
+      rightLines.splice(insertStart, 0, ...insertLines);
+      changed = true;
+    }
+  }
+  
+  return {
+    leftText: leftLines.join('\n'),
+    rightText: rightLines.join('\n'),
+    changed
+  };
+}
+
+function getCharDiffForLine(oldLine, newLine) {
+  const diffs = dmp.diff_main(oldLine, newLine);
+  dmp.diff_cleanupSemantic(diffs);
+  
+  return diffs.map(diff => ({
+    type: diff[0] === 0 ? 'equal' : diff[0] === -1 ? 'delete' : 'insert',
+    text: diff[1]
+  }));
+}
+
 function mergeChange(fromText, toText, changeType, lineNumber) {
   const fromLines = fromText.split('\n');
   const toLines = toText.split('\n');
@@ -191,6 +320,9 @@ function mergeChange(fromText, toText, changeType, lineNumber) {
 module.exports = {
   compareTexts,
   getLineBasedDiff,
+  getDetailedLineDiff,
   computeLineDiff,
-  mergeChange
+  mergeChange,
+  mergeSingleChange,
+  getCharDiffForLine
 };

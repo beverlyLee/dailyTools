@@ -1,0 +1,22 @@
+[package]
+name = "quantum-sim-lab"
+version = "0.1.0"
+description = "Quantum Computing Simulation Laboratory"
+authors = ["Quantum Sim Lab Team"]
+license = "MIT"
+edition = "2021"
+rust-version = "1.70"
+
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
+[dependencies]
+tauri = { version = "1.5", features = ["shell-open"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+quantum-simulator = { path = "../crates/quantum-simulator" }
+num-complex = { version = "0.4", features = ["std"] }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

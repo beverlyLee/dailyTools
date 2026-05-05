@@ -1,0 +1,6 @@
+{
+  "database": {
+    "filename": "./database.db"
+  },
+  "migrationsDir": "./migrations"
+}

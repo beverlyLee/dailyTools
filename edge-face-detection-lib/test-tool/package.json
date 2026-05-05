@@ -1,0 +1,23 @@
+{
+  "name": "@edge-face-detection/test-tool",
+  "version": "1.0.0",
+  "description": "Test tool for edge face detection library",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "face-detection",
+    "test-tool"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "@edge-face-detection/core": "file:../core"
+  }
+}

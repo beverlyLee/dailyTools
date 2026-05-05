@@ -31,12 +31,12 @@ export const imageService = {
   },
 
   getModelImages: async () => {
-    const response = await api.get('/api/models');
+    const response = await api.get('/api/images/models');
     return response.data;
   },
 
   getFashionStyles: async () => {
-    const response = await api.get('/api/fashions');
+    const response = await api.get('/api/images/fashions');
     return response.data;
   },
 };

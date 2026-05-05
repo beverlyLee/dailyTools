@@ -3,7 +3,7 @@ import { Row, Col, Card, Form, Input, Select, Switch, Slider, Button, message, D
 import { 
   SettingOutlined, 
   SaveOutlined, 
-  ResetOutlined,
+  UndoOutlined,
   CloudOutlined,
   ApiOutlined,
   PictureOutlined,
@@ -12,7 +12,6 @@ import {
 } from '@ant-design/icons';
 import './SettingsPage.css';
 
-const { Option } = Select;
 const { TextArea } = Input;
 
 const SettingsPage = () => {
@@ -153,7 +152,12 @@ const SettingsPage = () => {
                 </span>
               }
               className="page-card settings-card"
-              headStyle={{ background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', borderBottom: '1px solid #DEB887' }}
+              styles={{
+                header: { 
+                  background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', 
+                  borderBottom: '1px solid #DEB887' 
+                }
+              }}
             >
               <Row gutter={16}>
                 <Col span={16}>
@@ -200,13 +204,7 @@ const SettingsPage = () => {
                     name="model_provider"
                     label="模型提供商"
                   >
-                    <Select>
-                      {modelProviderOptions.map(opt => (
-                        <Option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </Option>
-                      ))}
-                    </Select>
+                    <Select options={modelProviderOptions} />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -214,13 +212,7 @@ const SettingsPage = () => {
                     name="controlnet_model"
                     label="ControlNet 模型"
                   >
-                    <Select>
-                      {controlnetModels.map(opt => (
-                        <Option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </Option>
-                      ))}
-                    </Select>
+                    <Select options={controlnetModels} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -264,7 +256,12 @@ const SettingsPage = () => {
                 </span>
               }
               className="page-card settings-card"
-              headStyle={{ background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', borderBottom: '1px solid #DEB887' }}
+              styles={{
+                header: { 
+                  background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', 
+                  borderBottom: '1px solid #DEB887' 
+                }
+              }}
             >
               <Row gutter={16}>
                 <Col span={12}>
@@ -272,13 +269,7 @@ const SettingsPage = () => {
                     name="output_resolution"
                     label="输出分辨率"
                   >
-                    <Select>
-                      {resolutionOptions.map(opt => (
-                        <Option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </Option>
-                      ))}
-                    </Select>
+                    <Select options={resolutionOptions} />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -286,13 +277,7 @@ const SettingsPage = () => {
                     name="output_format"
                     label="输出格式"
                   >
-                    <Select>
-                      {formatOptions.map(opt => (
-                        <Option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </Option>
-                      ))}
-                    </Select>
+                    <Select options={formatOptions} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -352,7 +337,12 @@ const SettingsPage = () => {
                 </span>
               }
               className="page-card settings-card"
-              headStyle={{ background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', borderBottom: '1px solid #DEB887' }}
+              styles={{
+                header: { 
+                  background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', 
+                  borderBottom: '1px solid #DEB887' 
+                }
+              }}
             >
               <Row gutter={16}>
                 <Col span={8}>
@@ -405,7 +395,12 @@ const SettingsPage = () => {
                 </span>
               }
               className="page-card settings-card"
-              headStyle={{ background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', borderBottom: '1px solid #DEB887' }}
+              styles={{
+                header: { 
+                  background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', 
+                  borderBottom: '1px solid #DEB887' 
+                }
+              }}
             >
               <Row gutter={16}>
                 <Col span={8}>
@@ -439,13 +434,7 @@ const SettingsPage = () => {
                     name="log_level"
                     label="日志级别"
                   >
-                    <Select>
-                      {logLevelOptions.map(opt => (
-                        <Option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </Option>
-                      ))}
-                    </Select>
+                    <Select options={logLevelOptions} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -467,7 +456,7 @@ const SettingsPage = () => {
                 </Button>
                 <Button 
                   onClick={handleReset}
-                  icon={<ResetOutlined />}
+                  icon={<UndoOutlined />}
                   size="large"
                 >
                   重置默认

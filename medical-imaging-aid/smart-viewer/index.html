@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智能阅片工作站</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #1a1a2e;
+      color: #e0e0e0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .app-container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 280px;
+      background-color: #16213e;
+      border-right: 1px solid #0f3460;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-section {
+      padding: 15px;
+      border-bottom: 1px solid #0f3460;
+    }
+
+    .sidebar-section:last-child {
+      border-bottom: none;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .sidebar-title {
+      font-size: 0.85rem;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .tool-group {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .tool-btn {
+      background-color: #1a1a2e;
+      border: 1px solid #374151;
+      border-radius: 8px;
+      padding: 12px 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: #e0e0e0;
+      font-size: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tool-btn:hover {
+      background-color: #0f3460;
+      border-color: #4f46e5;
+    }
+
+    .tool-btn.active {
+      background-color: #4f46e5;
+      border-color: #4f46e5;
+      color: white;
+    }
+
+    .tool-icon {
+      font-size: 1.5rem;
+    }
+
+    .patient-info {
+      background-color: #1a1a2e;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .patient-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .patient-details {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      line-height: 1.6;
+    }
+
+    .study-info {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #374151;
+    }
+
+    .study-info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      margin-bottom: 4px;
+    }
+
+    .study-info-label {
+      color: #6b7280;
+    }
+
+    .study-info-value {
+      color: #e0e0e0;
+    }
+
+    .image-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .image-item {
+      background-color: #1a1a2e;
+      border: 1px solid #374151;
+      border-radius: 6px;
+      padding: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.85rem;
+    }
+
+    .image-item:hover {
+      border-color: #4f46e5;
+      background-color: #0f3460;
+    }
+
+    .image-item.active {
+      border-color: #4f46e5;
+      background-color: rgba(79, 70, 229, 0.2);
+    }
+
+    .image-index {
+      font-weight: 600;
+      color: #4f46e5;
+      margin-right: 6px;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #0a0a0a;
+      position: relative;
+    }
+
+    .toolbar {
+      height: 50px;
+      background-color: #16213e;
+      border-bottom: 1px solid #0f3460;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 15px;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toolbar-group:not(:last-child) {
+      border-right: 1px solid #374151;
+      padding-right: 15px;
+    }
+
+    .toolbar-btn {
+      background-color: transparent;
+      border: 1px solid #374151;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: #e0e0e0;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toolbar-btn:hover {
+      background-color: #0f3460;
+      border-color: #4f46e5;
+    }
+
+    .toolbar-btn.primary {
+      background-color: #4f46e5;
+      border-color: #4f46e5;
+    }
+
+    .toolbar-btn.primary:hover {
+      background-color: #4338ca;
+      border-color: #4338ca;
+    }
+
+    .window-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .window-control {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .window-control-label {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .window-control-value {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .window-control input {
+      width: 80px;
+      background-color: #1a1a2e;
+      border: 1px solid #374151;
+      border-radius: 4px;
+      padding: 4px 8px;
+      color: #e0e0e0;
+      font-size: 0.85rem;
+    }
+
+    .preset-select {
+      background-color: #1a1a2e;
+      border: 1px solid #374151;
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: #e0e0e0;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .viewer-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background-color: #000;
+      overflow: hidden;
+    }
+
+    .dicom-viewer {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .cornerstone-canvas {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #6b7280;
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+    }
+
+    .empty-state-title {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #9ca3af;
+    }
+
+    .empty-state-text {
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .overlay-info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      pointer-events: none;
+    }
+
+    .overlay-info-row {
+      display: flex;
+      gap: 15px;
+    }
+
+    .overlay-info-label {
+      color: #6b7280;
+    }
+
+    .overlay-info-value {
+      color: #e0e0e0;
+    }
+
+    .ai-highlight-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .status-bar {
+      height: 30px;
+      background-color: #16213e;
+      border-top: 1px solid #0f3460;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+
+    .status-bar-left,
+    .status-bar-right {
+      display: flex;
+      gap: 20px;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ai-panel {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: rgba(22, 33, 62, 0.95);
+      border-radius: 12px;
+      padding: 16px;
+      min-width: 280px;
+      border: 1px solid #0f3460;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      display: none;
+    }
+
+    .ai-panel.visible {
+      display: block;
+    }
+
+    .ai-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .ai-panel-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #4ade80;
+    }
+
+    .ai-panel-close {
+      background: none;
+      border: none;
+      color: #6b7280;
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 0;
+    }
+
+    .ai-detection-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .ai-detection-item {
+      background-color: rgba(26, 26, 46, 0.8);
+      border-radius: 8px;
+      padding: 12px;
+      border-left: 4px solid #ef4444;
+    }
+
+    .ai-detection-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .ai-detection-type {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .ai-detection-confidence {
+      font-size: 0.8rem;
+      padding: 2px 8px;
+      background-color: rgba(74, 222, 128, 0.2);
+      color: #4ade80;
+      border-radius: 4px;
+    }
+
+    .ai-detection-desc {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      line-height: 1.5;
+    }
+
+    .slice-navigator {
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background-color: rgba(22, 33, 62, 0.9);
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid #0f3460;
+    }
+
+    .slice-btn {
+      background-color: #1a1a2e;
+      border: 1px solid #374151;
+      border-radius: 4px;
+      padding: 6px 12px;
+      cursor: pointer;
+      color: #e0e0e0;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    .slice-btn:hover {
+      background-color: #0f3460;
+      border-color: #4f46e5;
+    }
+
+    .slice-info {
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+
+    .slice-slider {
+      width: 200px;
+      height: 4px;
+      background-color: #374151;
+      border-radius: 2px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .slice-slider-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background-color: #4f46e5;
+      border-radius: 2px;
+    }
+
+    .measurements-panel {
+      position: absolute;
+      bottom: 50px;
+      right: 20px;
+      background-color: rgba(22, 33, 62, 0.95);
+      border-radius: 12px;
+      padding: 16px;
+      min-width: 250px;
+      border: 1px solid #0f3460;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      display: none;
+    }
+
+    .measurements-panel.visible {
+      display: block;
+    }
+
+    .measurements-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .measurements-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .measurements-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .measurements-action-btn {
+      background: none;
+      border: 1px solid #374151;
+      color: #9ca3af;
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .measurements-action-btn:hover {
+      background-color: #ef4444;
+      border-color: #ef4444;
+      color: white;
+    }
+
+    .measurements-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .measurement-item {
+      background-color: rgba(26, 26, 46, 0.8);
+      border-radius: 6px;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .measurement-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .measurement-type {
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+
+    .measurement-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .measurement-delete {
+      background: none;
+      border: none;
+      color: #6b7280;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0;
+    }
+
+    .measurement-delete:hover {
+      color: #ef4444;
+    }
+
+    .loading-spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      color: #9ca3af;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid #374151;
+      border-top-color: #4f46e5;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(79, 70, 229, 0.95);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      display: none;
+    }
+
+    .toast.visible {
+      display: block;
+      animation: fadeInUp 0.3s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">患者信息</div>
+        <div class="patient-info" id="patientInfo">
+          <div class="patient-name">未加载患者</div>
+          <div class="patient-details">
+            <div>请打开 DICOM 文件或文件夹</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">阅片工具</div>
+        <div class="tool-group">
+          <button class="tool-btn active" id="toolPan">
+            <span class="tool-icon">🖐️</span>
+            <span>平移/缩放</span>
+          </button>
+          <button class="tool-btn" id="toolWindow">
+            <span class="tool-icon">⚡</span>
+            <span>窗宽窗位</span>
+          </button>
+          <button class="tool-btn" id="toolLength">
+            <span class="tool-icon">📏</span>
+            <span>长度测量</span>
+          </button>
+          <button class="tool-btn" id="toolAngle">
+            <span class="tool-icon">📐</span>
+            <span>角度测量</span>
+          </button>
+          <button class="tool-btn" id="toolRectangle">
+            <span class="tool-icon">⬜</span>
+            <span>矩形 ROI</span>
+          </button>
+          <button class="tool-btn" id="toolEllipse">
+            <span class="tool-icon">⭕</span>
+            <span>椭圆 ROI</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">影像序列</div>
+        <div class="image-list" id="imageList">
+          <div class="image-item active">未加载影像</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <button class="toolbar-btn" id="btnOpenFile">
+            <span>📂</span>
+            <span>打开文件</span>
+          </button>
+          <button class="toolbar-btn" id="btnOpenFolder">
+            <span>📁</span>
+            <span>打开文件夹</span>
+          </button>
+        </div>
+
+        <div class="toolbar-group">
+          <select class="preset-select" id="windowPreset">
+            <option value="">窗宽窗位预设</option>
+            <option value="chest">胸部 (WW:1500, WL:-500)</option>
+            <option value="abdomen">腹部 (WW:400, WL:40)</option>
+            <option value="bone">骨窗 (WW:2000, WL:400)</option>
+            <option value="brain">脑窗 (WW:80, WL:40)</option>
+          </select>
+          <div class="window-controls">
+            <div class="window-control">
+              <span class="window-control-label">窗宽 (WW)</span>
+              <div class="window-control-value">
+                <input type="number" id="windowWidth" value="400">
+              </div>
+            </div>
+            <div class="window-control">
+              <span class="window-control-label">窗位 (WL)</span>
+              <div class="window-control-value">
+                <input type="number" id="windowLevel" value="40">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="toolbar-group">
+          <button class="toolbar-btn" id="btnReset">
+            <span>🔄</span>
+            <span>重置视图</span>
+          </button>
+          <button class="toolbar-btn" id="btnScreenshot">
+            <span>📷</span>
+            <span>截图</span>
+          </button>
+          <button class="toolbar-btn primary" id="btnAIDetect">
+            <span>🤖</span>
+            <span>AI 病灶检测</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="viewer-area" id="viewerArea">
+        <div class="dicom-viewer" id="dicomViewer">
+          <div class="empty-state" id="emptyState">
+            <div class="empty-state-icon">🩻</div>
+            <div class="empty-state-title">未加载影像</div>
+            <div class="empty-state-text">
+              点击工具栏的"打开文件"或"打开文件夹"<br>
+              选择 DICOM 影像文件开始阅片
+            </div>
+          </div>
+          <canvas class="cornerstone-canvas" id="cornerstoneCanvas"></canvas>
+          <div class="overlay-info" id="overlayInfo" style="display: none;">
+            <div class="overlay-info-row">
+              <span class="overlay-info-label">患者:</span>
+              <span class="overlay-info-value" id="infoPatient">-</span>
+            </div>
+            <div class="overlay-info-row">
+              <span class="overlay-info-label">检查:</span>
+              <span class="overlay-info-value" id="infoStudy">-</span>
+            </div>
+            <div class="overlay-info-row">
+              <span class="overlay-info-label">序列:</span>
+              <span class="overlay-info-value" id="infoSeries">-</span>
+            </div>
+          </div>
+          <div class="ai-highlight-overlay" id="aiHighlightOverlay"></div>
+        </div>
+
+        <div class="slice-navigator" id="sliceNavigator" style="display: none;">
+          <button class="slice-btn" id="btnPrevSlice">◀</button>
+          <div class="slice-slider" id="sliceSlider">
+            <div class="slice-slider-progress" id="sliceSliderProgress" style="width: 0%"></div>
+          </div>
+          <div class="slice-info">
+            <span id="currentSlice">1</span> / <span id="totalSlices">1</span>
+          </div>
+          <button class="slice-btn" id="btnNextSlice">▶</button>
+        </div>
+
+        <div class="ai-panel" id="aiPanel">
+          <div class="ai-panel-header">
+            <span class="ai-panel-title">🤖 AI 病灶检测结果</span>
+            <button class="ai-panel-close" id="btnCloseAIPanel">×</button>
+          </div>
+          <div class="ai-detection-list" id="aiDetectionList">
+          </div>
+        </div>
+
+        <div class="measurements-panel" id="measurementsPanel">
+          <div class="measurements-header">
+            <span class="measurements-title">📏 测量结果</span>
+            <div class="measurements-actions">
+              <button class="measurements-action-btn" id="btnClearMeasurements">清除全部</button>
+            </div>
+          </div>
+          <div class="measurements-list" id="measurementsList">
+          </div>
+        </div>
+
+        <div class="loading-spinner" id="loadingSpinner" style="display: none;">
+          <div class="spinner"></div>
+          <span>加载中...</span>
+        </div>
+      </div>
+
+      <div class="status-bar">
+        <div class="status-bar-left">
+          <div class="status-item">
+            <span>🖼️</span>
+            <span id="statusImageSize">-</span>
+          </div>
+          <div class="status-item">
+            <span>🔍</span>
+            <span id="statusZoom">缩放: 100%</span>
+          </div>
+          <div class="status-item">
+            <span>🎨</span>
+            <span id="statusWindow">WW: 400 WL: 40</span>
+          </div>
+        </div>
+        <div class="status-bar-right">
+          <div class="status-item">
+            <span id="statusTool">当前工具: 平移/缩放</span>
+          </div>
+          <div class="status-item">
+            <span id="statusSlice">层: 1/1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="./src/renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+.canvas-wrapper {
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-dragger {
+  width: 100%;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.canvas-container-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.fabric-canvas {
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* 关键点选择状态 */
+.fabric-canvas .keypoint-selected {
+  fill: #ff4d4f !important;
+  stroke: #ff7875 !important;
+}
+
+/* 加载动画 */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  border-radius: 8px;
+}
+
+/* 历史记录卡片 */
+.ant-card-hoverable:hover {
+  border-color: #1890ff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+}
+
+/* 风格选择下拉框 */
+.ant-select-dropdown {
+  max-height: 300px;
+}
+
+/* 滑块样式优化 */
+.ant-slider-track {
+  background: linear-gradient(90deg, #1890ff, #40a9ff);
+}
+
+.ant-slider:hover .ant-slider-track {
+  background: linear-gradient(90deg, #096dd9, #1890ff);
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .canvas-wrapper {
+    min-height: 300px;
+  }
+  
+  .upload-dragger {
+    min-height: 250px;
+  }
+  
+  .fabric-canvas {
+    max-width: 100%;
+    height: auto !important;
+  }
+}

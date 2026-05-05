@@ -1,0 +1,16 @@
+fastapi==0.109.0
+uvicorn==0.27.0
+python-dotenv==1.0.0
+sqlalchemy==2.0.25
+pydantic==2.5.3
+pydantic-settings==2.1.0
+python-multipart==0.0.6
+aiofiles==23.2.1
+
+transformers==4.36.2
+torch==2.1.2
+
+jieba==0.42.1
+
+numpy==1.26.3
+regex==2023.12.25

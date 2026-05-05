@@ -345,3 +345,59 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #555555;
 }
+
+.merge-widget {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  background-color: #252526;
+  border-radius: 4px;
+  z-index: 100;
+}
+
+.merge-btn {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.merge-btn-right {
+  background-color: #4ecdc4;
+  color: #1e1e1e;
+}
+
+.merge-btn-right:hover {
+  background-color: #45b7aa;
+}
+
+.merge-btn-left {
+  background-color: #ff6b6b;
+  color: #1e1e1e;
+}
+
+.merge-btn-left:hover {
+  background-color: #e55a5a;
+}
+
+.modification-decoration {
+  background-color: rgba(255, 196, 0, 0.2);
+  border-left: 3px solid #ffc400;
+}
+
+.line-number-modification {
+  color: #ffc400;
+  font-weight: bold;
+}
+
+.gutter-modification {
+  background-color: rgba(255, 196, 0, 0.3);
+}

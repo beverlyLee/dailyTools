@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: governance-backend
+    ports:
+      - "8080:8080"
+      - "18000:18000"
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./backend/config.yaml:/app/config.yaml
+    networks:
+      - governance-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: governance-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - governance-network
+    restart: unless-stopped
+
+networks:
+  governance-network:
+    driver: bridge

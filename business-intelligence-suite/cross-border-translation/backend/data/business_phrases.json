@@ -1,0 +1,80 @@
+{
+  "greetings": [
+    {
+      "id": 1,
+      "category": "greetings",
+      "source_language": "zh",
+      "target_language": "en",
+      "source_text": "您好，很高兴认识您",
+      "translated_text": "Hello, nice to meet you",
+      "is_favorite": true
+    },
+    {
+      "id": 2,
+      "category": "greetings",
+      "source_language": "zh",
+      "target_language": "ja",
+      "source_text": "您好，很高兴认识您",
+      "translated_text": "こんにちは、お会いできて光栄です",
+      "is_favorite": true
+    },
+    {
+      "id": 3,
+      "category": "greetings",
+      "source_language": "zh",
+      "target_language": "ko",
+      "source_text": "您好，很高兴认识您",
+      "translated_text": "안녕하세요, 만나서 반갑습니다",
+      "is_favorite": true
+    }
+  ],
+  "business": [
+    {
+      "id": 4,
+      "category": "business",
+      "source_language": "zh",
+      "target_language": "en",
+      "source_text": "我们来讨论一下合作事宜",
+      "translated_text": "Let's discuss the cooperation",
+      "is_favorite": false
+    },
+    {
+      "id": 5,
+      "category": "business",
+      "source_language": "zh",
+      "target_language": "en",
+      "source_text": "请查看我们的报价单",
+      "translated_text": "Please review our quotation",
+      "is_favorite": true
+    },
+    {
+      "id": 6,
+      "category": "business",
+      "source_language": "zh",
+      "target_language": "ja",
+      "source_text": "契約書を確認してください",
+      "translated_text": "请确认合同",
+      "is_favorite": false
+    }
+  ],
+  "trade": [
+    {
+      "id": 7,
+      "category": "trade",
+      "source_language": "zh",
+      "target_language": "en",
+      "source_text": "付款方式是信用证",
+      "translated_text": "Payment method is letter of credit",
+      "is_favorite": true
+    },
+    {
+      "id": 8,
+      "category": "trade",
+      "source_language": "zh",
+      "target_language": "en",
+      "source_text": "交货期是下个月",
+      "translated_text": "Delivery is next month",
+      "is_favorite": false
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+import { Matrix2D } from './Matrix2D';
+import { Point, TransformData } from '../types';
+
+export declare class Transform {
+    private _x;
+    private _y;
+    private _rotation;
+    private _scaleX;
+    private _scaleY;
+    private _skewX;
+    private _skewY;
+    private _matrix;
+    private _inverseMatrix;
+    private _matrixDirty;
+    private _inverseDirty;
+    constructor(data?: Partial<TransformData>);
+    get x(): number;
+    set x(value: number);
+    get y(): number;
+    set y(value: number);
+    get rotation(): number;
+    set rotation(value: number);
+    get scaleX(): number;
+    set scaleX(value: number);
+    get scaleY(): number;
+    set scaleY(value: number);
+    get skewX(): number;
+    set skewX(value: number);
+    get skewY(): number;
+    set skewY(value: number);
+    private _markDirty;
+    private _updateMatrix;
+    private _updateInverseMatrix;
+    get matrix(): Matrix2D;
+    get inverseMatrix(): Matrix2D;
+    translate(tx: number, ty: number): this;
+    rotate(angle: number): this;
+    scale(sx: number, sy: number): this;
+    set(x?: number, y?: number, rotation?: number, scaleX?: number, scaleY?: number, skewX?: number, skewY?: number): this;
+    localToGlobal(point: Point): Point;
+    globalToLocal(point: Point): Point;
+    applyToContext(ctx: CanvasRenderingContext2D): void;
+    toData(): TransformData;
+    fromData(data: TransformData): this;
+    clone(): Transform;
+    copyFrom(other: Transform): this;
+    static fromData(data: TransformData): Transform;
+}

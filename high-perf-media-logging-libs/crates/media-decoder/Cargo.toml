@@ -1,0 +1,24 @@
+[package]
+name = "media-decoder"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+tokio.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+lockfree = { path = "../lockfree" }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+# Windows 平台使用 DirectX 相关 API
+
+[target.'cfg(target_os = "linux")'.dependencies]
+# Linux 平台使用 VA-API 等相关 API
+
+[target.'cfg(target_os = "macos")'.dependencies]
+# macOS 平台使用 VideoToolbox 相关 API
+
+[dev-dependencies]
+criterion = "0.5"

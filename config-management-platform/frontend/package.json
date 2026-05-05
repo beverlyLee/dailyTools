@@ -1,0 +1,27 @@
+{
+  "name": "config-management-platform",
+  "version": "1.0.0",
+  "description": "配置管理与差异对比平台",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "config",
+    "diff",
+    "compare",
+    "electron",
+    "monaco"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0"
+  },
+  "dependencies": {
+    "diff-match-patch": "^1.0.5",
+    "sql.js": "^1.10.2",
+    "monaco-editor": "^0.45.0"
+  }
+}

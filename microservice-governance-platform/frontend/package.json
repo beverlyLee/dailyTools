@@ -1,0 +1,27 @@
+{
+  "name": "microservice-governance-frontend",
+  "version": "1.0.0",
+  "description": "微服务治理平台前端",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .js,.vue --fix"
+  },
+  "dependencies": {
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.5",
+    "ant-design-vue": "^4.0.3",
+    "axios": "^1.5.1",
+    "dayjs": "^1.11.10",
+    "echarts": "^5.4.3",
+    "@ant-design/icons-vue": "^7.0.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.4.0",
+    "vite": "^4.5.0",
+    "sass": "^1.69.5",
+    "eslint": "^8.53.0",
+    "eslint-plugin-vue": "^9.18.1"
+  }
+}

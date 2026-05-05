@@ -1,0 +1,26 @@
+[package]
+name = "network-protocol-suite"
+version = "0.1.0"
+description = "网络协议分析套件 - 高性能桌面应用"
+authors = ["Network Protocol Team"]
+license = "MIT"
+edition = "2021"
+rust-version = "1.70"
+
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
+[dependencies]
+tauri = { version = "1.6", features = ["shell-all", "http-all", "notification-all"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.35", features = ["full"] }
+thiserror = "1.0"
+anyhow = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+hex = "0.4"
+log = "0.4"
+env_logger = "0.10"
+
+packet-sniffer = { path = "../packet-sniffer" }
+session-analyzer = { path = "../session-analyzer" }

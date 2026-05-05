@@ -1,0 +1,140 @@
+@import '~antd/dist/reset.css';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+}
+
+.status-online {
+  color: #52c41a;
+}
+
+.status-warning {
+  color: #faad14;
+}
+
+.status-critical {
+  color: #ff4d4f;
+}
+
+.status-offline {
+  color: #bfbfbf;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.status-dot-online {
+  background-color: #52c41a;
+  box-shadow: 0 0 6px #52c41a;
+}
+
+.status-dot-warning {
+  background-color: #faad14;
+  box-shadow: 0 0 6px #faad14;
+}
+
+.status-dot-critical {
+  background-color: #ff4d4f;
+  box-shadow: 0 0 6px #ff4d4f;
+}
+
+.status-dot-offline {
+  background-color: #bfbfbf;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-card {
+  text-align: center;
+  padding: 16px;
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.metric-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.ssh-terminal {
+  background-color: #1a1a2e;
+  color: #00ff41;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  padding: 16px;
+  border-radius: 4px;
+  min-height: 300px;
+  overflow-y: auto;
+}
+
+.ssh-terminal-input {
+  background-color: transparent;
+  border: none;
+  color: #00ff41;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  outline: none;
+  width: 80%;
+}
+
+.three-container {
+  width: 100%;
+  height: 600px;
+  background-color: #0a0a1a;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.deployment-log {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  padding: 16px;
+  border-radius: 4px;
+  max-height: 400px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.deployment-log .log-info {
+  color: #4fc3f7;
+}
+
+.deployment-log .log-error {
+  color: #f44336;
+}
+
+.deployment-log .log-success {
+  color: #4caf50;
+}
+
+.deployment-log .log-warning {
+  color: #ff9800;
+}
+
+.node-map-container {
+  width: 100%;
+  height: 500px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #001529;
+}

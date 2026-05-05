@@ -1,0 +1,27 @@
+.state-evolution-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.evolution-svg {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.evolution-info {
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: rgba(100, 255, 218, 0.05);
+  border-radius: 6px;
+  border: 1px solid rgba(100, 255, 218, 0.1);
+}
+
+.evolution-info p {
+  font-size: 0.85rem;
+  color: #a0a0a0;
+}
+
+.evolution-info strong {
+  color: #64ffda;
+}

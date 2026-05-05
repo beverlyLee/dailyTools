@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>端侧交互工具集 - 示例</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .header p {
+      opacity: 0.9;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card h2 {
+      color: #667eea;
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+    }
+    
+    .canvas-container {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+      background: white;
+    }
+    
+    #editor-canvas {
+      display: block;
+      cursor: crosshair;
+    }
+    
+    .toolbar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .toolbar button {
+      padding: 0.5rem 1rem;
+      border: 1px solid #ddd;
+      background: #f5f5f5;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .toolbar button:hover {
+      background: #e0e0e0;
+    }
+    
+    .toolbar button.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+    
+    .status {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: #f0f9ff;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      color: #0c4a6e;
+    }
+    
+    .voice-controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .voice-controls button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    #init-wakeword {
+      background: #10b981;
+      color: white;
+    }
+    
+    #init-wakeword:hover {
+      background: #059669;
+    }
+    
+    #stop-wakeword {
+      background: #ef4444;
+      color: white;
+    }
+    
+    #stop-wakeword:hover {
+      background: #dc2626;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>端侧交互工具集</h1>
+    <p>Web矢量图形编辑内核 + 端侧语音唤醒词检测</p>
+  </div>
+  
+  <div class="container">
+    <div class="card">
+      <h2>矢量图形编辑器</h2>
+      <div class="toolbar">
+        <button id="tool-select" class="active">选择</button>
+        <button id="tool-rect">矩形</button>
+        <button id="tool-ellipse">椭圆</button>
+        <button id="tool-text">文本</button>
+        <button id="tool-clear">清空</button>
+        <button id="tool-save">保存</button>
+        <button id="tool-load">加载</button>
+      </div>
+      <div class="canvas-container">
+        <canvas id="editor-canvas" width="500" height="400"></canvas>
+      </div>
+      <div class="status">
+        状态：就绪 | 提示：选择工具后在画布上绘制
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>语音唤醒词检测</h2>
+      <p>点击下方按钮启动麦克风，尝试说"你好小明"来测试唤醒词检测。</p>
+      <div class="voice-controls">
+        <button id="init-wakeword">启动唤醒词检测</button>
+        <button id="stop-wakeword" disabled>停止检测</button>
+      </div>
+      <div class="status" id="voice-status">
+        状态：未启动
+      </div>
+    </div>
+  </div>
+  
+  <script type="module" src="/src/main.ts"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tools = ['select', 'rect', 'ellipse', 'text'];
+      const toolButtons = tools.map(id => document.getElementById(`tool-${id}`));
+      
+      toolButtons.forEach(button => {
+        button?.addEventListener('click', () => {
+          toolButtons.forEach(btn => btn?.classList.remove('active'));
+          button.classList.add('active');
+          
+          if ((window as any).editor) {
+            const toolName = button.id.replace('tool-', '');
+            (window as any).editor.setTool(toolName);
+          }
+        });
+      });
+      
+      const clearBtn = document.getElementById('tool-clear');
+      const saveBtn = document.getElementById('tool-save');
+      const loadBtn = document.getElementById('tool-load');
+      
+      clearBtn?.addEventListener('click', () => {
+        if ((window as any).editor) {
+          (window as any).editor.clear();
+        }
+      });
+      
+      saveBtn?.addEventListener('click', () => {
+        if ((window as any).editor) {
+          (window as any).editor.saveToStorage();
+          alert('画布已保存到本地存储');
+        }
+      });
+      
+      loadBtn?.addEventListener('click', () => {
+        if ((window as any).editor) {
+          (window as any).editor.loadFromStorage();
+          alert('画布已从本地存储加载');
+        }
+      });
+      
+      const stopBtn = document.getElementById('stop-wakeword');
+      stopBtn?.addEventListener('click', () => {
+        if ((window as any).detector) {
+          (window as any).detector.stop();
+          stopBtn.disabled = true;
+          document.getElementById('init-wakeword')!.disabled = false;
+          document.getElementById('voice-status')!.textContent = '状态：已停止';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

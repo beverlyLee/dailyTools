@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web 文档与图形处理内核</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #f5f5f5;
+    }
+    #app {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      background: #2c3e50;
+      color: white;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header h1 {
+      font-size: 18px;
+      font-weight: 500;
+    }
+    .tabs {
+      display: flex;
+      gap: 4px;
+    }
+    .tab {
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .tab:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .tab.active {
+      background: rgba(255,255,255,0.3);
+    }
+    .container {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    .sidebar {
+      width: 240px;
+      background: white;
+      border-right: 1px solid #e0e0e0;
+      padding: 16px;
+      overflow-y: auto;
+    }
+    .sidebar-section {
+      margin-bottom: 20px;
+    }
+    .sidebar-section h3 {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .tool-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 10px 12px;
+      background: none;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 6px;
+      transition: all 0.2s;
+      font-size: 14px;
+      text-align: left;
+    }
+    .tool-btn:hover {
+      background: #f5f5f5;
+      border-color: #bbb;
+    }
+    .tool-btn.active {
+      background: #e3f2fd;
+      border-color: #2196f3;
+      color: #1976d2;
+    }
+    .color-picker {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .color-option {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .color-option:hover {
+      transform: scale(1.1);
+    }
+    .color-option.active {
+      border-color: #333;
+    }
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #e0e0e0;
+      overflow: hidden;
+    }
+    .toolbar {
+      background: white;
+      padding: 8px 16px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .toolbar-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .toolbar-btn {
+      padding: 6px 12px;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .toolbar-btn:hover {
+      background: #e0e0e0;
+    }
+    .toolbar-btn.primary {
+      background: #2196f3;
+      color: white;
+      border-color: #2196f3;
+    }
+    .toolbar-btn.primary:hover {
+      background: #1976d2;
+    }
+    .canvas-container {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+    }
+    #pdf-canvas, #graphics-canvas {
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .file-input {
+      display: none;
+    }
+    .status-bar {
+      background: white;
+      padding: 8px 16px;
+      border-top: 1px solid #e0e0e0;
+      font-size: 12px;
+      color: #666;
+      display: flex;
+      justify-content: space-between;
+    }
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .slider-container label {
+      font-size: 13px;
+      color: #666;
+      min-width: 60px;
+    }
+    .slider-container input[type="range"] {
+      width: 100px;
+    }
+    .slider-container span {
+      font-size: 13px;
+      min-width: 30px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="header">
+      <h1>Web 文档与图形处理内核</h1>
+      <div class="tabs">
+        <button class="tab active" data-tab="pdf">PDF 引擎</button>
+        <button class="tab" data-tab="graphics">图形编辑</button>
+      </div>
+    </div>
+    <div class="container">
+      <div class="sidebar" id="pdf-sidebar">
+        <div class="sidebar-section">
+          <h3>标注工具</h3>
+          <button class="tool-btn active" data-tool="select">
+            <span>🖱️</span> 选择工具
+          </button>
+          <button class="tool-btn" data-tool="highlight">
+            <span>🖍️</span> 高亮
+          </button>
+          <button class="tool-btn" data-tool="underline">
+            <span>📝</span> 下划线
+          </button>
+          <button class="tool-btn" data-tool="textbox">
+            <span>💬</span> 文本框
+          </button>
+          <button class="tool-btn" data-tool="freehand">
+            <span>✏️</span> 手绘涂鸦
+          </button>
+        </div>
+        <div class="sidebar-section">
+          <h3>颜色</h3>
+          <div class="color-picker" id="pdf-colors">
+            <div class="color-option active" data-color="#fdd835" style="background: #fdd835;"></div>
+            <div class="color-option" data-color="#ff5252" style="background: #ff5252;"></div>
+            <div class="color-option" data-color="#4caf50" style="background: #4caf50;"></div>
+            <div class="color-option" data-color="#2196f3" style="background: #2196f3;"></div>
+            <div class="color-option" data-color="#9c27b0" style="background: #9c27b0;"></div>
+            <div class="color-option" data-color="#000000" style="background: #000000;"></div>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <h3>线条粗细</h3>
+          <div class="slider-container">
+            <label>粗细:</label>
+            <input type="range" id="pdf-stroke-width" min="1" max="20" value="3">
+            <span id="pdf-stroke-value">3</span>
+          </div>
+        </div>
+      </div>
+      <div class="sidebar" id="graphics-sidebar" style="display: none;">
+        <div class="sidebar-section">
+          <h3>绘图工具</h3>
+          <button class="tool-btn active" data-graphic-tool="select">
+            <span>🖱️</span> 选择
+          </button>
+          <button class="tool-btn" data-graphic-tool="rect">
+            <span>⬜</span> 矩形
+          </button>
+          <button class="tool-btn" data-graphic-tool="ellipse">
+            <span>⭕</span> 椭圆
+          </button>
+          <button class="tool-btn" data-graphic-tool="path">
+            <span>〰️</span> 路径
+          </button>
+          <button class="tool-btn" data-graphic-tool="text">
+            <span>A</span> 文本
+          </button>
+        </div>
+        <div class="sidebar-section">
+          <h3>操作</h3>
+          <button class="tool-btn" data-graphic-action="move-up">
+            <span>⬆️</span> 上移一层
+          </button>
+          <button class="tool-btn" data-graphic-action="move-down">
+            <span>⬇️</span> 下移一层
+          </button>
+          <button class="tool-btn" data-graphic-action="move-front">
+            <span>🔝</span> 置于顶层
+          </button>
+          <button class="tool-btn" data-graphic-action="move-back">
+            <span>🔚</span> 置于底层
+          </button>
+          <button class="tool-btn" data-graphic-action="delete">
+            <span>🗑️</span> 删除
+          </button>
+        </div>
+        <div class="sidebar-section">
+          <h3>颜色</h3>
+          <div class="color-picker" id="graphics-colors">
+            <div class="color-option active" data-color="#2196f3" style="background: #2196f3;"></div>
+            <div class="color-option" data-color="#f44336" style="background: #f44336;"></div>
+            <div class="color-option" data-color="#4caf50" style="background: #4caf50;"></div>
+            <div class="color-option" data-color="#ff9800" style="background: #ff9800;"></div>
+            <div class="color-option" data-color="#9c27b0" style="background: #9c27b0;"></div>
+            <div class="color-option" data-color="#000000" style="background: #000000;"></div>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <h3>变换</h3>
+          <div class="slider-container">
+            <label>缩放:</label>
+            <input type="range" id="graphics-scale" min="50" max="200" value="100">
+            <span id="graphics-scale-value">100%</span>
+          </div>
+          <div class="slider-container" style="margin-top: 10px;">
+            <label>旋转:</label>
+            <input type="range" id="graphics-rotate" min="0" max="360" value="0">
+            <span id="graphics-rotate-value">0°</span>
+          </div>
+        </div>
+      </div>
+      <div class="main-content">
+        <div class="toolbar" id="pdf-toolbar">
+          <div class="toolbar-group">
+            <input type="file" id="pdf-file-input" accept=".pdf" class="file-input">
+            <button class="toolbar-btn primary" id="open-pdf-btn">打开 PDF</button>
+          </div>
+          <div class="toolbar-group">
+            <button class="toolbar-btn" id="prev-page">◀ 上一页</button>
+            <span id="page-info">第 0 / 0 页</span>
+            <button class="toolbar-btn" id="next-page">下一页 ▶</button>
+          </div>
+          <div class="toolbar-group">
+            <button class="toolbar-btn" id="zoom-out">−</button>
+            <span id="zoom-level">100%</span>
+            <button class="toolbar-btn" id="zoom-in">+</button>
+          </div>
+          <div class="toolbar-group">
+            <button class="toolbar-btn" id="copy-text">复制选中文本</button>
+            <button class="toolbar-btn" id="save-annotations">保存标注</button>
+            <button class="toolbar-btn" id="load-annotations">加载标注</button>
+          </div>
+        </div>
+        <div class="toolbar" id="graphics-toolbar" style="display: none;">
+          <div class="toolbar-group">
+            <button class="toolbar-btn primary" id="clear-canvas">清空画布</button>
+            <button class="toolbar-btn" id="undo-btn">撤销</button>
+            <button class="toolbar-btn" id="redo-btn">重做</button>
+          </div>
+          <div class="toolbar-group">
+            <button class="toolbar-btn" id="save-graphics">保存</button>
+            <button class="toolbar-btn" id="load-graphics">加载</button>
+            <button class="toolbar-btn" id="export-json">导出 JSON</button>
+          </div>
+        </div>
+        <div class="canvas-container">
+          <canvas id="pdf-canvas" style="display: block;"></canvas>
+          <canvas id="graphics-canvas" style="display: none;"></canvas>
+        </div>
+        <div class="status-bar">
+          <span id="status-message">就绪</span>
+          <span id="coordinates">X: 0, Y: 0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

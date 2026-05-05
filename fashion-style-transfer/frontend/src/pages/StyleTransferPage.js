@@ -17,8 +17,6 @@ import Konva from 'konva';
 import { imageService, styleTransferService, downloadService, historyService } from '../services/api';
 import './StyleTransferPage.css';
 
-const { TabPane } = Tabs;
-const { Option } = Select;
 const { TextArea } = Input;
 
 const StyleTransferPage = ({ uploadedImage, keypoints }) => {
@@ -422,7 +420,12 @@ const StyleTransferPage = ({ uploadedImage, keypoints }) => {
           <Card
             title="交互式画布"
             className="page-card canvas-card"
-            headStyle={{ background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', borderBottom: '1px solid #DEB887' }}
+            styles={{
+              header: { 
+                background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', 
+                borderBottom: '1px solid #DEB887' 
+              }
+            }}
             extra={
               <div className="canvas-controls">
                 <Button.Group>
@@ -547,7 +550,12 @@ const StyleTransferPage = ({ uploadedImage, keypoints }) => {
               title="结果预览"
               className="page-card"
               style={{ marginTop: 24 }}
-              headStyle={{ background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', borderBottom: '1px solid #DEB887' }}
+              styles={{
+                header: { 
+                  background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', 
+                  borderBottom: '1px solid #DEB887' 
+                }
+              }}
               extra={
                 <div>
                   <Button.Group>
@@ -605,11 +613,20 @@ const StyleTransferPage = ({ uploadedImage, keypoints }) => {
           <Card
             title="服饰风格"
             className="page-card"
-            headStyle={{ background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', borderBottom: '1px solid #DEB887' }}
+            styles={{
+              header: { 
+                background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', 
+                borderBottom: '1px solid #DEB887' 
+              }
+            }}
           >
-            <Tabs defaultActiveKey="汉服" className="fashion-tabs">
-              {['汉服', '旗袍'].map((category) => (
-                <TabPane tab={category} key={category}>
+            <Tabs 
+              defaultActiveKey="汉服" 
+              className="fashion-tabs"
+              items={['汉服', '旗袍'].map((category) => ({
+                key: category,
+                label: category,
+                children: (
                   <div className="fashion-grid">
                     {fashionStyles
                       .filter(f => f.category === category)
@@ -632,16 +649,21 @@ const StyleTransferPage = ({ uploadedImage, keypoints }) => {
                         </div>
                       ))}
                   </div>
-                </TabPane>
-              ))}
-            </Tabs>
+                ),
+              }))}
+            />
           </Card>
 
           <Card
             title="风格迁移参数"
             className="page-card"
             style={{ marginTop: 24 }}
-            headStyle={{ background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', borderBottom: '1px solid #DEB887' }}
+            styles={{
+              header: { 
+                background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', 
+                borderBottom: '1px solid #DEB887' 
+              }
+            }}
           >
             <div className="parameter-section">
               <div className="parameter-label">迁移强度</div>
@@ -680,7 +702,12 @@ const StyleTransferPage = ({ uploadedImage, keypoints }) => {
             title="高级工具"
             className="page-card"
             style={{ marginTop: 24 }}
-            headStyle={{ background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', borderBottom: '1px solid #DEB887' }}
+            styles={{
+              header: { 
+                background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', 
+                borderBottom: '1px solid #DEB887' 
+              }
+            }}
           >
             <div className="tool-section">
               <div className="tool-label">局部重绘</div>

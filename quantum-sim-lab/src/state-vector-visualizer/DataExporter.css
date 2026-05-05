@@ -1,0 +1,124 @@
+.data-exporter {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.exporter-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.format-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.format-selector label {
+  font-weight: 500;
+  color: #a0a0a0;
+  font-size: 0.9rem;
+}
+
+.format-select {
+  padding: 0.6rem 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #e0e0e0;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.format-select:focus {
+  outline: none;
+  border-color: #1de9b6;
+}
+
+.export-success {
+  padding: 0.5rem 1rem;
+  background: rgba(29, 233, 182, 0.1);
+  border: 1px solid rgba(29, 233, 182, 0.3);
+  border-radius: 6px;
+  color: #1de9b6;
+  font-weight: 600;
+  font-size: 0.85rem;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.export-preview {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.export-preview h4 {
+  font-size: 0.95rem;
+  color: #e0e0e0;
+  margin-bottom: 1rem;
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.preview-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.preview-label {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.preview-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #64ffda;
+}
+
+.format-info {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 1rem;
+}
+
+.format-info h5 {
+  font-size: 0.85rem;
+  color: #a0a0a0;
+  margin-bottom: 0.75rem;
+}
+
+.format-info ul {
+  margin-left: 1.25rem;
+}
+
+.format-info li {
+  font-size: 0.8rem;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+.format-info strong {
+  color: #64ffda;
+}

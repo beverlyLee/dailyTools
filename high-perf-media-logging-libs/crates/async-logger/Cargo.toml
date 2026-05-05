@@ -1,0 +1,20 @@
+[package]
+name = "async-logger"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+chrono.workspace = true
+log.workspace = true
+once_cell.workspace = true
+lockfree = { path = "../lockfree" }
+
+[dev-dependencies]
+criterion = "0.5"
+tempfile = "3.9"

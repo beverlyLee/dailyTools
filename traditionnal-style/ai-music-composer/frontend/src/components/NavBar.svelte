@@ -1,22 +1,13 @@
 <script>
-  import { Link, location } from 'svelte-routing'
+  import { Link } from 'svelte-routing'
 
   let isMenuOpen = false
-
-  $: currentPath = $location.pathname
 
   const navLinks = [
     { path: '/', label: '首页', icon: '🏠' },
     { path: '/generate', label: '生成音乐', icon: '🎵' },
     { path: '/library', label: '我的作品', icon: '📁' }
   ]
-
-  function isActive(path) {
-    if (path === '/') {
-      return currentPath === '/'
-    }
-    return currentPath.startsWith(path)
-  }
 </script>
 
 <nav class="navbar">
@@ -35,8 +26,14 @@
         <Link
           to={link.path}
           class="nav-link"
-          class:active={isActive(link.path)}
           on:click={() => isMenuOpen = false}
+          getProps={({ isPartiallyCurrent, isCurrent }) => {
+            return {
+              class: isCurrent || (isPartiallyCurrent && link.path !== '/') 
+                ? 'nav-link active' 
+                : 'nav-link'
+            }
+          }}
         >
           <span class="nav-icon">{link.icon}</span>
           <span>{link.label}</span>

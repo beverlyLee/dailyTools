@@ -1,0 +1,40 @@
+import { Point } from '../types';
+
+export declare class Matrix2D {
+    a: number;
+    b: number;
+    c: number;
+    d: number;
+    e: number;
+    f: number;
+    constructor(a?: number, b?: number, c?: number, d?: number, e?: number, f?: number);
+    static identity(): Matrix2D;
+    static translation(tx: number, ty: number): Matrix2D;
+    static rotation(angle: number): Matrix2D;
+    static scaling(sx: number, sy: number): Matrix2D;
+    static skewing(skewX: number, skewY: number): Matrix2D;
+    reset(): Matrix2D;
+    translate(tx: number, ty: number): Matrix2D;
+    rotate(angle: number): Matrix2D;
+    scale(sx: number, sy: number): Matrix2D;
+    skew(skewX: number, skewY: number): Matrix2D;
+    multiply(other: Matrix2D): Matrix2D;
+    preMultiply(other: Matrix2D): Matrix2D;
+    invert(): Matrix2D;
+    inverse(): Matrix2D;
+    transpose(): Matrix2D;
+    transformPoint(point: Point): Point;
+    transformPoints(points: Point[]): Point[];
+    transformVector(v: Point): Point;
+    get translation(): Point;
+    get rotation(): number;
+    get scaleX(): number;
+    get scaleY(): number;
+    get determinant(): number;
+    clone(): Matrix2D;
+    toArray(): number[];
+    fromArray(arr: number[]): Matrix2D;
+    equals(other: Matrix2D, epsilon?: number): boolean;
+    static multiply(a: Matrix2D, b: Matrix2D): Matrix2D;
+    static lerp(a: Matrix2D, b: Matrix2D, t: number): Matrix2D;
+}

@@ -1,0 +1,61 @@
+{
+  "name": "@edge-perception/face-detection",
+  "version": "1.0.0",
+  "description": "Edge-side face detection library powered by WebAssembly (Rust). Features: multi-scale detection, 5/68 point landmarks, SIMD optimization, Web Worker support.",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "src/js",
+    "pkg",
+    "README.md"
+  ],
+  "scripts": {
+    "build:rust": "wasm-pack build --target web --out-dir pkg --out-name edge_face_detection",
+    "build:rust:simd": "RUSTFLAGS=\"-C target-feature=+simd128\" wasm-pack build --target web --out-dir pkg-simd --out-name edge_face_detection",
+    "build:js": "rollup -c",
+    "build": "npm run build:rust && npm run build:js",
+    "dev": "rollup -c -w",
+    "clean": "rm -rf dist pkg pkg-simd",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "face-detection",
+    "webassembly",
+    "wasm",
+    "rust",
+    "computer-vision",
+    "edge-computing",
+    "face-landmarks",
+    "web-worker",
+    "simd",
+    "object-detection"
+  ],
+  "author": "",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/edge-perception-libs.git",
+    "directory": "packages/face-detection"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@types/jest": "^29.0.0",
+    "jest": "^29.0.0",
+    "rollup": "^4.0.0",
+    "rollup-plugin-copy": "^3.0.0",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@edge-perception/common": "^1.0.0"
+  }
+}

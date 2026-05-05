@@ -3,6 +3,10 @@ const path = require('path');
 const fs = require('fs');
 const Database = require('./database');
 
+app.commandLine.appendSwitch('no-sandbox');
+app.commandLine.appendSwitch('disable-gpu');
+app.commandLine.appendSwitch('disable-software-rasterizer');
+
 let mainWindow;
 let database;
 

@@ -374,14 +374,14 @@
             <div
               class="piano-key"
               class:black={noteNames[pitch % 12].includes('#')}
-              class:active={false}
+              style="height: {noteHeight}px;"
             >
               <span class="note-label">{getNoteName(pitch)}</span>
             </div>
           {/each}
         </div>
 
-        <div class="grid-container">
+        <div class="grid-container" style="min-width: {canvasWidth}px;">
           <div class="time-ruler">
             {#each Array.from({ length: totalBeats + 1 }, (_, i) => i) as beat}
               <div
@@ -623,7 +623,7 @@
   }
 
   .piano-key {
-    height: {noteHeight}px;
+    height: 20px;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -646,7 +646,6 @@
     flex: 1;
     position: relative;
     overflow: auto;
-    min-width: {canvasWidth}px;
   }
 
   .time-ruler {
@@ -673,16 +672,16 @@
       repeating-linear-gradient(
         90deg,
         transparent,
-        transparent {pixelsPerBeat - 1}px,
-        #3a3a4a {pixelsPerBeat - 1}px,
-        #3a3a4a {pixelsPerBeat}px
+        transparent 79px,
+        #3a3a4a 79px,
+        #3a3a4a 80px
       ),
       repeating-linear-gradient(
         0deg,
         transparent,
-        transparent {noteHeight - 1}px,
-        #3a3a4a {noteHeight - 1}px,
-        #3a3a4a {noteHeight}px
+        transparent 19px,
+        #3a3a4a 19px,
+        #3a3a4a 20px
       );
     cursor: crosshair;
   }

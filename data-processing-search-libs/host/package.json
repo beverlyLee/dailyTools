@@ -1,0 +1,30 @@
+{
+  "name": "data-processing-search-host",
+  "version": "0.1.0",
+  "description": "数据处理与搜索库集 - TypeScript 宿主层",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "wasm-pack": "cd ../core-search-engine && wasm-pack build --target web --out-dir ../host/src/wasm"
+  },
+  "keywords": [
+    "search",
+    "data-validation",
+    "wasm",
+    "full-text-search"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "data-validator": "file:../data-validator"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.0"
+  }
+}

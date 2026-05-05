@@ -1,0 +1,19 @@
+[package]
+name = "packet-sniffer"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.70"
+description = "实时流量嗅探器 - 多网卡选择、混杂模式、BPF过滤、SQLite存储"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.35", features = ["full"] }
+thiserror = "1.0"
+anyhow = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+hex = "0.4"
+log = "0.4"
+rand = "0.8"
+sqlx = { version = "0.7", features = ["runtime-tokio", "sqlite", "chrono"] }
+dirs = "5.0"

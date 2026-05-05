@@ -1,0 +1,39 @@
+{
+  "name": "lightweight-orm",
+  "version": "0.1.0",
+  "description": "A lightweight TypeScript ORM framework with decorator-based model definition and type-safe queries",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext .ts",
+    "migrate": "ts-node src/cli/migrate.ts",
+    "migrate:up": "ts-node src/cli/migrate.ts up",
+    "migrate:down": "ts-node src/cli/migrate.ts down"
+  },
+  "keywords": [
+    "orm",
+    "typescript",
+    "decorators",
+    "database",
+    "sql"
+  ],
+  "author": "Developer",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "@types/sqlite3": "^3.1.8",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.1.13",
+    "sqlite3": "^5.1.6"
+  }
+}

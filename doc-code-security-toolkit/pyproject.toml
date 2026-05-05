@@ -1,0 +1,40 @@
+[project]
+name = "doc-code-security-toolkit"
+version = "0.1.0"
+description = "Development Documentation and Code Security Toolkit - 智能代码安全审计与文档自动化处理平台"
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.1.0",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0",
+    "requests>=2.31.0",
+    "openai>=1.0.0",
+    "pdfplumber>=0.10.0",
+    "python-docx>=0.8.11",
+    "openpyxl>=3.1.0",
+    "pandas>=2.0.0",
+    "markdown>=3.4.0",
+    "pypdfium2>=4.0.0",
+    "beautifulsoup4>=4.12.0",
+    "schedule>=1.2.0",
+    "rich>=13.0.0",
+    "jinja2>=3.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+docsec = "doc_code_security_toolkit.cli.main:cli"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["doc_code_security_toolkit"]

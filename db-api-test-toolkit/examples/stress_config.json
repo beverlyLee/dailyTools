@@ -1,0 +1,18 @@
+{
+  "request": {
+    "url": "http://localhost:8080/api/test",
+    "method": "GET",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer your-token-here"
+    },
+    "body": ""
+  },
+  "concurrency": 50,
+  "total_requests": 10000,
+  "duration_seconds": 0,
+  "timeout_seconds": 10,
+  "think_time_ms": 0,
+  "output_format": "json",
+  "output_file": "stress_results.json"
+}

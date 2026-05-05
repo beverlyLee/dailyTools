@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>医疗影像辅助诊断系统</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      text-align: center;
+      color: white;
+    }
+
+    .header {
+      margin-bottom: 60px;
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      font-weight: 300;
+      letter-spacing: 2px;
+    }
+
+    .header p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    .modules {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .module-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 40px 30px;
+      width: 280px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .module-card:hover {
+      transform: translateY(-10px);
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .module-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+    }
+
+    .module-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      font-weight: 500;
+    }
+
+    .module-card p {
+      font-size: 0.95rem;
+      opacity: 0.85;
+      line-height: 1.6;
+    }
+
+    .footer {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>医疗影像辅助诊断系统</h1>
+      <p>智能阅片 · 精准诊断 · 高效报告</p>
+    </div>
+
+    <div class="modules">
+      <div class="module-card" id="smartViewer">
+        <div class="module-icon">🩻</div>
+        <h2>智能阅片工作站</h2>
+        <p>支持 DICOM 影像查看、窗宽窗位调整、MPR 三维重建、长度/角度测量，集成 AI 病灶检测高亮提示</p>
+      </div>
+
+      <div class="module-card" id="structuredReport">
+        <div class="module-icon">📋</div>
+        <h2>报告结构化录入</h2>
+        <p>基于模板快速生成诊断报告，支持关键影像截图嵌入，与 HIS/RIS 系统无缝对接</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    © 2024 医疗影像辅助诊断系统 v1.0.0
+  </div>
+
+  <script>
+    document.getElementById('smartViewer').addEventListener('click', () => {
+      window.electronAPI.openSmartViewer();
+    });
+
+    document.getElementById('structuredReport').addEventListener('click', () => {
+      window.electronAPI.openStructuredReport();
+    });
+  </script>
+</body>
+</html>

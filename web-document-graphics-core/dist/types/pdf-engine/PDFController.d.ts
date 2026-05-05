@@ -1,0 +1,45 @@
+import { Controller } from '../core';
+import { PDFModel } from './PDFModel';
+import { PDFView } from './PDFView';
+import { Annotation } from './types';
+
+export declare class PDFController extends Controller<PDFModel, PDFView> {
+    private _toolColor;
+    private _strokeWidth;
+    private _isDrawing;
+    private _drawStartPos;
+    private _drawCurrentPos;
+    private _freehandPoints;
+    constructor(model: PDFModel, view: PDFView);
+    get toolColor(): string;
+    set toolColor(color: string);
+    get strokeWidth(): number;
+    set strokeWidth(width: number);
+    private setupDefaultTools;
+    loadDocument(data: ArrayBuffer | string, fileName?: string): Promise<void>;
+    unloadDocument(): void;
+    goToPage(page: number): Promise<boolean>;
+    nextPage(): Promise<boolean>;
+    prevPage(): Promise<boolean>;
+    zoomIn(factor?: number): Promise<void>;
+    zoomOut(factor?: number): Promise<void>;
+    setZoom(scale: number): Promise<void>;
+    private handleSelectMouseDown;
+    private handleSelectMouseMove;
+    private handleSelectMouseUp;
+    private startDrawing;
+    private updateDrawing;
+    private finishDrawing;
+    private renderPreview;
+    private handleTextboxClick;
+    private startFreehand;
+    private updateFreehand;
+    private finishFreehand;
+    private renderFreehandPreview;
+    removeAnnotation(annotationId: string): boolean;
+    getCurrentPageAnnotations(): Annotation[];
+    getAllAnnotations(): Record<number, Annotation[]>;
+    loadAnnotations(data: Record<number, Annotation[]>): void;
+    copySelectedText(): string;
+    renderCurrentPage(): Promise<void>;
+}

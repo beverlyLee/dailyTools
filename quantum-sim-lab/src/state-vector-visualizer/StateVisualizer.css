@@ -1,0 +1,213 @@
+.state-visualizer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1rem;
+}
+
+.visualizer-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex-wrap: wrap;
+}
+
+.animation-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.step-indicator {
+  padding: 0.5rem 1rem;
+  background: rgba(100, 255, 218, 0.1);
+  border-radius: 6px;
+  color: #64ffda;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.empty-state-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-visualizer {
+  text-align: center;
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 500px;
+}
+
+.empty-visualizer h3 {
+  font-size: 1.5rem;
+  color: #64ffda;
+  margin-bottom: 1rem;
+}
+
+.empty-visualizer p {
+  color: #a0a0a0;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+}
+
+.empty-visualizer .hint {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.visualizer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 0.5rem;
+}
+
+.visualizer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 1200px) {
+  .visualizer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bloch-sphere-section,
+.probability-section {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+}
+
+.bloch-sphere-section h3,
+.probability-section h3 {
+  font-size: 1rem;
+  color: #e0e0e0;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.qubit-selector {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.qubit-btn {
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #a0a0a0;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.qubit-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+}
+
+.qubit-btn.active {
+  background: linear-gradient(135deg, #1de9b6 0%, #1dc4e9 100%);
+  color: #0a1929;
+  border: none;
+}
+
+.measurement-stats {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.measurement-stats h4 {
+  font-size: 0.9rem;
+  color: #a0a0a0;
+  margin-bottom: 1rem;
+}
+
+.evolution-section,
+.exporter-section,
+.state-details {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+}
+
+.evolution-section h3,
+.exporter-section h3,
+.state-details h3 {
+  font-size: 1rem;
+  color: #e0e0e0;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.amplitudes-table {
+  overflow-x: auto;
+}
+
+.amplitudes-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.amplitudes-table th,
+.amplitudes-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.amplitudes-table th {
+  background: rgba(29, 233, 182, 0.1);
+  color: #64ffda;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.amplitudes-table tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.state-label {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.real-part {
+  color: #1de9b6;
+}
+
+.imag-part {
+  color: #fd79a8;
+}
+
+.probability {
+  font-weight: 600;
+  color: #64ffda;
+}

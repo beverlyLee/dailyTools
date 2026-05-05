@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>报告结构化录入系统</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .app-container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar-left {
+      width: 280px;
+      background-color: #ffffff;
+      border-right: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-section {
+      padding: 15px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .sidebar-section:last-child {
+      border-bottom: none;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .sidebar-title {
+      font-size: 0.85rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .patient-info-card {
+      background-color: #f1f5f9;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .patient-info-card.empty {
+      text-align: center;
+      color: #64748b;
+      font-size: 0.85rem;
+    }
+
+    .patient-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #1e293b;
+    }
+
+    .patient-details {
+      font-size: 0.85rem;
+      color: #64748b;
+      line-height: 1.6;
+    }
+
+    .patient-details-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3px;
+    }
+
+    .patient-details-label {
+      color: #94a3b8;
+    }
+
+    .template-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .template-item {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .template-item:hover {
+      border-color: #4f46e5;
+      background-color: #f5f3ff;
+    }
+
+    .template-item.active {
+      border-color: #4f46e5;
+      background-color: #f5f3ff;
+      border-left: 3px solid #4f46e5;
+    }
+
+    .template-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+      color: #1e293b;
+    }
+
+    .template-category {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .template-description {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #f8fafc;
+    }
+
+    .toolbar {
+      height: 50px;
+      background-color: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 15px;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toolbar-group:not(:last-child) {
+      border-right: 1px solid #e2e8f0;
+      padding-right: 15px;
+    }
+
+    .toolbar-btn {
+      background-color: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: #374151;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toolbar-btn:hover {
+      background-color: #f3f4f6;
+      border-color: #4f46e5;
+    }
+
+    .toolbar-btn.primary {
+      background-color: #4f46e5;
+      border-color: #4f46e5;
+      color: white;
+    }
+
+    .toolbar-btn.primary:hover {
+      background-color: #4338ca;
+      border-color: #4338ca;
+    }
+
+    .toolbar-btn.success {
+      background-color: #10b981;
+      border-color: #10b981;
+      color: white;
+    }
+
+    .toolbar-btn.success:hover {
+      background-color: #059669;
+      border-color: #059669;
+    }
+
+    .toolbar-select {
+      background-color: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: #374151;
+      font-size: 0.85rem;
+      cursor: pointer;
+      min-width: 150px;
+    }
+
+    .report-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+
+    .report-status.draft {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+
+    .report-status.submitted {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    .editor-area {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .editor-container {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background-color: #ffffff;
+    }
+
+    .report-editor {
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      min-height: 100%;
+      padding: 40px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .report-header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #374151;
+    }
+
+    .report-hospital {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 10px;
+    }
+
+    .report-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1e293b;
+      letter-spacing: 2px;
+    }
+
+    .report-section {
+      margin-bottom: 25px;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .patient-info-section {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px 30px;
+      font-size: 0.95rem;
+    }
+
+    .info-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .info-label {
+      color: #64748b;
+      min-width: 70px;
+    }
+
+    .info-value {
+      color: #1e293b;
+      font-weight: 500;
+    }
+
+    .info-input {
+      border: none;
+      border-bottom: 1px solid #d1d5db;
+      padding: 2px 4px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      background: transparent;
+      flex: 1;
+    }
+
+    .info-input:focus {
+      border-bottom-color: #4f46e5;
+    }
+
+    .text-editor {
+      width: 100%;
+      min-height: 150px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      line-height: 1.8;
+      resize: vertical;
+      outline: none;
+    }
+
+    .text-editor:focus {
+      border-color: #4f46e5;
+    }
+
+    .images-section {
+      margin-top: 20px;
+    }
+
+    .images-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .image-card {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .image-card:hover {
+      border-color: #4f46e5;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+    }
+
+    .image-preview {
+      width: 100%;
+      height: 150px;
+      background-color: #000;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .image-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .image-info {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    .image-name {
+      font-weight: 500;
+      color: #1e293b;
+      margin-bottom: 2px;
+    }
+
+    .image-remove {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background-color: rgba(239, 68, 68, 0.9);
+      color: white;
+      border: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .image-card:hover .image-remove {
+      display: flex;
+    }
+
+    .add-image-card {
+      background-color: #f8fafc;
+      border: 2px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 40px 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      min-height: 170px;
+    }
+
+    .add-image-card:hover {
+      border-color: #4f46e5;
+      background-color: #f5f3ff;
+      color: #4f46e5;
+    }
+
+    .add-image-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .add-image-text {
+      font-size: 0.85rem;
+    }
+
+    .sidebar-right {
+      width: 300px;
+      background-color: #ffffff;
+      border-left: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .field-hints {
+      padding: 15px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .field-title {
+      font-size: 0.85rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .quick-phrases {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .phrase-item {
+      background-color: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.85rem;
+      color: #374151;
+    }
+
+    .phrase-item:hover {
+      background-color: #e0e7ff;
+      border-color: #4f46e5;
+    }
+
+    .report-history {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .history-item {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .history-item:hover {
+      border-color: #4f46e5;
+    }
+
+    .history-patient {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .history-date {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .history-status {
+      font-size: 0.75rem;
+      margin-top: 4px;
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .history-status.draft {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+
+    .history-status.submitted {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    .status-bar {
+      height: 30px;
+      background-color: #ffffff;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    .status-bar-left,
+    .status-bar-right {
+      display: flex;
+      gap: 20px;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.visible {
+      display: flex;
+    }
+
+    .modal {
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #64748b;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .modal-body {
+      padding: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 15px 20px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .modal-btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: 1px solid #d1d5db;
+      background-color: #ffffff;
+      color: #374151;
+      transition: all 0.2s ease;
+    }
+
+    .modal-btn:hover {
+      background-color: #f3f4f6;
+    }
+
+    .modal-btn.primary {
+      background-color: #4f46e5;
+      border-color: #4f46e5;
+      color: white;
+    }
+
+    .modal-btn.primary:hover {
+      background-color: #4338ca;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(79, 70, 229, 0.95);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      z-index: 10000;
+      display: none;
+    }
+
+    .toast.visible {
+      display: block;
+      animation: fadeInUp 0.3s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ffffff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 6px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="sidebar-left">
+      <div class="sidebar-section">
+        <div class="sidebar-title">患者信息</div>
+        <div class="patient-info-card" id="patientInfoCard">
+          <div class="empty">请选择报告模板或新建报告</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">报告模板</div>
+        <div class="template-list" id="templateList">
+          <div class="template-item active" data-template-id="template-001">
+            <div class="template-name">胸部CT常规报告</div>
+            <div class="template-category">CT</div>
+            <div class="template-description">胸部CT检查的标准报告模板</div>
+          </div>
+          <div class="template-item" data-template-id="template-002">
+            <div class="template-name">头颅MRI报告</div>
+            <div class="template-category">MRI</div>
+            <div class="template-description">头颅MRI检查的标准报告模板</div>
+          </div>
+          <div class="template-item" data-template-id="template-003">
+            <div class="template-name">腹部超声报告</div>
+            <div class="template-category">超声</div>
+            <div class="template-description">腹部超声检查的标准报告模板</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <button class="toolbar-btn" id="btnNewReport">
+            <span>📄</span>
+            <span>新建</span>
+          </button>
+          <button class="toolbar-btn" id="btnSaveReport">
+            <span>💾</span>
+            <span>保存</span>
+          </button>
+          <button class="toolbar-btn" id="btnPrintReport">
+            <span>🖨️</span>
+            <span>打印</span>
+          </button>
+        </div>
+
+        <div class="toolbar-group">
+          <button class="toolbar-btn" id="btnInsertImage">
+            <span>🖼️</span>
+            <span>插入影像</span>
+          </button>
+        </div>
+
+        <div class="toolbar-group">
+          <div class="report-status draft" id="reportStatus">
+            <span>📝</span>
+            <span>草稿</span>
+          </div>
+        </div>
+
+        <div class="toolbar-group" style="margin-left: auto;">
+          <button class="toolbar-btn success" id="btnSubmitReport">
+            <span>✅</span>
+            <span>提交报告</span>
+          </button>
+        </div>
+
+        <div class="toolbar-group">
+          <button class="toolbar-btn primary" id="btnExportHIS">
+            <span>🏥</span>
+            <span>导出HIS</span>
+          </button>
+          <button class="toolbar-btn" id="btnExportRIS">
+            <span>📋</span>
+            <span>导出RIS</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="editor-area">
+        <div class="editor-container">
+          <div class="report-editor" id="reportEditor">
+            <div class="report-header">
+              <div class="report-hospital">示例医院</div>
+              <div class="report-title" id="reportTitle">医学影像诊断报告</div>
+            </div>
+
+            <div class="report-section">
+              <div class="section-title">基本信息</div>
+              <div class="patient-info-section">
+                <div class="info-row">
+                  <span class="info-label">姓名:</span>
+                  <input type="text" class="info-input" id="inputPatientName" placeholder="请输入患者姓名">
+                </div>
+                <div class="info-row">
+                  <span class="info-label">性别:</span>
+                  <select class="info-input" id="inputGender">
+                    <option value="">请选择</option>
+                    <option value="男">男</option>
+                    <option value="女">女</option>
+                  </select>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">年龄:</span>
+                  <input type="text" class="info-input" id="inputAge" placeholder="请输入年龄">
+                </div>
+                <div class="info-row">
+                  <span class="info-label">住院号:</span>
+                  <input type="text" class="info-input" id="inputPatientId" placeholder="请输入住院号">
+                </div>
+                <div class="info-row">
+                  <span class="info-label">检查日期:</span>
+                  <input type="date" class="info-input" id="inputStudyDate">
+                </div>
+                <div class="info-row">
+                  <span class="info-label">检查部位:</span>
+                  <input type="text" class="info-input" id="inputStudyDescription" placeholder="请输入检查部位">
+                </div>
+              </div>
+            </div>
+
+            <div class="report-section">
+              <div class="section-title">检查所见</div>
+              <textarea class="text-editor" id="inputFindings" placeholder="请输入检查所见..."></textarea>
+            </div>
+
+            <div class="report-section">
+              <div class="section-title">诊断意见</div>
+              <textarea class="text-editor" id="inputImpression" placeholder="请输入诊断意见..."></textarea>
+            </div>
+
+            <div class="report-section">
+              <div class="section-title">建议</div>
+              <textarea class="text-editor" id="inputRecommendation" placeholder="请输入建议..."></textarea>
+            </div>
+
+            <div class="report-section images-section">
+              <div class="section-title">关键影像</div>
+              <div class="images-grid" id="imagesGrid">
+                <div class="add-image-card" id="btnAddImage">
+                  <div class="add-image-icon">+</div>
+                  <div class="add-image-text">点击添加影像截图</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="report-section" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+              <div class="patient-info-section">
+                <div class="info-row">
+                  <span class="info-label">报告医生:</span>
+                  <input type="text" class="info-input" id="inputDoctorName" placeholder="请输入报告医生">
+                </div>
+                <div class="info-row">
+                  <span class="info-label">报告日期:</span>
+                  <input type="date" class="info-input" id="inputReportDate">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-right">
+          <div class="field-hints">
+            <div class="field-title">常用短语</div>
+            <div class="quick-phrases">
+              <div class="phrase-item" data-field="findings" data-text="双肺野清晰，未见明显渗出性病灶。">
+                双肺野清晰，未见明显渗出性病灶。
+              </div>
+              <div class="phrase-item" data-field="findings" data-text="心影大小形态正常，纵隔未见明显增宽。">
+                心影大小形态正常，纵隔未见明显增宽。
+              </div>
+              <div class="phrase-item" data-field="findings" data-text="胸廓对称，肋骨走行自然，未见明确骨折征象。">
+                胸廓对称，肋骨走行自然，未见明确骨折征象。
+              </div>
+              <div class="phrase-item" data-field="impression" data-text="胸部平片未见明显异常。">
+                胸部平片未见明显异常。
+              </div>
+              <div class="phrase-item" data-field="impression" data-text="考虑为良性病变，建议随访复查。">
+                考虑为良性病变，建议随访复查。
+              </div>
+              <div class="phrase-item" data-field="recommendation" data-text="建议3个月后复查，观察病变变化情况。">
+                建议3个月后复查，观察病变变化情况。
+              </div>
+              <div class="phrase-item" data-field="recommendation" data-text="如有不适，请及时就诊。">
+                如有不适，请及时就诊。
+              </div>
+            </div>
+          </div>
+
+          <div class="report-history">
+            <div class="sidebar-title">历史报告</div>
+            <div class="history-list" id="historyList">
+              <div class="history-item">
+                <div class="history-patient">张三</div>
+                <div class="history-date">2024-01-15</div>
+                <div class="history-status submitted">已提交</div>
+              </div>
+              <div class="history-item">
+                <div class="history-patient">李四</div>
+                <div class="history-date">2024-01-14</div>
+                <div class="history-status draft">草稿</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-bar">
+        <div class="status-bar-left">
+          <div class="status-item">
+            <span>📄</span>
+            <span id="statusTemplate">当前模板: 胸部CT常规报告</span>
+          </div>
+          <div class="status-item">
+            <span>🖼️</span>
+            <span id="statusImages">影像: 0张</span>
+          </div>
+        </div>
+        <div class="status-bar-right">
+          <div class="status-item">
+            <span id="statusLastSaved">上次保存: 未保存</span>
+          </div>
+          <div class="status-item">
+            <span id="statusWordCount">字数: 0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="exportModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="exportModalTitle">导出到 HIS 系统</div>
+        <button class="modal-close" id="btnCloseExportModal">×</button>
+      </div>
+      <div class="modal-body" id="exportModalBody">
+        <p style="margin-bottom: 15px;">确认将当前报告导出到系统？</p>
+        <div style="background-color: #f1f5f9; padding: 15px; border-radius: 8px;">
+          <div style="margin-bottom: 8px;"><strong>患者:</strong> <span id="exportPatientName">-</span></div>
+          <div style="margin-bottom: 8px;"><strong>检查日期:</strong> <span id="exportStudyDate">-</span></div>
+          <div><strong>报告状态:</strong> <span id="exportStatus">-</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn" id="btnCancelExport">取消</button>
+        <button class="modal-btn primary" id="btnConfirmExport">确认导出</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="./src/renderer.js"></script>
+</body>
+</html>

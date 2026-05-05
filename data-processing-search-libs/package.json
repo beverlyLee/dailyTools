@@ -1,0 +1,27 @@
+{
+  "name": "data-processing-search-libs",
+  "version": "0.1.0",
+  "description": "数据处理与搜索库集",
+  "private": true,
+  "scripts": {
+    "example:search": "npx tsx examples/searchExample.ts",
+    "example:cleaner": "npx tsx examples/dataCleanerExample.ts",
+    "build:validator": "cd data-validator && npm run build",
+    "build:host": "cd host && npm run build",
+    "build:wasm": "cd core-search-engine && wasm-pack build --target web --out-dir ../host/src/wasm",
+    "install:all": "npm install && cd data-validator && npm install && cd ../host && npm install"
+  },
+  "keywords": [
+    "search",
+    "data-validation",
+    "typescript",
+    "rust",
+    "wasm"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,77 @@
+policies:
+  - id: "CUSTOM-001"
+    severity: "HIGH"
+    message: "资源标签缺失"
+    resource_filters:
+      type:
+        - "aws_ec2_instance"
+        - "aws_s3_bucket"
+        - "aws_ebs_volume"
+    conditions:
+      tags:
+        not_contains: "Name"
+    remediation: |
+      为资源添加必要的标签：
+      tags = {
+        Name = "resource-name"
+        Environment = "prod"
+        Owner = "team-name"
+      }
+
+  - id: "CUSTOM-002"
+    severity: "MEDIUM"
+    message: "实例类型不符合成本优化要求"
+    resource_filters:
+      type:
+        - "aws_ec2_instance"
+    conditions:
+      instance_type:
+        equals: "t2.large"
+    remediation: |
+      考虑使用更具成本效益的实例类型：
+      - t3.large: 相同性能，成本降低约 10%
+      - 或考虑使用预留实例节省成本
+
+  - id: "CUSTOM-003"
+    severity: "CRITICAL"
+    message: "检测到硬编码的 AWS 凭证"
+    resource_filters:
+      type:
+        - "aws_iam_access_key"
+    conditions:
+      secret:
+        contains: "AKIA"
+    remediation: |
+      不要在代码中硬编码凭证：
+      1. 使用环境变量: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+      2. 使用 ~/.aws/credentials 配置文件
+      3. 使用 IAM 角色（推荐用于 EC2 实例）
+
+  - id: "CUSTOM-004"
+    severity: "HIGH"
+    message: "S3 桶版本控制未启用"
+    resource_filters:
+      type:
+        - "aws_s3_bucket"
+    conditions:
+      versioning:
+        not_equals: "Enabled"
+    remediation: |
+      启用 S3 桶版本控制：
+      versioning {
+        enabled = true
+      }
+
+  - id: "CUSTOM-005"
+    severity: "MEDIUM"
+    message: "安全组名称不符合命名规范"
+    resource_filters:
+      type:
+        - "aws_security_group"
+    conditions:
+      name:
+        not_contains: "-sg-"
+    remediation: |
+      安全组命名应遵循规范：
+      - 格式: {application}-{purpose}-sg-{environment}
+      - 示例: web-app-sg-prod

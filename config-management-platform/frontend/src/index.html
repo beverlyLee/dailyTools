@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>配置管理与差异对比平台</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <div class="header-left">
+        <h1>配置管理与差异对比平台</h1>
+      </div>
+      <div class="header-center">
+        <nav class="tab-navigation">
+          <button id="tab-config-center" class="tab-button active" data-tab="config-center">
+            <span class="tab-icon">⚙️</span>
+            <span class="tab-text">配置中心</span>
+          </button>
+          <button id="tab-diff-viewer" class="tab-button" data-tab="diff-viewer">
+            <span class="tab-icon">📊</span>
+            <span class="tab-text">差异对比</span>
+          </button>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div id="status-indicator" class="status-indicator">
+          <span class="status-dot"></span>
+          <span class="status-text">就绪</span>
+        </div>
+      </div>
+    </header>
+    
+    <main class="main-content">
+      <!-- 配置中心面板 -->
+      <div id="panel-config-center" class="tab-panel active">
+        <div class="config-center-layout">
+          <div class="config-sidebar">
+            <div class="sidebar-header">
+              <h3>环境管理</h3>
+              <div class="sidebar-actions">
+                <button id="btn-new-env" class="btn btn-sm btn-primary" title="新建环境">+ 新建</button>
+              </div>
+            </div>
+            <div id="env-list" class="env-list">
+              <div class="empty-state">
+                <p>暂无环境配置</p>
+                <p class="empty-hint">点击"新建"创建第一个环境</p>
+              </div>
+            </div>
+            
+            <div class="sidebar-section">
+              <div class="sidebar-header">
+                <h3>配置项</h3>
+                <div class="sidebar-actions">
+                  <button id="btn-new-config" class="btn btn-sm btn-primary" title="新建配置项">+ 新建</button>
+                </div>
+              </div>
+              <div id="config-list" class="config-list">
+                <div class="empty-state">
+                  <p>选择环境查看配置</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="sidebar-section">
+              <div class="sidebar-header">
+                <h3>版本历史</h3>
+              </div>
+              <div id="version-list" class="version-list">
+                <div class="empty-state">
+                  <p>选择配置项查看历史</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="config-content">
+            <div class="config-toolbar">
+              <div class="toolbar-left">
+                <div class="format-selector">
+                  <label for="config-format">格式:</label>
+                  <select id="config-format" class="select-input">
+                    <option value="keyvalue">Key-Value</option>
+                    <option value="json">JSON</option>
+                    <option value="yaml">YAML</option>
+                  </select>
+                </div>
+                <div class="env-info" id="current-env-info">
+                  <span class="env-label">当前环境:</span>
+                  <span class="env-name" id="current-env-name">未选择</span>
+                </div>
+              </div>
+              <div class="toolbar-right">
+                <button id="btn-save-config" class="btn btn-primary" disabled>
+                  <span class="btn-icon">💾</span>
+                  保存
+                </button>
+                <button id="btn-encrypt" class="btn btn-secondary" disabled>
+                  <span class="btn-icon">🔒</span>
+                  加密敏感字段
+                </button>
+                <button id="btn-compare-versions" class="btn btn-secondary" disabled>
+                  <span class="btn-icon">📊</span>
+                  对比版本
+                </button>
+              </div>
+            </div>
+            
+            <div class="config-editor-container">
+              <div class="editor-panel">
+                <div class="panel-header">
+                  <span class="panel-title" id="config-editor-title">配置编辑器</span>
+                  <div class="panel-actions">
+                    <button id="btn-clear-config" class="btn btn-sm">清空</button>
+                    <button id="btn-import-config" class="btn btn-sm">导入</button>
+                    <button id="btn-export-config" class="btn btn-sm">导出</button>
+                  </div>
+                </div>
+                <div id="config-editor" class="editor"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 差异对比面板 -->
+      <div id="panel-diff-viewer" class="tab-panel">
+        <div class="diff-viewer-layout">
+          <div class="diff-toolbar">
+            <div class="toolbar-left">
+              <button id="btn-open-left" class="btn btn-secondary">
+                <span class="btn-icon">📂</span>
+                打开左侧
+              </button>
+              <button id="btn-open-right" class="btn btn-secondary">
+                <span class="btn-icon">📂</span>
+                打开右侧
+              </button>
+              <div class="mode-selector">
+                <label for="diff-mode">模式:</label>
+                <select id="diff-mode" class="select-input">
+                  <option value="text">文本对比</option>
+                  <option value="folder">文件夹对比</option>
+                </select>
+              </div>
+            </div>
+            <div class="toolbar-center">
+              <button id="btn-compare" class="btn btn-primary">
+                <span class="btn-icon">🔍</span>
+                比较差异
+              </button>
+              <button id="btn-swap" class="btn btn-secondary" title="交换两侧">
+                <span class="btn-icon">⇄</span>
+              </button>
+            </div>
+            <div class="toolbar-right">
+              <div class="merge-controls">
+                <button id="btn-merge-all-right" class="btn btn-icon" title="将所有更改合并到右侧">→</button>
+                <button id="btn-merge-all-left" class="btn btn-icon" title="将所有更改合并到左侧">←</button>
+              </div>
+              <div id="diff-stats" class="diff-stats"></div>
+            </div>
+          </div>
+          
+          <div class="diff-content">
+            <!-- 文本对比模式 -->
+            <div id="diff-text-mode" class="diff-mode-panel active">
+              <div class="editor-container">
+                <div class="editor-panel">
+                  <div class="panel-header">
+                    <span class="panel-title" id="left-title">左侧文本</span>
+                    <div class="panel-actions">
+                      <button id="btn-save-left" class="btn btn-sm">保存</button>
+                      <button id="btn-clear-left" class="btn btn-sm">清空</button>
+                    </div>
+                  </div>
+                  <div id="editor-left" class="editor"></div>
+                </div>
+                
+                <div class="divider">
+                  <div class="divider-actions">
+                    <span class="diff-direction">→</span>
+                  </div>
+                </div>
+                
+                <div class="editor-panel">
+                  <div class="panel-header">
+                    <span class="panel-title" id="right-title">右侧文本</span>
+                    <div class="panel-actions">
+                      <button id="btn-save-right" class="btn btn-sm">保存</button>
+                      <button id="btn-clear-right" class="btn btn-sm">清空</button>
+                    </div>
+                  </div>
+                  <div id="editor-right" class="editor"></div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 文件夹对比模式 -->
+            <div id="diff-folder-mode" class="diff-mode-panel">
+              <div class="folder-compare-container">
+                <div class="folder-panel">
+                  <div class="panel-header">
+                    <span class="panel-title" id="folder-left-title">左侧文件夹</span>
+                    <div class="panel-actions">
+                      <span id="folder-left-path" class="folder-path">未选择</span>
+                    </div>
+                  </div>
+                  <div id="folder-left-tree" class="folder-tree">
+                    <div class="empty-state">
+                      <p>选择文件夹</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="divider">
+                  <div class="divider-actions">
+                    <span class="diff-direction">⇄</span>
+                  </div>
+                </div>
+                
+                <div class="folder-panel">
+                  <div class="panel-header">
+                    <span class="panel-title" id="folder-right-title">右侧文件夹</span>
+                    <div class="panel-actions">
+                      <span id="folder-right-path" class="folder-path">未选择</span>
+                    </div>
+                  </div>
+                  <div id="folder-right-tree" class="folder-tree">
+                    <div class="empty-state">
+                      <p>选择文件夹</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="folder-diff-summary">
+                <div id="folder-diff-stats" class="folder-diff-stats"></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 合并冲突解决向导 -->
+          <div id="merge-wizard" class="merge-wizard hidden">
+            <div class="wizard-header">
+              <h3>合并冲突解决向导</h3>
+              <button id="btn-close-wizard" class="btn btn-close">×</button>
+            </div>
+            <div class="wizard-content">
+              <div class="wizard-steps">
+                <div class="wizard-step active" data-step="1">
+                  <span class="step-number">1</span>
+                  <span class="step-text">选择合并方向</span>
+                </div>
+                <div class="wizard-step" data-step="2">
+                  <span class="step-number">2</span>
+                  <span class="step-text">选择保留内容</span>
+                </div>
+                <div class="wizard-step" data-step="3">
+                  <span class="step-number">3</span>
+                  <span class="step-text">预览结果</span>
+                </div>
+              </div>
+              
+              <div class="wizard-panels">
+                <div class="wizard-panel active" data-step="1">
+                  <div class="direction-options">
+                    <div class="direction-option" data-direction="left-to-right">
+                      <div class="direction-icon">→</div>
+                      <div class="direction-text">
+                        <h4>从左侧合并到右侧</h4>
+                        <p>将左侧的更改应用到右侧文件</p>
+                      </div>
+                    </div>
+                    <div class="direction-option" data-direction="right-to-left">
+                      <div class="direction-icon">←</div>
+                      <div class="direction-text">
+                        <h4>从右侧合并到左侧</h4>
+                        <p>将右侧的更改应用到左侧文件</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="wizard-panel" data-step="2">
+                  <div class="conflict-list" id="conflict-list">
+                    <div class="empty-state">
+                      <p>没有检测到冲突</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="wizard-panel" data-step="3">
+                  <div class="preview-container">
+                    <div class="preview-header">
+                      <span>预览结果</span>
+                    </div>
+                    <div id="merge-preview" class="merge-preview-editor"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="wizard-actions">
+                <button id="btn-wizard-prev" class="btn btn-secondary" disabled>上一步</button>
+                <button id="btn-wizard-next" class="btn btn-primary">下一步</button>
+                <button id="btn-wizard-apply" class="btn btn-success hidden">应用合并</button>
+                <button id="btn-wizard-cancel" class="btn btn-secondary">取消</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- 模态框容器 -->
+  <div id="modal-container" class="modal-container hidden">
+    <div id="modal-backdrop" class="modal-backdrop"></div>
+    <div id="modal-content" class="modal-content">
+      <!-- 动态内容 -->
+    </div>
+  </div>
+  
+  <!-- 提示信息 -->
+  <div id="toast-container" class="toast-container"></div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

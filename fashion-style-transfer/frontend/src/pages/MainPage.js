@@ -5,7 +5,6 @@ import { imageService } from '../services/api';
 import './MainPage.css';
 
 const { Dragger } = Upload;
-const { TabPane } = Tabs;
 
 const MainPage = ({ onImageUpload, onNext }) => {
   const [loading, setLoading] = useState(false);
@@ -179,6 +178,91 @@ const MainPage = ({ onImageUpload, onNext }) => {
     </div>
   );
 
+  const tabItems = [
+    {
+      key: 'upload',
+      label: <span><UploadOutlined /> 上传照片</span>,
+      children: (
+        <>
+          {!imagePreview ? (
+            <Dragger {...uploadProps}>
+              {renderUploadContent()}
+            </Dragger>
+          ) : (
+            <div>
+              {renderPreview()}
+              <Row gutter={16} style={{ marginTop: 16 }}>
+                <Col>
+                  <Button 
+                    type="primary" 
+                    className="btn-primary"
+                    onClick={handleUploadToServer}
+                    loading={loading || detecting}
+                    disabled={!uploadedFile}
+                  >
+                    {loading || detecting ? <Spin indicator={<LoadingOutlined spin />} /> : null}
+                    {detecting ? '检测关键点中...' : '开始处理'}
+                  </Button>
+                </Col>
+                <Col>
+                  <Button 
+                    className="btn-secondary"
+                    onClick={() => {
+                      setUploadedFile(null);
+                      setImagePreview(null);
+                      setKeypoints(null);
+                    }}
+                  >
+                    重新选择
+                  </Button>
+                </Col>
+              </Row>
+            </div>
+          )}
+        </>
+      ),
+    },
+    {
+      key: 'model',
+      label: <span><UserOutlined /> 选择模特</span>,
+      children: (
+        <>
+          <Row gutter={[16, 16]}>
+            {modelImages.map((model) => (
+              <Col span={6} key={model.id}>
+                <div
+                  className={`model-item ${selectedModel?.id === model.id ? 'selected' : ''}`}
+                  onClick={() => handleSelectModel(model)}
+                >
+                  <img 
+                    src={model.url} 
+                    alt={model.name} 
+                    className="model-image"
+                    loading="lazy"
+                  />
+                  <div className="model-name">{model.name}</div>
+                </div>
+              </Col>
+            ))}
+          </Row>
+          {selectedModel && (
+            <div style={{ marginTop: 16 }}>
+              <Button 
+                type="primary" 
+                className="btn-primary"
+                onClick={onNext}
+                disabled={detecting}
+              >
+                {detecting ? <Spin indicator={<LoadingOutlined spin />} /> : null}
+                继续换装
+              </Button>
+            </div>
+          )}
+        </>
+      ),
+    },
+  ];
+
   return (
     <div className="page-container">
       <Row gutter={24}>
@@ -186,81 +270,14 @@ const MainPage = ({ onImageUpload, onNext }) => {
           <Card
             title="上传图片"
             className="page-card"
-            headStyle={{ background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', borderBottom: '1px solid #DEB887' }}
+            styles={{
+              header: { 
+                background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', 
+                borderBottom: '1px solid #DEB887' 
+              }
+            }}
           >
-            <Tabs defaultActiveKey="upload" className="tabs-container">
-              <TabPane tab={<span><UploadOutlined /> 上传照片</span>} key="upload">
-                {!imagePreview ? (
-                  <Dragger {...uploadProps}>
-                    {renderUploadContent()}
-                  </Dragger>
-                ) : (
-                  <div>
-                    {renderPreview()}
-                    <Row gutter={16} style={{ marginTop: 16 }}>
-                      <Col>
-                        <Button 
-                          type="primary" 
-                          className="btn-primary"
-                          onClick={handleUploadToServer}
-                          loading={loading || detecting}
-                          disabled={!uploadedFile}
-                        >
-                          {loading || detecting ? <Spin indicator={<LoadingOutlined spin />} /> : null}
-                          {detecting ? '检测关键点中...' : '开始处理'}
-                        </Button>
-                      </Col>
-                      <Col>
-                        <Button 
-                          className="btn-secondary"
-                          onClick={() => {
-                            setUploadedFile(null);
-                            setImagePreview(null);
-                            setKeypoints(null);
-                          }}
-                        >
-                          重新选择
-                        </Button>
-                      </Col>
-                    </Row>
-                  </div>
-                )}
-              </TabPane>
-              
-              <TabPane tab={<span><UserOutlined /> 选择模特</span>} key="model">
-                <Row gutter={[16, 16]}>
-                  {modelImages.map((model) => (
-                    <Col span={6} key={model.id}>
-                      <div
-                        className={`model-item ${selectedModel?.id === model.id ? 'selected' : ''}`}
-                        onClick={() => handleSelectModel(model)}
-                      >
-                        <img 
-                          src={model.url} 
-                          alt={model.name} 
-                          className="model-image"
-                          loading="lazy"
-                        />
-                        <div className="model-name">{model.name}</div>
-                      </div>
-                    </Col>
-                  ))}
-                </Row>
-                {selectedModel && (
-                  <div style={{ marginTop: 16 }}>
-                    <Button 
-                      type="primary" 
-                      className="btn-primary"
-                      onClick={onNext}
-                      disabled={detecting}
-                    >
-                      {detecting ? <Spin indicator={<LoadingOutlined spin />} /> : null}
-                      继续换装
-                    </Button>
-                  </div>
-                )}
-              </TabPane>
-            </Tabs>
+            <Tabs defaultActiveKey="upload" className="tabs-container" items={tabItems} />
           </Card>
         </Col>
 
@@ -268,7 +285,12 @@ const MainPage = ({ onImageUpload, onNext }) => {
           <Card
             title="操作指南"
             className="page-card"
-            headStyle={{ background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', borderBottom: '1px solid #DEB887' }}
+            styles={{
+              header: { 
+                background: 'linear-gradient(90deg, #FFFAF0, #FFF8DC)', 
+                borderBottom: '1px solid #DEB887' 
+              }
+            }}
           >
             <div style={{ lineHeight: 2 }}>
               <h4 style={{ color: '#8B4513', marginBottom: 12 }}>📸 上传照片</h4>

@@ -1,0 +1,177 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.topology-graph-container {
+  width: 100%;
+  height: 600px;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.topology-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.topology-node {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.topology-node:hover {
+  opacity: 0.8;
+}
+
+.topology-node-selected {
+  stroke: #1890ff;
+  stroke-width: 3px;
+}
+
+.topology-edge {
+  fill: none;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.topology-edge-abnormal {
+  stroke: #ff4d4f;
+  stroke-width: 3px;
+  stroke-dasharray: 5, 5;
+  animation: dash 0.5s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+.topology-edge-normal {
+  stroke: #1890ff;
+  stroke-width: 2px;
+}
+
+.topology-edge-label {
+  font-size: 10px;
+  fill: #666;
+  pointer-events: none;
+}
+
+.topology-node-label {
+  font-size: 12px;
+  fill: #333;
+  pointer-events: none;
+  text-anchor: middle;
+}
+
+.topology-node-status-healthy {
+  fill: #52c41a;
+}
+
+.topology-node-status-degraded {
+  fill: #faad14;
+}
+
+.topology-node-status-error {
+  fill: #ff4d4f;
+}
+
+.topology-node-status-unknown {
+  fill: #bfbfbf;
+}
+
+.flow-line {
+  fill: none;
+  stroke: #1890ff;
+  stroke-width: 2px;
+  opacity: 0.6;
+}
+
+.flow-line-abnormal {
+  stroke: #ff4d4f;
+}
+
+.flow-marker {
+  fill: #1890ff;
+}
+
+.flow-marker-abnormal {
+  fill: #ff4d4f;
+}
+
+.service-detail-modal .ant-modal-body {
+  padding: 24px;
+}
+
+.metrics-card {
+  margin-bottom: 16px;
+}
+
+.instances-table {
+  margin-top: 16px;
+}
+
+.abnormal-indicator {
+  display: inline-flex;
+  align-items: center;
+  color: #ff4d4f;
+  font-weight: bold;
+}
+
+.abnormal-indicator .anticon {
+  margin-right: 4px;
+  animation: blink 1s linear infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.healthy-indicator {
+  display: inline-flex;
+  align-items: center;
+  color: #52c41a;
+  font-weight: bold;
+}
+
+.healthy-indicator .anticon {
+  margin-right: 4px;
+}
+
+.legend-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+}

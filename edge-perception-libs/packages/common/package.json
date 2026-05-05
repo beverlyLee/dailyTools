@@ -1,0 +1,41 @@
+{
+  "name": "@edge-perception/common",
+  "version": "1.0.0",
+  "description": "Common utilities for edge perception libraries",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w",
+    "clean": "rm -rf dist",
+    "lint": "eslint src --ext .ts",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "utils",
+    "common",
+    "edge-perception",
+    "types",
+    "helpers"
+  ],
+  "author": "",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/edge-perception-libs.git",
+    "directory": "packages/common"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

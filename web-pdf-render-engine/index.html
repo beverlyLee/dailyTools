@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web PDF 渲染与标注引擎</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #f5f5f5;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .file-input {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .file-input input {
+      display: none;
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background-color: #3498db;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #2980b9;
+    }
+
+    .btn-secondary {
+      background-color: #ecf0f1;
+      color: #2c3e50;
+    }
+
+    .btn-secondary:hover {
+      background-color: #bdc3c7;
+    }
+
+    .btn-small {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.8rem;
+    }
+
+    .toolbar {
+      background-color: white;
+      padding: 0.75rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e0e0e0;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .tools-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .tool-btn {
+      padding: 0.5rem 1rem;
+      border: 2px solid #e0e0e0;
+      background-color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .tool-btn.active {
+      background-color: #3498db;
+      color: white;
+      border-color: #3498db;
+    }
+
+    .tool-btn:hover:not(.active) {
+      border-color: #3498db;
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .color-picker {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .color-picker input[type="color"] {
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .stroke-width {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .stroke-width input[type="range"] {
+      width: 80px;
+    }
+
+    .page-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .page-controls input {
+      width: 60px;
+      padding: 0.3rem;
+      text-align: center;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+    }
+
+    .zoom-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .main-container {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .pdf-container {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      background-color: white;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    #annotationCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .status-bar {
+      background-color: white;
+      padding: 0.5rem 2rem;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: #7f8c8d;
+    }
+
+    .annotations-list {
+      width: 250px;
+      background-color: white;
+      border-left: 1px solid #e0e0e0;
+      padding: 1rem;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .annotations-list.visible {
+      display: block;
+    }
+
+    .annotations-list h3 {
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      color: #2c3e50;
+    }
+
+    .annotation-item {
+      padding: 0.75rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .annotation-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.25rem;
+    }
+
+    .annotation-type {
+      font-weight: 600;
+      color: #3498db;
+    }
+
+    .annotation-remove {
+      color: #e74c3c;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .annotation-remove:hover {
+      text-decoration: underline;
+    }
+
+    .annotation-page {
+      color: #7f8c8d;
+      font-size: 0.8rem;
+    }
+
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1rem;
+      color: #7f8c8d;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Web PDF 渲染与标注引擎</h1>
+    <div class="file-input">
+      <label for="fileUpload" class="btn btn-primary">选择 PDF 文件</label>
+      <input type="file" id="fileUpload" accept=".pdf">
+      <button id="saveAnnotations" class="btn btn-secondary">保存标注</button>
+      <button id="loadAnnotations" class="btn btn-secondary">加载标注</button>
+      <button id="toggleAnnotationsList" class="btn btn-secondary">显示标注列表</button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="tools-group">
+      <button class="tool-btn active" data-tool="select">选择工具</button>
+      <button class="tool-btn" data-tool="highlight">高亮</button>
+      <button class="tool-btn" data-tool="underline">下划线</button>
+      <button class="tool-btn" data-tool="textbox">文本框</button>
+      <button class="tool-btn" data-tool="freehand">手绘涂鸦</button>
+    </div>
+
+    <div class="controls-group">
+      <div class="color-picker">
+        <label for="colorPicker">颜色:</label>
+        <input type="color" id="colorPicker" value="#fdd835">
+      </div>
+
+      <div class="stroke-width">
+        <label for="strokeWidth">粗细:</label>
+        <input type="range" id="strokeWidth" min="1" max="10" value="3">
+        <span id="strokeWidthValue">3px</span>
+      </div>
+    </div>
+
+    <div class="page-controls">
+      <button id="prevPage" class="btn btn-secondary btn-small">上一页</button>
+      <input type="number" id="currentPage" value="1" min="1">
+      <span>/ <span id="totalPages">0</span></span>
+      <button id="nextPage" class="btn btn-secondary btn-small">下一页</button>
+    </div>
+
+    <div class="zoom-controls">
+      <button id="zoomOut" class="btn btn-secondary btn-small">-</button>
+      <span id="zoomLevel">100%</span>
+      <button id="zoomIn" class="btn btn-secondary btn-small">+</button>
+      <button id="resetZoom" class="btn btn-secondary btn-small">重置</button>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="pdf-container" id="pdfContainer">
+      <div class="canvas-wrapper" id="canvasWrapper">
+        <canvas id="pdfCanvas"></canvas>
+        <canvas id="annotationCanvas"></canvas>
+      </div>
+      <div class="loading" id="loading">请选择一个 PDF 文件</div>
+    </div>
+
+    <div class="annotations-list" id="annotationsList">
+      <h3>当前页标注</h3>
+      <div id="annotationsContent">
+        <p>暂无标注</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <span id="statusText">就绪</span>
+    <span id="fileInfo">未加载文件</span>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

@@ -169,8 +169,13 @@
 
             <div class="info-row">
               <span class="info-label">风格：</span>
-              {@const badge = getStyleBadge(composition.folk_ratio, composition.modern_ratio)}
-              <span class="badge {badge.class}">{badge.label}</span>
+              {#if composition.folk_ratio > 0.7}
+                <span class="badge badge-warning">传统民乐</span>
+              {:else if composition.modern_ratio > 0.7}
+                <span class="badge badge-primary">现代电子</span>
+              {:else}
+                <span class="badge badge-success">国潮融合</span>
+              {/if}
             </div>
 
             <div class="style-preview">

@@ -1,12 +1,15 @@
 const { ipcRenderer } = require('electron');
-const { getLineBasedDiff, mergeChange } = require('./diff');
+const { getLineBasedDiff, getDetailedLineDiff, mergeChange, mergeSingleChange, getCharDiffForLine } = require('./diff');
 
 let leftEditor = null;
 let rightEditor = null;
 let monaco = null;
 let currentDiffResult = null;
+let currentDetailedDiff = null;
 let leftDecorations = [];
 let rightDecorations = [];
+let leftGutterWidgets = [];
+let rightGutterWidgets = [];
 let leftFileName = null;
 let rightFileName = null;
 let leftFilePath = null;
@@ -241,11 +244,13 @@ function compareFiles() {
   clearDiffHighlights();
   
   currentDiffResult = getLineBasedDiff(leftText, rightText);
+  currentDetailedDiff = getDetailedLineDiff(leftText, rightText);
   
   const diffs = dmp.diff_main(leftText, rightText);
   dmp.diff_cleanupSemantic(diffs);
   
   applyDiffHighlights(diffs);
+  addMergeButtons();
   updateDiffStats();
   showMergeHint();
 }
@@ -340,11 +345,20 @@ function applyDiffHighlights(diffs) {
 function clearDiffHighlights() {
   if (leftEditor) {
     leftDecorations = leftEditor.deltaDecorations(leftDecorations, []);
+    for (const widget of leftGutterWidgets) {
+      leftEditor.removeContentWidget(widget);
+    }
+    leftGutterWidgets = [];
   }
   if (rightEditor) {
     rightDecorations = rightEditor.deltaDecorations(rightDecorations, []);
+    for (const widget of rightGutterWidgets) {
+      rightEditor.removeContentWidget(widget);
+    }
+    rightGutterWidgets = [];
   }
   currentDiffResult = null;
+  currentDetailedDiff = null;
   document.getElementById('diff-stats').textContent = '';
   hideMergeHint();
 }
@@ -396,6 +410,106 @@ function showMergeHint() {
 
 function hideMergeHint() {
   document.getElementById('merge-hint').classList.add('hidden');
+}
+
+function addMergeButtons() {
+  if (!currentDetailedDiff) return;
+  
+  const blocks = currentDetailedDiff.blocks;
+  
+  blocks.forEach((block, blockIndex) => {
+    if (block.type === 'equal') return;
+    
+    if (block.leftLines.length > 0) {
+      const startLine = block.leftLines[0].lineNumber;
+      const widget = createMergeWidget('left', startLine, blockIndex, block.type);
+      leftEditor.addContentWidget(widget);
+      leftGutterWidgets.push(widget);
+    }
+    
+    if (block.rightLines.length > 0) {
+      const startLine = block.rightLines[0].lineNumber;
+      const widget = createMergeWidget('right', startLine, blockIndex, block.type);
+      rightEditor.addContentWidget(widget);
+      rightGutterWidgets.push(widget);
+    }
+  });
+}
+
+function createMergeWidget(side, lineNumber, blockIndex, blockType) {
+  const id = `merge-widget-${side}-${lineNumber}-${Date.now()}`;
+  const domNode = document.createElement('div');
+  domNode.className = 'merge-widget';
+  domNode.style.marginTop = '2px';
+  
+  const buttonToRight = document.createElement('button');
+  buttonToRight.className = 'merge-btn merge-btn-right';
+  buttonToRight.title = side === 'left' ? '将此更改合并到右侧' : '将此更改应用到左侧';
+  buttonToRight.innerHTML = '→';
+  buttonToRight.onclick = (e) => {
+    e.stopPropagation();
+    mergeSingleBlock(blockIndex, 'right');
+  };
+  
+  const buttonToLeft = document.createElement('button');
+  buttonToLeft.className = 'merge-btn merge-btn-left';
+  buttonToLeft.title = side === 'right' ? '将此更改合并到左侧' : '将此更改应用到右侧';
+  buttonToLeft.innerHTML = '←';
+  buttonToLeft.onclick = (e) => {
+    e.stopPropagation();
+    mergeSingleBlock(blockIndex, 'left');
+  };
+  
+  if (side === 'left') {
+    domNode.appendChild(buttonToRight);
+  } else {
+    domNode.appendChild(buttonToLeft);
+  }
+  
+  return {
+    getId: function() { return id; },
+    getDomNode: function() { return domNode; },
+    getPosition: function() {
+      return {
+        position: {
+          lineNumber: lineNumber + 1,
+          column: 1
+        },
+        preference: [monaco.editor.ContentWidgetPositionPreference.TOP_LEFT]
+      };
+    }
+  };
+}
+
+function mergeSingleBlock(blockIndex, direction) {
+  if (!currentDetailedDiff) {
+    alert('请先比较差异');
+    return;
+  }
+  
+  const leftText = leftEditor.getValue();
+  const rightText = rightEditor.getValue();
+  
+  const result = mergeSingleChange(direction, blockIndex, leftText, rightText);
+  
+  if (result.changed) {
+    leftEditor.setValue(result.leftText);
+    rightEditor.setValue(result.rightText);
+    clearDiffHighlights();
+    
+    const newLeftText = leftEditor.getValue();
+    const newRightText = rightEditor.getValue();
+    
+    currentDiffResult = getLineBasedDiff(newLeftText, newRightText);
+    currentDetailedDiff = getDetailedLineDiff(newLeftText, newRightText);
+    
+    const diffs = dmp.diff_main(newLeftText, newRightText);
+    dmp.diff_cleanupSemantic(diffs);
+    
+    applyDiffHighlights(diffs);
+    addMergeButtons();
+    updateDiffStats();
+  }
 }
 
 function mergeAll(direction) {

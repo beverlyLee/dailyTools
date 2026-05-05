@@ -1,0 +1,1 @@
+export { VAD } from './VAD';

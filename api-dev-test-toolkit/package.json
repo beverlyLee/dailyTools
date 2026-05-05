@@ -1,0 +1,37 @@
+{
+  "name": "api-dev-test-toolkit",
+  "version": "1.0.0",
+  "description": "API 开发与测试工具集 - 智能生成 API 文档和测试用例",
+  "main": "src/cli/index.js",
+  "bin": {
+    "api-toolkit": "./src/cli/index.js"
+  },
+  "scripts": {
+    "start": "node src/cli/index.js",
+    "test": "node tests/run-tests.js"
+  },
+  "keywords": [
+    "api",
+    "documentation",
+    "testing",
+    "test-generator",
+    "jsdoc",
+    "openapi",
+    "postman"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "openai": "^4.24.7",
+    "glob": "^10.3.10",
+    "fs-extra": "^11.2.0",
+    "chalk": "^5.3.0",
+    "ora": "^7.0.1",
+    "yaml": "^2.3.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "type": "module"
+}

@@ -1,0 +1,21 @@
+{
+  "name": "distributed-debug-console",
+  "version": "0.1.0",
+  "description": "分布式系统调试台 - 基于 Tauri + D3.js + Rust",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^1.5.3",
+    "d3": "^7.8.5",
+    "lucene-query-parser": "^1.0.2"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.5.11",
+    "vite": "^5.0.12"
+  }
+}

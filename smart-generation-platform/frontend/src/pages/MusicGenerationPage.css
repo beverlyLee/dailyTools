@@ -1,0 +1,91 @@
+.preset-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* 钢琴卷帘样式 */
+.piano-roll-wrapper {
+  min-height: 400px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.piano-roll-container {
+  padding: 16px;
+  min-width: 100%;
+}
+
+.piano-roll-svg {
+  display: block;
+  background: #fff;
+  border-radius: 4px;
+}
+
+.piano-roll-empty {
+  min-height: 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 音符块悬停效果 */
+.note-rect {
+  transition: all 0.2s ease;
+}
+
+.note-rect:hover {
+  opacity: 0.8;
+}
+
+/* 音符编辑面板 */
+.note-editor-panel {
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+/* 播放指示器动画 */
+@keyframes pulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+.piano-roll-svg line[stroke="#ff4d4f"] {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+/* 滑块标签 */
+.ant-slider-mark-text {
+  white-space: nowrap;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .piano-roll-wrapper {
+    min-height: 300px;
+  }
+  
+  .preset-buttons {
+    justify-content: flex-start;
+  }
+}
+
+/* 历史记录卡片 */
+.ant-card-meta-description {
+  max-width: 100%;
+}
+
+.ant-card-meta-description .ant-typography {
+  display: block;
+}
+
+/* 加载状态 */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}

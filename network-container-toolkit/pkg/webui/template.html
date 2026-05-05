@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNS Server Web Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        header h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        header p {
+            text-align: center;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-tab {
+            padding: 12px 24px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .nav-tab:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .nav-tab.active {
+            background: #667eea;
+            color: white;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card h3 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .stat-card p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .stat-card:nth-child(2) {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .stat-card:nth-child(3) {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .stat-card:nth-child(4) {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        tr:hover {
+            background: #f5f7fa;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+        .refresh-btn:hover {
+            background: #5a6fd6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔒 DNS Server Dashboard</h1>
+            <p>Real-time monitoring and management for your local DNS server</p>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('stats')">📊 Statistics</button>
+            <button class="nav-tab" onclick="showSection('logs')">📋 Query Logs</button>
+            <button class="nav-tab" onclick="showSection('cache')">💾 Cache</button>
+        </div>
+
+        <div id="stats-section" class="content-section active">
+            <div class="card">
+                <h2>Server Statistics</h2>
+                <div id="stats-content" class="loading">Loading statistics...</div>
+            </div>
+        </div>
+
+        <div id="logs-section" class="content-section">
+            <div class="card">
+                <h2 style="display: flex; justify-content: space-between; align-items: center;">
+                    Recent Query Logs
+                    <button class="refresh-btn" onclick="refreshLogs()">🔄 Refresh</button>
+                </h2>
+                <div id="logs-content" class="loading">Loading query logs...</div>
+            </div>
+        </div>
+
+        <div id="cache-section" class="content-section">
+            <div class="card">
+                <h2 style="display: flex; justify-content: space-between; align-items: center;">
+                    DNS Cache
+                    <button class="refresh-btn" onclick="refreshCache()">🔄 Refresh</button>
+                </h2>
+                <div id="cache-content" class="loading">Loading cache data...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected section and activate tab
+            document.getElementById(sectionName + '-section').classList.add('active');
+            event.target.classList.add('active');
+            
+            // Refresh data for selected section
+            if (sectionName === 'stats') {
+                refreshStats();
+            } else if (sectionName === 'logs') {
+                refreshLogs();
+            } else if (sectionName === 'cache') {
+                refreshCache();
+            }
+        }
+
+        async function refreshStats() {
+            const content = document.getElementById('stats-content');
+            content.innerHTML = '<div class="loading">Loading statistics...</div>';
+            
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+                
+                const uptimeHours = Math.floor((Date.now() - new Date(stats.StartTime * 1000)) / (1000 * 60 * 60));
+                const cacheHitRate = stats.TotalQueries > 0 ? 
+                    ((stats.CacheHits / stats.TotalQueries) * 100).toFixed(1) : 0;
+                
+                content.innerHTML = '\
+                    <div class="stats-grid">\
+                        <div class="stat-card">\
+                            <h3>' + stats.TotalQueries.toLocaleString() + '</h3>\
+                            <p>Total Queries</p>\
+                        </div>\
+                        <div class="stat-card">\
+                            <h3>' + stats.CacheHits.toLocaleString() + '</h3>\
+                            <p>Cache Hits</p>\
+                        </div>\
+                        <div class="stat-card">\
+                            <h3>' + cacheHitRate + '%</h3>\
+                            <p>Cache Hit Rate</p>\
+                        </div>\
+                        <div class="stat-card">\
+                            <h3>' + uptimeHours + 'h</h3>\
+                            <p>Uptime</p>\
+                        </div>\
+                    </div>\
+                    <table style="margin-top: 30px;">\
+                        <thead>\
+                            <tr>\
+                                <th>Metric</th>\
+                                <th>Count</th>\
+                            </tr>\
+                        </thead>\
+                        <tbody>\
+                            <tr>\
+                                <td>Cache Misses</td>\
+                                <td>' + stats.CacheMisses.toLocaleString() + '</td>\
+                            </tr>\
+                            <tr>\
+                                <td>Recursive Queries</td>\
+                                <td>' + stats.RecursiveQueries.toLocaleString() + '</td>\
+                            </tr>\
+                            <tr>\
+                                <td>Hosts File Queries</td>\
+                                <td>' + stats.HostsQueries.toLocaleString() + '</td>\
+                            </tr>\
+                            <tr>\
+                                <td>DoT Queries</td>\
+                                <td>' + stats.DOTQueries.toLocaleString() + '</td>\
+                            </tr>\
+                            <tr>\
+                                <td>DoH Queries</td>\
+                                <td>' + stats.DOHQueries.toLocaleString() + '</td>\
+                            </tr>\
+                            <tr>\
+                                <td>Error Queries</td>\
+                                <td>' + stats.ErrorQueries.toLocaleString() + '</td>\
+                            </tr>\
+                        </tbody>\
+                    </table>\
+                ';
+            } catch (error) {
+                content.innerHTML = '<div class="loading">Failed to load statistics</div>';
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function refreshLogs() {
+            const content = document.getElementById('logs-content');
+            content.innerHTML = '<div class="loading">Loading query logs...</div>';
+            
+            try {
+                const response = await fetch('/api/logs');
+                const logs = await response.json();
+                
+                if (logs.length === 0) {
+                    content.innerHTML = '<div class="loading">No query logs yet</div>';
+                    return;
+                }
+
+                let tableHTML = '\
+                    <table>\
+                        <thead>\
+                            <tr>\
+                                <th>Time</th>\
+                                <th>Client IP</th>\
+                                <th>Query</th>\
+                                <th>Source</th>\
+                                <th>Response Time</th>\
+                                <th>Status</th>\
+                            </tr>\
+                        </thead>\
+                        <tbody>\
+                ';
+
+                logs.forEach(log => {
+                    const time = new Date(log.Timestamp * 1000);
+                    const timeStr = time.toLocaleTimeString();
+                    const responseTime = (log.ResponseTime / 1000000).toFixed(2); // ms
+                    
+                    let sourceBadge = '';
+                    switch(log.Source) {
+                        case 'cache':
+                            sourceBadge = '<span class="badge badge-info">Cache</span>';
+                            break;
+                        case 'hosts':
+                            sourceBadge = '<span class="badge badge-warning">Hosts</span>';
+                            break;
+                        case 'upstream':
+                            sourceBadge = '<span class="badge badge-success">Upstream</span>';
+                            break;
+                        default:
+                            sourceBadge = '<span class="badge">' + log.Source + '</span>';
+                    }
+
+                    const statusBadge = log.Success ? 
+                        '<span class="badge badge-success">Success</span>' : 
+                        '<span class="badge badge-danger">Failed</span>';
+
+                    tableHTML += '\
+                        <tr>\
+                            <td>' + timeStr + '</td>\
+                            <td>' + log.ClientIP + '</td>\
+                            <td>' + log.Question.Name + ' (Type ' + log.Question.Type + ')</td>\
+                            <td>' + sourceBadge + '</td>\
+                            <td>' + responseTime + ' ms</td>\
+                            <td>' + statusBadge + '</td>\
+                        </tr>\
+                    ';
+                });
+
+                tableHTML += '\
+                        </tbody>\
+                    </table>\
+                ';
+
+                content.innerHTML = tableHTML;
+            } catch (error) {
+                content.innerHTML = '<div class="loading">Failed to load query logs</div>';
+                console.error('Error loading logs:', error);
+            }
+        }
+
+        async function refreshCache() {
+            const content = document.getElementById('cache-content');
+            content.innerHTML = '<div class="loading">Loading cache data...</div>';
+            
+            try {
+                const response = await fetch('/api/cache');
+                const cache = await response.json();
+                
+                const entries = Object.entries(cache.Entries || {});
+                const lastCleaned = new Date(cache.LastCleaned * 1000);
+                
+                let contentHTML = '\
+                    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 30px;">\
+                        <div class="stat-card">\
+                            <h3>' + entries.length + '</h3>\
+                            <p>Entries</p>\
+                        </div>\
+                        <div class="stat-card">\
+                            <h3>' + cache.Size + '</h3>\
+                            <p>Current Size</p>\
+                        </div>\
+                        <div class="stat-card">\
+                            <h3>' + cache.MaxSize + '</h3>\
+                            <p>Max Size</p>\
+                        </div>\
+                    </div>\
+                    <p style="margin-bottom: 20px; color: #666;">\
+                        <strong>Last Cleaned:</strong> ' + lastCleaned.toLocaleString() + '\
+                    </p>\
+                ';
+
+                if (entries.length > 0) {
+                    contentHTML += '\
+                        <table>\
+                            <thead>\
+                                <tr>\
+                                    <th>Key</th>\
+                                    <th>Source</th>\
+                                    <th>Created At</th>\
+                                    <th>Last Used</th>\
+                                    <th>TTL</th>\
+                                </tr>\
+                            </thead>\
+                            <tbody>\
+                    ';
+
+                    entries.forEach(([key, entry]) => {
+                        const createdAt = new Date(entry.CreatedAt * 1000);
+                        const lastUsed = new Date(entry.LastUsed * 1000);
+                        const ttlMinutes = Math.floor(entry.TTL / 60);
+
+                        contentHTML += '\
+                            <tr>\
+                                <td>' + key + '</td>\
+                                <td><span class="badge badge-info">' + entry.Source + '</span></td>\
+                                <td>' + createdAt.toLocaleString() + '</td>\
+                                <td>' + lastUsed.toLocaleString() + '</td>\
+                                <td>' + ttlMinutes + ' min</td>\
+                            </tr>\
+                        ';
+                    });
+
+                    contentHTML += '\
+                            </tbody>\
+                        </table>\
+                    ';
+                } else {
+                    contentHTML += '<div class="loading">No cache entries yet</div>';
+                }
+
+                content.innerHTML = contentHTML;
+            } catch (error) {
+                content.innerHTML = '<div class="loading">Failed to load cache data</div>';
+                console.error('Error loading cache:', error);
+            }
+        }
+
+        // Initial load
+        refreshStats();
+        refreshLogs();
+        refreshCache();
+
+        // Auto-refresh every 10 seconds
+        setInterval(() => {
+            refreshStats();
+        }, 10000);
+    </script>
+</body>
+</html>

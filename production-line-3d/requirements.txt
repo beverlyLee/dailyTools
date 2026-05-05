@@ -1,0 +1,11 @@
+# 产线 3D 监控服务依赖
+websockets==12.0
+numpy>=1.24.0
+python-dateutil>=2.8.2
+
+# 可选依赖 - 用于与 Django 后端集成
+requests>=2.31.0
+aiohttp>=3.9.0
+
+# 可选依赖 - 用于 Unity 集成
+# 需要在 Unity 环境中安装

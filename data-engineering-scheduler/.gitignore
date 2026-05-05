@@ -1,0 +1,38 @@
+# Dependencies
+frontend/node_modules/
+backend/venv/
+backend/env/
+
+# Build outputs
+frontend/build/
+backend/dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Airflow
+backend/airflow/logs/
+backend/airflow/dags/*.pyc
+
+# Database
+*.db
+*.sqlite
+
+# Docker volumes
+postgres_data/

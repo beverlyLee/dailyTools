@@ -1,0 +1,114 @@
+{
+    "pages": [
+        {
+            "path": "pages/index/index",
+            "style": {
+                "navigationBarTitleText": "商务智能系统",
+                "navigationStyle": "default"
+            }
+        },
+        {
+            "path": "pages/translation/index",
+            "style": {
+                "navigationBarTitleText": "实时翻译",
+                "navigationStyle": "default"
+            }
+        },
+        {
+            "path": "pages/translation/history",
+            "style": {
+                "navigationBarTitleText": "翻译历史",
+                "navigationStyle": "default"
+            }
+        },
+        {
+            "path": "pages/translation/phrases",
+            "style": {
+                "navigationBarTitleText": "商务短语",
+                "navigationStyle": "default"
+            }
+        },
+        {
+            "path": "pages/invoice/index",
+            "style": {
+                "navigationBarTitleText": "发票核验",
+                "navigationStyle": "default"
+            }
+        },
+        {
+            "path": "pages/invoice/list",
+            "style": {
+                "navigationBarTitleText": "发票列表",
+                "navigationStyle": "default"
+            }
+        },
+        {
+            "path": "pages/invoice/detail",
+            "style": {
+                "navigationBarTitleText": "发票详情",
+                "navigationStyle": "default"
+            }
+        },
+        {
+            "path": "pages/invoice/verify",
+            "style": {
+                "navigationBarTitleText": "核验结果",
+                "navigationStyle": "default"
+            }
+        },
+        {
+            "path": "pages/company/index",
+            "style": {
+                "navigationBarTitleText": "公司管理",
+                "navigationStyle": "default"
+            }
+        },
+        {
+            "path": "pages/reimbursement/index",
+            "style": {
+                "navigationBarTitleText": "报销管理",
+                "navigationStyle": "default"
+            }
+        }
+    ],
+    "globalStyle": {
+        "navigationBarTextStyle": "white",
+        "navigationBarTitleText": "商务智能系统",
+        "navigationBarBackgroundColor": "#1E88E5",
+        "backgroundColor": "#F5F5F5",
+        "backgroundTextStyle": "dark"
+    },
+    "tabBar": {
+        "color": "#999999",
+        "selectedColor": "#1E88E5",
+        "borderStyle": "black",
+        "backgroundColor": "#FFFFFF",
+        "list": [
+            {
+                "pagePath": "pages/index/index",
+                "text": "首页",
+                "iconPath": "static/icons/home.png",
+                "selectedIconPath": "static/icons/home-active.png"
+            },
+            {
+                "pagePath": "pages/translation/index",
+                "text": "翻译",
+                "iconPath": "static/icons/translate.png",
+                "selectedIconPath": "static/icons/translate-active.png"
+            },
+            {
+                "pagePath": "pages/invoice/index",
+                "text": "发票",
+                "iconPath": "static/icons/invoice.png",
+                "selectedIconPath": "static/icons/invoice-active.png"
+            },
+            {
+                "pagePath": "pages/reimbursement/index",
+                "text": "报销",
+                "iconPath": "static/icons/reimburse.png",
+                "selectedIconPath": "static/icons/reimburse-active.png"
+            }
+        ]
+    },
+    "uniIdRouter": {}
+}

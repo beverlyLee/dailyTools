@@ -1,0 +1,56 @@
+{
+  "name": "edge-perception-libs",
+  "version": "1.0.0",
+  "description": "Edge-side perception libraries including face detection and voice wakeup detection",
+  "private": true,
+  "workspaces": [
+    "packages/common",
+    "packages/face-detection",
+    "packages/voice-wakeup",
+    "examples/face-detection-demo",
+    "examples/voice-wakeup-demo"
+  ],
+  "scripts": {
+    "clean": "npm run clean:common && npm run clean:face && npm run clean:voice",
+    "clean:common": "cd packages/common && npm run clean",
+    "clean:face": "cd packages/face-detection && npm run clean",
+    "clean:voice": "cd packages/voice-wakeup && npm run clean",
+    "build": "npm run build:common && npm run build:face && npm run build:voice",
+    "build:common": "cd packages/common && npm run build",
+    "build:face": "cd packages/face-detection && npm run build",
+    "build:voice": "cd packages/voice-wakeup && npm run build",
+    "build:rust": "npm run build:rust:face && npm run build:rust:voice",
+    "build:rust:face": "cd packages/face-detection && npm run build:rust",
+    "build:rust:voice": "cd packages/voice-wakeup && npm run build:rust",
+    "dev": "npm run dev:face-demo",
+    "dev:face-demo": "cd examples/face-detection-demo && npm run dev",
+    "dev:voice-demo": "cd examples/voice-wakeup-demo && npm run dev",
+    "test": "npm run test:face && npm run test:voice",
+    "test:face": "cd packages/face-detection && npm run test",
+    "test:voice": "cd packages/voice-wakeup && npm run test",
+    "lint": "npm run lint:common && npm run lint:face && npm run lint:voice",
+    "lint:common": "cd packages/common && npm run lint",
+    "lint:face": "cd packages/face-detection && npm run lint",
+    "lint:voice": "cd packages/voice-wakeup && npm run lint",
+    "publish": "npm run publish:common && npm run publish:face && npm run publish:voice",
+    "publish:common": "cd packages/common && npm publish --access public",
+    "publish:face": "cd packages/face-detection && npm publish --access public",
+    "publish:voice": "cd packages/voice-wakeup && npm publish --access public"
+  },
+  "keywords": [
+    "edge-computing",
+    "webassembly",
+    "wasm",
+    "rust",
+    "face-detection",
+    "voice-wakeup",
+    "vad",
+    "computer-vision",
+    "audio-processing"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

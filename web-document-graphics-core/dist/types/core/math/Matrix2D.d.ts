@@ -1,0 +1,62 @@
+import { Point } from '../utils/GeometryUtils';
+
+export declare class Matrix2D {
+    a: number;
+    b: number;
+    c: number;
+    d: number;
+    tx: number;
+    ty: number;
+    constructor(a?: number, b?: number, c?: number, d?: number, tx?: number, ty?: number);
+    static identity(): Matrix2D;
+    static translate(x: number, y: number): Matrix2D;
+    static scale(sx: number, sy?: number): Matrix2D;
+    static rotate(angle: number): Matrix2D;
+    static rotateDegrees(degrees: number): Matrix2D;
+    static shear(sx: number, sy: number): Matrix2D;
+    translate(x: number, y: number): this;
+    scale(sx: number, sy?: number): this;
+    rotate(angle: number): this;
+    rotateDegrees(degrees: number): this;
+    shear(sx: number, sy: number): this;
+    multiply(matrix: Matrix2D): this;
+    prepend(matrix: Matrix2D): this;
+    invert(): this;
+    inverted(): Matrix2D;
+    transformPoint(point: Point): Point;
+    inverseTransformPoint(point: Point): Point;
+    transformPoints(points: Point[]): Point[];
+    clone(): Matrix2D;
+    copy(matrix: Matrix2D): this;
+    reset(): this;
+    isIdentity(): boolean;
+    equals(matrix: Matrix2D, epsilon?: number): boolean;
+    getDeterminant(): number;
+    getScaleX(): number;
+    getScaleY(): number;
+    getRotation(): number;
+    getRotationDegrees(): number;
+    getTranslation(): Point;
+    applyToContext(ctx: CanvasRenderingContext2D): void;
+    toArray(): [number, number, number, number, number, number];
+    fromArray(arr: [number, number, number, number, number, number]): this;
+    toJSON(): {
+        a: number;
+        b: number;
+        c: number;
+        d: number;
+        tx: number;
+        ty: number;
+    };
+    fromJSON(json: {
+        a: number;
+        b: number;
+        c: number;
+        d: number;
+        tx: number;
+        ty: number;
+    }): this;
+    static multiplyMatrices(m1: Matrix2D, m2: Matrix2D): Matrix2D;
+    static rotateAround(angle: number, pivot: Point): Matrix2D;
+    static scaleAround(sx: number, sy: number, pivot: Point): Matrix2D;
+}

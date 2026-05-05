@@ -1,0 +1,34 @@
+{
+  "name": "smart-contract-lifecycle-frontend",
+  "version": "1.0.0",
+  "description": "智能合同全生命周期管理平台前端",
+  "private": true,
+  "scripts": {
+    "start": "umi dev",
+    "build": "umi build",
+    "postinstall": "umi generate tmp",
+    "prettier": "prettier --write '**/*.{js,jsx,tsx,ts,less,md,json}'",
+    "test": "umi-test",
+    "test:coverage": "umi-test --coverage"
+  },
+  "dependencies": {
+    "@ant-design/charts": "^1.4.2",
+    "@ant-design/icons": "^4.7.0",
+    "@ant-design/pro-card": "^1.20.6",
+    "@ant-design/pro-form": "^1.64.0",
+    "@ant-design/pro-layout": "^6.34.10",
+    "@ant-design/pro-table": "^2.71.10",
+    "antd": "^4.23.4",
+    "axios": "^0.27.2",
+    "dayjs": "^1.11.5",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "umi": "^3.5.32"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.47",
+    "@types/react-dom": "^17.0.17",
+    "prettier": "^2.7.1",
+    "typescript": "^4.8.3"
+  }
+}

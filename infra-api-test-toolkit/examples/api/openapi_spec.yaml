@@ -1,0 +1,424 @@
+openapi: "3.0.3"
+info:
+  title: 用户管理 API
+  description: 用于管理用户和角色的 RESTful API
+  version: "1.0.0"
+  contact:
+    name: API 支持团队
+    email: support@example.com
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: 开发服务器
+  - url: https://api.example.com/v1
+    description: 生产服务器
+
+tags:
+  - name: Users
+    description: 用户管理操作
+  - name: Roles
+    description: 角色管理操作
+
+paths:
+  /users:
+    get:
+      tags:
+        - Users
+      summary: 获取用户列表
+      description: 返回所有用户的列表，支持分页和筛选
+      parameters:
+        - name: page
+          in: query
+          description: 页码
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: 每页数量
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: status
+          in: query
+          description: 用户状态筛选
+          required: false
+          schema:
+            type: string
+            enum: [active, inactive, suspended]
+      responses:
+        '200':
+          description: 成功返回用户列表
+          headers:
+            X-Total-Count:
+              description: 总用户数
+              schema:
+                type: integer
+            X-Page-Count:
+              description: 总页数
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+              example:
+                data:
+                  - id: "1"
+                    name: "张三"
+                    email: "zhangsan@example.com"
+                    status: "active"
+                    role: "admin"
+                    createdAt: "2024-01-15T10:30:00Z"
+                  - id: "2"
+                    name: "李四"
+                    email: "lisi@example.com"
+                    status: "active"
+                    role: "user"
+                    createdAt: "2024-01-16T14:20:00Z"
+                pagination:
+                  page: 1
+                  limit: 10
+                  total: 100
+                  pages: 10
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 禁止访问
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Users
+      summary: 创建新用户
+      description: 创建一个新的用户账户
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+            example:
+              name: "王五"
+              email: "wangwu@example.com"
+              password: "StrongPass123!"
+              role: "user"
+      responses:
+        '201':
+          description: 用户创建成功
+          headers:
+            Location:
+              description: 新创建用户的 URL
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 用户已存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/{userId}:
+    get:
+      tags:
+        - Users
+      summary: 获取用户详情
+      description: 根据用户 ID 获取用户的详细信息
+      parameters:
+        - name: userId
+          in: path
+          description: 用户 ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回用户详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Users
+      summary: 更新用户信息
+      description: 更新指定用户的信息
+      parameters:
+        - name: userId
+          in: path
+          description: 用户 ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: 用户更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Users
+      summary: 删除用户
+      description: 删除指定的用户
+      parameters:
+        - name: userId
+          in: path
+          description: 用户 ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 用户删除成功
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /roles:
+    get:
+      tags:
+        - Roles
+      summary: 获取角色列表
+      description: 返回所有可用的角色列表
+      responses:
+        '200':
+          description: 成功返回角色列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+
+components:
+  schemas:
+    User:
+      type: object
+      description: 用户对象
+      properties:
+        id:
+          type: string
+          description: 用户唯一标识符
+          example: "1"
+        name:
+          type: string
+          description: 用户姓名
+          minLength: 1
+          maxLength: 100
+          example: "张三"
+        email:
+          type: string
+          format: email
+          description: 用户邮箱地址
+          example: "zhangsan@example.com"
+        status:
+          type: string
+          description: 用户状态
+          enum: [active, inactive, suspended]
+          example: "active"
+        role:
+          type: string
+          description: 用户角色
+          example: "admin"
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+          example: "2024-01-15T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新时间
+          example: "2024-01-15T10:30:00Z"
+      required:
+        - id
+        - name
+        - email
+        - status
+        - createdAt
+
+    CreateUserRequest:
+      type: object
+      description: 创建用户请求
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          maxLength: 100
+        role:
+          type: string
+          enum: [admin, user, guest]
+          default: user
+      required:
+        - name
+        - email
+        - password
+
+    UpdateUserRequest:
+      type: object
+      description: 更新用户请求
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        role:
+          type: string
+          enum: [admin, user, guest]
+
+    Role:
+      type: object
+      description: 角色对象
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+
+    Pagination:
+      type: object
+      description: 分页信息
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        limit:
+          type: integer
+          minimum: 1
+        total:
+          type: integer
+          minimum: 0
+        pages:
+          type: integer
+          minimum: 0
+      required:
+        - page
+        - limit
+        - total
+        - pages
+
+    Error:
+      type: object
+      description: 错误响应
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "VALIDATION_ERROR"
+            message:
+              type: string
+              example: "请求参数验证失败"
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+      required:
+        - error
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 使用 JWT Token 进行身份验证
+
+security:
+  - BearerAuth: []

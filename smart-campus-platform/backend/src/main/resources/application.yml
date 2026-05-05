@@ -1,0 +1,32 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: smart-campus-platform
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+
+logging:
+  level:
+    com.smartcampus: DEBUG
+    io.netty: INFO
+
+netty:
+  port: 8090
+  boss-threads: 1
+  worker-threads: 4
+  so-backlog: 1024
+  keep-alive: true
+  reader-idle-time: 30
+  writer-idle-time: 0
+  all-idle-time: 0

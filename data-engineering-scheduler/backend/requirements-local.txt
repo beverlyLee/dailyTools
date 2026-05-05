@@ -1,0 +1,7 @@
+# 本地开发依赖（不包含 Airflow）
+flask==3.0.0
+flask-cors==4.0.0
+flask-sqlalchemy==3.1.1
+sqlalchemy==2.0.25
+python-dateutil==2.8.2
+python-dotenv==1.0.0

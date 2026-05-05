@@ -1,0 +1,101 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "code-quality-toolkit"
+dynamic = ["version", "description"]
+requires-python = ">=3.8"
+dependencies = [
+    "requests>=2.28.0",
+    "packaging>=21.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "flake8>=5.0",
+    "black>=22.0",
+    "mypy>=1.0",
+]
+yaml = ["pyyaml>=6.0"]
+toml = ["toml>=0.10.2"]
+
+[project.scripts]
+code-quality = "code_quality_toolkit.cli:main"
+cqt = "code_quality_toolkit.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/example/code-quality-toolkit"
+Bug Tracker = "https://github.com/example/code-quality-toolkit/issues"
+
+[project.classifiers]
+"Development Status" = "4 - Beta"
+"Intended Audience" = "Developers"
+"Topic" = [
+    "Software Development :: Quality Assurance",
+    "Software Development :: Testing",
+]
+"License" = "OSI Approved :: MIT License"
+"Programming Language" = [
+    "Python :: 3",
+    "Python :: 3.8",
+    "Python :: 3.9",
+    "Python :: 3.10",
+    "Python :: 3.11",
+    "Python :: 3.12",
+]
+
+[tool.setuptools]
+packages = ["code_quality_toolkit", "code_quality_toolkit.*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "code_quality_toolkit.__version__.__version__"}
+
+[tool.black]
+line-length = 100
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+)/
+'''
+
+[tool.flake8]
+max-line-length = 100
+max-complexity = 10
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".venv",
+    "venv",
+]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+]

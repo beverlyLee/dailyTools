@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>人脸检测演示</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      width: 100%;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.5rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 20px;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    video, canvas {
+      width: 100%;
+      border-radius: 8px;
+      display: block;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .option-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .option-group label {
+      font-weight: 600;
+      color: #555;
+    }
+
+    .option-group input[type="range"] {
+      width: 100%;
+    }
+
+    .option-group select {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 2px solid #e0e0e0;
+      font-size: 14px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .stat-item {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .status {
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .status.ready {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status.loading {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .use-worker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .use-worker input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>人脸检测演示</h1>
+    
+    <div class="card">
+      <div id="status" class="status loading">
+        正在初始化...
+      </div>
+
+      <div class="controls">
+        <button id="startCamera" class="btn-primary">
+          开启摄像头
+        </button>
+        <button id="stopCamera" class="btn-secondary" disabled>
+          停止摄像头
+        </button>
+        <button id="detectOnce" class="btn-secondary">
+          单次检测
+        </button>
+        <div class="use-worker">
+          <input type="checkbox" id="useWorker" checked>
+          <label for="useWorker">使用 Web Worker</label>
+        </div>
+      </div>
+
+      <div class="options">
+        <div class="option-group">
+          <label for="minFaceSize">最小人脸尺寸: <span id="minFaceSizeValue">20</span></label>
+          <input type="range" id="minFaceSize" min="10" max="100" value="20" step="5">
+        </div>
+        
+        <div class="option-group">
+          <label for="scoreThreshold">置信度阈值: <span id="scoreThresholdValue">0.7</span></label>
+          <input type="range" id="scoreThreshold" min="0.1" max="0.95" value="0.7" step="0.05">
+        </div>
+        
+        <div class="option-group">
+          <label for="enableLandmarks">关键点检测</label>
+          <select id="enableLandmarks">
+            <option value="0">无</option>
+            <option value="5">5 点</option>
+            <option value="68">68 点</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="video-container">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="canvas"></canvas>
+      </div>
+
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-value" id="faceCount">0</div>
+          <div class="stat-label">检测到的人脸</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="fps">0</div>
+          <div class="stat-label">FPS</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="avgConfidence">0%</div>
+          <div class="stat-label">平均置信度</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

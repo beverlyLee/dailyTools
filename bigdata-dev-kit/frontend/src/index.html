@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>大数据处理开发套件</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="header-left">
+        <div class="app-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <h1 class="app-title">大数据处理开发套件</h1>
+      </div>
+      <div class="header-right">
+        <div class="connection-status" id="connection-status">
+          <span class="status-dot disconnected"></span>
+          <span class="status-text">后端未连接</span>
+        </div>
+      </div>
+    </header>
+    
+    <div class="main-layout">
+      <aside class="sidebar">
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <div class="nav-section-title">工作台</div>
+            <button class="nav-item active" data-module="batch">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M9 9h6M9 12h6M9 15h4"/>
+              </svg>
+              <span>批处理作业工作台</span>
+            </button>
+            <button class="nav-item" data-module="stream">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+              <span>流处理 SQL 编辑器</span>
+            </button>
+          </div>
+          
+          <div class="nav-section">
+            <div class="nav-section-title">管理</div>
+            <button class="nav-item" data-module="udf">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+              <span>UDF 函数管理</span>
+            </button>
+            <button class="nav-item" data-module="sql-versions">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <span>SQL 版本控制</span>
+            </button>
+          </div>
+        </nav>
+      </aside>
+      
+      <main class="content-area">
+        <div id="batch-module" class="module-content active">
+          <div class="module-toolbar">
+            <h2>批处理作业工作台</h2>
+            <div class="toolbar-actions">
+              <button id="btn-new-job" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                新建作业
+              </button>
+              <button id="btn-refresh-jobs" class="btn btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10"/>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                </svg>
+                刷新
+              </button>
+            </div>
+          </div>
+          
+          <div class="module-content-body">
+            <div class="split-layout">
+              <div class="left-panel">
+                <div class="panel-header">
+                  <span class="panel-title">作业列表</span>
+                  <div class="panel-filters">
+                    <select id="job-type-filter" class="form-select">
+                      <option value="all">全部类型</option>
+                      <option value="BATCH">批处理</option>
+                      <option value="STREAMING">流处理</option>
+                    </select>
+                    <select id="job-status-filter" class="form-select">
+                      <option value="all">全部状态</option>
+                      <option value="PENDING">等待中</option>
+                      <option value="RUNNING">运行中</option>
+                      <option value="COMPLETED">已完成</option>
+                      <option value="FAILED">失败</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="panel-body">
+                  <div id="job-list" class="job-list">
+                    <div class="empty-state">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <path d="M9 9h6M9 12h6M9 15h4"/>
+                      </svg>
+                      <p>暂无作业</p>
+                      <p class="empty-hint">点击"新建作业"开始</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="right-panel">
+                <div class="tabs-container">
+                  <div class="tabs-header">
+                    <button class="tab-btn active" data-tab="editor">SQL 编辑器</button>
+                    <button class="tab-btn" data-tab="jar-upload">Jar 上传</button>
+                    <button class="tab-btn" data-tab="dag">DAG 图</button>
+                    <button class="tab-btn" data-tab="monitor">监控</button>
+                    <button class="tab-btn" data-tab="logs">日志</button>
+                  </div>
+                  
+                  <div class="tabs-content">
+                    <div id="tab-editor" class="tab-pane active">
+                      <div class="sql-editor-container">
+                        <div class="editor-toolbar">
+                          <select id="engine-type" class="form-select">
+                            <option value="SPARK">Spark</option>
+                            <option value="FLINK">Flink</option>
+                          </select>
+                          <button id="btn-sql-format" class="btn btn-sm">格式化</button>
+                          <button id="btn-sql-validate" class="btn btn-sm">校验</button>
+                          <button id="btn-sql-run" class="btn btn-sm btn-primary">执行</button>
+                        </div>
+                        <div id="batch-sql-editor" class="editor-container"></div>
+                        <div class="results-container">
+                          <div class="results-header">
+                            <span>执行结果</span>
+                            <button id="btn-clear-results" class="btn btn-sm">清空</button>
+                          </div>
+                          <div id="sql-results" class="results-content">
+                            <div class="empty-state small">
+                              <p>执行 SQL 后结果将显示在这里</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div id="tab-jar-upload" class="tab-pane">
+                      <div class="jar-upload-container">
+                        <div class="upload-area" id="jar-upload-area">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                          </svg>
+                          <p>拖拽 Jar 文件到此处或点击选择</p>
+                          <p class="upload-hint">支持 .jar 文件，最大 500MB</p>
+                          <input type="file" id="jar-file-input" accept=".jar" style="display: none;">
+                        </div>
+                        
+                        <div class="uploaded-files" id="uploaded-jars">
+                          <h4>已上传的 Jar 文件</h4>
+                          <div class="empty-state small">
+                            <p>暂无上传的文件</p>
+                          </div>
+                        </div>
+                        
+                        <div class="job-submit-form">
+                          <h4>作业提交配置</h4>
+                          <div class="form-group">
+                            <label>作业名称</label>
+                            <input type="text" id="submit-job-name" class="form-input" placeholder="请输入作业名称">
+                          </div>
+                          <div class="form-group">
+                            <label>主类名</label>
+                            <input type="text" id="submit-main-class" class="form-input" placeholder="例如: com.example.Main">
+                          </div>
+                          <div class="form-group">
+                            <label>程序参数</label>
+                            <input type="text" id="submit-args" class="form-input" placeholder="参数之间用空格分隔">
+                          </div>
+                          <button id="btn-submit-job" class="btn btn-primary btn-full">提交作业</button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div id="tab-dag" class="tab-pane">
+                      <div class="dag-container">
+                        <div class="dag-toolbar">
+                          <button id="btn-dag-zoom-in" class="btn btn-sm">放大</button>
+                          <button id="btn-dag-zoom-out" class="btn btn-sm">缩小</button>
+                          <button id="btn-dag-fit" class="btn btn-sm">适应视图</button>
+                          <button id="btn-dag-export" class="btn btn-sm">导出</button>
+                        </div>
+                        <div id="dag-viewer" class="dag-viewer">
+                          <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                            </svg>
+                            <p>选择作业查看 DAG 图</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div id="tab-monitor" class="tab-pane">
+                      <div class="monitor-container">
+                        <div class="monitor-stats">
+                          <div class="stat-card">
+                            <span class="stat-label">总 Executor</span>
+                            <span class="stat-value" id="stat-total-executors">0</span>
+                          </div>
+                          <div class="stat-card">
+                            <span class="stat-label">运行中</span>
+                            <span class="stat-value" id="stat-running-executors">0</span>
+                          </div>
+                          <div class="stat-card">
+                            <span class="stat-label">完成任务</span>
+                            <span class="stat-value" id="stat-completed-tasks">0</span>
+                          </div>
+                          <div class="stat-card">
+                            <span class="stat-label">失败任务</span>
+                            <span class="stat-value" id="stat-failed-tasks">0</span>
+                          </div>
+                        </div>
+                        <div class="executor-list" id="executor-list">
+                          <div class="empty-state small">
+                            <p>选择运行中的作业查看 Executor</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div id="tab-logs" class="tab-pane">
+                      <div class="logs-container">
+                        <div class="logs-toolbar">
+                          <select id="log-level-filter" class="form-select">
+                            <option value="all">全部级别</option>
+                            <option value="INFO">INFO</option>
+                            <option value="WARN">WARN</option>
+                            <option value="ERROR">ERROR</option>
+                            <option value="DEBUG">DEBUG</option>
+                          </select>
+                          <button id="btn-logs-refresh" class="btn btn-sm">刷新</button>
+                          <button id="btn-logs-clear" class="btn btn-sm">清空</button>
+                        </div>
+                        <div id="logs-content" class="logs-content">
+                          <div class="empty-state small">
+                            <p>选择作业查看日志</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="stream-module" class="module-content">
+          <div class="module-toolbar">
+            <h2>流处理 SQL 编辑器</h2>
+            <div class="toolbar-actions">
+              <button id="btn-new-stream-sql" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                新建 SQL
+              </button>
+              <button id="btn-refresh-stream-sql" class="btn btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10"/>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                </svg>
+                刷新
+              </button>
+            </div>
+          </div>
+          
+          <div class="module-content-body">
+            <div class="split-layout">
+              <div class="left-panel">
+                <div class="panel-header">
+                  <span class="panel-title">流表列表</span>
+                  <button id="btn-refresh-tables" class="btn btn-sm">刷新</button>
+                </div>
+                <div class="panel-body">
+                  <div id="stream-tables-list" class="table-list">
+                    <div class="empty-state">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      </svg>
+                      <p>暂无流表</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="right-panel">
+                <div class="tabs-container">
+                  <div class="tabs-header">
+                    <button class="tab-btn active" data-tab="stream-editor">SQL 编辑器</button>
+                    <button class="tab-btn" data-tab="stream-preview">数据预览</button>
+                    <button class="tab-btn" data-tab="stream-udfs">UDF 管理</button>
+                    <button class="tab-btn" data-tab="stream-versions">版本历史</button>
+                  </div>
+                  
+                  <div class="tabs-content">
+                    <div id="tab-stream-editor" class="tab-pane active">
+                      <div class="sql-editor-container">
+                        <div class="editor-toolbar">
+                          <input type="text" id="stream-sql-name" class="form-input" placeholder="SQL 名称">
+                          <button id="btn-stream-sql-format" class="btn btn-sm">格式化</button>
+                          <button id="btn-stream-sql-validate" class="btn btn-sm">语法校验</button>
+                          <button id="btn-stream-sql-save" class="btn btn-sm">保存版本</button>
+                          <button id="btn-stream-sql-run" class="btn btn-sm btn-primary">执行</button>
+                        </div>
+                        <div id="stream-sql-editor" class="editor-container"></div>
+                        <div class="validation-result" id="validation-result">
+                          <div class="empty-state small">
+                            <p>点击"语法校验"检查 SQL</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div id="tab-stream-preview" class="tab-pane">
+                      <div class="preview-container">
+                        <div class="preview-toolbar">
+                          <select id="preview-table-select" class="form-select">
+                            <option value="">选择流表</option>
+                          </select>
+                          <button id="btn-preview-start" class="btn btn-sm btn-primary">开始预览</button>
+                          <button id="btn-preview-stop" class="btn btn-sm" disabled>停止预览</button>
+                          <span id="preview-status" class="preview-status">未开始</span>
+                        </div>
+                        <div id="preview-data" class="preview-data">
+                          <div class="empty-state small">
+                            <p>选择流表并开始预览</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div id="tab-stream-udfs" class="tab-pane">
+                      <div class="udf-manage-container">
+                        <div class="udf-toolbar">
+                          <button id="btn-new-udf" class="btn btn-primary">新增 UDF</button>
+                          <button id="btn-refresh-udfs" class="btn btn-secondary">刷新</button>
+                        </div>
+                        <div id="udf-list" class="udf-list">
+                          <div class="empty-state small">
+                            <p>暂无自定义函数</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div id="tab-stream-versions" class="tab-pane">
+                      <div class="versions-container">
+                        <div class="versions-toolbar">
+                          <select id="version-sql-select" class="form-select">
+                            <option value="">选择 SQL</option>
+                          </select>
+                        </div>
+                        <div id="versions-list" class="versions-list">
+                          <div class="empty-state small">
+                            <p>选择 SQL 查看版本历史</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="udf-module" class="module-content">
+          <div class="module-toolbar">
+            <h2>UDF 函数管理</h2>
+            <div class="toolbar-actions">
+              <button id="btn-udf-add" class="btn btn-primary">新增 UDF</button>
+              <button id="btn-udf-refresh" class="btn btn-secondary">刷新</button>
+            </div>
+          </div>
+          <div class="module-content-body">
+            <div id="udf-manage-list" class="udf-manage-list">
+              <div class="empty-state">
+                <p>暂无自定义函数</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="sql-versions-module" class="module-content">
+          <div class="module-toolbar">
+            <h2>SQL 版本控制</h2>
+            <div class="toolbar-actions">
+              <button id="btn-versions-refresh" class="btn btn-secondary">刷新</button>
+            </div>
+          </div>
+          <div class="module-content-body">
+            <div id="sql-versions-list" class="sql-versions-list">
+              <div class="empty-state">
+                <p>暂无 SQL 版本记录</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal" id="common-modal">
+      <div class="modal-header">
+        <h3 id="modal-title">标题</h3>
+        <button id="modal-close" class="btn btn-close">×</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+  <script src="api.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

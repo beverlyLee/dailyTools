@@ -1,0 +1,21 @@
+server:
+  port: 8080
+  mode: debug
+
+database:
+  type: sqlite
+  file: ./data/governance.db
+
+redis:
+  host: localhost
+  port: 6379
+  password: ""
+  db: 0
+
+envoy:
+  xds_port: 18000
+  control_plane_id: "governance-control-plane"
+
+logging:
+  level: debug
+  format: json

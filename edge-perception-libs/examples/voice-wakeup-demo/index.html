@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>语音唤醒词检测演示</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.5rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 20px;
+    }
+
+    .status {
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .status.ready {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status.loading {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .status.listening {
+      background: #cce5ff;
+      color: #004085;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(240, 147, 251, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .option-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .option-group label {
+      font-weight: 600;
+      color: #555;
+    }
+
+    .option-group input[type="range"] {
+      width: 100%;
+    }
+
+    .option-group input[type="text"] {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 2px solid #e0e0e0;
+      font-size: 14px;
+    }
+
+    .option-group select {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 2px solid #e0e0e0;
+      font-size: 14px;
+    }
+
+    .visualizer {
+      height: 150px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .visualizer canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .wakeup-history {
+      max-height: 200px;
+      overflow-y: auto;
+      background: #f9f9f9;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 20px;
+    }
+
+    .wakeup-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      background: white;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .wakeup-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .wakeup-time {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .wakeup-confidence {
+      color: #f5576c;
+      font-weight: 600;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .stat-item {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #f5576c;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .vad-indicator {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .vad-light {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ccc;
+      transition: background 0.1s ease;
+    }
+
+    .vad-light.active {
+      background: #4ade80;
+      box-shadow: 0 0 10px #4ade80;
+    }
+
+    .vad-label {
+      font-weight: 600;
+      color: #555;
+    }
+
+    .energy-bar {
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .energy-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4ade80, #f5576c);
+      width: 0%;
+      transition: width 0.1s ease;
+    }
+
+    .detection-animation {
+      display: none;
+      text-align: center;
+      padding: 40px;
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      border-radius: 16px;
+      margin-bottom: 20px;
+      animation: bounce 0.5s ease;
+    }
+
+    .detection-animation.active {
+      display: block;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .detection-animation h2 {
+      color: #f5576c;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .detection-animation p {
+      color: #666;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>语音唤醒词检测演示</h1>
+    
+    <div class="card">
+      <div id="status" class="status loading">
+        正在初始化...
+      </div>
+
+      <div id="detectionAnimation" class="detection-animation">
+        <h2>🎉 检测到唤醒词！</h2>
+        <p id="detectionInfo">检测到 "你好小明"</p>
+      </div>
+
+      <div class="controls">
+        <button id="startListening" class="btn-primary">
+          🎤 开始监听
+        </button>
+        <button id="stopListening" class="btn-danger" disabled>
+          ⏹️ 停止监听
+        </button>
+        <button id="clearHistory" class="btn-secondary">
+          🗑️ 清除历史
+        </button>
+      </div>
+
+      <div class="options">
+        <div class="option-group">
+          <label for="wakeWord">唤醒词</label>
+          <input type="text" id="wakeWord" value="你好小明" placeholder="输入唤醒词">
+        </div>
+        
+        <div class="option-group">
+          <label for="detectionThreshold">检测阈值: <span id="detectionThresholdValue">0.8</span></label>
+          <input type="range" id="detectionThreshold" min="0.5" max="0.95" value="0.8" step="0.05">
+        </div>
+        
+        <div class="option-group">
+          <label for="vadAggressiveness">VAD 灵敏度</label>
+          <select id="vadAggressiveness">
+            <option value="0">低 (宽松)</option>
+            <option value="1" selected>中</option>
+            <option value="2">高</option>
+            <option value="3">最高 (严格)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="vad-indicator">
+        <div id="vadLight" class="vad-light"></div>
+        <span class="vad-label">VAD: <span id="vadStatus">未检测到语音</span></span>
+      </div>
+      
+      <div class="energy-bar">
+        <div id="energyFill" class="energy-fill"></div>
+      </div>
+
+      <div class="visualizer">
+        <canvas id="visualizerCanvas"></canvas>
+      </div>
+
+      <h3 style="margin-bottom: 12px; color: #333;">检测历史</h3>
+      <div id="wakeupHistory" class="wakeup-history">
+        <p style="color: #999; text-align: center; padding: 20px;">暂无检测记录</p>
+      </div>
+
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-value" id="detectionCount">0</div>
+          <div class="stat-label">检测次数</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="avgConfidence">0%</div>
+          <div class="stat-label">平均置信度</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="listeningTime">0s</div>
+          <div class="stat-label">监听时长</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

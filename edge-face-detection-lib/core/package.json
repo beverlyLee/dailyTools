@@ -1,0 +1,49 @@
+{
+  "name": "@edge-face-detection/core",
+  "version": "1.0.0",
+  "description": "Edge-side face detection core library powered by WebAssembly (Rust)",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./worker": {
+      "import": "./dist/edge-face-detection-worker.esm.js",
+      "require": "./dist/edge-face-detection-worker.js"
+    }
+  },
+  "files": [
+    "dist",
+    "pkg"
+  ],
+  "scripts": {
+    "build:rust": "cd src/rust && wasm-pack build --target web --out-dir ../../pkg",
+    "build:rust:node": "cd src/rust && wasm-pack build --target nodejs --out-dir ../../pkg/node",
+    "build:js": "rollup -c",
+    "build": "npm run build:rust && npm run build:js",
+    "test": "jest",
+    "lint": "eslint src/js --ext .ts"
+  },
+  "keywords": [
+    "face-detection",
+    "webassembly",
+    "wasm",
+    "rust",
+    "computer-vision",
+    "edge-computing"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@types/node": "^20.0.0",
+    "rollup": "^4.0.0",
+    "typescript": "^5.0.0",
+    "tslib": "^2.5.0"
+  }
+}

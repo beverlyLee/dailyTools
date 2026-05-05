@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src/js",
+    "baseUrl": ".",
+    "paths": {
+      "@edge-perception/common": ["../common/src"]
+    }
+  },
+  "include": ["src/js/**/*"],
+  "references": [{ "path": "../common" }]
+}

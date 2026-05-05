@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>系统安全与监控工具集</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="/main.js" defer></script>
+  </head>
+  <body>
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h1>🛡️ 系统工具</h1>
+        </div>
+        <nav class="nav-menu">
+          <button class="nav-item active" data-tab="monitor">
+            <span class="nav-icon">📊</span>
+            <span>系统监控</span>
+          </button>
+          <button class="nav-item" data-tab="processes">
+            <span class="nav-icon">⚙️</span>
+            <span>进程管理</span>
+          </button>
+          <button class="nav-item" data-tab="history">
+            <span class="nav-icon">📈</span>
+            <span>历史曲线</span>
+          </button>
+          <button class="nav-item" data-tab="passwords">
+            <span class="nav-icon">🔐</span>
+            <span>密码管理器</span>
+          </button>
+          <button class="nav-item" data-tab="regex">
+            <span class="nav-icon">🔍</span>
+            <span>正则测试器</span>
+          </button>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <!-- 系统监控页面 -->
+        <section id="tab-monitor" class="tab-content active">
+          <header class="tab-header">
+            <h2>系统资源监视器</h2>
+            <div class="header-actions">
+              <button id="refresh-btn" class="btn btn-primary">
+                🔄 刷新
+              </button>
+              <button id="auto-refresh-btn" class="btn btn-secondary">
+                ⏸️ 暂停自动刷新
+              </button>
+            </div>
+          </header>
+
+          <div class="dashboard-grid">
+            <!-- CPU 卡片 -->
+            <div class="card cpu-card">
+              <div class="card-header">
+                <h3>💻 CPU 使用率</h3>
+                <span id="cpu-avg" class="metric-value">0%</span>
+              </div>
+              <div class="card-content">
+                <div class="cpu-cores-container" id="cpu-cores">
+                </div>
+              </div>
+            </div>
+
+            <!-- 内存卡片 -->
+            <div class="card memory-card">
+              <div class="card-header">
+                <h3>🧠 内存使用</h3>
+                <span id="memory-percent" class="metric-value">0%</span>
+              </div>
+              <div class="card-content">
+                <div class="progress-bar">
+                  <div class="progress-fill memory-fill" id="memory-bar" style="width: 0%"></div>
+                </div>
+                <div class="metric-details">
+                  <span id="memory-used">0 GB</span>
+                  <span>/</span>
+                  <span id="memory-total">0 GB</span>
+                </div>
+                <div class="swap-info">
+                  <span>交换空间: </span>
+                  <span id="swap-used">0 GB</span>
+                  <span>/</span>
+                  <span id="swap-total">0 GB</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 磁盘卡片 -->
+            <div class="card disk-card">
+              <div class="card-header">
+                <h3>💾 磁盘使用</h3>
+              </div>
+              <div class="card-content" id="disk-list">
+              </div>
+            </div>
+
+            <!-- 网络卡片 -->
+            <div class="card network-card">
+              <div class="card-header">
+                <h3>🌐 网络流量</h3>
+              </div>
+              <div class="card-content" id="network-list">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 进程管理页面 -->
+        <section id="tab-processes" class="tab-content">
+          <header class="tab-header">
+            <h2>进程管理器</h2>
+            <div class="header-actions">
+              <button id="refresh-processes-btn" class="btn btn-primary">
+                🔄 刷新
+              </button>
+              <input type="text" id="process-search" placeholder="搜索进程..." class="search-input" />
+            </div>
+          </header>
+
+          <div class="process-table-container">
+            <table class="process-table">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort="pid">PID ↕</th>
+                  <th class="sortable" data-sort="name">进程名 ↕</th>
+                  <th class="sortable" data-sort="cpu">CPU % ↕</th>
+                  <th class="sortable" data-sort="memory">内存 ↕</th>
+                  <th>状态</th>
+                  <th>运行时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="process-list">
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 历史曲线页面 -->
+        <section id="tab-history" class="tab-content">
+          <header class="tab-header">
+            <h2>历史性能曲线</h2>
+            <div class="header-actions">
+              <select id="history-range" class="select-input">
+                <option value="1">最近 1 小时</option>
+                <option value="6">最近 6 小时</option>
+                <option value="24" selected>最近 24 小时</option>
+                <option value="168">最近 7 天</option>
+              </select>
+              <button id="load-history-btn" class="btn btn-primary">
+                📊 加载数据
+              </button>
+            </div>
+          </header>
+
+          <div class="charts-container">
+            <div class="chart-card">
+              <h3>CPU 使用率</h3>
+              <canvas id="cpu-chart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>内存使用率</h3>
+              <canvas id="memory-chart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>磁盘 I/O</h3>
+              <canvas id="disk-chart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>网络流量</h3>
+              <canvas id="network-chart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- 密码管理器页面 -->
+        <section id="tab-passwords" class="tab-content">
+          <header class="tab-header">
+            <h2>🔐 密码管理器</h2>
+            <div class="header-actions">
+              <button id="unlock-btn" class="btn btn-primary">
+                🔓 解锁
+              </button>
+              <button id="add-password-btn" class="btn btn-success" style="display: none;">
+                ➕ 添加密码
+              </button>
+            </div>
+          </header>
+
+          <!-- 解锁界面 -->
+          <div id="unlock-screen" class="unlock-screen">
+            <div class="unlock-card">
+              <h3>输入主密码</h3>
+              <input type="password" id="master-password-input" placeholder="主密码" class="input-field" />
+              <p id="unlock-error" class="error-message" style="display: none;"></p>
+              <div class="unlock-actions">
+                <button id="unlock-confirm-btn" class="btn btn-primary">解锁</button>
+                <button id="setup-master-btn" class="btn btn-secondary">设置主密码</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 密码列表界面 -->
+          <div id="passwords-container" style="display: none;">
+            <div class="password-generator-section">
+              <h3>密码生成器</h3>
+              <div class="generator-controls">
+                <div class="control-group">
+                  <label>长度: <span id="password-length-value">16</span></label>
+                  <input type="range" id="password-length" min="8" max="64" value="16" />
+                </div>
+                <div class="control-group">
+                  <label>
+                    <input type="checkbox" id="include-numbers" checked />
+                    包含数字
+                  </label>
+                </div>
+                <div class="control-group">
+                  <label>
+                    <input type="checkbox" id="include-symbols" checked />
+                    包含符号
+                  </label>
+                </div>
+              </div>
+              <div class="generator-actions">
+                <input type="text" id="generated-password" readonly class="password-display" />
+                <button id="generate-password-btn" class="btn btn-primary">生成密码</button>
+                <button id="generate-passphrase-btn" class="btn btn-secondary">生成口令短语</button>
+                <button id="copy-password-btn" class="btn btn-success">复制</button>
+              </div>
+              <div id="password-strength" class="strength-indicator">
+                <span>密码强度: </span>
+                <span id="strength-level">-</span>
+              </div>
+            </div>
+
+            <div class="passwords-list-section">
+              <h3>已保存的密码</h3>
+              <div id="passwords-list" class="passwords-grid">
+              </div>
+            </div>
+
+            <!-- 密码审计 -->
+            <div class="audit-section">
+              <h3>安全审计</h3>
+              <button id="run-audit-btn" class="btn btn-warning">
+                🔍 运行安全审计
+              </button>
+              <div id="audit-results" class="audit-results" style="display: none;">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 正则测试器页面 -->
+        <section id="tab-regex" class="tab-content">
+          <header class="tab-header">
+            <h2>🔍 正则表达式测试器</h2>
+            <div class="header-actions">
+              <button id="load-saved-patterns-btn" class="btn btn-secondary">
+                📚 收藏的模式
+              </button>
+            </div>
+          </header>
+
+          <div class="regex-container">
+            <div class="regex-input-section">
+              <div class="input-group">
+                <label>正则表达式</label>
+                <div class="pattern-input-wrapper">
+                  <span class="pattern-delimiter">/</span>
+                  <input type="text" id="regex-pattern" placeholder="输入正则表达式..." class="pattern-input" />
+                  <span class="pattern-delimiter">/</span>
+                  <input type="text" id="regex-flags" placeholder="gi" class="flags-input" />
+                </div>
+              </div>
+              <div class="input-group">
+                <label>测试文本</label>
+                <textarea id="test-text" rows="8" placeholder="输入测试文本..."></textarea>
+              </div>
+              <div class="regex-actions">
+                <button id="test-regex-btn" class="btn btn-primary">测试匹配</button>
+                <button id="explain-regex-btn" class="btn btn-secondary">解释正则</button>
+                <button id="save-pattern-btn" class="btn btn-success">保存模式</button>
+              </div>
+            </div>
+
+            <div class="regex-results-section">
+              <div class="results-card">
+                <h3>匹配结果</h3>
+                <div id="match-status" class="match-status"></div>
+                <div id="matches-list" class="matches-list"></div>
+              </div>
+              <div class="results-card">
+                <h3>高亮显示</h3>
+                <div id="highlighted-text" class="highlight-container"></div>
+              </div>
+              <div class="results-card">
+                <h3>正则解释</h3>
+                <pre id="regex-explanation" class="explanation-text"></pre>
+              </div>
+            </div>
+
+            <!-- 收藏的模式面板 -->
+            <div id="saved-patterns-panel" class="saved-patterns-panel" style="display: none;">
+              <div class="panel-header">
+                <h3>收藏的正则模式</h3>
+                <button id="close-patterns-btn" class="btn btn-secondary">✕</button>
+              </div>
+              <div id="saved-patterns-list" class="patterns-list"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- 模态框 -->
+    <!-- 添加密码模态框 -->
+    <div id="password-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modal-title">添加密码</h3>
+          <button id="close-modal-btn" class="btn btn-secondary">✕</button>
+        </div>
+        <form id="password-form" class="modal-form">
+          <input type="hidden" id="edit-password-id" value="" />
+          <div class="form-group">
+            <label>标题 *</label>
+            <input type="text" id="password-title" required class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>用户名 *</label>
+            <input type="text" id="password-username" required class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>密码 *</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="password-value" required class="form-input" />
+              <button type="button" id="toggle-password-visibility" class="btn btn-secondary">👁️</button>
+              <button type="button" id="generate-for-form-btn" class="btn btn-secondary">🎲</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>URL</label>
+            <input type="url" id="password-url" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>备注</label>
+            <textarea id="password-notes" rows="3" class="form-input"></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" id="cancel-modal-btn" class="btn btn-secondary">取消</button>
+            <button type="submit" class="btn btn-primary">保存</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 保存正则模式模态框 -->
+    <div id="save-pattern-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>保存正则模式</h3>
+          <button id="close-pattern-modal-btn" class="btn btn-secondary">✕</button>
+        </div>
+        <form id="save-pattern-form" class="modal-form">
+          <div class="form-group">
+            <label>名称 *</label>
+            <input type="text" id="pattern-name" required class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>正则表达式</label>
+            <input type="text" id="pattern-to-save" readonly class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>描述</label>
+            <textarea id="pattern-description" rows="2" class="form-input"></textarea>
+          </div>
+          <div class="form-group">
+            <label>分类</label>
+            <select id="pattern-category" class="form-input">
+              <option value="general">通用</option>
+              <option value="communication">通讯</option>
+              <option value="web">网络</option>
+              <option value="network">网络协议</option>
+              <option value="identity">身份</option>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button type="button" id="cancel-pattern-modal-btn" class="btn btn-secondary">取消</button>
+            <button type="submit" class="btn btn-primary">保存</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 确认删除模态框 -->
+    <div id="confirm-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>确认删除</h3>
+          <button id="close-confirm-modal-btn" class="btn btn-secondary">✕</button>
+        </div>
+        <p id="confirm-message">确定要删除此项吗？</p>
+        <div class="modal-actions">
+          <button type="button" id="cancel-confirm-btn" class="btn btn-secondary">取消</button>
+          <button type="button" id="confirm-delete-btn" class="btn btn-danger">删除</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

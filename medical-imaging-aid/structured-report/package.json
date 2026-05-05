@@ -1,0 +1,20 @@
+{
+  "name": "structured-report",
+  "version": "1.0.0",
+  "description": "报告结构化录入系统 - 医疗诊断报告管理工具",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["medical", "report", "structured", "diagnosis", "electron"],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^28.0.0"
+  },
+  "dependencies": {
+    "uuid": "^9.0.1"
+  }
+}

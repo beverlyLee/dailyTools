@@ -1,0 +1,25 @@
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+sqlalchemy==2.0.23
+aiofiles==23.2.1
+pydantic==2.5.0
+pydantic-settings==2.1.0
+pillow==10.1.0
+numpy==1.26.2
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.0
+
+# AI Model Dependencies (optional, can be installed separately)
+# torch==2.1.0
+# torchvision==0.16.0
+# opencv-python==4.8.1.78
+# basicsr==1.4.2
+# facexlib==0.3.0
+# gfpgan==1.3.8
+# realesrgan==0.3.0
+# # For colorization
+# colorization-pytorch
+# # For inpainting
+# lama-cleaner
