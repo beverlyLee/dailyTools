@@ -1,0 +1,7 @@
+node_modules/
+venv/
+.env
+.cache/
+.next/
+dist/
+build/
