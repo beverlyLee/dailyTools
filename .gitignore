@@ -1,7 +1,241 @@
+# ============================================
+# 操作系统文件
+# ============================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# ============================================
+# IDE和编辑器文件
+# ============================================
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains IDEs (IntelliJ, WebStorm, PyCharm等)
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+
+# ============================================
+# Node.js和JavaScript项目
+# ============================================
+# 依赖目录
 node_modules/
-venv/
-.env
-.cache/
-.next/
+jspm_packages/
+
+# 构建输出
 dist/
 build/
+out/
+.next/
+.nuxt/
+.parcel-cache/
+.cache/
+public/build/
+
+# 日志文件
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# 测试覆盖率
+coverage/
+*.lcov
+.nyc_output/
+
+# 环境变量文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# 包管理器锁文件 (根据项目需求选择是否忽略)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# 其他
+*.tsbuildinfo
+.npm
+.eslintcache
+.stylelintcache
+.yarn-integrity
+.node_repl_history
+*.pid
+*.seed
+*.pid.lock
+
+# ============================================
+# Python项目
+# ============================================
+# 虚拟环境
+venv/
+.venv/
+ENV/
+env/
+.ENV/
+
+# 字节码
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 分发
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# 测试
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# 环境变量
+.env
+.venv
+env/
+venv/
+ENV/
+
+# 日志
+*.log
+
+# 其他
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ============================================
+# Go项目
+# ============================================
+# 二进制文件
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.out
+
+# 测试二进制
+*.test
+
+# Go工作区
+go.work
+
+# 依赖
+vendor/
+
+# ============================================
+# Rust项目
+# ============================================
+# 构建输出
+target/
+
+# ============================================
+# 数据库文件
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ============================================
+# 临时文件
+# ============================================
+tmp/
+temp/
+*.tmp
+*.temp
+
+# ============================================
+# 其他常见忽略项
+# ============================================
+# 备份文件
+*.bak
+*.backup
+
+# 秘密文件
+*.pem
+*.key
+*.crt
+*.p12
+
+# 大文件
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# 图片 (如果不需要版本控制)
+# *.jpg
+# *.jpeg
+# *.png
+# *.gif
+# *.bmp
+# *.svg
+
+# ============================================
+# 特定项目配置
+# ============================================
+# 如果你有需要忽略的特定目录或文件，可以在这里添加
+# 例如：
+# my-special-project/sensitive-data/
+# *.local.config.js
+
+# 子项目特定的忽略
+# 注意：以下规则会应用到所有子目录，因为.gitignore规则是递归的
+
+# ============================================
+# 注意事项
+# ============================================
+# 1. 本.gitignore文件设计为适用于多种技术栈的项目
+# 2. 某些规则可能需要根据具体项目需求进行调整
+# 3. 例如：package-lock.json 有时需要提交，有时需要忽略
+# 4. 请根据实际情况添加或删除特定规则
