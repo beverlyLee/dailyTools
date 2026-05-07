@@ -55,17 +55,45 @@ tramp
 # ============================================
 # 依赖目录
 node_modules/
+**/node_modules/
 jspm_packages/
+**/jspm_packages/
 
 # 构建输出
 dist/
+**/dist/
 build/
+**/build/
 out/
+**/out/
 .next/
+**/.next/
 .nuxt/
+**/.nuxt/
 .parcel-cache/
+**/.parcel-cache/
 .cache/
+**/.cache/
 public/build/
+**/public/build/
+
+# 大文件 - Next.js SWC二进制文件
+next-swc-*.node
+**/next-swc-*.node
+
+# 大文件 - Electron相关
+Electron.app/
+**/Electron.app/
+Electron Framework
+**/Electron Framework
+electron/dist/
+**/electron/dist/
+
+# 大文件 - Webpack/Vite缓存
+*.pack
+**/*.pack
+*.pack.gz
+**/*.pack.gz
 
 # 日志文件
 npm-debug.log*
@@ -77,8 +105,10 @@ lerna-debug.log*
 
 # 测试覆盖率
 coverage/
+**/coverage/
 *.lcov
 .nyc_output/
+**/.nyc_output/
 
 # 环境变量文件
 .env
@@ -109,13 +139,19 @@ coverage/
 # ============================================
 # 虚拟环境
 venv/
+**/venv/
 .venv/
+**/.venv/
 ENV/
+**/ENV/
 env/
+**/env/
 .ENV/
+**/.ENV/
 
 # 字节码
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 
@@ -132,6 +168,7 @@ dist/
 .coverage.*
 htmlcov/
 .pytest_cache/
+**/.pytest_cache/
 nosetests.xml
 coverage.xml
 *.cover
@@ -147,8 +184,59 @@ ENV/
 # 日志
 *.log
 
-# 其他
+# 大文件 - 共享库和动态库
 *.so
+**/*.so
+*.dylib
+**/*.dylib
+*.dll
+**/*.dll
+
+# 大文件 - PyTorch/TensorFlow等深度学习库
+libtorch_*.dylib
+**/libtorch_*.dylib
+libtorch_*.so
+**/libtorch_*.so
+libtensorflow_*.so
+**/libtensorflow_*.so
+
+# 大文件 - Playwright
+playwright/driver/node
+**/playwright/driver/node
+
+# 大文件 - Taichi
+taichi_python*.so
+**/taichi_python*.so
+
+# 大文件 - 模型文件
+*.pth
+**/*.pth
+*.pt
+**/*.pt
+*.pkl
+**/*.pkl
+*.h5
+**/*.h5
+*.hdf5
+**/*.hdf5
+*.keras
+**/*.keras
+*.onnx
+**/*.onnx
+*.pb
+**/*.pb
+
+# 大文件 - 大型数据文件
+*.csv.gz
+**/*.csv.gz
+*.json.gz
+**/*.json.gz
+*.parquet
+**/*.parquet
+*.feather
+**/*.feather
+
+# 其他
 .Python
 pip-log.txt
 pip-delete-this-directory.txt
@@ -207,19 +295,170 @@ temp/
 *.crt
 *.p12
 
-# 大文件
+# ============================================
+# 大文件 - 压缩包和归档文件
+# ============================================
 *.zip
+**/*.zip
 *.tar.gz
+**/*.tar.gz
+*.tar.bz2
+**/*.tar.bz2
+*.tar.xz
+**/*.tar.xz
 *.rar
+**/*.rar
 *.7z
+**/*.7z
+*.gz
+**/*.gz
+*.bz2
+**/*.bz2
+*.xz
+**/*.xz
 
-# 图片 (如果不需要版本控制)
+# ============================================
+# 大文件 - 可执行文件和二进制文件
+# ============================================
+*.exe
+**/*.exe
+*.app
+**/*.app
+*.dmg
+**/*.dmg
+*.pkg
+**/*.pkg
+*.deb
+**/*.deb
+*.rpm
+**/*.rpm
+*.msi
+**/*.msi
+
+# ============================================
+# 大文件 - 媒体文件
+# ============================================
+# 视频文件
+*.mp4
+**/*.mp4
+*.avi
+**/*.avi
+*.mkv
+**/*.mkv
+*.mov
+**/*.mov
+*.wmv
+**/*.wmv
+*.flv
+**/*.flv
+
+# 音频文件
+*.mp3
+**/*.mp3
+*.wav
+**/*.wav
+*.flac
+**/*.flac
+*.aac
+**/*.aac
+*.ogg
+**/*.ogg
+
+# 大图片文件
 # *.jpg
+# **/*.jpg
 # *.jpeg
+# **/*.jpeg
 # *.png
+# **/*.png
 # *.gif
+# **/*.gif
 # *.bmp
+# **/*.bmp
 # *.svg
+# **/*.svg
+*.tiff
+**/*.tiff
+*.tif
+**/*.tif
+*.psd
+**/*.psd
+*.ai
+**/*.ai
+
+# ============================================
+# 大文件 - 文档和电子书
+# ============================================
+*.pdf
+**/*.pdf
+*.epub
+**/*.epub
+*.mobi
+**/*.mobi
+*.azw3
+**/*.azw3
+
+# ============================================
+# 大文件 - 虚拟机和容器
+# ============================================
+*.vmdk
+**/*.vmdk
+*.vdi
+**/*.vdi
+*.vhd
+**/*.vhd
+*.vhdx
+**/*.vhdx
+*.ova
+**/*.ova
+*.ovf
+**/*.ovf
+*.qcow2
+**/*.qcow2
+*.qcow
+**/*.qcow
+
+# ============================================
+# 大文件 - 游戏资源
+# ============================================
+*.unitypackage
+**/*.unitypackage
+*.uproject
+**/*.uproject
+*.uasset
+**/*.uasset
+*.umap
+**/*.umap
+*.pak
+**/*.pak
+
+# ============================================
+# 大文件 - 其他
+# ============================================
+*.iso
+**/*.iso
+*.img
+**/*.img
+*.bin
+**/*.bin
+*.cue
+**/*.cue
+*.mdf
+**/*.mdf
+*.nrg
+**/*.nrg
+*.toast
+**/*.toast
+*.cdi
+**/*.cdi
+
+# 大型日志和数据文件
+*.large
+**/*.large
+*.big
+**/*.big
+*.huge
+**/*.huge
 
 # ============================================
 # 特定项目配置
