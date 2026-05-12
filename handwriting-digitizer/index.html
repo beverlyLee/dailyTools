@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手写笔记数字化增强工具</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📝 手写笔记数字化增强工具</h1>
+            <p>智能处理泛黄纸张、桌纹污渍，支持多色字迹，让课堂笔记清爽如 Kindle 电子墨水屏</p>
+        </header>
+
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <div class="upload-content">
+                    <div class="upload-icon">🖼️</div>
+                    <p>点击或拖拽图片到此处</p>
+                    <span>支持 JPG、PNG、WebP 格式 - 识别黑/蓝/红/绿色字迹</span>
+                </div>
+            </div>
+            <button id="uploadBtn" class="btn btn-primary">选择图片</button>
+        </div>
+
+        <div class="controls" id="controls" style="display: none;">
+            <h2>处理参数</h2>
+            
+            <div class="control-row">
+                <div class="control-group inline">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enableSkew" checked>
+                        倾斜校正
+                    </label>
+                </div>
+                
+                <div class="control-group inline">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enableColorEnhance" checked>
+                        多色字迹增强
+                    </label>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="windowSize">局部窗口大小: <span id="windowSizeValue">31</span></label>
+                <input type="range" id="windowSize" min="11" max="61" value="31" step="2">
+                <div class="hint">值越大越平滑，文字细小时调小</div>
+            </div>
+
+            <div class="control-group">
+                <label for="kValue">对比度敏感度: <span id="kValueValue">0.35</span></label>
+                <input type="range" id="kValue" min="10" max="60" value="35" step="1">
+                <div class="hint">背景复杂时增大，字迹淡时减小</div>
+            </div>
+
+            <div class="control-group">
+                <label for="textProtection">文字保护度: <span id="textProtectionValue">0.90</span></label>
+                <input type="range" id="textProtection" min="70" max="100" value="90" step="1">
+                <div class="hint">保护细弱文字不被误判为背景</div>
+            </div>
+
+            <div class="control-group">
+                <label for="minArea">最小保留像素区域: <span id="minAreaValue">3</span></label>
+                <input type="range" id="minArea" min="1" max="15" value="3" step="1">
+                <div class="hint">去除小于该值的噪点，字迹细小时调小</div>
+            </div>
+
+            <div class="button-group">
+                <button id="processBtn" class="btn btn-primary">处理图片</button>
+                <button id="resetBtn" class="btn btn-secondary">重置</button>
+                <button id="downloadBtn" class="btn btn-success" style="display: none;">下载结果</button>
+            </div>
+        </div>
+
+        <div class="preview-section" id="previewSection" style="display: none;">
+            <div class="preview-container">
+                <div class="preview-box">
+                    <h3>原始图片</h3>
+                    <canvas id="originalCanvas"></canvas>
+                </div>
+                <div class="preview-box">
+                    <h3>处理结果</h3>
+                    <canvas id="processedCanvas"></canvas>
+                </div>
+            </div>
+            <div class="comparison" id="comparison" style="display: none;">
+                <h3>前后对比（拖拽滑动查看）</h3>
+                <div class="slider-container" id="sliderContainer">
+                    <canvas id="comparisonCanvas"></canvas>
+                    <div class="slider-handle" id="sliderHandle"></div>
+                </div>
+            </div>
+            <div class="info-panel" id="infoPanel" style="display: none;">
+                <p id="infoText"></p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

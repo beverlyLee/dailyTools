@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能翻译官 - Universal Translator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="app-logo">
+                    <span class="logo-icon">🌐</span>
+                    <h1>智能翻译官</h1>
+                    <span class="app-subtitle">Universal Translator</span>
+                </div>
+                <div class="status-bar">
+                    <span id="statusIndicator" class="status-indicator"></span>
+                    <span id="statusText" class="status-text">加载中...</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="translation-section">
+                <div class="source-controls">
+                    <div class="source-select-wrapper">
+                        <label>模型源 (Model Source):</label>
+                        <select id="modelSource" class="language-select">
+                            <option value="volcengine" selected>火山翻译 API (Volcengine Translate)</option>
+                            <option value="local">本地模型 (Local ONNX Model)</option>
+                            <option value="custom">自定义 API (Custom API)</option>
+                        </select>
+                    </div>
+                    <button id="configBtn" class="btn btn-outline">
+                        ⚙️ 参数设置
+                    </button>
+                </div>
+
+                <div id="configPanel" class="config-panel" style="display: none;">
+                    <div class="config-header">
+                        <h3>模型参数配置 (Model Configuration)</h3>
+                        <button id="closeConfigBtn" class="close-btn">×</button>
+                    </div>
+                    
+                    <div class="config-tabs">
+                        <button class="config-tab active" data-tab="volcengine">火山翻译</button>
+                        <button class="config-tab" data-tab="custom">自定义 API</button>
+                        <button class="config-tab" data-tab="local">本地模型</button>
+                    </div>
+
+                    <div class="config-content">
+                        <div id="volcengine-config" class="config-section active">
+                            <div class="config-info">
+                                <p>ℹ️ 使用火山引擎 Ark 平台的豆包大模型 API，与 OpenAI chat completions 接口兼容。<br>
+                                获取 API Key：<a href="https://console.volcengine.com/ark/region:ark+cn-beijing/endpoint" target="_blank" style="color: #17a2b8;">火山引擎 Ark 控制台</a></p>
+                            </div>
+                            <div class="config-group">
+                                <label for="volcApiKey">Ark API Key:</label>
+                                <input type="password" id="volcApiKey" class="config-input" 
+                                    placeholder="请输入火山引擎 Ark API Key">
+                            </div>
+                            <div class="config-group">
+                                <label for="volcModel">模型 ID (Model ID):</label>
+                                <input type="text" id="volcModel" class="config-input" 
+                                    value="doubao-seed-2-0-code-preview-260215"
+                                    placeholder="如：doubao-seed-2-0-code-preview-260215 或 endpoint ID">
+                            </div>
+                            <div class="config-group">
+                                <label for="volcEndpoint">API Endpoint:</label>
+                                <input type="text" id="volcEndpoint" class="config-input" 
+                                    value="https://ark.cn-beijing.volces.com/api/v3/chat/completions">
+                            </div>
+                            <div class="config-group">
+                                <label for="volcSystemPrompt">系统提示词 (System Prompt):</label>
+                                <textarea id="volcSystemPrompt" class="config-textarea" rows="3"
+                                    placeholder="可选：自定义翻译系统提示词">你是一位专业的翻译专家。请将用户提供的文本从源语言翻译为目标语言，保持原文的语义和语气。只输出翻译结果，不要输出其他内容。</textarea>
+                            </div>
+                            <div class="config-actions">
+                                <button id="testVolcBtn" class="btn btn-outline">测试连接</button>
+                                <button id="saveVolcBtn" class="btn btn-primary">保存配置</button>
+                            </div>
+                        </div>
+
+                        <div id="custom-config" class="config-section">
+                            <div class="config-group">
+                                <label for="customModelName">模型名称 (Model Name):</label>
+                                <input type="text" id="customModelName" class="config-input" 
+                                    placeholder="自定义模型名称">
+                            </div>
+                            <div class="config-group">
+                                <label for="customUrl">API URL:</label>
+                                <input type="text" id="customUrl" class="config-input" 
+                                    placeholder="https://your-api.com/translate">
+                            </div>
+                            <div class="config-group">
+                                <label for="customMethod">请求方法 (Method):</label>
+                                <select id="customMethod" class="config-select">
+                                    <option value="POST">POST</option>
+                                    <option value="GET">GET</option>
+                                </select>
+                            </div>
+                            <div class="config-group">
+                                <label for="customApiKey">API Key (可选):</label>
+                                <input type="password" id="customApiKey" class="config-input" 
+                                    placeholder="API Key (如果需要)">
+                            </div>
+                            <div class="config-group">
+                                <label for="customHeaders">自定义 Headers (JSON):</label>
+                                <textarea id="customHeaders" class="config-textarea" rows="3"
+                                    placeholder='{"Authorization": "Bearer xxx"}'></textarea>
+                            </div>
+                            <div class="config-group">
+                                <label>请求体模板 (Request Body Template):</label>
+                                <textarea id="customBodyTemplate" class="config-textarea" rows="4"
+                                    placeholder='{"text": "{{text}}", "from": "{{source}}", "to": "{{target}}"}'>{"text": "{{text}}", "source": "{{source}}", "target": "{{target}}"}</textarea>
+                            </div>
+                            <div class="config-group">
+                                <label>响应解析路径 (Response Path):</label>
+                                <input type="text" id="customResponsePath" class="config-input" 
+                                    placeholder="translation 或 data.translation" value="translation">
+                            </div>
+                            <div class="config-actions">
+                                <button id="testCustomBtn" class="btn btn-outline">测试连接</button>
+                                <button id="saveCustomBtn" class="btn btn-primary">保存配置</button>
+                            </div>
+                        </div>
+
+                        <div id="local-config" class="config-section">
+                            <div class="config-group">
+                                <label for="localModelSelect">选择本地模型:</label>
+                                <select id="localModelSelect" class="config-select">
+                                    <optgroup label="English → 其他语言">
+                                        <option value="Xenova/opus-mt-en-zh">English → 中文</option>
+                                        <option value="Xenova/opus-mt-en-fr">English → 法语</option>
+                                        <option value="Xenova/opus-mt-en-ja">English → 日语</option>
+                                        <option value="Xenova/opus-mt-en-es">English → 西班牙语</option>
+                                        <option value="Xenova/opus-mt-en-de">English → 德语</option>
+                                        <option value="Xenova/opus-mt-en-ru">English → 俄语</option>
+                                    </optgroup>
+                                    <optgroup label="其他语言 → English">
+                                        <option value="Xenova/opus-mt-zh-en">中文 → English</option>
+                                        <option value="Xenova/opus-mt-fr-en">法语 → English</option>
+                                        <option value="Xenova/opus-mt-ja-en">日语 → English</option>
+                                        <option value="Xenova/opus-mt-es-en">西班牙语 → English</option>
+                                        <option value="Xenova/opus-mt-de-en">德语 → English</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="config-group">
+                                <label for="localBeamSize">Beam Size (束搜索大小):</label>
+                                <input type="number" id="localBeamSize" class="config-input" value="4" min="1" max="10">
+                            </div>
+                            <div class="config-group">
+                                <label for="localMaxTokens">最大输出 Token 数:</label>
+                                <input type="number" id="localMaxTokens" class="config-input" value="256" min="32" max="1024">
+                            </div>
+                            <div class="config-info">
+                                <p>ℹ️ 本地模型会从 Hugging Face 下载 ONNX 格式的翻译模型，首次加载后会缓存到浏览器本地存储中，支持离线使用。</p>
+                            </div>
+                            <div class="config-actions">
+                                <button id="loadLocalBtn" class="btn btn-primary">加载模型</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="testResult" class="test-result" style="display: none;">
+                    </div>
+                </div>
+
+                <div class="model-controls" id="localModelControls">
+                    <div class="model-select-wrapper">
+                        <label for="modelSelect">翻译模型 (Translation Model):</label>
+                        <select id="modelSelect" class="language-select">
+                            <optgroup label="English → 其他语言">
+                                <option value="Xenova/opus-mt-en-zh">English → 中文 (Chinese)</option>
+                                <option value="Xenova/opus-mt-en-fr" selected>English → 法语 (French)</option>
+                                <option value="Xenova/opus-mt-en-ja">English → 日语 (Japanese)</option>
+                                <option value="Xenova/opus-mt-en-es">English → 西班牙语 (Spanish)</option>
+                                <option value="Xenova/opus-mt-en-de">English → 德语 (German)</option>
+                                <option value="Xenova/opus-mt-en-ru">English → 俄语 (Russian)</option>
+                                <option value="Xenova/opus-mt-en-ar">English → 阿拉伯语 (Arabic)</option>
+                            </optgroup>
+                            <optgroup label="其他语言 → English">
+                                <option value="Xenova/opus-mt-zh-en">中文 (Chinese) → English</option>
+                                <option value="Xenova/opus-mt-fr-en">法语 (French) → English</option>
+                                <option value="Xenova/opus-mt-ja-en">日语 (Japanese) → English</option>
+                                <option value="Xenova/opus-mt-es-en">西班牙语 (Spanish) → English</option>
+                                <option value="Xenova/opus-mt-de-en">德语 (German) → English</option>
+                                <option value="Xenova/opus-mt-ru-en">俄语 (Russian) → English</option>
+                                <option value="Xenova/opus-mt-ar-en">阿拉伯语 (Arabic) → English</option>
+                            </optgroup>
+                            <optgroup label="其他语言对">
+                                <option value="Xenova/opus-mt-fr-de">法语 → 德语 (French → German)</option>
+                                <option value="Xenova/opus-mt-de-fr">德语 → 法语 (German → French)</option>
+                                <option value="Xenova/opus-mt-fr-es">法语 → 西班牙语 (French → Spanish)</option>
+                                <option value="Xenova/opus-mt-es-fr">西班牙语 → 法语 (Spanish → French)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <button id="loadModelBtn" class="btn btn-secondary">
+                        🔄 加载模型 (Load Model)
+                    </button>
+                </div>
+
+                <div id="apiLanguageControls" class="language-controls" style="display: none;">
+                    <div class="language-select-wrapper">
+                        <label>源语言 (Source):</label>
+                        <select id="apiSourceLang" class="language-select">
+                            <option value="auto">自动检测 (Auto)</option>
+                            <option value="zh">中文 (Chinese)</option>
+                            <option value="en">English</option>
+                            <option value="fr">Français</option>
+                            <option value="ja">日本語</option>
+                            <option value="es">Español</option>
+                            <option value="de">Deutsch</option>
+                            <option value="ru">Русский</option>
+                            <option value="ko">한국어</option>
+                            <option value="ar">العربية</option>
+                        </select>
+                    </div>
+                    
+                    <button class="swap-btn" id="apiSwapBtn" title="交换语言">
+                        ⇄
+                    </button>
+                    
+                    <div class="language-select-wrapper">
+                        <label>目标语言 (Target):</label>
+                        <select id="apiTargetLang" class="language-select">
+                            <option value="zh">中文 (Chinese)</option>
+                            <option value="en" selected>English</option>
+                            <option value="fr">Français</option>
+                            <option value="ja">日本語</option>
+                            <option value="es">Español</option>
+                            <option value="de">Deutsch</option>
+                            <option value="ru">Русский</option>
+                            <option value="ko">한국어</option>
+                            <option value="ar">العربية</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="model-status">
+                    <div id="modelProgress" class="model-progress" style="display: none;">
+                        <div class="progress-bar">
+                            <div id="progressFill" class="progress-fill"></div>
+                        </div>
+                        <span id="progressText" class="progress-text">加载中... 0%</span>
+                    </div>
+                    <div id="modelInfo" class="model-info"></div>
+                </div>
+
+                <div class="translation-container">
+                    <div class="translation-box source-box">
+                        <div class="box-header">
+                            <span class="box-title">源文本 (Source)</span>
+                            <div class="box-actions">
+                                <button id="voiceInputBtn" class="action-btn voice-btn" title="语音输入">
+                                    🎤
+                                </button>
+                                <span class="char-count">0 字符</span>
+                            </div>
+                        </div>
+                        <textarea 
+                            id="sourceText" 
+                            class="translation-textarea" 
+                            placeholder="在此输入要翻译的文本，或点击麦克风按钮进行语音输入...&#10;Enter text here, or click the microphone button for voice input..."
+                            rows="6"
+                        ></textarea>
+                        <div class="box-footer">
+                            <div class="quick-phrases">
+                                <button class="quick-phrase" data-text="I love machine learning">I love machine learning</button>
+                                <button class="quick-phrase" data-text="Hello, how are you?">Hello, how are you?</button>
+                                <button class="quick-phrase" data-text="Thank you very much">Thank you</button>
+                                <button class="quick-phrase" data-text="Where is the bathroom?">Where is the bathroom?</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="translation-box target-box">
+                        <div class="box-header">
+                            <span class="box-title">翻译结果 (Translation)</span>
+                            <div class="target-actions">
+                                <button id="copyBtn" class="action-btn" title="复制">📋</button>
+                                <button id="speakBtn" class="action-btn" title="朗读">🔊</button>
+                            </div>
+                        </div>
+                        <textarea 
+                            id="targetText" 
+                            class="translation-textarea" 
+                            placeholder="翻译结果将显示在这里...&#10;Translation will appear here..."
+                            rows="6"
+                            readonly
+                        ></textarea>
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <div class="action-buttons">
+                        <button id="translateBtn" class="btn btn-primary" disabled>
+                            翻译 (Translate)
+                        </button>
+                        <button id="clearBtn" class="btn btn-secondary">清空 (Clear)</button>
+                    </div>
+                    
+                    <div class="options">
+                        <label class="option-item">
+                            <input type="checkbox" id="backTranslateCheck">
+                            <span>显示回译结果 (Back Translation)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="backTranslateResult" class="back-translate-result" style="display: none;">
+                </div>
+
+                <div id="voiceStatus" class="voice-status" style="display: none;">
+                    <div class="voice-indicator">
+                        <span class="pulse-ring"></span>
+                        <span class="pulse-ring"></span>
+                        <span class="pulse-ring"></span>
+                    </div>
+                    <span id="voiceStatusText">正在聆听... (Listening...)</span>
+                    <button id="stopVoiceBtn" class="btn btn-danger">停止 (Stop)</button>
+                </div>
+            </section>
+
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3>📚 翻译历史</h3>
+                    <div id="historyList" class="history-list">
+                        <div class="empty-history">暂无翻译历史</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>💡 使用提示</h3>
+                    <ul class="tips-list">
+                        <li>按 <kbd>Ctrl</kbd> + <kbd>Enter</kbd> 快速翻译</li>
+                        <li>点击⚙️配置API密钥或切换模型</li>
+                        <li>火山翻译每月免费200万字符</li>
+                        <li>本地模型支持离线使用</li>
+                        <li>点击麦克风🎤进行语音输入</li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>🌍 支持语言</h3>
+                    <div class="languages-grid">
+                        <span class="language-tag">中文</span>
+                        <span class="language-tag">English</span>
+                        <span class="language-tag">Français</span>
+                        <span class="language-tag">日本語</span>
+                        <span class="language-tag">Español</span>
+                        <span class="language-tag">Deutsch</span>
+                        <span class="language-tag">Русский</span>
+                        <span class="language-tag">العربية</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>⚙️ 当前配置</h3>
+                    <div id="currentConfig" class="current-config">
+                        <div class="config-item">
+                            <span class="config-label">模型源:</span>
+                            <span id="currentSource" class="config-value">本地模型</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-label">状态:</span>
+                            <span id="currentStatus" class="config-value status-waiting">等待配置</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <footer class="app-footer">
+            <p>智能翻译官 - 支持本地ONNX模型、火山翻译API、自定义API</p>
+            <p class="footer-note">Universal Translator - Multiple Translation Backends</p>
+        </footer>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

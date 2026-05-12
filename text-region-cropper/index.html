@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>截图文字区域自动提取器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>截图文字区域自动提取器</h1>
+            <p>从软件 UI 截图中自动检测并提取文字区域，只发送你需要的内容</p>
+        </header>
+
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <div class="upload-content">
+                    <div class="upload-icon">📄</div>
+                    <p>点击或拖拽截图到此处</p>
+                    <span>支持 JPG、PNG、WebP 格式</span>
+                </div>
+            </div>
+            <button id="uploadBtn" class="btn btn-primary">选择图片</button>
+        </div>
+
+        <div class="controls" id="controls" style="display: none;">
+            <h2>检测参数</h2>
+            <div class="control-group">
+                <label for="minArea">最小区域面积: <span id="minAreaValue">10</span></label>
+                <input type="range" id="minArea" min="5" max="200" value="10" step="5">
+            </div>
+            <div class="control-group">
+                <label for="maxArea">最大区域面积: <span id="maxAreaValue">100000</span></label>
+                <input type="range" id="maxArea" min="1000" max="100000" value="100000" step="1000">
+            </div>
+            <div class="control-group">
+                <label for="horizontalGap">水平合并间距: <span id="horizontalGapValue">80</span></label>
+                <input type="range" id="horizontalGap" min="5" max="150" value="80" step="1">
+            </div>
+            <div class="control-group">
+                <label for="verticalGap">垂直合并间距: <span id="verticalGapValue">50</span></label>
+                <input type="range" id="verticalGap" min="2" max="100" value="50" step="1">
+            </div>
+            <div class="button-group">
+                <button id="detectBtn" class="btn btn-primary">检测文字区域</button>
+                <button id="resetBtn" class="btn btn-secondary">重置</button>
+            </div>
+        </div>
+
+        <div class="preview-section" id="previewSection" style="display: none;">
+            <div class="preview-container">
+                <div class="preview-box">
+                    <h3>原始图片</h3>
+                    <canvas id="originalCanvas"></canvas>
+                </div>
+                <div class="preview-box">
+                    <h3>检测结果</h3>
+                    <canvas id="detectedCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <h3>提取的文字区域</h3>
+            <div class="results-grid" id="resultsGrid">
+            </div>
+            <div class="download-all" id="downloadAllSection" style="display: none;">
+                <button id="downloadAllBtn" class="btn btn-success">下载所有区域</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

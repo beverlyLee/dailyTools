@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>试卷错题自动提取与排版工具</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>试卷错题自动提取与排版工具</h1>
+            <p class="subtitle">从试卷中快速提取错题，自动排版生成可打印的错题本</p>
+        </header>
+
+        <div class="workflow">
+            <div class="step active" data-step="1">
+                <div class="step-number">1</div>
+                <div class="step-title">上传图片</div>
+            </div>
+            <div class="step" data-step="2">
+                <div class="step-number">2</div>
+                <div class="step-title">透视矫正</div>
+            </div>
+            <div class="step" data-step="3">
+                <div class="step-number">3</div>
+                <div class="step-title">题目分割</div>
+            </div>
+            <div class="step" data-step="4">
+                <div class="step-number">4</div>
+                <div class="step-title">选择错题</div>
+            </div>
+            <div class="step" data-step="5">
+                <div class="step-number">5</div>
+                <div class="step-title">导出PDF</div>
+            </div>
+        </div>
+
+        <main>
+            <section id="step-upload" class="step-panel active">
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="fileInput" accept="image/*" multiple>
+                    <div class="upload-content">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <p>点击或拖拽上传试卷图片</p>
+                        <p class="upload-hint">支持 JPG、PNG 格式，可多选</p>
+                    </div>
+                </div>
+                <div class="image-list" id="imageList"></div>
+            </section>
+
+            <section id="step-correction" class="step-panel">
+                <div class="correction-container">
+                    <div class="image-navigation">
+                        <button id="prevImage" class="nav-btn">← 上一张</button>
+                        <span id="imageCounter">1 / 1</span>
+                        <button id="nextImage" class="nav-btn">下一张 →</button>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <canvas id="correctionCanvas"></canvas>
+                    </div>
+                    <div class="correction-controls">
+                        <p class="instruction">点击图片四个角标记试卷边界，按顺序点击左上角、右上角、右下角、左下角</p>
+                        <div class="control-buttons">
+                            <button id="resetPoints" class="btn btn-secondary">重置标记点</button>
+                            <button id="applyCorrection" class="btn btn-primary">应用矫正</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="step-split" class="step-panel">
+                <div class="split-container">
+                    <div class="canvas-wrapper">
+                        <canvas id="splitCanvas"></canvas>
+                    </div>
+                    <div class="split-controls">
+                        <div class="control-group">
+                            <label>行间距阈值:</label>
+                            <input type="range" id="gapThreshold" min="5" max="50" value="20">
+                            <span id="gapValue">20px</span>
+                        </div>
+                        <div class="control-group">
+                            <label>最小区块高度:</label>
+                            <input type="range" id="minBlockHeight" min="20" max="200" value="50">
+                            <span id="minHeightValue">50px</span>
+                        </div>
+                        <button id="performSplit" class="btn btn-primary">执行分割</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="step-select" class="step-panel">
+                <div class="selection-container">
+                    <h3>选择错题</h3>
+                    <p class="instruction">点击选择需要加入错题本的题目区块</p>
+                    <div class="blocks-grid" id="blocksGrid"></div>
+                    <div class="selection-summary">
+                        <span>已选择: <strong id="selectedCount">0</strong> 道题</span>
+                        <button id="selectAll" class="btn btn-secondary">全选</button>
+                        <button id="clearSelection" class="btn btn-secondary">清空选择</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="step-export" class="step-panel">
+                <div class="export-container">
+                    <h3>A4 排版预览</h3>
+                    <div class="preview-wrapper">
+                        <canvas id="previewCanvas"></canvas>
+                    </div>
+                    <div class="export-controls">
+                        <div class="control-group">
+                            <label>页面边距 (mm):</label>
+                            <input type="number" id="margin" min="5" max="30" value="15">
+                        </div>
+                        <div class="control-group">
+                            <label>区块间距 (mm):</label>
+                            <input type="number" id="blockGap" min="2" max="20" value="8">
+                        </div>
+                        <button id="refreshPreview" class="btn btn-secondary">刷新预览</button>
+                        <button id="exportPDF" class="btn btn-primary btn-large">导出 PDF</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div class="navigation-buttons">
+            <button id="prevStep" class="btn btn-secondary" style="display: none;">上一步</button>
+            <button id="nextStep" class="btn btn-primary">下一步</button>
+        </div>
+    </div>
+
+    <script src="PerspectiveCorrector.js"></script>
+    <script src="TextBlockSplitter.js"></script>
+    <script src="A4LayoutEngine.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

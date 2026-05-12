@@ -1,0 +1,123 @@
+{
+  "conditionProfiles": {
+    "糖尿病": {
+      "maxGlycemicIndex": 55,
+      "maxSugarPerMeal": 10,
+      "maxCarbsPerMeal": 45,
+      "warnings": ["高糖", "高GI", "精制碳水"],
+      "recommendedTags": ["低GI", "粗粮", "高纤维"],
+      "priority": 1
+    },
+    "高血压": {
+      "maxSodiumPerMeal": 400,
+      "maxFatPerMeal": 20,
+      "warnings": ["高钠", "高脂肪"],
+      "recommendedTags": ["低钠", "低脂肪", "高钾"],
+      "priority": 2
+    },
+    "肥胖": {
+      "maxCaloriesPerMeal": 500,
+      "maxCarbsPerMeal": 50,
+      "maxFatPerMeal": 15,
+      "warnings": ["高热量", "高糖", "高脂肪"],
+      "recommendedTags": ["低热量", "高纤维", "高蛋白"],
+      "priority": 3
+    },
+    "心脏病": {
+      "maxSodiumPerMeal": 300,
+      "maxFatPerMeal": 15,
+      "maxCholesterolPerMeal": 100,
+      "warnings": ["高钠", "高脂肪", "高胆固醇"],
+      "recommendedTags": ["低钠", "低脂肪", "Omega-3"],
+      "priority": 4
+    }
+  },
+  "bmRanges": {
+    "underweight": { "min": 0, "max": 18.5, "label": "偏瘦" },
+    "normal": { "min": 18.5, "max": 24, "label": "正常" },
+    "overweight": { "min": 24, "max": 28, "label": "偏胖" },
+    "obese": { "min": 28, "max": 100, "label": "肥胖" }
+  },
+  "recommendedDailyCalories": {
+    "sedentary": {
+      "male": { "base": 2200, "adjustPerUnit": 90 },
+      "female": { "base": 1800, "adjustPerUnit": 80 }
+    },
+    "moderate": {
+      "male": { "base": 2600, "adjustPerUnit": 100 },
+      "female": { "base": 2000, "adjustPerUnit": 90 }
+    },
+    "active": {
+      "male": { "base": 3000, "adjustPerUnit": 110 },
+      "female": { "base": 2400, "adjustPerUnit": 100 }
+    }
+  },
+  "foodReplacementRules": [
+    {
+      "from": "米饭",
+      "to": "糙米",
+      "reason": "粗粮升糖指数更低，富含膳食纤维",
+      "conditions": ["糖尿病", "肥胖"]
+    },
+    {
+      "from": "米饭",
+      "to": "燕麦",
+      "reason": "血糖反应更平稳",
+      "conditions": ["糖尿病"]
+    },
+    {
+      "from": "可乐",
+      "to": "白开水",
+      "reason": "完全去除糖分，无热量负担",
+      "conditions": ["糖尿病", "肥胖", "高血压"]
+    },
+    {
+      "from": "可乐",
+      "to": "无糖可乐",
+      "reason": "不含糖分，但建议适量饮用",
+      "conditions": ["糖尿病"]
+    },
+    {
+      "from": "可乐",
+      "to": "绿茶",
+      "reason": "天然健康，含抗氧化物质",
+      "conditions": ["糖尿病", "肥胖", "高血压", "心脏病"]
+    },
+    {
+      "from": "面包",
+      "to": "全麦面包",
+      "reason": "更多膳食纤维，血糖反应更温和",
+      "conditions": ["糖尿病", "肥胖"]
+    },
+    {
+      "from": "面条",
+      "to": "面条(荞麦)",
+      "reason": "荞麦富含膳食纤维，升糖指数更低",
+      "conditions": ["糖尿病"]
+    },
+    {
+      "from": "蛋糕",
+      "to": "无糖酸奶",
+      "reason": "更低糖、高蛋白",
+      "conditions": ["糖尿病", "肥胖"]
+    },
+    {
+      "from": "薯片",
+      "to": "苹果",
+      "reason": "天然来源，含膳食纤维",
+      "conditions": ["糖尿病", "肥胖"]
+    },
+    {
+      "from": "猪肉",
+      "to": "鸡肉",
+      "reason": "更低脂肪，更健康的蛋白质来源",
+      "conditions": ["高血压", "心脏病"]
+    },
+    {
+      "from": "猪肉",
+      "to": "鱼肉",
+      "reason": "富含Omega-3脂肪酸，有益心血管",
+      "conditions": ["高血压", "心脏病"]
+    }
+  ]
+}

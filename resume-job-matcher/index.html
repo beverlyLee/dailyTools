@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能简历职位匹配度分析器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>智能简历职位匹配度分析器</h1>
+            <p>基于 AI 技术，精准分析简历与职位的契合度</p>
+        </header>
+
+        <main>
+            <div class="config-section">
+                <div class="config-box">
+                    <label for="api-url">API 地址</label>
+                    <input type="text" id="api-url" placeholder="API 端点地址，例如：/api/embeddings">
+                </div>
+                <div class="config-box">
+                    <label for="api-key">火山引擎 API Key</label>
+                    <input type="password" id="api-key" placeholder="请输入您的火山引擎 API Key">
+                    <div class="api-hint">
+                        <a href="https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey" target="_blank">获取 API Key</a>
+                    </div>
+                </div>
+                <div class="config-box">
+                    <label for="model-name">向量化模型</label>
+                    <input type="text" id="model-name" placeholder="模型 ID 或 Endpoint ID，例如：doubao-embedding-text-240715">
+                </div>
+                <div class="config-box">
+                    <label for="encoding-format">编码格式</label>
+                    <select id="encoding-format">
+                        <option value="float">float (浮点数数组)</option>
+                        <option value="base64">base64 (Base64 编码)</option>
+                    </select>
+                    <div class="format-hint">
+                        取值范围: float, base64
+                    </div>
+                </div>
+                <div class="config-box test-connection-box config-box-full">
+                    <label>连接测试</label>
+                    <button id="test-connection-btn" class="test-connection-btn">测试连接</button>
+                    <div id="connection-status" class="connection-status"></div>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <div class="input-box">
+                    <label for="resume-text">简历内容</label>
+                    <textarea id="resume-text" placeholder="请粘贴您的简历内容..."></textarea>
+                    <button id="load-sample-resume">加载示例简历</button>
+                </div>
+
+                <div class="input-box">
+                    <label for="job-text">职位描述 (JD)</label>
+                    <textarea id="job-text" placeholder="请粘贴职位描述..."></textarea>
+                    <div class="button-group">
+                        <button id="load-sample-job-matching">加载匹配 JD</button>
+                        <button id="load-sample-job-unmatching">加载不匹配 JD</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <button id="analyze-btn" class="analyze-btn">开始分析</button>
+                <div id="loading" class="loading" style="display: none;">
+                    <span>正在加载模型并分析，请稍候...</span>
+                </div>
+            </div>
+
+            <div id="result-section" class="result-section" style="display: none;">
+                <div class="result-card">
+                    <h2>匹配度分析结果</h2>
+                    <div class="match-score">
+                        <div class="score-circle" id="score-circle">
+                            <span id="score-value">0%</span>
+                        </div>
+                        <p id="score-description">等待分析</p>
+                    </div>
+                </div>
+
+                <div class="keywords-card">
+                    <h2>关键词分析</h2>
+                    <div class="keywords-section">
+                        <div class="keywords-box">
+                            <h3>简历中的关键词</h3>
+                            <div id="resume-keywords" class="keywords-list"></div>
+                        </div>
+                        <div class="keywords-box">
+                            <h3>职位描述中的关键词</h3>
+                            <div id="job-keywords" class="keywords-list"></div>
+                        </div>
+                    </div>
+                    <div class="missing-keywords-box">
+                        <h3>缺失的关键技能</h3>
+                        <p class="missing-hint">以下技能在职位描述中提到，但简历中未体现：</p>
+                        <div id="missing-keywords" class="keywords-list"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

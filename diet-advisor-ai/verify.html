@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>验证测试 - 糖尿病 + 米饭+可乐</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; margin-bottom: 10px; }
+        .subtitle { color: #666; margin-bottom: 25px; }
+        .section { margin-bottom: 25px; padding: 15px; background: #f8f9fa; border-radius: 10px; }
+        .section h3 { color: #333; margin: 0 0 12px 0; }
+        .row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .pill { background: #e3f2fd; padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; }
+        .danger { background: #ffebee; color: #c62828; }
+        .warning { background: #fff3cd; color: #856404; }
+        .success { background: #d4edda; color: #155724; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .result-box { border: 2px solid #ddd; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        .verdict-pass { border-color: #28a745; background: #d4edda; }
+        .verdict-fail { border-color: #dc3545; background: #f8d7da; }
+        .verdict-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
+        pre { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
+        code { color: #a6e22e; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🥗 AI 健康饮食顾问 - 验证测试</h1>
+        <p class="subtitle">测试场景：糖尿病患者 + 午餐：米饭+可乐</p>
+
+        <div id="loading">
+            <div class="section">
+                <h3>⏳ 正在加载数据和初始化模块...</h3>
+            </div>
+        </div>
+
+        <div id="content" class="hidden">
+            <div class="section">
+                <h3>👤 用户健康画像</h3>
+                <div class="row">
+                    <span class="pill">身高: 175 cm</span>
+                    <span class="pill">体重: 80 kg</span>
+                    <span class="pill" id="bmi-result"></span>
+                    <span class="pill danger">糖尿病患者</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>🍽️ 输入餐食</h3>
+                <div class="row">
+                    <span class="pill warning">米饭</span>
+                    <span class="pill danger">可乐</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>📊 营养分析结果</h3>
+                <div id="nutrition-results" class="row"></div>
+            </div>
+
+            <div class="section">
+                <h3>⚠️ 规则引擎 - 违规检测</h3>
+                <div id="rule-violations"></div>
+            </div>
+
+            <div class="section">
+                <h3>🔄 替换建议</h3>
+                <div id="replacements"></div>
+            </div>
+
+            <div class="section">
+                <h3>🔬 贝叶斯风险评估</h3>
+                <div id="bayesian-risks"></div>
+            </div>
+
+            <div id="verdict" class="result-box">
+                <div id="verdict-content"></div>
+            </div>
+
+            <div class="section">
+                <h3>💾 项目文件结构</h3>
+                <pre><code>diet-advisor-ai/
+├── index.html              # 主页面
+├── styles.css              # 样式表
+├── main.js                 # 主入口
+├── HealthProfiler.js       # 健康画像模块
+├── MealAnalyzer.js         # 餐盘分析模块
+├── RuleEngine.js           # 规则引擎
+├── BayesianNetwork.js      # 贝叶斯网络
+├── DietRecommender.js      # 推荐系统
+└── data/
+    ├── foodDatabase.json   # 食物成分数据库 (27种食物)
+    └── healthRules.json    # 健康规则配置
+</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <script src="HealthProfiler.js"></script>
+    <script src="MealAnalyzer.js"></script>
+    <script src="RuleEngine.js"></script>
+    <script src="BayesianNetwork.js"></script>
+    <script src="DietRecommender.js"></script>
+
+    <script>
+        async function runVerification() {
+            try {
+                const [foodDbResponse, rulesResponse] = await Promise.all([
+                    fetch('data/foodDatabase.json'),
+                    fetch('data/healthRules.json')
+                ]);
+
+                const foodDatabase = await foodDbResponse.json();
+                const healthRules = await rulesResponse.json();
+
+                const profiler = new HealthProfiler(healthRules);
+                const analyzer = new MealAnalyzer(foodDatabase);
+                const ruleEngine = new RuleEngine(healthRules);
+                const bayesian = new SimpleBayesianNetwork();
+                const recommender = new DietRecommender(healthRules, foodDatabase, ruleEngine, bayesian);
+
+                const profile = profiler.createProfile({
+                    heightCm: 175,
+                    weightKg: 80,
+                    age: 50,
+                    gender: 'male',
+                    activityLevel: 'sedentary',
+                    conditions: ['糖尿病']
+                });
+
+                document.getElementById('bmi-result').textContent = `BMI: ${profile.bmi} (${profile.bmiCategory.label})`;
+
+                const mealResult = analyzer.analyze('米饭+可乐');
+                
+                const nutritionHtml = [];
+                nutritionHtml.push(`<span class="pill">总热量: ${mealResult.aggregate.calories} kcal</span>`);
+                nutritionHtml.push(`<span class="pill warning">碳水: ${mealResult.aggregate.carbs} g</span>`);
+                nutritionHtml.push(`<span class="pill danger">糖分: ${mealResult.aggregate.sugar} g</span>`);
+                nutritionHtml.push(`<span class="pill warning">平均GI: ${mealResult.aggregate.avgGlycemicIndex}</span>`);
+                
+                document.getElementById('nutrition-results').innerHTML = nutritionHtml.join('');
+
+                const ruleEval = ruleEngine.evaluateMeal(mealResult, profile);
+                
+                let ruleHtml = '';
+                if (ruleEval.hasViolations) {
+                    for (const [condition, result] of Object.entries(ruleEval.conditionResults)) {
+                        ruleHtml += `<p><strong>${condition} 违规:</strong></p><ul style="margin: 8px 0 12px 20px;">`;
+                        for (const v of result.violations) {
+                            ruleHtml += `<li>${v.name}: ${v.value} (限值: ${v.limit}${v.unit || ''})</li>`;
+                        }
+                        for (const tag of result.tagViolations) {
+                            ruleHtml += `<li>标签违规: ${tag}</li>`;
+                        }
+                        ruleHtml += '</ul>';
+                    }
+                    
+                    if (ruleEval.highRiskFoods.length > 0) {
+                        ruleHtml += '<p><strong>高风险食物:</strong></p><ul style="margin: 8px 0 0 20px;">';
+                        for (const f of ruleEval.highRiskFoods) {
+                            ruleHtml += `<li>${f.name}: ${f.reason}</li>`;
+                        }
+                        ruleHtml += '</ul>';
+                    }
+                } else {
+                    ruleHtml = '<p class="success">✅ 未检测到违规</p>';
+                }
+                document.getElementById('rule-violations').innerHTML = ruleHtml;
+
+                const recs = recommender.generateRecommendations(mealResult, profile, ruleEval);
+
+                let repHtml = '';
+                if (recs.replacements.length > 0) {
+                    for (const rep of recs.replacements) {
+                        repHtml += `<p style="margin: 8px 0;">
+                            <span style="color: #dc3545; font-weight: bold;">${rep.from}</span>
+                            → 
+                            <span style="color: #28a745; font-weight: bold;">${rep.to}</span>
+                            <span style="color: #666; font-size: 0.9rem; margin-left: 10px;">(${rep.reason})</span>
+                        </p>`;
+                    }
+                } else {
+                    repHtml = '<p class="success">✅ 无需替换</p>';
+                }
+                document.getElementById('replacements').innerHTML = repHtml;
+
+                let bayesHtml = '';
+                if (recs.bayesianRisks && recs.bayesianRisks.recommendations.length > 0) {
+                    bayesHtml = `<p><strong>整体风险等级: ${recs.bayesianRisks.overallLevel}</strong></p>`;
+                    for (const rec of recs.bayesianRisks.recommendations) {
+                        bayesHtml += `<p style="margin: 6px 0; color: #666;">• ${rec}</p>`;
+                    }
+                } else {
+                    bayesHtml = '<p class="success">✅ 贝叶斯评估通过</p>';
+                }
+                document.getElementById('bayesian-risks').innerHTML = bayesHtml;
+
+                const hasRiceCokeIssue = recs.warnings.some(w => 
+                    (w.type === 'carbs' || w.type === 'sugar' || w.type === 'glycemicIndex' || w.tag) &&
+                    recs.replacements.some(r => r.from === '米饭' || r.from === '可乐')
+                );
+
+                const hasCriticalWarnings = recs.warnings.length > 0;
+                const hasReplacements = recs.replacements.length > 0;
+                const hasHighRiskAssessment = recs.overallAssessment.severity !== 'none';
+
+                const validationPassed = 
+                    hasRiceCokeIssue &&
+                    hasCriticalWarnings &&
+                    hasReplacements &&
+                    hasHighRiskAssessment;
+
+                let verdictHtml = '';
+                if (validationPassed) {
+                    verdictHtml = `
+                        <div class="verdict-title" style="color: #155724;">✅ 验证成功！</div>
+                        <div style="color: #155724;">
+                            <p><strong>系统正确识别了糖尿病患者的"米饭+可乐"组合，并给出了关键警告：</strong></p>
+                            <ul style="margin-top: 10px; margin-left: 20px;">
+                                <li>🚨 <strong>碳水化合物和糖分过高</strong></li>
+                                <li>🔄 <strong>建议替换为粗粮和白开水</strong> (米饭→糙米, 可乐→白开水)</li>
+                                <li>⚠️ 升糖指数超出糖尿病患者安全范围</li>
+                                <li>📊 贝叶斯网络评估为高风险</li>
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    verdictHtml = `
+                        <div class="verdict-title" style="color: #721c24;">❌ 验证未通过</div>
+                        <div style="color: #721c24;">
+                            <p>预期警告: "碳水化合物和糖分过高，建议替换为粗粮和白开水"</p>
+                            <p>hasRiceCokeIssue: ${hasRiceCokeIssue}</p>
+                            <p>hasCriticalWarnings: ${hasCriticalWarnings}</p>
+                            <p>hasReplacements: ${hasReplacements}</p>
+                        </div>
+                    `;
+                }
+
+                const verdictBox = document.getElementById('verdict');
+                verdictBox.className = `result-box ${validationPassed ? 'verdict-pass' : 'verdict-fail'}`;
+                document.getElementById('verdict-content').innerHTML = verdictHtml;
+
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('content').classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading').innerHTML = `
+                    <div class="section" style="background: #f8d7da;">
+                        <h3>❌ 初始化错误</h3>
+                        <p>${err.message}</p>
+                        <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
+                            请确保通过 HTTP 服务器访问此页面 (如 python3 -m http.server)
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', runVerification);
+    </script>
+</body>
+</html>

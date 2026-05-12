@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>验证工作流</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">验证工作流</h1>
+        <p class="subtitle">AI 产出物验收 · 归因诊断 · 下一轮 Prompt</p>
+
+        <!-- 输入区 -->
+        <div class="card" id="inputCard">
+            <h2 class="card-title">提交验收</h2>
+
+            <div class="form-group">
+                <label for="projectName">工程名称</label>
+                <input type="text" id="projectName" placeholder="如：braille-ocr" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="requirement">核心需求</label>
+                <textarea id="requirement" rows="3" placeholder="新项目简述目标，续作写"需求同前""></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group half">
+                    <label for="roundNum">当前轮次</label>
+                    <input type="number" id="roundNum" value="1" min="1" max="99">
+                </div>
+                <div class="form-group half">
+                    <label for="stage">阶段描述</label>
+                    <input type="text" id="stage" placeholder="如：物理碰撞检测" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>运行结果截图 <span class="hint">（拖拽或点击上传，支持多张）</span></label>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-placeholder" id="uploadPlaceholder">
+                        <span class="upload-icon">+</span>
+                        <span>拖拽截图到此处，或点击选择文件</span>
+                    </div>
+                    <div class="preview-grid" id="previewGrid"></div>
+                    <input type="file" id="fileInput" multiple accept="image/*" hidden>
+                </div>
+                <div class="auto-screenshot">
+                    <input type="text" id="autoScreenshotUrl" placeholder="预留：输入项目运行地址自动截图" disabled>
+                    <button class="btn btn-ghost btn-sm" id="autoScreenshotBtn" disabled title="功能开发中">自动截图</button>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="submitBtn" disabled>
+                <span class="btn-text">提交验收</span>
+                <span class="btn-loading" hidden>验收中...</span>
+            </button>
+        </div>
+
+        <!-- 结果区 -->
+        <div class="card" id="resultCard" hidden>
+            <div class="result-header">
+                <h2 class="card-title">验收结果</h2>
+                <div class="result-meta" id="resultMeta"></div>
+            </div>
+            <div class="result-body" id="resultBody"></div>
+            <div class="result-actions">
+                <button class="btn btn-secondary" id="copyPromptBtn">复制下一轮 Prompt</button>
+                <button class="btn btn-ghost" id="newRoundBtn">开始新一轮</button>
+            </div>
+        </div>
+
+        <!-- 历史记录 -->
+        <div class="card" id="historyCard" hidden>
+            <div class="history-header">
+                <h2 class="card-title">历史记录</h2>
+                <button class="btn btn-ghost btn-sm" id="clearHistoryBtn">清空</button>
+            </div>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast" hidden></div>
+
+    <script src="main.js"></script>
+</body>
+</html>

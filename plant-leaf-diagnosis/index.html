@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>植物叶片病虫害识别辅助工具</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌿 植物叶片病虫害识别辅助工具</h1>
+            <p class="subtitle">帮助您判断叶片是缺素还是病害，快速识别病斑区域</p>
+        </header>
+
+        <main>
+            <section id="uploadSection" class="card">
+                <h2>📷 上传叶片图片</h2>
+                <div id="uploadArea" class="upload-area">
+                    <p>点击或拖拽图片到此处</p>
+                    <p class="hint">支持 JPG、PNG 格式</p>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+                <button id="uploadBtn" class="btn btn-primary">选择图片</button>
+            </section>
+
+            <section id="controls" class="card" style="display: none;">
+                <h2>⚙️ 分析参数</h2>
+                
+                <div class="threshold-info">
+                    <h3>📋 阈值说明</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-title yellow">🟡 黄色病斑阈值</span>
+                            <span class="info-desc">控制黄化、缺素（如缺氮、缺铁）病斑的检测灵敏度。阈值越高，检测越严格，只检测明显的黄色区域。</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-title brown">🟤 褐色病斑阈值</span>
+                            <span class="info-desc">控制坏死、焦枯病斑（如真菌病害、缺磷钾）的检测灵敏度。阈值越高，只检测颜色更深的褐色区域。</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-title red">🔴 红色病斑阈值</span>
+                            <span class="info-desc">控制红色、红褐色病斑（如锈病、细菌性病害）的检测灵敏度。</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-title white">⚪ 白色病斑阈值</span>
+                            <span class="info-desc">控制白粉病、霉斑、白化病斑的检测灵敏度。</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-title gray">⚫ 灰色病斑阈值</span>
+                            <span class="info-desc">控制灰霉病、煤污病、早衰等灰色病斑的检测灵敏度。</span>
+                        </div>
+                    </div>
+                    <p class="info-tip">💡 提示：如果病斑漏检，可降低对应颜色的阈值；如果误检过多（检测到非病斑区域），可提高阈值。</p>
+                </div>
+                
+                <div class="params-grid">
+                    <div class="param-group">
+                        <label for="kClusters">K-Means 聚类数:</label>
+                        <input type="range" id="kClusters" min="2" max="6" value="4">
+                        <span id="kClustersValue">4</span>
+                        <p class="param-hint">叶片分割精度，值越大分割越细（推荐 3-4）</p>
+                    </div>
+                    <div class="param-group">
+                        <label for="yellowThreshold">黄色病斑阈值:</label>
+                        <input type="range" id="yellowThreshold" min="0" max="100" value="50">
+                        <span id="yellowThresholdValue">50</span>
+                    </div>
+                    <div class="param-group">
+                        <label for="brownThreshold">褐色病斑阈值:</label>
+                        <input type="range" id="brownThreshold" min="0" max="100" value="40">
+                        <span id="brownThresholdValue">40</span>
+                    </div>
+                    <div class="param-group">
+                        <label for="redThreshold">红色病斑阈值:</label>
+                        <input type="range" id="redThreshold" min="0" max="100" value="30">
+                        <span id="redThresholdValue">30</span>
+                    </div>
+                    <div class="param-group">
+                        <label for="whiteThreshold">白色病斑阈值:</label>
+                        <input type="range" id="whiteThreshold" min="0" max="100" value="45">
+                        <span id="whiteThresholdValue">45</span>
+                    </div>
+                    <div class="param-group">
+                        <label for="grayThreshold">灰色病斑阈值:</label>
+                        <input type="range" id="grayThreshold" min="0" max="100" value="50">
+                        <span id="grayThresholdValue">50</span>
+                    </div>
+                    <div class="param-group">
+                        <label for="useEdgeEnhancement">启用边缘增强:</label>
+                        <input type="checkbox" id="useEdgeEnhancement" checked>
+                        <span id="edgeEnhancementLabel">已启用</span>
+                        <p class="param-hint">结合边缘检测扩大病斑检测范围</p>
+                    </div>
+                    <div class="param-group">
+                        <label for="useRelativeDetection">启用相对检测:</label>
+                        <input type="checkbox" id="useRelativeDetection" checked>
+                        <span id="relativeDetectionLabel">已启用</span>
+                        <p class="param-hint">与健康叶片颜色对比检测异常区域</p>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button id="analyzeBtn" class="btn btn-primary">开始分析</button>
+                    <button id="resetBtn" class="btn btn-secondary">重置</button>
+                </div>
+            </section>
+
+            <section id="resultsSection" class="card" style="display: none;">
+                <h2>📊 分析结果</h2>
+                <div class="canvas-container">
+                    <div class="canvas-wrapper">
+                        <h3>原图</h3>
+                        <canvas id="originalCanvas"></canvas>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <h3>叶片分割</h3>
+                        <canvas id="segmentedCanvas"></canvas>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <h3>病斑检测</h3>
+                        <canvas id="spotCanvas"></canvas>
+                    </div>
+                </div>
+                <div class="diagnosis-panel">
+                    <h3>诊断结果</h3>
+                    <div id="diagnosisContent">
+                        <div class="diagnosis-item">
+                            <span class="label">病斑覆盖率:</span>
+                            <span id="coverageRate" class="value">-</span>
+                        </div>
+                        <div class="diagnosis-item">
+                            <span class="label">叶片状态:</span>
+                            <span id="leafStatus" class="status">-</span>
+                        </div>
+                        <div class="diagnosis-item">
+                            <span class="label">可能病因:</span>
+                            <span id="possibleCause" class="cause">-</span>
+                        </div>
+                        <div class="diagnosis-item">
+                            <span class="label">建议措施:</span>
+                            <span id="suggestion" class="suggestion">-</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2026 植物叶片病虫害识别辅助工具 | 仅供参考，实际诊断请咨询专业人士</p>
+        </footer>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

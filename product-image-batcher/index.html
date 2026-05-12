@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电商商品主图批量处理器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <h1>电商商品主图批量处理器</h1>
+            <p class="subtitle">智能识别商品主体，一键批量处理淘宝/亚马逊主图尺寸</p>
+        </header>
+
+        <div class="content">
+            <div class="panel left-panel">
+                <div class="panel-header">
+                    <h2>📁 上传图片</h2>
+                </div>
+
+                <div id="dropZone" class="drop-zone">
+                    <div class="drop-icon">⬆️</div>
+                    <p class="drop-text">拖拽图片到此处</p>
+                    <p class="drop-hint">或点击选择文件</p>
+                    <p class="drop-hint">支持 JPG、PNG、WebP、GIF</p>
+                    <input type="file" id="fileInput" multiple accept="image/*">
+                </div>
+
+                <div class="file-list-section" id="fileListSection" style="display: none;">
+                    <div class="file-list-header">
+                        <span>已选择 <strong id="fileCount">0</strong> 张图片</span>
+                        <button id="clearAllBtn" class="clear-all-btn">清空</button>
+                    </div>
+                    <div class="file-list" id="fileList"></div>
+                </div>
+            </div>
+
+            <div class="panel right-panel">
+                <div class="panel-header">
+                    <h2>⚙️ 处理设置</h2>
+                </div>
+
+                <div class="setting-section">
+                    <h3>裁剪模式</h3>
+                    <div class="mode-buttons">
+                        <label class="mode-btn active">
+                            <input type="radio" name="mode" value="smart" checked>
+                            <span>智能避让</span>
+                            <small>自动识别商品主体，智能裁剪背景</small>
+                        </label>
+                        <label class="mode-btn">
+                            <input type="radio" name="mode" value="center">
+                            <span>居中裁剪</span>
+                            <small>从中心按比例裁剪</small>
+                        </label>
+                        <label class="mode-btn">
+                            <input type="radio" name="mode" value="pad">
+                            <span>填充背景</span>
+                            <small>等比缩放，不足部分填充背景</small>
+                        </label>
+                        <label class="mode-btn">
+                            <input type="radio" name="mode" value="remove-bg">
+                            <span>智能抠图</span>
+                            <small>自动抠出商品，透明背景</small>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="setting-section">
+                    <div class="setting-row">
+                        <div class="setting-item">
+                            <label>宽高比</label>
+                            <select id="ratio">
+                                <option value="1:1">1:1 (正方形)</option>
+                                <option value="4:3">4:3</option>
+                                <option value="3:4">3:4</option>
+                                <option value="16:9">16:9</option>
+                                <option value="9:16">9:16</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>目标尺寸 (px)</label>
+                            <select id="targetSize">
+                                <option value="500">500</option>
+                                <option value="800">800</option>
+                                <option value="1000" selected>1000</option>
+                                <option value="1200">1200</option>
+                                <option value="1500">1500</option>
+                                <option value="2000">2000</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-section">
+                    <div class="setting-row">
+                        <div class="setting-item">
+                            <label>背景颜色</label>
+                            <div class="color-picker">
+                                <input type="color" id="bgColor" value="#ffffff">
+                                <input type="text" id="bgColorText" value="#ffffff">
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label>图片质量: <span id="qualityValue">90</span>%</label>
+                            <input type="range" id="quality" min="10" max="100" value="90">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-section">
+                    <button id="previewBtn" class="btn btn-secondary" disabled>
+                        👁️ 预览效果
+                    </button>
+                    <div id="previewArea" class="preview-area" style="display: none;">
+                        <img id="previewImage" src="" alt="预览">
+                    </div>
+                </div>
+
+                <button id="processBtn" class="btn btn-primary" disabled>
+                    🚀 开始批量处理
+                </button>
+
+                <div id="progressSection" class="progress-section" style="display: none;">
+                    <div class="progress-header">
+                        <span>处理中...</span>
+                        <span id="progressText">0/0</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div id="resultSection" class="result-section" style="display: none;">
+                    <div class="result-icon">✅</div>
+                    <h3 id="resultTitle">处理完成!</h3>
+                    <p id="resultDesc">图片已成功处理</p>
+                    <button id="downloadBtn" class="btn btn-success">
+                        📥 下载处理结果
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>电商商品主图批量处理器 &copy; 2024</p>
+        </footer>
+    </div>
+
+    <script src="batchUploader.js"></script>
+</body>
+</html>

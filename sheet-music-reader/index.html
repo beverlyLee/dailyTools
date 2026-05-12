@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>乐谱音符识别练习助手</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎼 乐谱几何解析器</h1>
+            <p>纯几何解析模式 - 基于位置映射音高，无音乐推理</p>
+        </header>
+
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <div class="upload-content">
+                    <div class="upload-icon">🎵</div>
+                    <p>点击或拖拽乐谱图片到此处</p>
+                    <span>支持 JPG、PNG、WebP 格式 - 纯几何解析，无音乐推理</span>
+                </div>
+            </div>
+            <button id="uploadBtn" class="btn btn-primary">选择图片</button>
+        </div>
+
+        <div class="controls" id="controls" style="display: none;">
+            <h2>几何解析参数</h2>
+            
+            <div class="control-row">
+                <div class="control-group inline">
+                    <label>谱号类型:</label>
+                    <select id="clefSelect">
+                        <option value="auto">自动检测</option>
+                        <option value="treble">高音谱号 (G谱号)</option>
+                        <option value="bass">低音谱号 (F谱号)</option>
+                    </select>
+                </div>
+                
+                <div class="control-group inline">
+                    <label>标注颜色:</label>
+                    <select id="colorSelect">
+                        <option value="#e74c3c">红色</option>
+                        <option value="#3498db">蓝色</option>
+                        <option value="#27ae60">绿色</option>
+                        <option value="#9b59b6">紫色</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="recognizeBtn" class="btn btn-primary">几何解析</button>
+                <button id="resetBtn" class="btn btn-secondary">重置</button>
+                <button id="downloadBtn" class="btn btn-success" style="display: none;">下载标注结果</button>
+            </div>
+        </div>
+
+        <div class="preview-section" id="previewSection" style="display: none;">
+            <div class="preview-container">
+                <div class="preview-box">
+                    <h3>原始乐谱</h3>
+                    <canvas id="originalCanvas"></canvas>
+                </div>
+                <div class="preview-box">
+                    <h3>识别结果</h3>
+                    <canvas id="resultCanvas"></canvas>
+                </div>
+            </div>
+            
+            <div class="output-box" id="outputBox" style="display: none;">
+                <div class="output-header">
+                    <h3>📋 识别结果文本</h3>
+                    <button id="copyOutputBtn" class="btn btn-primary" style="padding: 8px 16px; font-size: 14px;">复制</button>
+                </div>
+                <pre id="outputText" class="output-text"></pre>
+            </div>
+            
+            <div class="note-list" id="noteList" style="display: none;">
+                <h3>识别出的音符列表</h3>
+                <div class="notes-container" id="notesContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

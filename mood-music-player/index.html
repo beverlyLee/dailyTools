@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>情绪音乐播放器 - Mood Music Player</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo-icon">🎵</div>
+                <div class="header-text">
+                    <h1>情绪音乐播放器</h1>
+                    <p>通过摄像头识别您的表情，智能推荐符合心情的音乐</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="toolbar">
+            <div class="control-bar">
+                <button id="startBtn" class="btn btn-primary">
+                    <span class="btn-icon">▶️</span>
+                    开始识别
+                </button>
+                <button id="stopBtn" class="btn btn-danger" style="display: none;">
+                    <span class="btn-icon">⏹️</span>
+                    停止
+                </button>
+                <button id="manualSelectBtn" class="btn btn-secondary">
+                    <span class="btn-icon">🎼</span>
+                    手动选择歌单
+                </button>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-label">状态:</span>
+                <span id="statusText" class="status-value idle">等待开始</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">模型加载:</span>
+                <span id="modelStatus" class="status-value loading">加载中...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">当前情绪:</span>
+                <span id="currentEmotion" class="status-value">--</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">当前歌单:</span>
+                <span id="currentPlaylist" class="status-value">默认歌单</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="content-wrapper">
+                <div class="video-section">
+                    <div class="placeholder-view" id="placeholderView">
+                        <div class="placeholder-icon">😊</div>
+                        <h2>开启您的音乐之旅</h2>
+                        <p>点击"开始识别"按钮，通过摄像头捕捉您的表情</p>
+                        <p class="tip">微笑保持5秒，将为您切换到欢快的流行乐</p>
+                    </div>
+                    
+                    <div class="video-container" id="videoContainer" style="display: none;">
+                        <video id="video" autoplay playsinline muted></video>
+                        <canvas id="canvas"></canvas>
+                    </div>
+
+                    <div class="emotion-panel" id="emotionPanel" style="display: none;">
+                        <h3>情绪检测</h3>
+                        <div class="emotion-bars" id="emotionBars"></div>
+                        <div class="smooth-info">
+                            <span>情绪持续:</span>
+                            <span id="emotionDuration">0s</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="music-section">
+                    <div class="now-playing">
+                        <div class="album-art" id="albumArt">🎵</div>
+                        <div class="track-info">
+                            <h3 id="trackTitle">未播放</h3>
+                            <p id="trackArtist">--</p>
+                        </div>
+                    </div>
+
+                    <div class="player-controls">
+                        <button id="prevBtn" class="control-btn">⏮️</button>
+                        <button id="playPauseBtn" class="control-btn primary">▶️</button>
+                        <button id="nextBtn" class="control-btn">⏭️</button>
+                    </div>
+
+                    <div class="playlist-section">
+                        <h3>当前歌单</h3>
+                        <ul id="playlist" class="playlist"></ul>
+                    </div>
+
+                    <div class="emotion-mapping">
+                        <h3>情绪-歌单映射</h3>
+                        <ul class="mapping-list">
+                            <li><span class="emotion-tag happy">😊 高兴</span> → <span class="playlist-tag pop">流行乐</span></li>
+                            <li><span class="emotion-tag sad">😢 悲伤</span> → <span class="playlist-tag classical">轻音乐/古典</span></li>
+                            <li><span class="emotion-tag angry">😠 愤怒</span> → <span class="playlist-tag rock">摇滚乐</span></li>
+                            <li><span class="emotion-tag neutral">😐 平静</span> → <span class="playlist-tag ambient">环境音乐</span></li>
+                            <li><span class="emotion-tag surprised">😲 惊讶</span> → <span class="playlist-tag electronic">电子音乐</span></li>
+                            <li><span class="emotion-tag fearful">😨 恐惧</span> → <span class="playlist-tag chill">舒缓音乐</span></li>
+                            <li><span class="emotion-tag disgusted">🤢 厌恶</span> → <span class="playlist-tag jazz">爵士乐</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="manualModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>手动选择歌单</h3>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="playlist-options" id="playlistOptions"></div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audioPlayer"></audio>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.min.js"></script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>

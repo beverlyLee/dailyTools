@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能题库组卷系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo">📝</div>
+                <div class="header-text">
+                    <h1>智能题库组卷系统</h1>
+                    <p>根据知识点和难度快速生成平衡试卷</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="panel panel-config">
+                <h2>组卷设置</h2>
+
+                <div class="form-group">
+                    <label>学科</label>
+                    <select id="subjectSelect">
+                        <option value="初中数学">初中数学</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>整体难度</label>
+                    <select id="difficultySelect">
+                        <option value="">综合（简单30%/中等50%/困难20%）</option>
+                        <option value="easy">偏简单（简单60%/中等30%/困难10%）</option>
+                        <option value="medium">偏中等（简单20%/中等60%/困难20%）</option>
+                        <option value="hard">偏困难（简单10%/中等30%/困难60%）</option>
+                    </select>
+                </div>
+
+                <h3>知识点分布</h3>
+                <div class="topic-distribution">
+                    <div class="distribution-item">
+                        <label>代数占比</label>
+                        <div class="slider-group">
+                            <input type="range" id="algebraRatio" min="0" max="100" value="60">
+                            <span class="ratio-value"><span id="algebraValue">60</span>%</span>
+                        </div>
+                    </div>
+                    <div class="distribution-item">
+                        <label>几何占比</label>
+                        <div class="slider-group">
+                            <input type="range" id="geometryRatio" min="0" max="100" value="40" disabled>
+                            <span class="ratio-value"><span id="geometryValue">40</span>%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>题型设置</h3>
+                <div class="question-types">
+                    <div class="type-row">
+                        <div class="type-label">选择题</div>
+                        <div class="type-info">
+                            <div class="type-detail">固定 3 分/题</div>
+                            <div class="type-inputs-simple">
+                                <div class="mini-input">
+                                    <label>题数</label>
+                                    <input type="number" id="choiceCount" value="10" min="0" max="20">
+                                </div>
+                                <div class="type-total">
+                                    共 <strong><span id="choiceTotal">30</span></strong> 分
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="type-row">
+                        <div class="type-label">填空题</div>
+                        <div class="type-info">
+                            <div class="type-detail">固定 4 分/题</div>
+                            <div class="type-inputs-simple">
+                                <div class="mini-input">
+                                    <label>题数</label>
+                                    <input type="number" id="fillCount" value="5" min="0" max="12">
+                                </div>
+                                <div class="type-total">
+                                    共 <strong><span id="fillTotal">20</span></strong> 分
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="type-row">
+                        <div class="type-label">解答题</div>
+                        <div class="type-info">
+                            <div class="type-detail">8-10 分/题（题库共4道）</div>
+                            <div class="type-inputs-simple">
+                                <div class="mini-input">
+                                    <label>题数</label>
+                                    <input type="number" id="answerCount" value="4" min="0" max="4">
+                                </div>
+                                <div class="type-total">
+                                    约 <strong><span id="answerTotal">36</span></strong> 分
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="total-preview">
+                    预计总分：<strong><span id="expectedTotal">86</span></strong> 分
+                </div>
+
+                <div class="actions">
+                    <button id="generateBtn" class="btn btn-primary">智能生成试卷</button>
+                    <button id="resetBtn" class="btn btn-secondary">重置设置</button>
+                </div>
+            </div>
+
+            <div class="panel panel-result" id="resultPanel">
+                <h2>生成结果</h2>
+                <div id="resultStats" class="result-stats"></div>
+                <div id="paperContainer"></div>
+                <div class="actions" id="downloadActions" style="display:none;">
+                    <button id="printBtn" class="btn btn-secondary">打印试卷</button>
+                    <button id="regenerateBtn" class="btn btn-primary">重新生成</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文章情感倾向分析器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 文章情感倾向分析器</h1>
+            <p class="subtitle">快速判断用户评论或文章是正面、负面还是中性</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <div class="section-header">
+                    <h2>📝 输入文本</h2>
+                </div>
+                <textarea 
+                    id="textInput" 
+                    class="text-input" 
+                    placeholder="请在此输入需要分析的文本内容...&#10;&#10;示例：&#10;1. 这家餐厅的服务员态度恶劣，菜品也很难吃&#10;2. 虽然下雨，但风景很美"></textarea>
+                <div class="button-group">
+                    <button id="analyzeBtn" class="btn btn-primary">🔍 分析情感</button>
+                    <button id="clearBtn" class="btn btn-secondary">🗑️ 清空</button>
+                </div>
+            </section>
+
+            <section class="example-section">
+                <div class="section-header">
+                    <h3>💡 快速测试示例</h3>
+                </div>
+                <div class="example-buttons">
+                    <button class="example-btn" data-text="这家餐厅的服务员态度恶劣，菜品也很难吃">负面示例</button>
+                    <button class="example-btn" data-text="虽然下雨，但风景很美">混合/正面示例</button>
+                    <button class="example-btn" data-text="今天天气很好，适合出门散步">正面示例</button>
+                    <button class="example-btn" data-text="这本书的价格是50元">中性示例</button>
+                </div>
+            </section>
+
+            <section id="loadingSection" class="loading-section hidden">
+                <div class="loading-spinner"></div>
+                <p>正在分析文本情感，请稍候...</p>
+            </section>
+
+            <section id="resultSection" class="result-section hidden">
+                <div class="analysis-result">
+                    <div class="analysis-card chart-card">
+                        <h3>📈 情感分析结果</h3>
+                        <div class="chart-container">
+                            <canvas id="gaugeChart"></canvas>
+                        </div>
+                        <div id="sentimentLabel" class="sentiment-label"></div>
+                    </div>
+                    
+                    <div class="analysis-card stats-card">
+                        <h3>📊 概率分布</h3>
+                        <div id="probabilityDistribution" class="probability-distribution"></div>
+                        <div class="tokens-info">
+                            <h4>🔤 分词信息</h4>
+                            <div id="tokensCount" class="tokens-count"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>基于 Hugging Face Inference API / Transformers.js 驱动的情感分析工具</p>
+        </footer>
+    </div>
+
+    <script src="js/Tokenizer.js"></script>
+    <script src="js/SentimentClassifier.js"></script>
+    <script src="js/GaugeChart.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

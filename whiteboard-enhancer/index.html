@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>白板板书高清化工具</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>白板板书高清化工具</h1>
+            <p>消除光照不均和反光，让视频会议中的白板字迹清晰可见</p>
+        </header>
+
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <div class="upload-content">
+                    <div class="upload-icon">📋</div>
+                    <p>点击或拖拽白板图片到此处</p>
+                    <span>支持 JPG、PNG、WebP 格式</span>
+                </div>
+            </div>
+            <button id="uploadBtn" class="btn btn-primary">选择图片</button>
+        </div>
+
+        <div class="controls" id="controls" style="display: none;">
+            <h2>处理参数</h2>
+            <div class="control-group">
+                <label for="clusterIterations">聚类迭代次数: <span id="clusterIterationsValue">12</span></label>
+                <input type="range" id="clusterIterations" min="3" max="20" value="12" step="1">
+            </div>
+            <div class="control-group">
+                <label for="illuminationStrength">光照归一化强度: <span id="illuminationStrengthValue">75</span>%</label>
+                <input type="range" id="illuminationStrength" min="0" max="100" value="75" step="1">
+            </div>
+            <div class="control-group">
+                <label for="colorBoostStrength">色彩增强强度: <span id="colorBoostStrengthValue">65</span>%</label>
+                <input type="range" id="colorBoostStrength" min="0" max="100" value="65" step="1">
+            </div>
+            <div class="control-group">
+                <label for="contrastBoost">整体对比度: <span id="contrastBoostValue">55</span>%</label>
+                <input type="range" id="contrastBoost" min="0" max="100" value="55" step="1">
+            </div>
+            <div class="button-group">
+                <button id="processBtn" class="btn btn-primary">处理图片</button>
+                <button id="resetBtn" class="btn btn-secondary">重置</button>
+                <button id="downloadBtn" class="btn btn-success" style="display: none;">下载结果</button>
+            </div>
+        </div>
+
+        <div class="preview-section" id="previewSection" style="display: none;">
+            <div class="preview-container">
+                <div class="preview-box">
+                    <h3>原始图片</h3>
+                    <canvas id="originalCanvas"></canvas>
+                </div>
+                <div class="preview-box">
+                    <h3>处理结果</h3>
+                    <canvas id="processedCanvas"></canvas>
+                </div>
+            </div>
+            <div class="comparison" id="comparison" style="display: none;">
+                <h3>前后对比</h3>
+                <div class="slider-container">
+                    <canvas id="comparisonCanvas"></canvas>
+                    <div class="slider-handle" id="sliderHandle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>语音指令控制器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎤 语音指令控制器</h1>
+            <p class="subtitle">通过语音控制网页，让操作更便捷</p>
+        </header>
+
+        <div id="envCheckPanel" class="env-check-panel">
+            <div class="env-item">
+                <span class="env-icon" id="browserIcon">⏳</span>
+                <span class="env-text">浏览器支持</span>
+            </div>
+            <div class="env-item">
+                <span class="env-icon" id="httpsIcon">⏳</span>
+                <span class="env-text">HTTPS/Localhost</span>
+            </div>
+            <div class="env-item">
+                <span class="env-icon" id="networkIcon">⏳</span>
+                <span class="env-text">网络连接</span>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-title">📋 使用说明</div>
+            <div class="info-content">
+                <p>1. 请确保使用 <strong>Chrome</strong> 或 <strong>Edge</strong> 浏览器（需要支持 Web Speech API）</p>
+                <p>2. 需要 <strong>HTTPS</strong> 或 <strong>localhost</strong> 环境</p>
+                <p>3. 需要 <strong>网络连接</strong>（使用 Google 语音识别服务）</p>
+                <p>4. 首次使用需要 <strong>允许麦克风访问</strong> 权限</p>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="status-card">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <span id="statusText">准备就绪</span>
+            </div>
+            
+            <button id="startBtn" class="btn btn-primary">
+                开始语音识别
+            </button>
+            <button id="stopBtn" class="btn btn-danger" disabled>
+                停止语音识别
+            </button>
+        </div>
+
+        <div id="audioLevelPanel" class="audio-level-panel" style="display: none;">
+            <span class="audio-label">🎧 麦克风音量</span>
+            <div class="audio-meter">
+                <div id="audioLevelBar" class="audio-level-bar"></div>
+            </div>
+            <span id="audioLevelText" class="audio-level-text">0%</span>
+        </div>
+
+        <div class="result-panel">
+            <div class="panel-header">
+                <span>语音转录</span>
+            </div>
+            <div id="transcriptBox" class="transcript-box">
+                等待语音输入...
+            </div>
+        </div>
+
+        <div class="result-panel">
+            <div class="panel-header">
+                <span>识别的指令</span>
+            </div>
+            <div id="commandBox" class="command-box">
+                暂无指令
+            </div>
+        </div>
+
+        <div class="result-panel">
+            <div class="panel-header">
+                <span>操作日志</span>
+            </div>
+            <div id="logBox" class="log-box">
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🎮 演示区域</h2>
+            <p class="demo-hint">尝试以下语音指令：</p>
+            
+            <div class="command-list">
+                <div class="command-item">"打开菜单"</div>
+                <div class="command-item">"关闭菜单"</div>
+                <div class="command-item">"向下滚动"</div>
+                <div class="command-item">"向上滚动"</div>
+                <div class="command-item">"滚动到底部"</div>
+                <div class="command-item">"滚动到顶部"</div>
+                <div class="command-item">"切换夜间模式"</div>
+                <div class="command-item">"点击第一个"</div>
+                <div class="command-item">"点击第二个"</div>
+            </div>
+
+            <div class="demo-buttons">
+                <button class="demo-btn" data-index="1">按钮 1</button>
+                <button class="demo-btn" data-index="2">按钮 2</button>
+                <button class="demo-btn" data-index="3">按钮 3</button>
+            </div>
+
+            <div id="demoMenu" class="demo-menu">
+                <h3>演示菜单</h3>
+                <ul>
+                    <li><a href="#">选项 1</a></li>
+                    <li><a href="#">选项 2</a></li>
+                    <li><a href="#">选项 3</a></li>
+                </ul>
+            </div>
+
+            <div class="filler-content">
+                <h3>更多内容区域</h3>
+                <p>这是一个用于演示滚动功能的内容区域。向下滚动可以看到更多内容。</p>
+                <p>语音指令控制器是一个基于 Web Speech API 开发的工具，旨在帮助手部不便的用户更便捷地操作网页。</p>
+                <p>通过简单的语音指令，用户可以实现滚动页面、点击按钮、切换主题等多种操作。</p>
+                <h3>功能特点</h3>
+                <ul>
+                    <li>实时语音识别</li>
+                    <li>智能指令解析</li>
+                    <li>多语言支持</li>
+                    <li>可扩展的指令集</li>
+                </ul>
+                <h3>使用场景</h3>
+                <p>无论是在厨房做饭时需要操作网页，还是双手被占用时需要控制电脑，语音指令控制器都能提供便捷的解决方案。</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

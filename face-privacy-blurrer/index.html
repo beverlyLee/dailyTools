@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人脸隐私保护器 - 屏幕录制保护</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo-icon">🛡️</div>
+                <div class="header-text">
+                    <h1>人脸隐私保护器</h1>
+                    <p>实时检测视频流中的人脸并自动打码，保护隐私安全</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="toolbar">
+            <div class="control-bar">
+                <button id="startCameraBtn" class="btn btn-primary">
+                    <span class="btn-icon">📷</span>
+                    开启摄像头
+                </button>
+                <button id="startScreenBtn" class="btn btn-secondary">
+                    <span class="btn-icon">🖥️</span>
+                    屏幕录制
+                </button>
+                <input type="file" id="videoFileInput" accept="video/*" hidden>
+                <button id="loadVideoBtn" class="btn btn-secondary">
+                    <span class="btn-icon">🎬</span>
+                    加载视频文件
+                </button>
+                <button id="stopBtn" class="btn btn-danger" style="display: none;">
+                    <span class="btn-icon">⏹️</span>
+                    停止
+                </button>
+            </div>
+            
+            <div class="options-bar">
+                <div class="option-group">
+                    <label>打码方式:</label>
+                    <select id="blurMode">
+                        <option value="pixelate">像素化(马赛克)</option>
+                        <option value="gaussian">高斯模糊</option>
+                        <option value="black">黑色遮罩</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label>打码强度: <span id="blurStrengthValue">25</span></label>
+                    <input type="range" id="blurStrength" min="5" max="50" value="25" step="1">
+                </div>
+                <div class="option-group">
+                    <label>区域扩展: <span id="paddingValue">30</span>%</label>
+                    <input type="range" id="padding" min="0" max="60" value="30" step="5">
+                </div>
+                <div class="option-group">
+                    <label>检测置信度: <span id="confidenceValue">0.5</span></label>
+                    <input type="range" id="confidence" min="0.1" max="0.9" value="0.5" step="0.05">
+                </div>
+                <div class="option-group">
+                    <label><input type="checkbox" id="showDetections" checked> 显示检测框</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-label">状态:</span>
+                <span id="statusText" class="status-value idle">等待开始</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">检测模型:</span>
+                <span id="modelStatus" class="status-value loading">加载中...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">检测到人脸:</span>
+                <span id="faceCount" class="status-value">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">FPS:</span>
+                <span id="fpsDisplay" class="status-value">0</span>
+            </div>
+        </div>
+
+        <div class="main-content" id="mainContent">
+            <div class="placeholder-view" id="placeholderView">
+                <div class="placeholder-icon">👁️</div>
+                <h2>保护您的隐私</h2>
+                <p>选择摄像头、屏幕录制或加载视频文件</p>
+                <p class="tip">自动检测人脸并实时打码保护</p>
+            </div>
+            
+            <div class="video-container" id="videoContainer" style="display: none;">
+                <video id="sourceVideo" playsinline muted style="display: none;"></video>
+                <canvas id="outputCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4.1646425229/face_detection.js" crossorigin="anonymous"></script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>

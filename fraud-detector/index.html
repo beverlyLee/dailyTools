@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>欺诈交易实时检测器</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ 欺诈交易实时检测器</h1>
+            <p class="subtitle">实时监控交易行为，识别异常消费，保护您的资金安全</p>
+        </header>
+
+        <main>
+            <div class="main-content">
+                <section class="transaction-section">
+                    <div class="section-header">
+                        <h2>📝 输入交易信息</h2>
+                    </div>
+                    
+                    <form id="transactionForm" class="transaction-form">
+                        <div class="form-group">
+                            <label for="amount">交易金额 (元)</label>
+                            <input 
+                                type="number" 
+                                id="amount" 
+                                placeholder="请输入交易金额" 
+                                min="0" 
+                                step="0.01"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="time">交易时间</label>
+                            <input 
+                                type="datetime-local" 
+                                id="time" 
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="location">交易地点</label>
+                            <select id="location" required>
+                                <option value="">请选择交易地点</option>
+                                <option value="中国北京">中国北京</option>
+                                <option value="中国上海">中国上海</option>
+                                <option value="中国广州">中国广州</option>
+                                <option value="中国深圳">中国深圳</option>
+                                <option value="美国纽约">美国纽约</option>
+                                <option value="日本东京">日本东京</option>
+                                <option value="英国伦敦">英国伦敦</option>
+                                <option value="法国巴黎">法国巴黎</option>
+                                <option value="德国柏林">德国柏林</option>
+                                <option value="新加坡">新加坡</option>
+                                <option value="韩国首尔">韩国首尔</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="merchant">商户名称</label>
+                            <input 
+                                type="text" 
+                                id="merchant" 
+                                placeholder="请输入商户名称" 
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="merchantCategory">商户类别</label>
+                            <select id="merchantCategory" required>
+                                <option value="">请选择商户类别</option>
+                                <option value="餐饮">餐饮</option>
+                                <option value="零售">零售</option>
+                                <option value="交通">交通</option>
+                                <option value="娱乐">娱乐</option>
+                                <option value="医疗">医疗</option>
+                                <option value="教育">教育</option>
+                                <option value="加油站">加油站</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="submit" class="btn btn-primary">🔍 检测风险</button>
+                            <button type="button" id="clearBtn" class="btn btn-secondary">🗑️ 清空</button>
+                        </div>
+                    </form>
+
+                    <div class="quick-test">
+                        <div class="section-header">
+                            <h3>💡 快速测试示例</h3>
+                        </div>
+                        <div class="example-buttons">
+                            <button class="example-btn" data-type="normal">
+                                ✅ 正常交易
+                            </button>
+                            <button class="example-btn" data-type="fraud">
+                                ⚠️ 高风险欺诈
+                            </button>
+                            <button class="example-btn" data-type="large-amount">
+                                💰 大额消费
+                            </button>
+                            <button class="example-btn" data-type="foreign">
+                                🌍 异地交易
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="result-section" id="resultSection">
+                    <div class="section-header">
+                        <h2>📊 风险评估结果</h2>
+                    </div>
+                    
+                    <div class="result-content" id="resultContent">
+                        <div class="empty-result">
+                            <div class="empty-icon">🔍</div>
+                            <p>请输入交易信息进行风险检测</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <section class="history-section" id="historySection">
+                <div class="section-header">
+                    <h2>📋 检测历史</h2>
+                    <button id="clearHistory" class="btn btn-clear">清空历史</button>
+                </div>
+                <div class="history-list" id="historyList">
+                    <div class="empty-state">
+                        <div class="empty-icon">📜</div>
+                        <p>暂无检测历史</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>基于 TensorFlow.js 的智能风控系统 | 保护您的每一笔交易</p>
+        </footer>
+    </div>
+
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚠️ 风险警报</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modalCancel">取消交易</button>
+                <button class="btn btn-primary" id="modalConfirm">确认身份</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="FeatureExtractor.js"></script>
+    <script src="AnomalyScorer.js"></script>
+    <script src="RiskInterceptor.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

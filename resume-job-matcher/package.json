@@ -1,0 +1,19 @@
+{
+  "name": "resume-job-matcher",
+  "version": "1.0.0",
+  "description": "智能简历职位匹配度分析器",
+  "main": "proxy-server.js",
+  "scripts": {
+    "start": "node proxy-server.js",
+    "dev": "node proxy-server.js"
+  },
+  "keywords": [
+    "resume",
+    "job",
+    "matching",
+    "nlp",
+    "ai"
+  ],
+  "author": "",
+  "license": "MIT"
+}

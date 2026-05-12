@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>纸质文档阴影去除工具</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>纸质文档阴影去除工具</h1>
+            <p>去除手机拍摄文档时手指或光源造成的阴影，提升文字可读性</p>
+        </header>
+
+        <div class="upload-section" id="uploadSection">
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <div class="upload-content">
+                    <div class="upload-icon">📁</div>
+                    <p>点击或拖拽图片到此处</p>
+                    <span>支持 JPG、PNG、WebP 格式</span>
+                </div>
+            </div>
+            <button id="uploadBtn" class="btn btn-primary">选择图片</button>
+        </div>
+
+        <div class="preview-section" id="previewSection" style="display: none;">
+            <div class="comparison-main" id="comparisonMain">
+                <h3>前后对比（拖动滑块查看效果）</h3>
+                <div class="slider-container">
+                    <canvas id="comparisonCanvas"></canvas>
+                    <div class="slider-handle" id="sliderHandle"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls" id="controls" style="display: none;">
+            <h2>处理参数</h2>
+            <div class="control-group">
+                <label for="shadowSensitivity">阴影敏感度: <span id="shadowSensitivityValue">50</span>%</label>
+                <input type="range" id="shadowSensitivity" min="10" max="90" value="50" step="1">
+            </div>
+            <div class="control-group">
+                <label for="brightnessBoost">亮度增强: <span id="brightnessBoostValue">40</span>%</label>
+                <input type="range" id="brightnessBoost" min="0" max="80" value="40" step="1">
+            </div>
+            <div class="control-group">
+                <label for="sharpenStrength">锐化强度: <span id="sharpenStrengthValue">30</span>%</label>
+                <input type="range" id="sharpenStrength" min="0" max="100" value="30" step="1">
+            </div>
+            <div class="button-group">
+                <button id="resetBtn" class="btn btn-secondary">重新选择</button>
+                <button id="downloadBtn" class="btn btn-success" style="display: none;">下载结果</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

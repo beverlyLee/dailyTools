@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片转 LaTeX - 数学公式识别工具</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.16.3/dist/ort.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo-icon">∑</div>
+                <div class="header-text">
+                    <h1>图片转 LaTeX</h1>
+                    <p>论文公式截图一键转 LaTeX 代码，告别手动输入</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="toolbar">
+            <div class="control-bar">
+                <input type="file" id="imageInput" accept="image/*" hidden>
+                <button id="uploadBtn" class="btn btn-primary">
+                    <span class="btn-icon">📁</span>
+                    上传图片
+                </button>
+                <button id="pasteBtn" class="btn btn-secondary">
+                    <span class="btn-icon">📋</span>
+                    粘贴剪贴板
+                </button>
+                <button id="clearBtn" class="btn btn-danger" style="display: none;">
+                    <span class="btn-icon">🗑️</span>
+                    清空
+                </button>
+                <button id="recognizeBtn" class="btn btn-success" style="display: none;">
+                    <span class="btn-icon">🔍</span>
+                    开始识别
+                </button>
+            </div>
+            
+            <div class="options-bar">
+                <div class="option-group">
+                    <label>识别模式:</label>
+                    <select id="modeSelect">
+                        <option value="analysis" selected>图像分析模式 (推荐)</option>
+                        <option value="demo">演示模式 (内置模板)</option>
+                        <option value="onnx">ONNX 模型推理</option>
+                    </select>
+                </div>
+                <div class="option-group" id="modelPathGroup" style="display: none;">
+                    <label>模型文件:</label>
+                    <input type="file" id="modelInput" accept=".onnx">
+                </div>
+                <div class="option-group">
+                    <label>预处理:</label>
+                    <label><input type="checkbox" id="autoCrop" checked> 自动裁剪</label>
+                    <label><input type="checkbox" id="denoise" checked> 去噪</label>
+                    <label><input type="checkbox" id="binarize" checked> 二值化</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-label">状态:</span>
+                <span id="statusText" class="status-value idle">等待上传图片</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">模型:</span>
+                <span id="modelStatus" class="status-value">演示模式</span>
+            </div>
+            <div class="status-item" id="progressItem" style="display: none;">
+                <span class="status-label">进度:</span>
+                <span id="progressText" class="status-value">0%</span>
+            </div>
+        </div>
+
+        <div class="main-content" id="mainContent">
+            <div class="placeholder-view" id="placeholderView">
+                <div class="placeholder-icon">📐</div>
+                <h2>数学公式识别</h2>
+                <p>上传论文截图或使用 Ctrl+V 粘贴图片</p>
+                <p class="tip">支持积分、矩阵、分式等复杂公式</p>
+                <div class="quick-demos">
+                    <p style="margin-bottom: 10px; color: #666;">快速体验：</p>
+                    <button class="demo-btn" data-demo="integral">∫ 积分公式</button>
+                    <button class="demo-btn" data-demo="matrix">⎡ 矩阵</button>
+                    <button class="demo-btn" data-demo="fraction">$\frac$ 分式</button>
+                    <button class="demo-btn" data-demo="sum">∑ 求和</button>
+                </div>
+            </div>
+            
+            <div class="workspace" id="workspace" style="display: none;">
+                <div class="panel left-panel">
+                    <div class="panel-header">
+                        <span class="panel-title">原始图片</span>
+                        <span class="panel-badge" id="imageSize"></span>
+                    </div>
+                    <div class="panel-content">
+                        <img id="originalImage" alt="原始图片">
+                    </div>
+                </div>
+                
+                <div class="panel center-panel">
+                    <div class="panel-header">
+                        <span class="panel-title">预处理后</span>
+                        <span class="panel-badge" id="preprocessedSize"></span>
+                    </div>
+                    <div class="panel-content">
+                        <canvas id="preprocessedCanvas"></canvas>
+                    </div>
+                </div>
+                
+                <div class="panel right-panel">
+                    <div class="panel-header">
+                        <span class="panel-title">LaTeX 代码</span>
+                        <button id="copyBtn" class="btn-copy" style="display: none;">复制</button>
+                    </div>
+                    <div class="panel-content">
+                        <textarea id="latexOutput" placeholder="识别结果将显示在这里..." readonly></textarea>
+                    </div>
+                    <div class="panel-header">
+                        <span class="panel-title">渲染预览</span>
+                    </div>
+                    <div class="panel-content preview-content">
+                        <div id="renderedLatex" class="math-preview">
+                            <span class="preview-placeholder">等待识别...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js?v=202506092"></script>
+</body>
+</html>

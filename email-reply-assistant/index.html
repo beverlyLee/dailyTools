@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能邮件回复建议助手</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📧 智能邮件回复建议助手</h1>
+            <p class="subtitle">快速分析邮件内容，生成专业回复建议</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <div class="section-header">
+                    <h2>📝 输入邮件内容</h2>
+                </div>
+                <textarea 
+                    id="emailContent" 
+                    class="email-input" 
+                    placeholder="请在此粘贴需要回复的邮件内容...&#10;&#10;示例：&#10;您好，我想咨询一下贵公司的「智能办公系统Pro版」的价格是多少？另外是否有年度订阅优惠？&#10;期待您的回复！&#10;--&#10;李明&#10;科技有限公司"></textarea>
+                <div class="button-group">
+                    <button id="analyzeBtn" class="btn btn-primary">🔍 分析并生成建议</button>
+                    <button id="clearBtn" class="btn btn-secondary">🗑️ 清空</button>
+                </div>
+            </section>
+
+            <section id="resultSection" class="result-section hidden">
+                <div class="analysis-result">
+                    <div class="analysis-card">
+                        <h3>🎯 识别到的意图</h3>
+                        <div id="intentResult" class="result-content"></div>
+                    </div>
+                    
+                    <div class="analysis-card">
+                        <h3>📊 提取的关键实体</h3>
+                        <div id="entityResult" class="result-content"></div>
+                    </div>
+                </div>
+
+                <div class="replies-section">
+                    <h2>💬 回复建议</h2>
+                    <p class="tip">以下为您生成了3条不同语气的回复建议，点击可复制</p>
+                    
+                    <div id="repliesContainer" class="replies-container">
+                    </div>
+                </div>
+            </section>
+
+            <section id="loadingSection" class="loading-section hidden">
+                <div class="loading-spinner"></div>
+                <p>正在分析邮件内容，请稍候...</p>
+            </section>
+        </main>
+
+        <footer>
+            <p>基于 TensorFlow.js 驱动的智能邮件助手</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.14.0/dist/tf.min.js"></script>
+    <script src="js/IntentClassifier.js"></script>
+    <script src="js/EntityExtractor.js"></script>
+    <script src="js/ReplyGenerator.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

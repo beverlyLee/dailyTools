@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实时视频绿幕背景替换工具</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>实时视频绿幕背景替换工具</h1>
+            <p class="subtitle">Chroma Key Live Background Replacement</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="video-section">
+                <div class="video-container">
+                    <video id="video" autoplay playsinline muted></video>
+                    <canvas id="output"></canvas>
+                    <canvas id="preview" class="hidden"></canvas>
+                    <div id="overlay" class="overlay hidden">
+                        <div class="pipette-tip"></div>
+                    </div>
+                    <div id="selectionOverlay" class="selection-overlay hidden">
+                        <div id="selectionBox" class="selection-box"></div>
+                    </div>
+                </div>
+                
+                <div class="controls-bar">
+                    <button id="startBtn" class="btn primary">启动摄像头</button>
+                    <button id="stopBtn" class="btn danger" disabled>停止</button>
+                    <button id="pipetteBtn" class="btn" disabled>吸管(单点)</button>
+                    <button id="addPipetteBtn" class="btn" disabled>添加颜色</button>
+                    <button id="sampleBtn" class="btn" disabled>框选采样</button>
+                    <button id="clearColorsBtn" class="btn warning" disabled>清除颜色</button>
+                    <label class="btn">
+                        上传背景图
+                        <input type="file" id="bgImageInput" accept="image/*" hidden>
+                    </label>
+                    <label class="btn">
+                        上传背景视频
+                        <input type="file" id="bgVideoInput" accept="video/*" hidden>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <div class="section">
+                    <h3>背景颜色</h3>
+                    <div class="color-display">
+                        <span>当前颜色:</span>
+                        <div id="colorBox" class="color-box"></div>
+                        <span id="colorValue">RGB(0, 255, 0)</span>
+                    </div>
+                    <div class="color-list-container">
+                        <span>已选背景色:</span>
+                        <div id="colorList" class="color-list">
+                            <div class="color-item active" style="background-color: rgb(0, 255, 0);" data-index="0"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>颜色键控</h3>
+                    <div class="control-item">
+                        <label>容差: <span id="toleranceValue">0.25</span></label>
+                        <input type="range" id="tolerance" min="0" max="1" step="0.01" value="0.25">
+                    </div>
+                    
+                    <div class="control-item">
+                        <label>柔化边缘: <span id="softnessValue">0.15</span></label>
+                        <input type="range" id="softness" min="0" max="1" step="0.01" value="0.15">
+                    </div>
+                    
+                    <div class="control-item">
+                        <label>饱和度阈值: <span id="saturationValue">0.30</span></label>
+                        <input type="range" id="saturation" min="0" max="1" step="0.01" value="0.3">
+                    </div>
+                    
+                    <div class="control-item">
+                        <label>边缘保护: <span id="edgeProtectionValue">0.60</span></label>
+                        <input type="range" id="edgeProtection" min="0" max="1" step="0.01" value="0.6">
+                    </div>
+                    
+                    <div class="control-item">
+                        <label>形态学处理: <span id="morphologyValue">2</span></label>
+                        <input type="range" id="morphology" min="0" max="5" step="1" value="2">
+                    </div>
+                    
+                    <div class="control-item">
+                        <label>空间一致性: <span id="spatialValue">0.40</span></label>
+                        <input type="range" id="spatial" min="0" max="1" step="0.01" value="0.4">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>人物保护</h3>
+                    <div class="control-item">
+                        <label>肤色保护: <span id="skinProtectionValue">0.70</span></label>
+                        <input type="range" id="skinProtection" min="0" max="1" step="0.01" value="0.7">
+                        <div class="hint">检测并保护人物肤色区域不被误抠</div>
+                    </div>
+                    
+                    <div class="control-item">
+                        <label>轮廓保护: <span id="humanProtectionValue">0.50</span></label>
+                        <input type="range" id="humanProtection" min="0" max="1" step="0.01" value="0.5">
+                        <div class="hint">保护人物边缘轮廓，减少侵蚀</div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>溢出抑制</h3>
+                    <div class="control-item">
+                        <label>抑制强度: <span id="spillIntensityValue">0.50</span></label>
+                        <input type="range" id="spillIntensity" min="0" max="1" step="0.01" value="0.5">
+                    </div>
+                    
+                    <div class="control-item">
+                        <label>抑制阈值: <span id="spillThresholdValue">0.30</span></label>
+                        <input type="range" id="spillThreshold" min="0" max="1" step="0.01" value="0.3">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>背景融合</h3>
+                    <div class="control-item">
+                        <label>阴影强度: <span id="shadowIntensityValue">0.30</span></label>
+                        <input type="range" id="shadowIntensity" min="0" max="1" step="0.01" value="0.3">
+                    </div>
+                    
+                    <div class="control-item">
+                        <label>阴影模糊: <span id="shadowBlurValue">15</span></label>
+                        <input type="range" id="shadowBlur" min="0" max="50" step="1" value="15">
+                    </div>
+                    
+                    <div class="presets">
+                        <span>预设背景:</span>
+                        <div class="preset-buttons">
+                            <button class="preset-btn" data-preset="beach">海边风景</button>
+                            <button class="preset-btn" data-preset="studio">虚拟演播室</button>
+                            <button class="preset-btn" data-preset="office">办公场景</button>
+                            <button class="preset-btn" data-preset="none">无背景</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section info">
+                    <h3>使用说明</h3>
+                    <ol>
+                        <li>点击"启动摄像头"开启摄像头</li>
+                        <li>方法1: 点击"吸管(单点)"选取单个背景色</li>
+                        <li>方法2: 点击"添加颜色"多次选取不同背景色</li>
+                        <li>方法3: 点击"框选采样"拖拽选取背景区域</li>
+                        <li>调整"肤色保护"和"轮廓保护"保护人物</li>
+                        <li>选择预设背景或上传自定义背景</li>
+                    </ol>
+                    <p class="tip">💡 提示：框选采样效果最好，可以自动适应光照变化</p>
+                    <p class="note">注意: 需要 HTTPS 环境才能调用摄像头</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="ChromaKeyer.js"></script>
+    <script src="SpillSuppressor.js"></script>
+    <script src="BackgroundBlender.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

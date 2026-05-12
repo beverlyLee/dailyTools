@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>证件照换底色与美颜工具</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>证件照换底色与美颜工具</h1>
+            <p class="subtitle">ID Photo Background Replacement & Beautification Studio</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="preview-section">
+                <div class="image-container">
+                    <canvas id="previewCanvas"></canvas>
+                    <div id="uploadOverlay" class="upload-overlay">
+                        <div class="upload-icon">📷</div>
+                        <p>点击或拖拽上传图片</p>
+                        <p class="hint">建议上传清晰的正面自拍照</p>
+                    </div>
+                </div>
+                
+                <div class="controls-bar">
+                    <label class="btn primary">
+                        上传图片
+                        <input type="file" id="imageInput" accept="image/*" hidden>
+                    </label>
+                    <button id="cameraBtn" class="btn">
+                        📷 摄像头拍摄
+                    </button>
+                    <button id="resetBtn" class="btn warning" disabled>
+                        重置
+                    </button>
+                    <button id="downloadBtn" class="btn success" disabled>
+                        💾 导出图片
+                    </button>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <div class="section">
+                    <h3>背景颜色</h3>
+                    <div class="color-options">
+                        <div class="color-option active" data-color="blue" title="蓝色背景 (护照通用)">
+                            <div class="color-preview" style="background: #438EDB;"></div>
+                            <span>蓝色</span>
+                        </div>
+                        <div class="color-option" data-color="red" title="红色背景 (证件照常用)">
+                            <div class="color-preview" style="background: #FF0000;"></div>
+                            <span>红色</span>
+                        </div>
+                        <div class="color-option" data-color="white" title="白色背景 (身份证等)">
+                            <div class="color-preview" style="background: #FFFFFF; border: 1px solid #ddd;"></div>
+                            <span>白色</span>
+                        </div>
+                        <div class="color-option" data-color="lightBlue" title="浅蓝背景">
+                            <div class="color-preview" style="background: #87CEEB;"></div>
+                            <span>浅蓝</span>
+                        </div>
+                    </div>
+                    <div class="custom-color">
+                        <label>自定义颜色:</label>
+                        <input type="color" id="customColor" value="#438EDB">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>美颜设置</h3>
+                    <div class="control-item">
+                        <label>磨皮强度: <span id="smoothnessValue">0.5</span></label>
+                        <input type="range" id="smoothness" min="0" max="1" step="0.01" value="0.5">
+                    </div>
+                    <div class="control-item">
+                        <label>亮度: <span id="brightnessValue">0</span></label>
+                        <input type="range" id="brightness" min="-0.2" max="0.2" step="0.01" value="0">
+                    </div>
+                    <div class="control-item">
+                        <label>对比度: <span id="contrastValue">0</span></label>
+                        <input type="range" id="contrast" min="-0.2" max="0.2" step="0.01" value="0">
+                    </div>
+                    <div class="control-item">
+                        <label>饱和度: <span id="saturationValue">0.1</span></label>
+                        <input type="range" id="saturation" min="-0.3" max="0.3" step="0.01" value="0.1">
+                    </div>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" data-preset="none">关闭美颜</button>
+                        <button class="preset-btn" data-preset="light">轻度美颜</button>
+                        <button class="preset-btn active" data-preset="medium">自然美颜</button>
+                        <button class="preset-btn" data-preset="strong">深度美颜</button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>图片尺寸</h3>
+                    <div class="size-options">
+                        <button class="size-btn active" data-size="original">原始尺寸</button>
+                        <button class="size-btn" data-size="1inch">一寸 (295×413)</button>
+                        <button class="size-btn" data-size="2inch">二寸 (413×579)</button>
+                        <button class="size-btn" data-size="passport">护照 (354×472)</button>
+                    </div>
+                    <div class="size-info">
+                        <span id="sizeInfo">当前尺寸: 原始</span>
+                    </div>
+                </div>
+                
+                <div class="section info">
+                    <h3>使用说明</h3>
+                    <ol>
+                        <li>点击"上传图片"或"摄像头拍摄"获取照片</li>
+                        <li>选择需要的背景颜色（红/蓝/白）</li>
+                        <li>调整美颜参数，自然磨皮保留五官</li>
+                        <li>选择合适的证件照尺寸</li>
+                        <li>点击"导出图片"保存结果</li>
+                    </ol>
+                    <p class="tip">💡 提示：穿着深色衣服、纯色背景拍摄效果最佳</p>
+                    <p class="note">注意: 所有处理都在本地完成，不会上传到服务器</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="cameraModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>摄像头拍摄</h3>
+            <div class="camera-container">
+                <video id="cameraVideo" autoplay playsinline></video>
+                <canvas id="cameraCanvas" class="hidden"></canvas>
+            </div>
+            <div class="modal-buttons">
+                <button id="captureBtn" class="btn primary">拍照</button>
+                <button id="retakeBtn" class="btn hidden">重拍</button>
+                <button id="usePhotoBtn" class="btn success hidden">使用此照片</button>
+                <button id="closeCameraBtn" class="btn">关闭</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="PortraitSegmenter.js"></script>
+    <script src="ColorReplacer.js"></script>
+    <script src="SkinSmoothing.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

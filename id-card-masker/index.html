@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>身份证/银行卡隐私打码器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo-icon">🔒</div>
+                <div class="header-text">
+                    <h1>隐私打码器</h1>
+                    <p>自动识别身份证号、银行卡号，一键打码保护隐私</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="toolbar">
+            <div class="upload-bar">
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <button id="uploadBtn" class="btn btn-primary">
+                    <span class="btn-icon">📷</span>
+                    选择图片
+                </button>
+                <button id="ocrBtn" class="btn btn-secondary">
+                    <span class="btn-icon">🔍</span>
+                    重新识别
+                </button>
+                <button id="clearRegionsBtn" class="btn btn-secondary">
+                    <span class="btn-icon">🗑️</span>
+                    清除区域
+                </button>
+                <button id="resetBtn" class="btn btn-secondary">
+                    <span class="btn-icon">🔄</span>
+                    重置
+                </button>
+            </div>
+            <div class="options-bar">
+                <div class="option-group">
+                    <label>识别类型:</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="enableIdCard" checked> 身份证</label>
+                        <label><input type="checkbox" id="enableBankCard" checked> 银行卡</label>
+                        <label><input type="checkbox" id="enablePhone"> 手机号</label>
+                    </div>
+                </div>
+                <div class="option-group">
+                    <label>打码方式:</label>
+                    <select id="blurMode">
+                        <option value="pixelate">像素化</option>
+                        <option value="blur">高斯模糊</option>
+                        <option value="black">黑色方块</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label>强度: <span id="blurStrengthValue">20</span></label>
+                    <input type="range" id="blurStrength" min="5" max="50" value="20" step="1">
+                </div>
+                <button id="downloadBtn" class="btn btn-success" style="display: none;">
+                    <span class="btn-icon">💾</span>
+                    下载
+                </button>
+            </div>
+        </div>
+
+        <div class="loading-section" id="loadingSection" style="display: none;">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <p id="loadingText">正在处理...</p>
+                <div class="progress-bar">
+                    <div class="progress" id="progressBar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="upload-placeholder" id="uploadArea">
+            <div class="upload-content">
+                <div class="upload-icon">📤</div>
+                <p class="upload-title">点击或拖拽图片到此处</p>
+                <p class="upload-subtitle">支持 JPG、PNG、WebP 格式</p>
+            </div>
+        </div>
+
+        <div class="main-content" id="mainContent" style="display: none;">
+            <div class="image-panel">
+                <div class="panel-header">
+                    <h3>原始图片</h3>
+                    <div class="region-badge" id="regionInfo">已识别 0 个敏感区域</div>
+                </div>
+                <div class="panel-body">
+                    <canvas id="originalCanvas"></canvas>
+                </div>
+                <div class="panel-footer">
+                    <p>💡 拖拽可手动添加区域 | 右键删除 | 拖拽边缘调整</p>
+                </div>
+            </div>
+
+            <div class="image-panel" id="resultBox">
+                <div class="panel-header">
+                    <h3>打码结果</h3>
+                    <div class="status-badge">已打码</div>
+                </div>
+                <div class="panel-body">
+                    <canvas id="resultCanvas"></canvas>
+                </div>
+                <div class="panel-footer">
+                    <p>✅ 隐私信息已保护</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>

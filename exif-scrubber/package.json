@@ -1,0 +1,21 @@
+{
+  "name": "exif-scrubber",
+  "version": "1.0.0",
+  "description": "图片 EXIF 地理信息去标识化工具 - 安全移除图片中的 GPS 位置信息",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "exif",
+    "gps",
+    "privacy",
+    "image",
+    "metadata"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "piexifjs": "^1.0.6"
+  }
+}

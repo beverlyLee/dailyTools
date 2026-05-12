@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>盲文点字图像转文本工具</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>盲文点字图像转文本工具</h1>
+            <p>智能识别盲文点字照片或试卷，快速转换为可读文本</p>
+        </header>
+
+        <div class="upload-section" id="uploadSection">
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <div class="upload-content">
+                    <div class="upload-icon">📷</div>
+                    <p>点击或拖拽盲文点字图片到此处</p>
+                    <span>支持 JPG、PNG、WebP 格式</span>
+                </div>
+            </div>
+            <button id="uploadBtn" class="btn btn-primary">选择图片</button>
+        </div>
+
+        <div class="controls" id="controls" style="display: none;">
+            <h2>识别参数</h2>
+            
+            <div class="control-row">
+                <div class="control-group inline">
+                    <label>盲文类型:</label>
+                    <select id="brailleType">
+                        <option value="2x3">标准2x3点阵 (6点)</option>
+                        <option value="2x4">扩展2x4点阵 (8点)</option>
+                    </select>
+                </div>
+                
+                <div class="control-group inline">
+                    <label>输出语言:</label>
+                    <select id="outputLang">
+                        <option value="en">英文</option>
+                        <option value="pinyin">拼音</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="threshold">二值化阈值: <span id="thresholdValue">128</span></label>
+                <input type="range" id="threshold" min="50" max="200" value="128" step="1">
+                <div class="hint">调整以区分盲文点和背景</div>
+            </div>
+
+            <div class="control-group">
+                <label for="cellSize">单元格大小: <span id="cellSizeValue">50</span></label>
+                <input type="range" id="cellSize" min="20" max="100" value="50" step="1">
+                <div class="hint">盲文单元格的预期像素大小</div>
+            </div>
+
+            <div class="control-group">
+                <label for="minDotSize">最小点大小: <span id="minDotSizeValue">5</span></label>
+                <input type="range" id="minDotSize" min="2" max="20" value="5" step="1">
+                <div class="hint">过滤小噪点</div>
+            </div>
+
+            <div class="button-group">
+                <button id="recognizeBtn" class="btn btn-primary">开始识别</button>
+                <button id="resetBtn" class="btn btn-secondary">重新选择</button>
+            </div>
+        </div>
+
+        <div class="preview-section" id="previewSection" style="display: none;">
+            <div class="preview-container">
+                <div class="preview-box">
+                    <h3>原始图片</h3>
+                    <canvas id="originalCanvas"></canvas>
+                </div>
+                <div class="preview-box">
+                    <h3>识别标记</h3>
+                    <canvas id="processedCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-section" id="resultSection" style="display: none;">
+            <h2>识别结果</h2>
+            <textarea id="resultText" readonly placeholder="识别结果将显示在这里..."></textarea>
+            <div class="button-group">
+                <button id="copyBtn" class="btn btn-success">复制文本</button>
+                <button id="downloadBtn" class="btn btn-success">下载文本</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

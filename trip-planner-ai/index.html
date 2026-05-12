@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能行程规划师</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🗺️ 智能行程规划师</h1>
+            <p class="subtitle">基于遗传算法的智能路线优化</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <h2>📝 输入您的需求</h2>
+                <div class="form-group">
+                    <label for="city">目标城市</label>
+                    <select id="city">
+                        <option value="北京">北京</option>
+                        <option value="上海">上海</option>
+                        <option value="杭州">杭州</option>
+                        <option value="成都">成都</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="days">游玩天数</label>
+                    <input type="number" id="days" min="1" max="7" value="3">
+                </div>
+                
+                <div class="form-group">
+                    <label>兴趣偏好</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" class="interest" value="历史" checked> 历史古迹</label>
+                        <label><input type="checkbox" class="interest" value="自然" checked> 自然风光</label>
+                        <label><input type="checkbox" class="interest" value="美食" checked> 美食小吃</label>
+                        <label><input type="checkbox" class="interest" value="购物"> 购物商圈</label>
+                        <label><input type="checkbox" class="interest" value="现代"> 现代建筑</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="budget">人均预算 (元)</label>
+                    <input type="number" id="budget" min="100" max="10000" value="1000">
+                </div>
+                
+                <button id="planBtn" class="btn-primary">🚀 开始规划</button>
+            </section>
+
+            <section class="result-section" id="resultSection" style="display: none;">
+                <h2>✅ 推荐行程</h2>
+                <div id="routeResult"></div>
+            </section>
+
+            <section class="info-section" id="infoSection">
+                <h2>💡 使用说明</h2>
+                <div class="info-cards">
+                    <div class="info-card">
+                        <h3>示例输入</h3>
+                        <p>城市：北京</p>
+                        <p>天数：3天</p>
+                        <p>偏好：古建筑、美食</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>智能算法</h3>
+                        <p>采用遗传算法优化路线</p>
+                        <p>避免来回折腾</p>
+                        <p>总路程最短</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>合理安排</h3>
+                        <p>按地理位置分组</p>
+                        <p>每天景点数均衡</p>
+                        <p>包含美食推荐</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>智能行程规划师 - 让旅行更轻松</p>
+        </footer>
+    </div>
+
+    <script src="poiData.js"></script>
+    <script src="PreferenceParser.js"></script>
+    <script src="PoiSearcher.js"></script>
+    <script src="RouteOptimizer.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 健康饮食顾问</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🥗 AI 健康饮食顾问</h1>
+            <p class="subtitle">基于规则引擎与贝叶斯网络的智能饮食推荐系统</p>
+        </header>
+
+        <main class="main-content">
+            <div class="column">
+                <section class="card profile-card">
+                    <h2 class="card-title">健康画像</h2>
+                    
+                    <div class="form-group">
+                        <label>身高 (cm)</label>
+                        <input type="number" id="height" placeholder="例如：175" min="50" max="250">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>体重 (kg)</label>
+                        <input type="number" id="weight" placeholder="例如：70" min="20" max="300">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>年龄</label>
+                        <input type="number" id="age" placeholder="例如：45" min="1" max="120">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>性别</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="male">
+                                <span>男</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="female">
+                                <span>女</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>活动水平</label>
+                        <select id="activity">
+                            <option value="sedentary">久坐少动</option>
+                            <option value="moderate" selected>中度活动</option>
+                            <option value="active">积极运动</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>健康状况</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="condition-diabetes" value="糖尿病">
+                                <span>糖尿病</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="condition-hypertension" value="高血压">
+                                <span>高血压</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="condition-heart" value="心脏病">
+                                <span>心脏病</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="condition-obesity" value="肥胖">
+                                <span>肥胖</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button id="quick-test-btn" class="btn btn-secondary">快速测试（糖尿病 + 米饭+可乐）</button>
+                </section>
+            </div>
+
+            <div class="column">
+                <section class="card meal-card">
+                    <h2 class="card-title">餐食分析</h2>
+                    
+                    <div class="form-group">
+                        <label>请输入今日餐食（用 + 连接多种食物）</label>
+                        <input type="text" id="meal-input" placeholder="例如：米饭+可乐 或 鸡肉+西兰花+米饭">
+                        <small class="hint">提示：支持别名，如"白饭"也能识别</small>
+                    </div>
+                    
+                    <button id="analyze-btn" class="btn btn-primary">分析餐食</button>
+                    
+                    <div class="examples">
+                        <span class="examples-label">示例：</span>
+                        <button class="example-tag" data-meal="米饭+可乐">米饭+可乐</button>
+                        <button class="example-tag" data-meal="燕麦+无糖酸奶+苹果">健康早餐</button>
+                        <button class="example-tag" data-meal="鱼肉+西兰花+糙米">健康午餐</button>
+                        <button class="example-tag" data-meal="面包+薯片+巧克力">高热量组合</button>
+                    </div>
+                </section>
+
+                <section class="card results-card">
+                    <h2 class="card-title">分析结果</h2>
+                    <div id="results-container" class="results-container">
+                        <div class="placeholder">
+                            <p>👆 输入健康信息和餐食，点击分析</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="column">
+                <section class="card recommendations-card">
+                    <h2 class="card-title">饮食建议</h2>
+                    <div id="recommendations-container" class="recommendations-container">
+                        <div class="placeholder">
+                            <p>📋 完成分析后这里会显示个性化建议</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card database-card">
+                    <h2 class="card-title">食物数据库</h2>
+                    <div class="search-box">
+                        <input type="text" id="food-search" placeholder="搜索食物...">
+                    </div>
+                    <div id="food-list" class="food-list"></div>
+                </section>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>AI Diet Advisor v1.0 | 仅供参考，不能替代专业医疗建议</p>
+        </footer>
+    </div>
+
+    <script src="HealthProfiler.js"></script>
+    <script src="MealAnalyzer.js"></script>
+    <script src="RuleEngine.js"></script>
+    <script src="BayesianNetwork.js"></script>
+    <script src="DietRecommender.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

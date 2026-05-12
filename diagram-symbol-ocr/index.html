@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电路图符号识别工具</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo-icon">⚡</div>
+                <div class="header-text">
+                    <h1>电路图符号识别工具</h1>
+                    <p>识别电子元件符号，自动生成 BOM 物料清单</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="toolbar">
+            <div class="control-bar">
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <button id="uploadBtn" class="btn btn-primary">
+                    <span class="btn-icon">📁</span>
+                    上传电路图
+                </button>
+                <button id="analyzeBtn" class="btn btn-secondary" disabled>
+                    <span class="btn-icon">🔍</span>
+                    开始分析
+                </button>
+                <button id="loadDemoBtn" class="btn btn-secondary">
+                    <span class="btn-icon">🧪</span>
+                    加载示例
+                </button>
+                <button id="resetBtn" class="btn btn-secondary">
+                    <span class="btn-icon">🔄</span>
+                    重置
+                </button>
+            </div>
+            
+            <div class="options-bar">
+                <div class="option-group">
+                    <label>匹配阈值:</label>
+                    <input type="range" id="matchThreshold" min="0.5" max="0.99" step="0.01" value="0.85">
+                    <span id="thresholdValue">0.85</span>
+                </div>
+                <div class="option-group">
+                    <label>最小区域:</label>
+                    <input type="range" id="minArea" min="50" max="500" step="10" value="100">
+                    <span id="minAreaValue">100</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading-section" id="loadingSection" style="display: none;">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <p id="loadingText">正在处理...</p>
+                <div class="progress-bar">
+                    <div class="progress" id="progressBar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="upload-placeholder" id="uploadArea">
+            <div class="upload-content">
+                <div class="upload-icon">📄</div>
+                <p class="upload-title">点击或拖拽电路图到此处</p>
+                <p class="upload-subtitle">支持 JPG、PNG、WebP 格式</p>
+                <p class="upload-tip">💡 建议使用清晰的电路图，背景为白色效果最佳</p>
+            </div>
+        </div>
+
+        <div class="main-content" id="mainContent" style="display: none;">
+            <div class="content-grid">
+                <div class="panel" id="imagePanel">
+                    <div class="panel-header">
+                        <h3>原始电路图</h3>
+                        <div class="panel-info" id="componentCount">已识别 0 个元件</div>
+                    </div>
+                    <div class="panel-body">
+                        <canvas id="originalCanvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="panel" id="resultPanel">
+                    <div class="panel-header">
+                        <h3>识别结果</h3>
+                        <div class="panel-actions">
+                            <button id="exportBomBtn" class="btn btn-sm btn-secondary" disabled>
+                                <span class="btn-icon">📋</span>
+                                导出 BOM
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-body scrollable">
+                        <div id="resultsContainer">
+                            <div class="results-placeholder">
+                                <p>点击"开始分析"按钮进行元件识别</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel" id="bomPanel">
+                    <div class="panel-header">
+                        <h3>BOM 物料清单</h3>
+                        <div class="panel-actions">
+                            <button id="downloadBomBtn" class="btn btn-sm btn-secondary" disabled>
+                                <span class="btn-icon">💾</span>
+                                下载 CSV
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-body scrollable">
+                        <div id="bomContainer">
+                            <table class="bom-table">
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>元件名称</th>
+                                        <th>类型</th>
+                                        <th>参数</th>
+                                        <th>数量</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bomBody">
+                                    <tr>
+                                        <td colspan="5" class="empty-state">暂无数据</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel" id="templatesPanel">
+                    <div class="panel-header">
+                        <h3>内置模板</h3>
+                    </div>
+                    <div class="panel-body scrollable">
+                        <div id="templatesContainer" class="templates-grid">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>

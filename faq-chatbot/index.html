@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能客服聊天机器人</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo">🤖</div>
+                <div class="header-text">
+                    <h1>智能客服助手</h1>
+                    <p>24小时在线，随时解答您的问题</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="chat-main">
+            <div class="chat-container" id="chatContainer">
+                <div class="message-bot message">
+                    <div class="avatar">🤖</div>
+                    <div class="message-content">
+                        <div class="message-text">
+                            您好！我是智能客服助手，可以帮您解答购物、退货、配送、支付等常见问题。请问有什么可以帮您的？
+                        </div>
+                        <div class="message-time">刚刚</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-questions" id="quickQuestions">
+                <span class="quick-tag">怎么退货？</span>
+                <span class="quick-tag">配送时间</span>
+                <span class="quick-tag">如何退款</span>
+                <span class="quick-tag">会员权益</span>
+                <span class="quick-tag">联系客服</span>
+            </div>
+        </main>
+
+        <footer class="input-area">
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    id="userInput" 
+                    placeholder="请输入您的问题，如：怎么退货？"
+                    autocomplete="off"
+                >
+                <button id="sendBtn" class="send-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>

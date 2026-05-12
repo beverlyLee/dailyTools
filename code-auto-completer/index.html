@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代码自动补全与纠错插件</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>代码自动补全与纠错插件</h1>
+            <div class="status-bar">
+                <span id="status-indicator" class="status-indicator ready">就绪</span>
+                <span id="file-name">untitled.js</span>
+            </div>
+        </header>
+        
+        <div class="editor-container">
+            <div id="editor"></div>
+        </div>
+        
+        <div class="panel">
+            <div class="panel-tabs">
+                <button class="tab active" data-tab="problems">问题</button>
+                <button class="tab" data-tab="output">输出</button>
+            </div>
+            <div class="panel-content">
+                <div id="problems-panel" class="panel-pane active">
+                    <div class="empty-message">未检测到问题</div>
+                </div>
+                <div id="output-panel" class="panel-pane">
+                    <div class="empty-message">运行代码以查看输出</div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <div class="footer-info">
+                <span>语言: JavaScript</span>
+                <span>基于 Monaco Editor</span>
+            </div>
+        </footer>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+    <script>
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+    </script>
+    <script src="SyntaxAnalyzer.js"></script>
+    <script src="CompletionProvider.js"></script>
+    <script src="LintChecker.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

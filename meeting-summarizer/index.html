@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会议纪要自动摘要生成器</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📝 会议纪要自动摘要生成器</h1>
+            <p class="subtitle">快速提取会议核心要点，生成简洁摘要和行动项</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <div class="section-header">
+                    <h2>📋 输入会议记录</h2>
+                    <div class="char-counter">
+                        <span id="charCount">0</span> / 5000 字符
+                    </div>
+                </div>
+                <textarea 
+                    id="meetingText" 
+                    placeholder="请粘贴您的会议记录或聊天记录...
+
+示例：
+大家好，今天我们讨论一下新产品的上线计划。嗯，首先，关于用户反馈的问题，呃，那个张工，你负责跟进一下这个问题，必须在本周五前完成修复。然后，还有新功能的测试方案，李工来负责制定测试计划，下周一之前提交给大家审核。那个，我们还需要确定上线时间，经过讨论，决定在下周三进行灰度发布，下周五正式上线。对了，运营团队需要准备好推广方案，明天下午之前完成初稿。还有，大家还有什么问题吗？好的，那我们今天的会议就到这里，散会。"
+                ></textarea>
+                <div class="input-actions">
+                    <button id="loadSampleBtn" class="btn-secondary">
+                        📄 加载示例文本
+                    </button>
+                    <button id="clearBtn" class="btn-secondary">
+                        🗑️ 清空
+                    </button>
+                </div>
+            </section>
+
+            <section class="options-section">
+                <h3>🔐 火山引擎 API 配置</h3>
+                <div class="api-config-section">
+                    <div class="api-config-item">
+                        <label for="apiKey">API Key:</label>
+                        <input type="password" id="apiKey" placeholder="请输入火山方舟 API Key">
+                        <button id="toggleApiKey" class="btn-toggle">显示</button>
+                    </div>
+                    <div class="api-config-item">
+                        <label for="modelId">模型 ID:</label>
+                        <input type="text" id="modelId" value="doubao-seed-1-6-251015" placeholder="例如: doubao-seed-1-6-251015">
+                    </div>
+                    <div class="api-config-item">
+                        <label for="baseUrl">API 地址:</label>
+                        <input type="text" id="baseUrl" value="https://ark.cn-beijing.volces.com/api/v3" placeholder="API Base URL">
+                    </div>
+                    <div class="api-config-item">
+                        <label class="option-item">
+                            <input type="checkbox" id="useApi" checked>
+                            <span>使用火山引擎 API</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" id="useFallback" checked>
+                            <span>API 失败时使用本地方案</span>
+                        </label>
+                    </div>
+                    <div class="api-status">
+                        <span id="apiStatus">状态: 未配置 API Key</span>
+                        <button id="testApiBtn" class="btn-secondary" disabled>🔌 测试连接</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="options-section">
+                <h3>⚙️ 处理选项</h3>
+                <div class="options-grid">
+                    <label class="option-item">
+                        <input type="checkbox" id="enableCleaning" checked>
+                        <span>启用文本清洗</span>
+                    </label>
+                    <label class="option-item">
+                        <input type="checkbox" id="extractActions" checked>
+                        <span>提取行动项</span>
+                    </label>
+                    <label class="option-item">
+                        <span>摘要最大长度:</span>
+                        <input type="number" id="maxSummaryLength" value="100" min="50" max="300">
+                        <span>字</span>
+                    </label>
+                </div>
+            </section>
+
+            <div class="process-section">
+                <button id="generateBtn" class="btn-primary">
+                    ✨ 生成摘要
+                </button>
+                <div id="loadingIndicator" class="loading hidden">
+                    <div class="spinner"></div>
+                    <span>正在处理中...</span>
+                </div>
+            </div>
+
+            <section class="output-section">
+                <div class="output-card">
+                    <h2>📝 生成的摘要</h2>
+                    <div id="summaryOutput" class="output-content">
+                        <p class="placeholder">摘要将在这里显示...</p>
+                    </div>
+                    <button id="copySummaryBtn" class="btn-copy" disabled>
+                        📋 复制摘要
+                    </button>
+                </div>
+
+                <div class="output-card">
+                    <h2>✅ 行动项列表</h2>
+                    <div id="actionsOutput" class="output-content">
+                        <p class="placeholder">行动项将在这里显示...</p>
+                    </div>
+                    <button id="copyActionsBtn" class="btn-copy" disabled>
+                        📋 复制行动项
+                    </button>
+                </div>
+            </section>
+
+            <section class="stats-section">
+                <h3>📊 处理统计</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">原始文本长度</span>
+                        <span id="statOriginalLength" class="stat-value">0</span>
+                        <span class="stat-unit">字符</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">清洗后长度</span>
+                        <span id="statCleanedLength" class="stat-value">0</span>
+                        <span class="stat-unit">字符</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">摘要长度</span>
+                        <span id="statSummaryLength" class="stat-value">0</span>
+                        <span class="stat-unit">字符</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">行动项数量</span>
+                        <span id="statActionCount" class="stat-value">0</span>
+                        <span class="stat-unit">项</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>💡 提示：建议输入 500 字以上的会议记录以获得更好的效果</p>
+        </footer>
+    </div>
+
+    <script src="TextCleaner.js"></script>
+    <script src="SummaryPredictor.js"></script>
+    <script src="ActionItemExtractor.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老照片划痕自动修复工具</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>老照片划痕自动修复工具</h1>
+            <p>自动检测并修复老照片上的白色划痕和霉点，恢复照片原貌</p>
+        </header>
+
+        <div class="upload-section" id="uploadSection">
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <div class="upload-content">
+                    <div class="upload-icon">📷</div>
+                    <p>点击或拖拽老照片到此处</p>
+                    <span>支持 JPG、PNG、WebP 格式</span>
+                </div>
+            </div>
+            <button id="uploadBtn" class="btn btn-primary">选择照片</button>
+        </div>
+
+        <div class="controls" id="controls" style="display: none;">
+            <h2>检测参数（高级）</h2>
+            <div class="params-section">
+                <h3>缺陷检测</h3>
+                <div class="control-group">
+                    <label for="brightnessThreshold">亮度阈值（划痕）: <span id="brightnessThresholdValue">50</span></label>
+                    <input type="range" id="brightnessThreshold" min="10" max="100" value="50" step="5">
+                    <small class="param-desc">控制对亮像素（白色划痕）的检测敏感度</small>
+                </div>
+                <div class="control-group">
+                    <label for="darkStainThreshold">深色阈值（污渍）: <span id="darkStainThresholdValue">30</span></label>
+                    <input type="range" id="darkStainThreshold" min="10" max="60" value="30" step="5">
+                    <small class="param-desc">控制对深色像素（霉点/污渍）的检测敏感度</small>
+                </div>
+                <div class="control-group">
+                    <label for="colorDistanceThreshold">颜色距离阈值: <span id="colorDistanceThresholdValue">35</span></label>
+                    <input type="range" id="colorDistanceThreshold" min="10" max="80" value="35" step="5">
+                    <small class="param-desc">与周围颜色的差异阈值（区分咖色污渍）</small>
+                </div>
+                <div class="control-group">
+                    <label for="localContrastThreshold">对比度阈值: <span id="localContrastThresholdValue">25</span></label>
+                    <input type="range" id="localContrastThreshold" min="5" max="50" value="25" step="5">
+                    <small class="param-desc">控制局部对比度差异的检测阈值</small>
+                </div>
+                <div class="control-group">
+                    <label for="edgeStrengthThreshold">边缘强度阈值: <span id="edgeStrengthThresholdValue">30</span></label>
+                    <input type="range" id="edgeStrengthThreshold" min="10" max="80" value="30" step="5">
+                    <small class="param-desc">用于验证缺陷边缘的强度阈值</small>
+                </div>
+                <div class="control-group">
+                    <label for="colorVarianceThreshold">颜色方差阈值: <span id="colorVarianceThresholdValue">20</span></label>
+                    <input type="range" id="colorVarianceThreshold" min="5" max="50" value="20" step="3">
+                    <small class="param-desc">缺陷区域的颜色变化阈值，用于排除纹理区域</small>
+                </div>
+            </div>
+            
+            <div class="params-section">
+                <h3>区域过滤</h3>
+                <div class="control-group">
+                    <label for="minDefectSize">最小缺陷尺寸: <span id="minDefectSizeValue">3</span>px</label>
+                    <input type="range" id="minDefectSize" min="1" max="20" value="3" step="1">
+                    <small class="param-desc">忽略小于此尺寸的噪点</small>
+                </div>
+                <div class="control-group">
+                    <label for="maxDefectSize">最大缺陷尺寸: <span id="maxDefectSizeValue">5000</span>px²</label>
+                    <input type="range" id="maxDefectSize" min="100" max="20000" value="5000" step="500">
+                    <small class="param-desc">忽略大于此尺寸的区域（避免误判大面积背景</small>
+                </div>
+                <div class="control-group">
+                    <label for="localWindowSize">局部窗口大小: <span id="localWindowSizeValue">21</span>px</label>
+                    <input type="range" id="localWindowSize" min="7" max="41" value="21" step="2">
+                    <small class="param-desc">用于计算局部统计信息的窗口大小</small>
+                </div>
+            </div>
+            
+            <div class="params-section">
+                <h3>修复参数</h3>
+                <div class="control-group">
+                    <label for="patchSize">纹理块大小: <span id="patchSizeValue">15</span>px</label>
+                    <input type="range" id="patchSize" min="5" max="31" value="15" step="2">
+                </div>
+                <div class="control-group">
+                    <label for="featherRadius">羽化半径: <span id="featherRadiusValue">8</span>px</label>
+                    <input type="range" id="featherRadius" min="1" max="20" value="8" step="1">
+                </div>
+                <div class="control-group">
+                    <label for="blendStrength">融合强度: <span id="blendStrengthValue">40</span>%</label>
+                    <input type="range" id="blendStrength" min="0" max="100" value="40" step="5">
+                </div>
+            </div>
+
+            <div class="params-section">
+                <h3>验证开关</h3>
+                <div class="control-group checkbox-group">
+                    <label>
+                        <input type="checkbox" id="detectDarkStains" checked>
+                        启用深色污渍检测
+                    </label>
+                </div>
+                <div class="control-group checkbox-group">
+                    <label>
+                        <input type="checkbox" id="useEdgeValidation" checked>
+                        启用边缘验证（减少阴影误判）
+                    </label>
+                </div>
+                <div class="control-group checkbox-group">
+                    <label>
+                        <input type="checkbox" id="useColorValidation" checked>
+                        启用颜色验证（排除纹理区域）
+                    </label>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="previewMaskBtn" class="btn btn-secondary">预览检测区域</button>
+                <button id="repairBtn" class="btn btn-primary">开始修复</button>
+                <button id="resetBtn" class="btn btn-secondary">重新选择</button>
+                <button id="resetParamsBtn" class="btn btn-secondary">恢复默认参数</button>
+            </div>
+        </div>
+
+        <div class="preview-section" id="previewSection" style="display: none;">
+            <div class="preview-container">
+                <div class="preview-box">
+                    <h3>原始照片</h3>
+                    <canvas id="originalCanvas"></canvas>
+                </div>
+                <div class="preview-box" id="resultPreviewBox" style="display: none;">
+                    <h3>修复结果</h3>
+                    <canvas id="resultCanvas"></canvas>
+                </div>
+                <div class="preview-box" id="maskPreviewBox" style="display: none;">
+                    <h3>检测到的缺陷区域</h3>
+                    <canvas id="maskCanvas"></canvas>
+                </div>
+            </div>
+            
+            <div class="comparison-section" id="comparisonSection" style="display: none;">
+                <h3>前后对比（拖动滑块查看效果）</h3>
+                <div class="slider-container">
+                    <canvas id="comparisonCanvas"></canvas>
+                    <div class="slider-handle" id="sliderHandle"></div>
+                </div>
+                <button id="downloadBtn" class="btn btn-success" style="display: none; margin-top: 20px;">
+                    下载修复后的照片
+                </button>
+            </div>
+        </div>
+
+        <div class="status-message" id="statusMessage" style="display: none;"></div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

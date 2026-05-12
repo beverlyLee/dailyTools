@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>条形码/二维码批量生成与排版打印工具</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+    <script src="lib/qrcode.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>条形码/二维码批量生成与排版打印工具</h1>
+        
+        <div class="main-content">
+            <div class="control-panel">
+                <div class="section">
+                    <h2>数据输入</h2>
+                    <p class="hint">粘贴 Excel 表格数据（每行格式：物品名 编号 或 物品名\t编号）</p>
+                    <textarea id="dataInput" placeholder="商品A	001
+商品B	002
+商品C	003"></textarea>
+                </div>
+
+                <div class="section">
+                    <h2>条码设置</h2>
+                    <div class="form-group">
+                        <label for="barcodeType">条码类型：</label>
+                        <select id="barcodeType">
+                            <option value="code128">Code128 条形码</option>
+                            <option value="qrcode">二维码</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="paperWidth">纸张宽度：</label>
+                        <select id="paperWidth">
+                            <option value="58">58mm (热敏小票纸)</option>
+                            <option value="80">80mm (热敏小票纸)</option>
+                            <option value="100">100mm</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="labelHeight">标签高度：</label>
+                        <input type="number" id="labelHeight" value="40" min="20" max="100"> mm
+                    </div>
+                    <div class="form-group">
+                        <label for="fontSize">字体大小：</label>
+                        <input type="number" id="fontSize" value="14" min="8" max="24"> px
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>操作</h2>
+                    <button id="generateBtn" class="btn btn-primary">生成预览</button>
+                    <button id="exportBtn" class="btn btn-secondary">导出长图</button>
+                    <button id="printBtn" class="btn btn-success">打印</button>
+                </div>
+
+                <div class="section">
+                    <h2>示例数据</h2>
+                    <button id="loadSampleBtn" class="btn btn-sample">加载10条模拟数据</button>
+                </div>
+            </div>
+
+            <div class="preview-panel">
+                <h2>预览</h2>
+                <div class="preview-container">
+                    <canvas id="previewCanvas"></canvas>
+                </div>
+                <div id="previewInfo" class="preview-info"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/ExcelDataParser.js"></script>
+    <script src="js/BarcodeGenerator.js"></script>
+    <script src="js/LabelLayoutManager.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
