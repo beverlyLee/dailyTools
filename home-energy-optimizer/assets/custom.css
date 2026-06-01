@@ -1,0 +1,115 @@
+/* 上传区域基础样式 */
+.upload-area {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    min-height: 120px;
+    border-width: 3px;
+    border-style: dashed;
+    border-radius: 12px;
+    border-color: #dee2e6;
+    text-align: center;
+    margin: 10px 0;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+/* 鼠标悬停效果 */
+.upload-area:hover {
+    border-color: #0d6efd;
+    background-color: #e7f1ff;
+    transform: scale(1.01);
+    box-shadow: 0 0 15px rgba(13, 110, 253, 0.2);
+}
+
+/* 拖拽激活状态 */
+.upload-area.drag-active {
+    border-color: #0d6efd;
+    background-color: #e7f1ff;
+    transform: scale(1.02);
+    box-shadow: 0 0 25px rgba(13, 110, 253, 0.35);
+    animation: pulse 1.5s infinite;
+}
+
+/* 拖拽激活时的文字颜色 */
+.upload-area.drag-active #upload-area-content {
+    color: #0d6efd;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(13, 110, 253, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+    }
+}
+
+/* 上传区域内容动画 */
+#upload-area-content {
+    transition: all 0.3s ease;
+}
+
+/* 图标动画 */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+.upload-icon-bounce {
+    animation: bounce 1s ease infinite;
+}
+
+/* 卡片悬停效果 */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 按钮悬停效果 */
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+}
+
+/* 平滑过渡 */
+* {
+    transition: all 0.2s ease;
+}
+
+/* 文件成功上传的状态 */
+.upload-success {
+    border-color: #198754 !important;
+    background-color: #d1e7dd !important;
+}
+
+/* 文件上传失败的状态 */
+.upload-error {
+    border-color: #dc3545 !important;
+    background-color: #f8d7da !important;
+}
+
+/* 确保SVG图标颜色正确继承 */
+.upload-area i {
+    transition: all 0.3s ease;
+}
+
+.upload-area:hover i,
+.upload-area.drag-active i {
+    color: #0d6efd;
+}

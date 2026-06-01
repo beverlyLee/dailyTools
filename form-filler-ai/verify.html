@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表单填写助手 - 验证测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 8px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"],
+        .form-group input[type="number"],
+        .form-group input[type="date"],
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #555;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .section {
+            padding: 20px;
+            background: #fafbfc;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .section h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .result-box {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+        }
+
+        .result-box.success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .result-box.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .result-box.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .result-box ul {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+
+        .result-box li {
+            margin: 4px 0;
+        }
+
+        .fill-report {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .fill-report-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .fill-report-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .fill-report-item:last-child {
+            border-bottom: none;
+        }
+
+        .fill-report-item .field-name {
+            color: #666;
+        }
+
+        .fill-report-item .matched-value {
+            color: #28a745;
+            font-weight: 500;
+        }
+
+        .fill-report-item .no-match {
+            color: #dc3545;
+        }
+
+        .test-section {
+            margin-top: 30px;
+            padding: 24px;
+            background: #fff8e1;
+            border-radius: 12px;
+            border: 2px dashed #ffc107;
+        }
+
+        .test-section h3 {
+            color: #856404;
+            margin-bottom: 16px;
+        }
+
+        .test-item {
+            margin-bottom: 12px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .test-item.pass {
+            border-left: 4px solid #28a745;
+        }
+
+        .test-item.fail {
+            border-left: 4px solid #dc3545;
+        }
+
+        .test-item-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .test-item-desc {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            margin-top: 30px;
+            font-size: 0.85rem;
+        }
+
+        .input-highlight {
+            animation: highlightPulse 0.8s ease-out;
+            border-color: #4caf50 !important;
+            background-color: #e8f5e9 !important;
+        }
+
+        @keyframes highlightPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+            }
+            100% {
+                box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+            }
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-badge.pass {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🧪 智能表单填写助手 - 验证测试</h1>
+            <p>用于测试字段识别、实体匹配和自动填充功能</p>
+            <a href="index.html" class="back-link">← 返回主页面</a>
+        </header>
+
+        <div class="card">
+            <h2 class="card-title">1️⃣ 测试数据</h2>
+            <p class="card-desc">点击下方按钮设置测试用的用户资料</p>
+            <div class="action-buttons">
+                <button id="set-test-data-btn" class="btn btn-primary">设置测试资料</button>
+                <button id="clear-profile-btn" class="btn btn-secondary">清空资料</button>
+            </div>
+            <div id="profile-status" class="result-box" style="display:none; margin-top:16px;"></div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">2️⃣ 模拟注册表单</h2>
+            <p class="card-desc">这是一个使用不同命名方式的表单，用于测试字段识别能力</p>
+
+            <div class="section">
+                <h3>📝 基本信息（标准命名）</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="v-username">用户名</label>
+                        <input type="text" name="username" id="v-username" placeholder="请输入用户名">
+                    </div>
+                    <div class="form-group">
+                        <label for="v-email">电子邮箱</label>
+                        <input type="email" name="email" id="v-email" placeholder="请输入邮箱">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="v-phone">手机号码</label>
+                        <input type="tel" name="phone" id="v-phone" placeholder="请输入手机号">
+                    </div>
+                    <div class="form-group">
+                        <label for="v-name">真实姓名</label>
+                        <input type="text" name="realname" id="v-name" placeholder="请输入真实姓名">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>📍 收货地址（非标准命名）</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="v-consignee">收货人</label>
+                        <input type="text" name="consignee" id="v-consignee" placeholder="收货人姓名">
+                    </div>
+                    <div class="form-group">
+                        <label for="v-mobile">联系电话</label>
+                        <input type="text" name="mobile" id="v-mobile" placeholder="收货人电话">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="v-province">所在地区</label>
+                        <input type="text" name="province" id="v-province" placeholder="省/市/区">
+                    </div>
+                    <div class="form-group">
+                        <label for="v-zip">邮政编码</label>
+                        <input type="text" name="zip" id="v-zip" placeholder="邮编">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="v-addr">详细地址</label>
+                    <input type="text" name="addr" id="v-addr" placeholder="街道、门牌号">
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>📋 其他信息（复杂命名）</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="v-sex">性别</label>
+                        <select name="sex" id="v-sex">
+                            <option value="">请选择</option>
+                            <option value="male">男</option>
+                            <option value="female">女</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="v-dob">出生日期</label>
+                        <input type="date" name="dob" id="v-dob">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="v-id">身份证号</label>
+                        <input type="text" name="id_no" id="v-id" placeholder="身份证号码">
+                    </div>
+                    <div class="form-group">
+                        <label for="v-nick">昵称</label>
+                        <input type="text" name="nick_name" id="v-nick" placeholder="您的昵称">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="v-company">工作单位</label>
+                        <input type="text" name="company_name" id="v-company" placeholder="公司名称">
+                    </div>
+                    <div class="form-group">
+                        <label for="v-job">职位</label>
+                        <input type="text" name="position" id="v-job" placeholder="职位">
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="fill-form-btn" class="btn btn-primary">🔮 自动填充表单</button>
+                <button id="clear-form-btn" class="btn btn-secondary">清空表单</button>
+            </div>
+
+            <div id="fill-status" class="result-box" style="display:none; margin-top:16px;"></div>
+            <div id="fill-report" class="fill-report" style="display:none;"></div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">3️⃣ 自动测试套件</h2>
+            <p class="card-desc">运行自动化测试，验证各模块功能是否正常</p>
+            <div class="action-buttons">
+                <button id="run-tests-btn" class="btn btn-primary">▶️ 运行所有测试</button>
+                <button id="reset-tests-btn" class="btn btn-secondary">重置测试</button>
+            </div>
+            <div id="test-results" class="test-section" style="display:none; margin-top:16px;"></div>
+        </div>
+
+        <footer class="footer">
+            <p>AI Form Filler v1.0 | 验证测试页面</p>
+        </footer>
+    </div>
+
+    <script src="FieldIdentifier.js"></script>
+    <script src="EntityMatcher.js"></script>
+    <script src="AutoFiller.js"></script>
+    <script src="ProfileStorage.js"></script>
+    <script>
+        class FormFillerTester {
+            constructor() {
+                this.fieldIdentifier = new FieldIdentifier();
+                this.entityMatcher = new EntityMatcher();
+                this.autoFiller = new AutoFiller();
+                this.profileStorage = new ProfileStorage();
+                this.testResults = [];
+            }
+
+            init() {
+                this.bindEvents();
+                console.log('Form Filler Tester initialized');
+            }
+
+            bindEvents() {
+                document.getElementById('set-test-data-btn').addEventListener('click', () => {
+                    this.setTestProfile();
+                });
+
+                document.getElementById('clear-profile-btn').addEventListener('click', () => {
+                    this.clearProfile();
+                });
+
+                document.getElementById('fill-form-btn').addEventListener('click', () => {
+                    this.fillDemoForm();
+                });
+
+                document.getElementById('clear-form-btn').addEventListener('click', () => {
+                    this.clearDemoForm();
+                });
+
+                document.getElementById('run-tests-btn').addEventListener('click', () => {
+                    this.runAllTests();
+                });
+
+                document.getElementById('reset-tests-btn').addEventListener('click', () => {
+                    this.resetTests();
+                });
+            }
+
+            setTestProfile() {
+                const testProfile = {
+                    name: '张三',
+                    phone: '13800138000',
+                    email: 'zhangsan@example.com',
+                    idCard: '110101199001011234',
+                    gender: 'male',
+                    age: 34,
+                    birthday: '1990-01-01',
+                    region: '北京市朝阳区',
+                    address: '中关村大街1号',
+                    zipcode: '100000',
+                    country: '中国',
+                    username: 'zhangsan',
+                    nickname: '小张三',
+                    company: '某某科技有限公司',
+                    job: '高级工程师'
+                };
+
+                const result = this.profileStorage.saveProfile(testProfile);
+                
+                const statusEl = document.getElementById('profile-status');
+                statusEl.style.display = 'block';
+                statusEl.className = 'result-box ' + (result.success ? 'success' : 'error');
+                statusEl.innerHTML = result.success 
+                    ? '<strong>✅ 测试资料已设置</strong><br><small>姓名: 张三 | 手机号: 13800138000 | 邮箱: zhangsan@example.com</small>'
+                    : '<strong>❌ 设置失败</strong>: ' + result.message;
+            }
+
+            clearProfile() {
+                const result = this.profileStorage.clearProfile();
+                const statusEl = document.getElementById('profile-status');
+                statusEl.style.display = 'block';
+                statusEl.className = 'result-box ' + (result.success ? 'info' : 'error');
+                statusEl.innerHTML = result.success 
+                    ? '<strong>ℹ️ 用户资料已清空</strong>'
+                    : '<strong>❌ 清空失败</strong>: ' + result.message;
+            }
+
+            async fillDemoForm() {
+                const profile = this.profileStorage.getProfile();
+                
+                if (!profile) {
+                    const statusEl = document.getElementById('fill-status');
+                    statusEl.style.display = 'block';
+                    statusEl.className = 'result-box error';
+                    statusEl.innerHTML = '<strong>❌ 请先设置测试资料</strong><br>点击"设置测试资料"按钮';
+                    return;
+                }
+
+                this.entityMatcher.setProfile(profile);
+
+                const demoForm = document.querySelector('.card');
+                const identifiedFields = this.fieldIdentifier.scanPage(demoForm);
+                
+                const { matches, noMatches } = this.entityMatcher.batchMatch(identifiedFields);
+                const fillResults = await this.autoFiller.fillAll(matches);
+
+                this.displayFillResult(fillResults, identifiedFields);
+
+                this.profileStorage.addHistoryEntry({
+                    action: 'fill_verify_form',
+                    matchedFields: fillResults.filled.length,
+                    totalFields: identifiedFields.length
+                });
+            }
+
+            displayFillResult(fillResults, identifiedFields) {
+                const statusEl = document.getElementById('fill-status');
+                const reportEl = document.getElementById('fill-report');
+
+                statusEl.style.display = 'block';
+                
+                if (fillResults.filled.length > 0) {
+                    statusEl.className = 'result-box success';
+                    statusEl.innerHTML = `
+                        <strong>✅ 填充完成</strong>
+                        <ul>
+                            <li>识别到 ${identifiedFields.length} 个字段</li>
+                            <li>成功填充 ${fillResults.filled.length} 个字段</li>
+                            ${fillResults.failed.length > 0 ? `<li>填充失败 ${fillResults.failed.length} 个字段</li>` : ''}
+                        </ul>
+                    `;
+
+                    let reportHtml = '<div class="fill-report-title">填充详情:</div>';
+                    for (const item of fillResults.filled) {
+                        const displayName = this.entityMatcher.getEntityDisplayInfo(item.entity).displayName;
+                        reportHtml += `
+                            <div class="fill-report-item">
+                                <span class="field-name">${displayName}</span>
+                                <span class="matched-value">${item.value}</span>
+                            </div>
+                        `;
+                    }
+                    reportEl.innerHTML = reportHtml;
+                    reportEl.style.display = 'block';
+                } else {
+                    statusEl.className = 'result-box info';
+                    statusEl.innerHTML = `
+                        <strong>ℹ️ 没有可填充的字段</strong>
+                        <ul>
+                            <li>识别到 ${identifiedFields.length} 个字段</li>
+                            <li>请检查用户资料是否已设置</li>
+                        </ul>
+                    `;
+                    reportEl.style.display = 'none';
+                }
+            }
+
+            clearDemoForm() {
+                const inputs = document.querySelectorAll('.card input:not([type="button"]):not([type="submit"]), .card select');
+                inputs.forEach(input => {
+                    if (input.tagName === 'SELECT') {
+                        input.selectedIndex = 0;
+                    } else {
+                        input.value = '';
+                    }
+                });
+
+                document.getElementById('fill-status').style.display = 'none';
+                document.getElementById('fill-report').style.display = 'none';
+            }
+
+            async runAllTests() {
+                this.testResults = [];
+                const resultsEl = document.getElementById('test-results');
+                resultsEl.style.display = 'block';
+                resultsEl.innerHTML = '<h3>⏳ 正在运行测试...</h3>';
+
+                const testProfile = {
+                    name: '张三',
+                    phone: '13800138000',
+                    email: 'zhangsan@example.com',
+                    gender: 'male'
+                };
+                this.profileStorage.saveProfile(testProfile);
+
+                await this.testFieldIdentifier();
+                await this.testEntityMatcher();
+                await this.testProfileStorage();
+                await this.testAutoFiller();
+                await this.testIntegration();
+
+                this.displayTestResults();
+            }
+
+            async testFieldIdentifier() {
+                console.log('Testing FieldIdentifier...');
+                
+                let passCount = 0;
+                let failCount = 0;
+
+                const testCases = [
+                    { name: 'username', id: 'v-username', expected: 'username' },
+                    { name: 'email', id: 'v-email', expected: 'email' },
+                    { name: 'phone', id: 'v-phone', expected: 'phone' },
+                    { name: 'realname', id: 'v-name', expected: 'name' },
+                    { name: 'mobile', id: 'v-mobile', expected: 'phone' },
+                    { name: 'consignee', id: 'v-consignee', expected: 'name' },
+                    { name: 'province', id: 'v-province', expected: 'region' },
+                    { name: 'addr', id: 'v-addr', expected: 'address' },
+                    { name: 'zip', id: 'v-zip', expected: 'zipcode' },
+                    { name: 'sex', id: 'v-sex', expected: 'gender' },
+                    { name: 'dob', id: 'v-dob', expected: 'birthday' },
+                    { name: 'id_no', id: 'v-id', expected: 'idCard' },
+                    { name: 'nick_name', id: 'v-nick', expected: 'nickname' },
+                    { name: 'company_name', id: 'v-company', expected: 'company' },
+                    { name: 'position', id: 'v-job', expected: 'job' }
+                ];
+
+                for (const tc of testCases) {
+                    const element = document.getElementById(tc.id);
+                    if (element) {
+                        const result = this.fieldIdentifier.identifyField(element);
+                        const passed = result && result.entity === tc.expected;
+                        
+                        if (passed) {
+                            passCount++;
+                        } else {
+                            failCount++;
+                        }
+
+                        this.testResults.push({
+                            category: 'FieldIdentifier',
+                            test: `${tc.name} → ${tc.expected}`,
+                            passed: passed,
+                            actual: result ? result.entity : 'null'
+                        });
+                    }
+                }
+
+                this.testResults.push({
+                    category: 'FieldIdentifier',
+                    test: '总计',
+                    passed: failCount === 0,
+                    actual: `${passCount}/${testCases.length} 通过`
+                });
+            }
+
+            async testEntityMatcher() {
+                console.log('Testing EntityMatcher...');
+
+                const profile = {
+                    name: '张三',
+                    phone: '13800138000',
+                    email: 'zhangsan@example.com'
+                };
+                this.entityMatcher.setProfile(profile);
+
+                const testCases = [
+                    { entity: 'name', expected: '张三' },
+                    { entity: 'phone', expected: '13800138000' },
+                    { entity: 'email', expected: 'zhangsan@example.com' },
+                    { entity: 'address', expected: null }
+                ];
+
+                for (const tc of testCases) {
+                    const identifiedField = { entity: tc.entity, confidence: 1 };
+                    const result = this.entityMatcher.matchEntity(identifiedField);
+                    const passed = tc.expected === null 
+                        ? result === null 
+                        : (result && result.value === tc.expected);
+
+                    this.testResults.push({
+                        category: 'EntityMatcher',
+                        test: `${tc.entity} 匹配`,
+                        passed: passed,
+                        actual: result ? result.value : 'null'
+                    });
+                }
+            }
+
+            async testProfileStorage() {
+                console.log('Testing ProfileStorage...');
+
+                const testData = {
+                    name: '测试用户',
+                    phone: '13900139000',
+                    email: 'test@example.com'
+                };
+
+                this.profileStorage.saveProfile(testData);
+                const loaded = this.profileStorage.getProfile();
+
+                this.testResults.push({
+                    category: 'ProfileStorage',
+                    test: '保存和读取',
+                    passed: loaded && loaded.name === testData.name && loaded.phone === testData.phone,
+                    actual: loaded ? `name: ${loaded.name}` : 'null'
+                });
+
+                const history = this.profileStorage.getHistory();
+                this.testResults.push({
+                    category: 'ProfileStorage',
+                    test: '历史记录读取',
+                    passed: Array.isArray(history),
+                    actual: `${history.length} 条记录`
+                });
+            }
+
+            async testAutoFiller() {
+                console.log('Testing AutoFiller...');
+
+                const testInput = document.getElementById('v-username');
+                if (testInput) {
+                    const match = {
+                        entity: 'username',
+                        value: 'testuser',
+                        element: testInput
+                    };
+
+                    const success = await this.autoFiller.fillField(match);
+
+                    this.testResults.push({
+                        category: 'AutoFiller',
+                        test: '填充 input 字段',
+                        passed: success && testInput.value === 'testuser',
+                        actual: testInput.value
+                    });
+                }
+
+                const testSelect = document.getElementById('v-sex');
+                if (testSelect) {
+                    const match = {
+                        entity: 'gender',
+                        value: 'male',
+                        element: testSelect
+                    };
+
+                    const success = await this.autoFiller.fillField(match);
+
+                    this.testResults.push({
+                        category: 'AutoFiller',
+                        test: '填充 select 下拉框',
+                        passed: success && testSelect.value === 'male',
+                        actual: testSelect.value
+                    });
+                }
+
+                const testDate = document.getElementById('v-dob');
+                if (testDate) {
+                    const match = {
+                        entity: 'birthday',
+                        value: '1990年5月15日',
+                        element: testDate
+                    };
+
+                    const success = await this.autoFiller.fillField(match);
+
+                    this.testResults.push({
+                        category: 'AutoFiller',
+                        test: '日期格式转换',
+                        passed: success && testDate.value === '1990-05-15',
+                        actual: testDate.value
+                    });
+                }
+            }
+
+            async testIntegration() {
+                console.log('Testing Integration...');
+
+                const profile = this.profileStorage.getProfile();
+                this.entityMatcher.setProfile(profile);
+
+                const demoForm = document.querySelector('.card');
+                const identifiedFields = this.fieldIdentifier.scanPage(demoForm);
+
+                this.testResults.push({
+                    category: 'Integration',
+                    test: '表单字段扫描',
+                    passed: identifiedFields.length >= 10,
+                    actual: `识别到 ${identifiedFields.length} 个字段`
+                });
+
+                const { matches, noMatches } = this.entityMatcher.batchMatch(identifiedFields);
+
+                this.testResults.push({
+                    category: 'Integration',
+                    test: '实体匹配',
+                    passed: matches.length > 0,
+                    actual: `匹配 ${matches.length} 个，未匹配 ${noMatches.length} 个`
+                });
+
+                const fillResults = await this.autoFiller.fillAll(matches);
+
+                this.testResults.push({
+                    category: 'Integration',
+                    test: '端到端填充',
+                    passed: fillResults.filled.length > 0,
+                    actual: `成功填充 ${fillResults.filled.length} 个字段`
+                });
+            }
+
+            displayTestResults() {
+                const resultsEl = document.getElementById('test-results');
+                
+                const categories = {};
+                for (const result of this.testResults) {
+                    if (!categories[result.category]) {
+                        categories[result.category] = [];
+                    }
+                    categories[result.category].push(result);
+                }
+
+                let totalPassed = 0;
+                let totalFailed = 0;
+                let html = '';
+
+                for (const [category, tests] of Object.entries(categories)) {
+                    const categoryPassed = tests.filter(t => t.passed).length;
+                    const categoryFailed = tests.filter(t => !t.passed).length;
+                    const allPassed = categoryFailed === 0;
+
+                    html += `
+                        <div class="test-item ${allPassed ? 'pass' : 'fail'}">
+                            <div class="test-item-title">
+                                ${this.getCategoryIcon(category)} ${this.getCategoryName(category)}
+                                <span class="status-badge ${allPassed ? 'pass' : 'fail'}">
+                                    ${categoryPassed}/${tests.length} 通过
+                                </span>
+                            </div>
+                            <div class="test-item-desc">
+                                ${tests.map(t => `
+                                    <div style="margin-top: 4px;">
+                                        ${t.passed ? '✅' : '❌'} ${t.test}
+                                        ${t.passed ? '' : `(期望: ${t.expected || '正确值'}, 实际: ${t.actual})`}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                    totalPassed += categoryPassed;
+                    totalFailed += categoryFailed;
+                }
+
+                const overallPassed = totalFailed === 0;
+                resultsEl.innerHTML = `
+                    <h3>${overallPassed ? '✅ 所有测试通过' : '❌ 部分测试失败'}</h3>
+                    <p style="margin-bottom: 16px; color: #856404;">
+                        总计: ${totalPassed + totalFailed} 个测试, ${totalPassed} 通过, ${totalFailed} 失败
+                    </p>
+                    ${html}
+                `;
+            }
+
+            getCategoryIcon(category) {
+                const icons = {
+                    'FieldIdentifier': '🔍',
+                    'EntityMatcher': '🎯',
+                    'ProfileStorage': '💾',
+                    'AutoFiller': '✍️',
+                    'Integration': '🔗'
+                };
+                return icons[category] || '📦';
+            }
+
+            getCategoryName(category) {
+                const names = {
+                    'FieldIdentifier': '字段识别模块',
+                    'EntityMatcher': '实体匹配模块',
+                    'ProfileStorage': '数据存储模块',
+                    'AutoFiller': '自动填充模块',
+                    'Integration': '集成测试'
+                };
+                return names[category] || category;
+            }
+
+            resetTests() {
+                document.getElementById('test-results').style.display = 'none';
+                this.testResults = [];
+                this.clearDemoForm();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const tester = new FormFillerTester();
+            tester.init();
+        });
+    </script>
+</body>
+</html>

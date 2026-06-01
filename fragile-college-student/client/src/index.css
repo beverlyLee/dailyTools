@@ -1,0 +1,361 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  color: #333;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.app-header {
+  text-align: center;
+  color: white;
+  margin-bottom: 30px;
+}
+
+.app-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.app-header p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 1200px) {
+  .content-grid {
+    grid-template-columns: 1fr 350px;
+  }
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.selector-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.selector-group select {
+  padding: 8px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  background: white;
+  transition: all 0.3s;
+}
+
+.selector-group select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.illness-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.illness-tab {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 20px;
+  background: #f0f0f0;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.illness-tab:hover {
+  background: #e0e0e0;
+}
+
+.illness-tab.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.risk-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.risk-badge.high {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.risk-badge.medium {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.risk-badge.low {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.monthly-illness-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.monthly-illness-item {
+  padding: 16px;
+  border-radius: 12px;
+  background: #f9fafb;
+  border-left: 4px solid transparent;
+  transition: all 0.3s;
+}
+
+.monthly-illness-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.monthly-illness-item.high {
+  border-left-color: #dc2626;
+  background: #fef2f2;
+}
+
+.monthly-illness-item.medium {
+  border-left-color: #d97706;
+  background: #fffbeb;
+}
+
+.monthly-illness-item.low {
+  border-left-color: #059669;
+  background: #f0fdf4;
+}
+
+.illness-name-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.illness-name {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.illness-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: #666;
+}
+
+.illness-symptoms {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.symptom-tag {
+  padding: 2px 10px;
+  background: white;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #666;
+  border: 1px solid #e5e7eb;
+}
+
+.high-risk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.high-risk-item {
+  padding: 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border: 1px solid #fca5a5;
+}
+
+.high-risk-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.high-risk-illness {
+  font-weight: 600;
+  color: #dc2626;
+}
+
+.high-risk-dates {
+  font-size: 13px;
+  color: #666;
+}
+
+.high-risk-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #666;
+}
+
+.heatmap-container {
+  width: 100%;
+  height: 200px;
+}
+
+.trend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trend-item {
+  padding: 12px;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.trend-date {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.trend-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trend-topic {
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: #666;
+}
+
+.error {
+  padding: 20px;
+  background: #fee2e2;
+  color: #dc2626;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.validation-status {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.validation-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.validation-pass {
+  color: #059669;
+}
+
+.validation-fail {
+  color: #dc2626;
+}
+
+.legend {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #666;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}

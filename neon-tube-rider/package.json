@@ -1,0 +1,22 @@
+{
+  "name": "neon-tube-rider",
+  "version": "1.0.0",
+  "description": "Neon tube rider game with Three.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "@rollup/pluginutils": "^5.3.0",
+    "@types/three": "^0.160.0",
+    "esbuild": "^0.28.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10",
+    "vite-plugin-glsl": "^1.6.0"
+  }
+}

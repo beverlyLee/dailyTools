@@ -1,0 +1,22 @@
+{
+  "name": "lava-lamp-sim",
+  "version": "1.0.0",
+  "description": "Lava lamp simulation using Three.js and SPH",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "keywords": ["lava-lamp", "threejs", "sph", "simulation"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "three": "^0.184.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.184.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.14"
+  }
+}

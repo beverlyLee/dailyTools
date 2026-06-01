@@ -1,0 +1,239 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+#app {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-columns: 1fr 300px;
+    grid-template-areas:
+        "header header"
+        "controls controls"
+        "map info"
+        "legend legend";
+    height: 100vh;
+    gap: 10px;
+    padding: 10px;
+}
+
+.header {
+    grid-area: header;
+    text-align: center;
+    color: white;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+}
+
+.header h1 {
+    font-size: 28px;
+    margin-bottom: 5px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header p {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.controls {
+    grid-area: controls;
+    display: flex;
+    gap: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.control-group label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #555;
+}
+
+.control-group select,
+.control-group input[type="range"] {
+    padding: 8px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.control-group select:hover,
+.control-group input[type="range"]:hover {
+    border-color: #667eea;
+}
+
+.control-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+#map-container {
+    grid-area: map;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+#deckgl-container {
+    width: 100%;
+    height: 100%;
+    background: #1a1a2e;
+}
+
+.info-panel {
+    grid-area: info;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card h3 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: #667eea;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 8px;
+}
+
+#stats-overview,
+#top-destinations,
+#route-info {
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    color: #666;
+}
+
+.stat-value {
+    font-weight: 600;
+    color: #333;
+}
+
+.dest-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.dest-item:last-child {
+    border-bottom: none;
+}
+
+.legend {
+    grid-area: legend;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.legend h4 {
+    font-size: 14px;
+    color: #555;
+    margin-right: 10px;
+}
+
+#legend-content {
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+.route-detail {
+    background: #f8f9ff;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.route-detail strong {
+    color: #667eea;
+}
+
+.region-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: white;
+    margin-right: 5px;
+}
+
+@media (max-width: 1024px) {
+    #app {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "header"
+            "controls"
+            "map"
+            "info"
+            "legend";
+    }
+    
+    .info-panel {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .stat-card {
+        flex: 1;
+        min-width: 250px;
+    }
+}

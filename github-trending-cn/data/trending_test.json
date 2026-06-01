@@ -1,0 +1,28 @@
+{
+  "date": "2026-05-16",
+  "fetched_at": "2026-05-16T12:13:50.166006",
+  "repos": [
+    {
+      "name": "tinyhumansai/openhuman",
+      "url": "https://github.com/tinyhumansai/openhuman",
+      "owner": "tinyhumansai",
+      "repo_name": "openhuman",
+      "description": "Your Personal AI super intelligence. Private, Simple and extremely powerful.",
+      "language": "Rust",
+      "stars": 8655,
+      "forks": 715,
+      "today_stars": 0
+    },
+    {
+      "name": "microsoft/autogen",
+      "url": "https://github.com/microsoft/autogen",
+      "owner": "microsoft",
+      "repo_name": "autogen",
+      "description": "A programming framework for agentic AI. It enables next-gen LLM applications with multi-agent conversations and tool support.",
+      "language": "Python",
+      "stars": 23456,
+      "forks": 2345,
+      "today_stars": 123
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Magic Cauldron - 魔法坩埚</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { overflow: hidden; background: #0a0514; }
+    canvas { display: block; }
+    .ui-overlay {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      color: #e0d4f7;
+      font-family: 'Georgia', serif;
+      background: rgba(26, 10, 46, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid rgba(180, 140, 255, 0.3);
+      backdrop-filter: blur(10px);
+      max-width: 280px;
+      z-index: 100;
+    }
+    .ui-overlay h2 {
+      font-size: 18px;
+      margin-bottom: 12px;
+      color: #c9a9ff;
+      text-shadow: 0 0 10px rgba(201, 169, 255, 0.5);
+    }
+    .ui-overlay p {
+      font-size: 13px;
+      line-height: 1.8;
+      margin: 4px 0;
+    }
+    .ui-overlay .key {
+      display: inline-block;
+      background: rgba(180, 140, 255, 0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-weight: bold;
+      color: #e8d7ff;
+      margin-right: 6px;
+      min-width: 24px;
+      text-align: center;
+    }
+    .current-ingredient {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(180, 140, 255, 0.2);
+    }
+    .current-ingredient .color-dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+      vertical-align: middle;
+      box-shadow: 0 0 10px currentColor;
+    }
+  </style>
+</head>
+<body>
+  <div class="ui-overlay">
+    <h2>🧙 魔法坩埚</h2>
+    <p><span class="key">F</span> 火焰精华</p>
+    <p><span class="key">W</span> 水晶之泪</p>
+    <p><span class="key">P</span> 剧毒粉末</p>
+    <p><span class="key">L</span> 闪电精华</p>
+    <p><span class="key">R</span> 重置配方</p>
+    <div class="current-ingredient">
+      <p><span class="color-dot" id="colorDot" style="background: #8b0000; color: #8b0000;"></span>
+      <span id="ingredientName">龙之血</span></p>
+    </div>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

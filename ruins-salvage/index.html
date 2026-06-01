@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ruins Salvage - 碎石清理</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #0a0a0a;
+        color: #e6e6e6;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+      #game-container {
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+      }
+      #hud {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        padding: 10px 14px;
+        background: rgba(0, 0, 0, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        font-size: 13px;
+        line-height: 1.5;
+        pointer-events: none;
+        user-select: none;
+        z-index: 10;
+      }
+      #hud b {
+        color: #ffcc66;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game-container">
+      <div id="hud">
+        <div><b>Ruins Salvage</b></div>
+        <div>鼠标靠近碎石 → 抓取</div>
+        <div>按住移动 → 搬运</div>
+        <div>松开 → 抛出清理</div>
+        <div style="margin-top:6px;color:#9aa4b2;font-size:12px;">
+          清理边界：方块离开画面或落地 5 秒后消失
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

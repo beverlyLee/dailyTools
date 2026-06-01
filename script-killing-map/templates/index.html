@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧本杀门店空间分布分析</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            width: 350px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .stat-card .percentage {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag-item {
+            background: #f0f0f0;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .tag-item.emotion {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .tag-item.hard {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .tag-item.terror {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .tag-item.mechanism {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .tag-item.joy {
+            background: #fff8e1;
+            color: #f57f17;
+        }
+
+        .tag-item.camp {
+            background: #e0f7fa;
+            color: #00838f;
+        }
+
+        .legend {
+            margin-top: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .legend-color.ut {
+            background: #4caf50;
+        }
+
+        .legend-color.cbd {
+            background: #ff9800;
+        }
+
+        .legend-color.shop {
+            background: #f44336;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .checkbox-item input {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .popup-content {
+            min-width: 200px;
+        }
+
+        .popup-content h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .popup-content .address {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .popup-content .rating {
+            font-size: 14px;
+            color: #ff9800;
+            margin-bottom: 8px;
+        }
+
+        .popup-content .price {
+            font-size: 14px;
+            color: #4caf50;
+            margin-bottom: 10px;
+        }
+
+        .popup-content .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .popup-content .tag {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .analysis-result {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .analysis-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .analysis-item:last-child {
+            border-bottom: none;
+        }
+
+        .analysis-label {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .analysis-value {
+            color: #333;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎭 剧本杀门店空间分布分析</h1>
+        <p>基于武汉光谷大学城 & CBD的缓冲区分析</p>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="section">
+                <div class="section-title">📊 统计概览</div>
+                <div class="stat-card">
+                    <h3>剧本杀门店总数</h3>
+                    <div class="number" id="totalShops">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>大学城3公里内门店</h3>
+                    <div class="number" id="utShops">0</div>
+                    <div class="percentage" id="utPercentage">占比 0%</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">🎯 图层控制</div>
+                <div class="checkbox-group">
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="showUT" checked>
+                        显示大学城缓冲区
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="showCBD" checked>
+                        显示CBD缓冲区
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="showShops" checked>
+                        显示门店点位
+                    </label>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">🏷️ 剧本类型分布</div>
+                <div class="tag-list" id="tagList">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">📈 详细分析</div>
+                <div class="analysis-result" id="analysisResult">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">🗺️ 图例</div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color ut"></div>
+                        <span>大学城 (3公里半径)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color cbd"></div>
+                        <span>CBD (2公里半径)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color shop"></div>
+                        <span>剧本杀门店</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script>
+        const map = L.map('map').setView([30.510, 114.378], 13);
+
+        const baseLayers = {
+            "高德地图": L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+                subdomains: ['1', '2', '3', '4'],
+                attribution: '&copy; 高德地图 Amap',
+                maxZoom: 19
+            }),
+            "CartoDB": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                subdomains: 'abcd',
+                attribution: '&copy; CartoDB',
+                maxZoom: 19
+            }),
+            "OpenStreetMap": L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19
+            })
+        };
+
+        baseLayers["高德地图"].addTo(map);
+
+        L.control.layers(baseLayers, null, {
+            position: 'topright'
+        }).addTo(map);
+
+        map.on('tileerror', function(error, tile) {
+            console.warn('瓦片加载失败:', error);
+        });
+
+        const shopMarkers = L.markerClusterGroup({
+            showCoverageOnHover: false,
+            maxClusterRadius: 50
+        });
+
+        const utCircles = [];
+        const cbdCircles = [];
+        const shopMarkerList = [];
+
+        const shopIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: '<div style="background: #f44336; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 5px rgba(0,0,0,0.3);"></div>',
+            iconSize: [12, 12],
+            iconAnchor: [6, 6]
+        });
+
+        async function loadData() {
+            try {
+                const [shopsRes, utRes, cbdRes, analysisRes] = await Promise.all([
+                    fetch('/api/shops'),
+                    fetch('/api/university-towns'),
+                    fetch('/api/cbd-areas'),
+                    fetch('/api/analysis/comprehensive')
+                ]);
+
+                const shops = await shopsRes.json();
+                const universityTowns = await utRes.json();
+                const cbdAreas = await cbdRes.json();
+                const analysis = await analysisRes.json();
+
+                renderUniversityTowns(universityTowns.data);
+                renderCBDAreas(cbdAreas.data);
+                renderShops(shops.data);
+                renderStatistics(analysis.data);
+                renderTagDistribution(analysis.data.tag_analysis);
+                renderAnalysisResult(analysis.data);
+
+            } catch (error) {
+                console.error('Failed to load data:', error);
+            }
+        }
+
+        function renderUniversityTowns(towns) {
+            towns.forEach(town => {
+                const circle = L.circle([town.latitude, town.longitude], {
+                    color: '#4caf50',
+                    fillColor: '#4caf50',
+                    fillOpacity: 0.15,
+                    weight: 2,
+                    radius: 3000
+                }).addTo(map);
+
+                circle.bindPopup(`
+                    <div style="min-width: 150px;">
+                        <h3 style="margin: 0 0 8px 0;">🎓 ${town.name}</h3>
+                        <p style="margin: 0; font-size: 13px; color: #666;">${town.description}</p>
+                    </div>
+                `);
+
+                utCircles.push(circle);
+            });
+        }
+
+        function renderCBDAreas(areas) {
+            areas.forEach(area => {
+                const circle = L.circle([area.latitude, area.longitude], {
+                    color: '#ff9800',
+                    fillColor: '#ff9800',
+                    fillOpacity: 0.15,
+                    weight: 2,
+                    radius: 2000
+                }).addTo(map);
+
+                circle.bindPopup(`
+                    <div style="min-width: 150px;">
+                        <h3 style="margin: 0 0 8px 0;">🏙️ ${area.name}</h3>
+                        <p style="margin: 0; font-size: 13px; color: #666;">${area.description}</p>
+                    </div>
+                `);
+
+                cbdCircles.push(circle);
+            });
+        }
+
+        function renderShops(shops) {
+            shops.forEach(shop => {
+                const marker = L.marker([shop.latitude, shop.longitude], {
+                    icon: shopIcon
+                });
+
+                const tagHtml = shop.tags.map(tag => {
+                    return `<span class="tag">${tag}</span>`;
+                }).join('');
+
+                marker.bindPopup(`
+                    <div class="popup-content">
+                        <h3>🎭 ${shop.name}</h3>
+                        <div class="address">📍 ${shop.address}</div>
+                        <div class="rating">⭐ ${shop.rating} 分</div>
+                        <div class="price">💰 人均 ${shop.price_per_person} 元</div>
+                        <div class="tags">${tagHtml}</div>
+                    </div>
+                `);
+
+                shopMarkers.addLayer(marker);
+                shopMarkerList.push(marker);
+            });
+
+            map.addLayer(shopMarkers);
+        }
+
+        function renderStatistics(data) {
+            const utAnalysis = data.university_town_analysis;
+            
+            document.getElementById('totalShops').textContent = utAnalysis.total_shops;
+            document.getElementById('utShops').textContent = utAnalysis.shops_in_any_buffer_count;
+            document.getElementById('utPercentage').textContent = `占比 ${utAnalysis.overall_percentage.toFixed(1)}%`;
+        }
+
+        function renderTagDistribution(tagData) {
+            const tagList = document.getElementById('tagList');
+            const tagClassMap = {
+                '情感本': 'emotion',
+                '硬核本': 'hard',
+                '恐怖本': 'terror',
+                '机制本': 'mechanism',
+                '欢乐本': 'joy',
+                '阵营本': 'camp'
+            };
+
+            for (const [tag, stats] of Object.entries(tagData.tag_distribution)) {
+                const tagEl = document.createElement('span');
+                tagEl.className = `tag-item ${tagClassMap[tag] || ''}`;
+                tagEl.textContent = `${tag} (${stats.count})`;
+                tagList.appendChild(tagEl);
+            }
+        }
+
+        function renderAnalysisResult(data) {
+            const resultEl = document.getElementById('analysisResult');
+            const utAnalysis = data.university_town_analysis;
+            const cbdAnalysis = data.cbd_analysis;
+
+            let html = '';
+
+            utAnalysis.university_towns.forEach(town => {
+                html += `
+                    <div class="analysis-item">
+                        <span class="analysis-label">${town.name}内门店</span>
+                        <span class="analysis-value">${town.shops_count} 家 (${town.percentage.toFixed(1)}%)</span>
+                    </div>
+                `;
+            });
+
+            cbdAnalysis.cbd_areas.forEach(cbd => {
+                html += `
+                    <div class="analysis-item">
+                        <span class="analysis-label">${cbd.name}内门店</span>
+                        <span class="analysis-value">${cbd.shops_count} 家 (${cbd.percentage.toFixed(1)}%)</span>
+                    </div>
+                `;
+            });
+
+            resultEl.innerHTML = html;
+        }
+
+        document.getElementById('showUT').addEventListener('change', function(e) {
+            utCircles.forEach(circle => {
+                if (e.target.checked) {
+                    map.addLayer(circle);
+                } else {
+                    map.removeLayer(circle);
+                }
+            });
+        });
+
+        document.getElementById('showCBD').addEventListener('change', function(e) {
+            cbdCircles.forEach(circle => {
+                if (e.target.checked) {
+                    map.addLayer(circle);
+                } else {
+                    map.removeLayer(circle);
+                }
+            });
+        });
+
+        document.getElementById('showShops').addEventListener('change', function(e) {
+            if (e.target.checked) {
+                map.addLayer(shopMarkers);
+            } else {
+                map.removeLayer(shopMarkers);
+            }
+        });
+
+        loadData();
+    </script>
+</body>
+</html>

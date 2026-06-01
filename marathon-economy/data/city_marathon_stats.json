@@ -1,0 +1,2395 @@
+[
+  {
+    "city": "上海",
+    "event_count": 3,
+    "total_participants": 56000,
+    "events": [
+      "上海马拉松",
+      "上海10公里精英赛",
+      "上海静安女子半程马拉松"
+    ],
+    "gdp": 53926.71,
+    "population": 2487,
+    "gdp_per_capita": 216834
+  },
+  {
+    "city": "北京",
+    "event_count": 4,
+    "total_participants": 83000,
+    "events": [
+      "北京半程马拉松",
+      "北京马拉松",
+      "北京城市副中心马拉松",
+      "北京昌平半程马拉松"
+    ],
+    "gdp": 49843.1,
+    "population": 2186,
+    "gdp_per_capita": 227987
+  },
+  {
+    "city": "深圳",
+    "event_count": 4,
+    "total_participants": 64000,
+    "events": [
+      "深圳马拉松",
+      "深圳宝安马拉松",
+      "深圳南山半程马拉松",
+      "深圳大鹏马拉松"
+    ],
+    "gdp": 36801.87,
+    "population": 1768,
+    "gdp_per_capita": 208155
+  },
+  {
+    "city": "重庆",
+    "event_count": 2,
+    "total_participants": 45000,
+    "events": [
+      "重庆马拉松",
+      "重庆璧山马拉松"
+    ],
+    "gdp": 32193.15,
+    "population": 3213,
+    "gdp_per_capita": 100197
+  },
+  {
+    "city": "广州",
+    "event_count": 4,
+    "total_participants": 75000,
+    "events": [
+      "广州马拉松",
+      "广州黄埔马拉松",
+      "广州花都摇滚马拉松",
+      "广州从化马拉松"
+    ],
+    "gdp": 31032.5,
+    "population": 1881,
+    "gdp_per_capita": 164979
+  },
+  {
+    "city": "苏州",
+    "event_count": 4,
+    "total_participants": 90000,
+    "events": [
+      "苏州金鸡湖半程马拉松",
+      "苏州马拉松",
+      "张家港马拉松",
+      "苏州环太湖1号公路马拉松"
+    ],
+    "gdp": 26727.0,
+    "population": 1291,
+    "gdp_per_capita": 207026
+  },
+  {
+    "city": "成都",
+    "event_count": 3,
+    "total_participants": 70000,
+    "events": [
+      "成都马拉松",
+      "成都双遗马拉松",
+      "成都半程马拉松"
+    ],
+    "gdp": 23511.3,
+    "population": 2119,
+    "gdp_per_capita": 110955
+  },
+  {
+    "city": "杭州",
+    "event_count": 3,
+    "total_participants": 54000,
+    "events": [
+      "杭州马拉松",
+      "杭州临安半程马拉松",
+      "杭州女子半程马拉松"
+    ],
+    "gdp": 21860.0,
+    "population": 1237,
+    "gdp_per_capita": 176718
+  },
+  {
+    "city": "武汉",
+    "event_count": 2,
+    "total_participants": 41000,
+    "events": [
+      "武汉马拉松",
+      "武汉后官湖半程马拉松"
+    ],
+    "gdp": 21106.23,
+    "population": 1365,
+    "gdp_per_capita": 154624
+  },
+  {
+    "city": "南京",
+    "event_count": 3,
+    "total_participants": 55000,
+    "events": [
+      "南京仙林半程马拉松",
+      "南京马拉松",
+      "南京浦口马拉松"
+    ],
+    "gdp": 18866.44,
+    "population": 942,
+    "gdp_per_capita": 200281
+  },
+  {
+    "city": "宁波",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 17715.7,
+    "population": 954,
+    "gdp_per_capita": 185700
+  },
+  {
+    "city": "天津",
+    "event_count": 1,
+    "total_participants": 30000,
+    "events": [
+      "天津马拉松"
+    ],
+    "gdp": 17285.6,
+    "population": 1363,
+    "gdp_per_capita": 126820
+  },
+  {
+    "city": "青岛",
+    "event_count": 2,
+    "total_participants": 35000,
+    "events": [
+      "青岛马拉松",
+      "青岛西海岸半程马拉松"
+    ],
+    "gdp": 16517.0,
+    "population": 1025,
+    "gdp_per_capita": 161141
+  },
+  {
+    "city": "无锡",
+    "event_count": 2,
+    "total_participants": 43000,
+    "events": [
+      "无锡马拉松",
+      "无锡滨湖半程马拉松"
+    ],
+    "gdp": 16412.0,
+    "population": 749,
+    "gdp_per_capita": 219119
+  },
+  {
+    "city": "长沙",
+    "event_count": 2,
+    "total_participants": 38000,
+    "events": [
+      "长沙马拉松",
+      "长沙望城马拉松"
+    ],
+    "gdp": 15392.93,
+    "population": 1042,
+    "gdp_per_capita": 147725
+  },
+  {
+    "city": "郑州",
+    "event_count": 1,
+    "total_participants": 20000,
+    "events": [
+      "郑州马拉松"
+    ],
+    "gdp": 15003.6,
+    "population": 1274,
+    "gdp_per_capita": 117768
+  },
+  {
+    "city": "福州",
+    "event_count": 4,
+    "total_participants": 58000,
+    "events": [
+      "福州马拉松",
+      "福州国际马拉松",
+      "福州国际马拉松",
+      "福州闽侯马拉松"
+    ],
+    "gdp": 13103.42,
+    "population": 842,
+    "gdp_per_capita": 155623
+  },
+  {
+    "city": "济南",
+    "event_count": 1,
+    "total_participants": 20000,
+    "events": [
+      "济南马拉松"
+    ],
+    "gdp": 12890.63,
+    "population": 941,
+    "gdp_per_capita": 136989
+  },
+  {
+    "city": "合肥",
+    "event_count": 2,
+    "total_participants": 28000,
+    "events": [
+      "合肥马拉松",
+      "合肥蜀山马拉松"
+    ],
+    "gdp": 12670.0,
+    "population": 963,
+    "gdp_per_capita": 131568
+  },
+  {
+    "city": "佛山",
+    "event_count": 1,
+    "total_participants": 15000,
+    "events": [
+      "佛山马拉松"
+    ],
+    "gdp": 12558.49,
+    "population": 950,
+    "gdp_per_capita": 132195
+  },
+  {
+    "city": "西安",
+    "event_count": 1,
+    "total_participants": 28000,
+    "events": [
+      "西安马拉松"
+    ],
+    "gdp": 12387.33,
+    "population": 1316,
+    "gdp_per_capita": 94129
+  },
+  {
+    "city": "泉州",
+    "event_count": 2,
+    "total_participants": 30000,
+    "events": [
+      "晋江马拉松",
+      "晋江马拉松"
+    ],
+    "gdp": 12270.53,
+    "population": 885,
+    "gdp_per_capita": 138650
+  },
+  {
+    "city": "南通",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 11998.5,
+    "population": 773,
+    "gdp_per_capita": 155220
+  },
+  {
+    "city": "东莞",
+    "event_count": 1,
+    "total_participants": 15000,
+    "events": [
+      "东莞马拉松"
+    ],
+    "gdp": 11634.5,
+    "population": 1053,
+    "gdp_per_capita": 110489
+  },
+  {
+    "city": "常州",
+    "event_count": 2,
+    "total_participants": 35000,
+    "events": [
+      "常州西太湖半程马拉松",
+      "常州马拉松"
+    ],
+    "gdp": 10519.8,
+    "population": 534,
+    "gdp_per_capita": 196999
+  },
+  {
+    "city": "烟台",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 10322.9,
+    "population": 706,
+    "gdp_per_capita": 146217
+  },
+  {
+    "city": "唐山",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 10003.9,
+    "population": 770,
+    "gdp_per_capita": 129921
+  },
+  {
+    "city": "徐州",
+    "event_count": 1,
+    "total_participants": 20000,
+    "events": [
+      "徐州马拉松"
+    ],
+    "gdp": 9240.0,
+    "population": 902,
+    "gdp_per_capita": 102439
+  },
+  {
+    "city": "大连",
+    "event_count": 2,
+    "total_participants": 35000,
+    "events": [
+      "大连马拉松",
+      "大连金石滩马拉松"
+    ],
+    "gdp": 9155.8,
+    "population": 745,
+    "gdp_per_capita": 122897
+  },
+  {
+    "city": "温州",
+    "event_count": 1,
+    "total_participants": 20000,
+    "events": [
+      "温州马拉松"
+    ],
+    "gdp": 8921.8,
+    "population": 967,
+    "gdp_per_capita": 92263
+  },
+  {
+    "city": "厦门",
+    "event_count": 2,
+    "total_participants": 53000,
+    "events": [
+      "厦门马拉松",
+      "厦门海沧半程马拉松"
+    ],
+    "gdp": 8400.5,
+    "population": 528,
+    "gdp_per_capita": 159100
+  },
+  {
+    "city": "沈阳",
+    "event_count": 2,
+    "total_participants": 28000,
+    "events": [
+      "沈阳马拉松",
+      "沈阳棋盘山马拉松"
+    ],
+    "gdp": 8125.7,
+    "population": 911,
+    "gdp_per_capita": 89195
+  },
+  {
+    "city": "昆明",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 7874.25,
+    "population": 850,
+    "gdp_per_capita": 92638
+  },
+  {
+    "city": "长春",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 7621.2,
+    "population": 907,
+    "gdp_per_capita": 84026
+  },
+  {
+    "city": "潍坊",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 7581.8,
+    "population": 939,
+    "gdp_per_capita": 80743
+  },
+  {
+    "city": "绍兴",
+    "event_count": 2,
+    "total_participants": 35000,
+    "events": [
+      "绍兴马拉松",
+      "绍兴上虞马拉松"
+    ],
+    "gdp": 7508.6,
+    "population": 533,
+    "gdp_per_capita": 140874
+  },
+  {
+    "city": "南昌",
+    "event_count": 2,
+    "total_participants": 40000,
+    "events": [
+      "南昌马拉松",
+      "南昌英雄马"
+    ],
+    "gdp": 7456.5,
+    "population": 643,
+    "gdp_per_capita": 115964
+  },
+  {
+    "city": "盐城",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 7394.4,
+    "population": 671,
+    "gdp_per_capita": 110200
+  },
+  {
+    "city": "扬州",
+    "event_count": 1,
+    "total_participants": 35000,
+    "events": [
+      "扬州鉴真半程马拉松"
+    ],
+    "gdp": 7328.1,
+    "population": 456,
+    "gdp_per_capita": 160704
+  },
+  {
+    "city": "石家庄",
+    "event_count": 1,
+    "total_participants": 20000,
+    "events": [
+      "石家庄马拉松"
+    ],
+    "gdp": 7263.6,
+    "population": 1121,
+    "gdp_per_capita": 64796
+  },
+  {
+    "city": "淄博",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 7126.2,
+    "population": 470,
+    "gdp_per_capita": 151621
+  },
+  {
+    "city": "临沂",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 6986.8,
+    "population": 1102,
+    "gdp_per_capita": 63401
+  },
+  {
+    "city": "哈尔滨",
+    "event_count": 1,
+    "total_participants": 20000,
+    "events": [
+      "哈尔滨马拉松"
+    ],
+    "gdp": 6897.5,
+    "population": 988,
+    "gdp_per_capita": 69813
+  },
+  {
+    "city": "台州",
+    "event_count": 3,
+    "total_participants": 31000,
+    "events": [
+      "台州马拉松",
+      "台州玉环马拉松",
+      "台州黄岩马拉松"
+    ],
+    "gdp": 6803.0,
+    "population": 667,
+    "gdp_per_capita": 101994
+  },
+  {
+    "city": "洛阳",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 6702.3,
+    "population": 707,
+    "gdp_per_capita": 94799
+  },
+  {
+    "city": "漳州",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 6544.2,
+    "population": 506,
+    "gdp_per_capita": 129332
+  },
+  {
+    "city": "泰州",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 6525.6,
+    "population": 451,
+    "gdp_per_capita": 144692
+  },
+  {
+    "city": "南宁",
+    "event_count": 2,
+    "total_participants": 30000,
+    "events": [
+      "南宁马拉松",
+      "南宁东盟马拉松"
+    ],
+    "gdp": 6502.0,
+    "population": 883,
+    "gdp_per_capita": 73635
+  },
+  {
+    "city": "济宁",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 6494.8,
+    "population": 829,
+    "gdp_per_capita": 78345
+  },
+  {
+    "city": "贵阳",
+    "event_count": 1,
+    "total_participants": 20000,
+    "events": [
+      "贵阳马拉松"
+    ],
+    "gdp": 6448.6,
+    "population": 622,
+    "gdp_per_capita": 103675
+  },
+  {
+    "city": "江门",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 6439.4,
+    "population": 482,
+    "gdp_per_capita": 133597
+  },
+  {
+    "city": "镇江",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 6155.1,
+    "population": 321,
+    "gdp_per_capita": 191748
+  },
+  {
+    "city": "太原",
+    "event_count": 1,
+    "total_participants": 20000,
+    "events": [
+      "太原马拉松"
+    ],
+    "gdp": 6112.4,
+    "population": 543,
+    "gdp_per_capita": 112567
+  },
+  {
+    "city": "金华",
+    "event_count": 1,
+    "total_participants": 15000,
+    "events": [
+      "义乌半程马拉松"
+    ],
+    "gdp": 6055.4,
+    "population": 712,
+    "gdp_per_capita": 85048
+  },
+  {
+    "city": "惠州",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 6007.1,
+    "population": 606,
+    "gdp_per_capita": 99127
+  },
+  {
+    "city": "淮安",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 5973.5,
+    "population": 456,
+    "gdp_per_capita": 131000
+  },
+  {
+    "city": "连云港",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 5938.1,
+    "population": 460,
+    "gdp_per_capita": 129089
+  },
+  {
+    "city": "威海",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 5917.7,
+    "population": 291,
+    "gdp_per_capita": 203357
+  },
+  {
+    "city": "邯郸",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 5828.6,
+    "population": 941,
+    "gdp_per_capita": 61940
+  },
+  {
+    "city": "东营",
+    "event_count": 1,
+    "total_participants": 30000,
+    "events": [
+      "东营马拉松"
+    ],
+    "gdp": 5791.5,
+    "population": 219,
+    "gdp_per_capita": 264452
+  },
+  {
+    "city": "海口",
+    "event_count": 1,
+    "total_participants": 15000,
+    "events": [
+      "海口马拉松"
+    ],
+    "gdp": 2358.44,
+    "population": 290,
+    "gdp_per_capita": 81326
+  },
+  {
+    "city": "湖州",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 4015.1,
+    "population": 341,
+    "gdp_per_capita": 117745
+  },
+  {
+    "city": "株洲",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 3868.1,
+    "population": 390,
+    "gdp_per_capita": 99182
+  },
+  {
+    "city": "柳州",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 3271.0,
+    "population": 418,
+    "gdp_per_capita": 78254
+  },
+  {
+    "city": "保定",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 4302.3,
+    "population": 1155,
+    "gdp_per_capita": 37250
+  },
+  {
+    "city": "泰安",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 3289.6,
+    "population": 547,
+    "gdp_per_capita": 60139
+  },
+  {
+    "city": "宿迁",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 4398.07,
+    "population": 499,
+    "gdp_per_capita": 88138
+  },
+  {
+    "city": "蚌埠",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2187.5,
+    "population": 331,
+    "gdp_per_capita": 66088
+  },
+  {
+    "city": "马鞍山",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2621.7,
+    "population": 218,
+    "gdp_per_capita": 120261
+  },
+  {
+    "city": "芜湖",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 4739.64,
+    "population": 373,
+    "gdp_per_capita": 127068
+  },
+  {
+    "city": "宜昌",
+    "event_count": 1,
+    "total_participants": 20000,
+    "events": [
+      "宜昌马拉松"
+    ],
+    "gdp": 5714.91,
+    "population": 392,
+    "gdp_per_capita": 145788
+  },
+  {
+    "city": "襄阳",
+    "event_count": 1,
+    "total_participants": 15000,
+    "events": [
+      "襄阳马拉松"
+    ],
+    "gdp": 5478.6,
+    "population": 528,
+    "gdp_per_capita": 103761
+  },
+  {
+    "city": "岳阳",
+    "event_count": 1,
+    "total_participants": 10000,
+    "events": [
+      "岳阳马拉松"
+    ],
+    "gdp": 4841.78,
+    "population": 505,
+    "gdp_per_capita": 95877
+  },
+  {
+    "city": "常德",
+    "event_count": 1,
+    "total_participants": 10000,
+    "events": [
+      "常德柳叶湖马拉松"
+    ],
+    "gdp": 4600.0,
+    "population": 528,
+    "gdp_per_capita": 87121
+  },
+  {
+    "city": "衡阳",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 4290.71,
+    "population": 664,
+    "gdp_per_capita": 64619
+  },
+  {
+    "city": "九江",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 4192.5,
+    "population": 456,
+    "gdp_per_capita": 91941
+  },
+  {
+    "city": "赣州",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 4725.88,
+    "population": 898,
+    "gdp_per_capita": 52627
+  },
+  {
+    "city": "遵义",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 4721.51,
+    "population": 661,
+    "gdp_per_capita": 71430
+  },
+  {
+    "city": "宜宾",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 3806.64,
+    "population": 459,
+    "gdp_per_capita": 82933
+  },
+  {
+    "city": "泸州",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2801.0,
+    "population": 426,
+    "gdp_per_capita": 65751
+  },
+  {
+    "city": "德阳",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2860.0,
+    "population": 346,
+    "gdp_per_capita": 82659
+  },
+  {
+    "city": "南充",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2834.0,
+    "population": 561,
+    "gdp_per_capita": 50517
+  },
+  {
+    "city": "绵阳",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 4157.06,
+    "population": 487,
+    "gdp_per_capita": 85361
+  },
+  {
+    "city": "大同",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1842.5,
+    "population": 311,
+    "gdp_per_capita": 59244
+  },
+  {
+    "city": "长治",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2900.1,
+    "population": 318,
+    "gdp_per_capita": 91198
+  },
+  {
+    "city": "运城",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2356.4,
+    "population": 477,
+    "gdp_per_capita": 49400
+  },
+  {
+    "city": "临汾",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2240.0,
+    "population": 391,
+    "gdp_per_capita": 57289
+  },
+  {
+    "city": "吕梁",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2416.9,
+    "population": 339,
+    "gdp_per_capita": 71295
+  },
+  {
+    "city": "晋城",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2543.4,
+    "population": 219,
+    "gdp_per_capita": 116137
+  },
+  {
+    "city": "朔州",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1571.3,
+    "population": 159,
+    "gdp_per_capita": 98824
+  },
+  {
+    "city": "忻州",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1679.4,
+    "population": 266,
+    "gdp_per_capita": 63135
+  },
+  {
+    "city": "晋中",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2103.0,
+    "population": 339,
+    "gdp_per_capita": 62035
+  },
+  {
+    "city": "安阳",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2556.3,
+    "population": 548,
+    "gdp_per_capita": 46648
+  },
+  {
+    "city": "新乡",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 3553.5,
+    "population": 625,
+    "gdp_per_capita": 56856
+  },
+  {
+    "city": "焦作",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2493.1,
+    "population": 355,
+    "gdp_per_capita": 70228
+  },
+  {
+    "city": "许昌",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 3832.7,
+    "population": 438,
+    "gdp_per_capita": 87505
+  },
+  {
+    "city": "平顶山",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2896.2,
+    "population": 498,
+    "gdp_per_capita": 58157
+  },
+  {
+    "city": "周口",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 3699.41,
+    "population": 903,
+    "gdp_per_capita": 40968
+  },
+  {
+    "city": "商丘",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 3360.5,
+    "population": 782,
+    "gdp_per_capita": 42973
+  },
+  {
+    "city": "驻马店",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2859.33,
+    "population": 701,
+    "gdp_per_capita": 40789
+  },
+  {
+    "city": "信阳",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 3275.97,
+    "population": 623,
+    "gdp_per_capita": 52584
+  },
+  {
+    "city": "南阳",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 4676.39,
+    "population": 971,
+    "gdp_per_capita": 48161
+  },
+  {
+    "city": "开封",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2556.5,
+    "population": 458,
+    "gdp_per_capita": 55819
+  },
+  {
+    "city": "漯河",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1834.7,
+    "population": 237,
+    "gdp_per_capita": 77414
+  },
+  {
+    "city": "濮阳",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1880.1,
+    "population": 377,
+    "gdp_per_capita": 49870
+  },
+  {
+    "city": "三门峡",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1836.0,
+    "population": 228,
+    "gdp_per_capita": 80526
+  },
+  {
+    "city": "通辽",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1577.9,
+    "population": 287,
+    "gdp_per_capita": 54979
+  },
+  {
+    "city": "赤峰",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2119.7,
+    "population": 402,
+    "gdp_per_capita": 52729
+  },
+  {
+    "city": "鄂尔多斯",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 5859.5,
+    "population": 215,
+    "gdp_per_capita": 272535
+  },
+  {
+    "city": "呼伦贝尔",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1379.3,
+    "population": 224,
+    "gdp_per_capita": 61576
+  },
+  {
+    "city": "巴彦淖尔",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1084.6,
+    "population": 152,
+    "gdp_per_capita": 71355
+  },
+  {
+    "city": "乌兰察布",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1081.8,
+    "population": 171,
+    "gdp_per_capita": 63263
+  },
+  {
+    "city": "包头",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 3992.1,
+    "population": 271,
+    "gdp_per_capita": 147310
+  },
+  {
+    "city": "乌海",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 734.0,
+    "population": 56,
+    "gdp_per_capita": 131071
+  },
+  {
+    "city": "银川",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2694.18,
+    "population": 288,
+    "gdp_per_capita": 93548
+  },
+  {
+    "city": "石嘴山",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 719.69,
+    "population": 75,
+    "gdp_per_capita": 95959
+  },
+  {
+    "city": "吴忠",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 900.0,
+    "population": 139,
+    "gdp_per_capita": 64748
+  },
+  {
+    "city": "西宁",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1721.0,
+    "population": 248,
+    "gdp_per_capita": 69395
+  },
+  {
+    "city": "海东",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 583.6,
+    "population": 136,
+    "gdp_per_capita": 42912
+  },
+  {
+    "city": "兰州",
+    "event_count": 1,
+    "total_participants": 20000,
+    "events": [
+      "兰州马拉松"
+    ],
+    "gdp": 3577.7,
+    "population": 438,
+    "gdp_per_capita": 81683
+  },
+  {
+    "city": "嘉峪关",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 373.4,
+    "population": 31,
+    "gdp_per_capita": 120452
+  },
+  {
+    "city": "金昌",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 520.0,
+    "population": 43,
+    "gdp_per_capita": 120930
+  },
+  {
+    "city": "白银",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 678.0,
+    "population": 151,
+    "gdp_per_capita": 44901
+  },
+  {
+    "city": "天水",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 813.88,
+    "population": 298,
+    "gdp_per_capita": 27311
+  },
+  {
+    "city": "酒泉",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 891.5,
+    "population": 106,
+    "gdp_per_capita": 84104
+  },
+  {
+    "city": "张掖",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 596.3,
+    "population": 113,
+    "gdp_per_capita": 52770
+  },
+  {
+    "city": "武威",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 677.3,
+    "population": 146,
+    "gdp_per_capita": 46390
+  },
+  {
+    "city": "乌鲁木齐",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 4503.08,
+    "population": 409,
+    "gdp_per_capita": 110099
+  },
+  {
+    "city": "克拉玛依",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1280.6,
+    "population": 49,
+    "gdp_per_capita": 261347
+  },
+  {
+    "city": "吐鲁番",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 526.56,
+    "population": 70,
+    "gdp_per_capita": 75223
+  },
+  {
+    "city": "哈密",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 893.39,
+    "population": 67,
+    "gdp_per_capita": 133342
+  },
+  {
+    "city": "昆明",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 8455.65,
+    "population": 850,
+    "gdp_per_capita": 99478
+  },
+  {
+    "city": "曲靖",
+    "event_count": 1,
+    "total_participants": 12000,
+    "events": [
+      "曲靖罗平马拉松"
+    ],
+    "gdp": 4048.91,
+    "population": 577,
+    "gdp_per_capita": 70172
+  },
+  {
+    "city": "玉溪",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2624.66,
+    "population": 224,
+    "gdp_per_capita": 117172
+  },
+  {
+    "city": "保山",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1348.11,
+    "population": 243,
+    "gdp_per_capita": 55478
+  },
+  {
+    "city": "昭通",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1615.08,
+    "population": 509,
+    "gdp_per_capita": 31730
+  },
+  {
+    "city": "丽江",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 660.81,
+    "population": 125,
+    "gdp_per_capita": 52865
+  },
+  {
+    "city": "普洱",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1099.69,
+    "population": 240,
+    "gdp_per_capita": 45820
+  },
+  {
+    "city": "临沧",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1016.07,
+    "population": 225,
+    "gdp_per_capita": 45159
+  },
+  {
+    "city": "贵阳",
+    "event_count": 1,
+    "total_participants": 20000,
+    "events": [
+      "贵阳马拉松"
+    ],
+    "gdp": 5264.05,
+    "population": 622,
+    "gdp_per_capita": 84631
+  },
+  {
+    "city": "六盘水",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1587.6,
+    "population": 303,
+    "gdp_per_capita": 52396
+  },
+  {
+    "city": "遵义",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 4760.21,
+    "population": 661,
+    "gdp_per_capita": 72015
+  },
+  {
+    "city": "安顺",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1189.23,
+    "population": 247,
+    "gdp_per_capita": 48147
+  },
+  {
+    "city": "毕节",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2364.34,
+    "population": 686,
+    "gdp_per_capita": 34466
+  },
+  {
+    "city": "铜仁",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1498.11,
+    "population": 328,
+    "gdp_per_capita": 45674
+  },
+  {
+    "city": "成都",
+    "event_count": 3,
+    "total_participants": 70000,
+    "events": [
+      "成都马拉松",
+      "成都双遗马拉松",
+      "成都半程马拉松"
+    ],
+    "gdp": 23511.3,
+    "population": 2119,
+    "gdp_per_capita": 110955
+  },
+  {
+    "city": "自贡",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1657.05,
+    "population": 249,
+    "gdp_per_capita": 66548
+  },
+  {
+    "city": "攀枝花",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1285.85,
+    "population": 121,
+    "gdp_per_capita": 106269
+  },
+  {
+    "city": "泸州",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2801.0,
+    "population": 426,
+    "gdp_per_capita": 65751
+  },
+  {
+    "city": "德阳",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2860.0,
+    "population": 346,
+    "gdp_per_capita": 82659
+  },
+  {
+    "city": "绵阳",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 4157.06,
+    "population": 487,
+    "gdp_per_capita": 85361
+  },
+  {
+    "city": "广元",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1179.62,
+    "population": 228,
+    "gdp_per_capita": 51738
+  },
+  {
+    "city": "遂宁",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1714.47,
+    "population": 278,
+    "gdp_per_capita": 61672
+  },
+  {
+    "city": "内江",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1785.05,
+    "population": 310,
+    "gdp_per_capita": 57582
+  },
+  {
+    "city": "乐山",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2325.82,
+    "population": 316,
+    "gdp_per_capita": 73602
+  },
+  {
+    "city": "南充",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2834.0,
+    "population": 561,
+    "gdp_per_capita": 50517
+  },
+  {
+    "city": "眉山",
+    "event_count": 1,
+    "total_participants": 15000,
+    "events": [
+      "眉山仁寿半程马拉松"
+    ],
+    "gdp": 1739.08,
+    "population": 296,
+    "gdp_per_capita": 58753
+  },
+  {
+    "city": "宜宾",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 3806.64,
+    "population": 459,
+    "gdp_per_capita": 82933
+  },
+  {
+    "city": "广安",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1473.83,
+    "population": 325,
+    "gdp_per_capita": 45349
+  },
+  {
+    "city": "达州",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2587.1,
+    "population": 537,
+    "gdp_per_capita": 48177
+  },
+  {
+    "city": "雅安",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 972.84,
+    "population": 143,
+    "gdp_per_capita": 68031
+  },
+  {
+    "city": "巴中",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 781.01,
+    "population": 266,
+    "gdp_per_capita": 29361
+  },
+  {
+    "city": "资阳",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 976.2,
+    "population": 231,
+    "gdp_per_capita": 42260
+  },
+  {
+    "city": "阿坝",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 468.01,
+    "population": 83,
+    "gdp_per_capita": 56387
+  },
+  {
+    "city": "甘孜",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 517.34,
+    "population": 111,
+    "gdp_per_capita": 46607
+  },
+  {
+    "city": "凉山",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2271.09,
+    "population": 487,
+    "gdp_per_capita": 46634
+  },
+  {
+    "city": "西安",
+    "event_count": 1,
+    "total_participants": 28000,
+    "events": [
+      "西安马拉松"
+    ],
+    "gdp": 12387.33,
+    "population": 1316,
+    "gdp_per_capita": 94129
+  },
+  {
+    "city": "铜川",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 491.33,
+    "population": 70,
+    "gdp_per_capita": 70190
+  },
+  {
+    "city": "宝鸡",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2850.7,
+    "population": 328,
+    "gdp_per_capita": 86912
+  },
+  {
+    "city": "咸阳",
+    "event_count": 1,
+    "total_participants": 18000,
+    "events": [
+      "杨凌马拉松"
+    ],
+    "gdp": 2850.0,
+    "population": 421,
+    "gdp_per_capita": 67696
+  },
+  {
+    "city": "渭南",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2310.02,
+    "population": 462,
+    "gdp_per_capita": 50000
+  },
+  {
+    "city": "延安",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2406.89,
+    "population": 216,
+    "gdp_per_capita": 111430
+  },
+  {
+    "city": "汉中",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1929.85,
+    "population": 319,
+    "gdp_per_capita": 60497
+  },
+  {
+    "city": "榆林",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 7538.68,
+    "population": 362,
+    "gdp_per_capita": 208251
+  },
+  {
+    "city": "安康",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1347.92,
+    "population": 249,
+    "gdp_per_capita": 54133
+  },
+  {
+    "city": "商洛",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 932.95,
+    "population": 203,
+    "gdp_per_capita": 45958
+  },
+  {
+    "city": "兰州",
+    "event_count": 1,
+    "total_participants": 20000,
+    "events": [
+      "兰州马拉松"
+    ],
+    "gdp": 3577.7,
+    "population": 438,
+    "gdp_per_capita": 81683
+  },
+  {
+    "city": "嘉峪关",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 373.4,
+    "population": 31,
+    "gdp_per_capita": 120452
+  },
+  {
+    "city": "金昌",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 520.0,
+    "population": 43,
+    "gdp_per_capita": 120930
+  },
+  {
+    "city": "白银",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 678.0,
+    "population": 151,
+    "gdp_per_capita": 44901
+  },
+  {
+    "city": "天水",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 813.88,
+    "population": 298,
+    "gdp_per_capita": 27311
+  },
+  {
+    "city": "武威",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 677.3,
+    "population": 146,
+    "gdp_per_capita": 46390
+  },
+  {
+    "city": "张掖",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 596.3,
+    "population": 113,
+    "gdp_per_capita": 52770
+  },
+  {
+    "city": "平凉",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 573.27,
+    "population": 183,
+    "gdp_per_capita": 31326
+  },
+  {
+    "city": "酒泉",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 891.5,
+    "population": 106,
+    "gdp_per_capita": 84104
+  },
+  {
+    "city": "庆阳",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1112.2,
+    "population": 217,
+    "gdp_per_capita": 51253
+  },
+  {
+    "city": "定西",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 579.33,
+    "population": 251,
+    "gdp_per_capita": 23081
+  },
+  {
+    "city": "陇南",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 583.24,
+    "population": 241,
+    "gdp_per_capita": 24201
+  },
+  {
+    "city": "西宁",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1721.0,
+    "population": 248,
+    "gdp_per_capita": 69395
+  },
+  {
+    "city": "海东",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 583.6,
+    "population": 136,
+    "gdp_per_capita": 42912
+  },
+  {
+    "city": "海北",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 109.86,
+    "population": 27,
+    "gdp_per_capita": 40689
+  },
+  {
+    "city": "黄南",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 118.48,
+    "population": 28,
+    "gdp_per_capita": 42314
+  },
+  {
+    "city": "海南",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 115.34,
+    "population": 45,
+    "gdp_per_capita": 25631
+  },
+  {
+    "city": "果洛",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 56.54,
+    "population": 22,
+    "gdp_per_capita": 25700
+  },
+  {
+    "city": "玉树",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 81.4,
+    "population": 43,
+    "gdp_per_capita": 18930
+  },
+  {
+    "city": "海西",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 802.5,
+    "population": 47,
+    "gdp_per_capita": 170745
+  },
+  {
+    "city": "银川",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2694.18,
+    "population": 288,
+    "gdp_per_capita": 93548
+  },
+  {
+    "city": "石嘴山",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 719.69,
+    "population": 75,
+    "gdp_per_capita": 95959
+  },
+  {
+    "city": "吴忠",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 900.0,
+    "population": 139,
+    "gdp_per_capita": 64748
+  },
+  {
+    "city": "固原",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 425.82,
+    "population": 115,
+    "gdp_per_capita": 37028
+  },
+  {
+    "city": "中卫",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 593.17,
+    "population": 108,
+    "gdp_per_capita": 54923
+  },
+  {
+    "city": "乌鲁木齐",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 4503.08,
+    "population": 409,
+    "gdp_per_capita": 110099
+  },
+  {
+    "city": "克拉玛依",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1280.6,
+    "population": 49,
+    "gdp_per_capita": 261347
+  },
+  {
+    "city": "吐鲁番",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 526.56,
+    "population": 70,
+    "gdp_per_capita": 75223
+  },
+  {
+    "city": "哈密",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 893.39,
+    "population": 67,
+    "gdp_per_capita": 133342
+  },
+  {
+    "city": "昌吉",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2200.0,
+    "population": 162,
+    "gdp_per_capita": 135802
+  },
+  {
+    "city": "博尔塔拉",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 481.27,
+    "population": 49,
+    "gdp_per_capita": 98218
+  },
+  {
+    "city": "巴音郭楞",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1600.0,
+    "population": 128,
+    "gdp_per_capita": 125000
+  },
+  {
+    "city": "阿克苏",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1800.0,
+    "population": 271,
+    "gdp_per_capita": 66421
+  },
+  {
+    "city": "克孜勒苏",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 220.0,
+    "population": 62,
+    "gdp_per_capita": 35484
+  },
+  {
+    "city": "喀什",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1400.0,
+    "population": 450,
+    "gdp_per_capita": 31111
+  },
+  {
+    "city": "和田",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 500.0,
+    "population": 251,
+    "gdp_per_capita": 19920
+  },
+  {
+    "city": "伊犁",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1500.0,
+    "population": 285,
+    "gdp_per_capita": 52632
+  },
+  {
+    "city": "塔城",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 850.0,
+    "population": 97,
+    "gdp_per_capita": 87629
+  },
+  {
+    "city": "阿勒泰",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 440.0,
+    "population": 67,
+    "gdp_per_capita": 65672
+  },
+  {
+    "city": "石河子",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 850.0,
+    "population": 72,
+    "gdp_per_capita": 118056
+  },
+  {
+    "city": "阿拉尔",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 380.0,
+    "population": 44,
+    "gdp_per_capita": 86364
+  },
+  {
+    "city": "图木舒克",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 280.0,
+    "population": 28,
+    "gdp_per_capita": 100000
+  },
+  {
+    "city": "五家渠",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 270.0,
+    "population": 23,
+    "gdp_per_capita": 117391
+  },
+  {
+    "city": "拉萨",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 850.0,
+    "population": 87,
+    "gdp_per_capita": 97701
+  },
+  {
+    "city": "日喀则",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 400.0,
+    "population": 79,
+    "gdp_per_capita": 50633
+  },
+  {
+    "city": "昌都",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 300.0,
+    "population": 77,
+    "gdp_per_capita": 38961
+  },
+  {
+    "city": "林芝",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 280.0,
+    "population": 24,
+    "gdp_per_capita": 116667
+  },
+  {
+    "city": "山南",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 250.0,
+    "population": 38,
+    "gdp_per_capita": 65789
+  },
+  {
+    "city": "那曲",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 200.0,
+    "population": 46,
+    "gdp_per_capita": 43478
+  },
+  {
+    "city": "阿里",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 80.0,
+    "population": 12,
+    "gdp_per_capita": 66667
+  },
+  {
+    "city": "南宁",
+    "event_count": 2,
+    "total_participants": 30000,
+    "events": [
+      "南宁马拉松",
+      "南宁东盟马拉松"
+    ],
+    "gdp": 5447.7,
+    "population": 883,
+    "gdp_per_capita": 61695
+  },
+  {
+    "city": "柳州",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 3271.0,
+    "population": 418,
+    "gdp_per_capita": 78254
+  },
+  {
+    "city": "桂林",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2547.11,
+    "population": 493,
+    "gdp_per_capita": 51666
+  },
+  {
+    "city": "梧州",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1573.53,
+    "population": 282,
+    "gdp_per_capita": 55800
+  },
+  {
+    "city": "北海",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1790.39,
+    "population": 186,
+    "gdp_per_capita": 96258
+  },
+  {
+    "city": "防城港",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1035.61,
+    "population": 105,
+    "gdp_per_capita": 98630
+  },
+  {
+    "city": "钦州",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2070.0,
+    "population": 330,
+    "gdp_per_capita": 62727
+  },
+  {
+    "city": "贵港",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1593.62,
+    "population": 432,
+    "gdp_per_capita": 36889
+  },
+  {
+    "city": "玉林",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 2200.0,
+    "population": 580,
+    "gdp_per_capita": 37931
+  },
+  {
+    "city": "百色",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1770.0,
+    "population": 357,
+    "gdp_per_capita": 49580
+  },
+  {
+    "city": "贺州",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1050.0,
+    "population": 201,
+    "gdp_per_capita": 52239
+  },
+  {
+    "city": "河池",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1170.0,
+    "population": 341,
+    "gdp_per_capita": 34311
+  },
+  {
+    "city": "来宾",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 925.87,
+    "population": 207,
+    "gdp_per_capita": 44728
+  },
+  {
+    "city": "崇左",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 1100.0,
+    "population": 209,
+    "gdp_per_capita": 52632
+  },
+  {
+    "city": "海口",
+    "event_count": 1,
+    "total_participants": 15000,
+    "events": [
+      "海口马拉松"
+    ],
+    "gdp": 2358.44,
+    "population": 290,
+    "gdp_per_capita": 81326
+  },
+  {
+    "city": "三亚",
+    "event_count": 1,
+    "total_participants": 20000,
+    "events": [
+      "三亚马拉松"
+    ],
+    "gdp": 985.02,
+    "population": 103,
+    "gdp_per_capita": 95633
+  },
+  {
+    "city": "儋州",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 878.91,
+    "population": 95,
+    "gdp_per_capita": 92517
+  },
+  {
+    "city": "三沙",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 30.0,
+    "population": 2,
+    "gdp_per_capita": 1500000
+  },
+  {
+    "city": "琼海",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 380.0,
+    "population": 53,
+    "gdp_per_capita": 71698
+  },
+  {
+    "city": "文昌",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 343.99,
+    "population": 56,
+    "gdp_per_capita": 61427
+  },
+  {
+    "city": "万宁",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 320.0,
+    "population": 55,
+    "gdp_per_capita": 58182
+  },
+  {
+    "city": "东方",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 240.0,
+    "population": 45,
+    "gdp_per_capita": 53333
+  },
+  {
+    "city": "五指山",
+    "event_count": 0,
+    "total_participants": 0,
+    "events": [],
+    "gdp": 40.0,
+    "population": 11,
+    "gdp_per_capita": 36364
+  }
+]

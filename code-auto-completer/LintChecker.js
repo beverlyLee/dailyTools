@@ -3,699 +3,547 @@ class LintChecker {
         this.editor = null;
         this.monaco = null;
         this.worker = null;
+        this.callbacks = {};
+        this.debounceTimer = null;
         this.decorations = [];
-        this.lintTimeout = null;
-        this.onIssuesChange = null;
-        this.pendingRequests = new Map();
-        this.requestIdCounter = 0;
-        this.currentVersion = 0;
-        this.latestProcessedCode = null;
-        this.lastKnownIssues = [];
+        this.currentIssues = [];
     }
 
-    init(editor, monaco, workerPath, callbacks = {}) {
+    init(editor, monaco, worker, callbacks = {}) {
         this.editor = editor;
         this.monaco = monaco;
-        this.onIssuesChange = callbacks.onIssuesChange || (() => {});
+        this.worker = worker;
+        this.callbacks = callbacks;
 
-        if (workerPath) {
-            console.log('[LintChecker] 尝试初始化 Worker:', workerPath);
-            this._initWorker(workerPath);
-        } else {
-            console.log('[LintChecker] workerPath 为空，使用同步模式');
-            this.worker = null;
+        if (worker) {
+            worker.onmessage = (event) => this.handleWorkerMessage(event);
+            worker.onerror = (error) => console.error('[LintChecker] Worker 错误:', error);
         }
 
-        this._setupEventListeners();
-        this.lint(true);
-    }
-
-    _initWorker(workerPath) {
-        try {
-            if (!workerPath) {
-                throw new Error('workerPath 为空');
-            }
-            
-            this.worker = new Worker(workerPath);
-            
-            this.worker.onmessage = (e) => {
-                this._handleWorkerResponse(e.data);
-            };
-
-            this.worker.onerror = (error) => {
-                console.warn('[LintChecker] Worker 错误（使用同步模式）:', error);
-                this.worker = null;
-            };
-        } catch (e) {
-            console.warn('[LintChecker] 无法创建 Web Worker，使用同步模式:', e.message);
-            this.worker = null;
-        }
-    }
-
-    _handleWorkerResponse(data) {
-        const { task, id, issues, version } = data;
-        const request = this.pendingRequests.get(id);
-        
-        if (!request) {
-            return;
-        }
-
-        this.pendingRequests.delete(id);
-        
-        if (task === 'lint' && request.resolve) {
-            if (version !== undefined && version < this.currentVersion) {
-                console.log(`忽略旧版本的 lint 结果 (版本: ${version}, 当前版本: ${this.currentVersion})`);
-                return;
-            }
-
-            if (request.code !== this.editor.getValue()) {
-                console.log('忽略过期的 lint 结果：代码已变化');
-                return;
-            }
-
-            this.latestProcessedCode = request.code;
-            this.lastKnownIssues = issues;
-            request.resolve(issues);
-        }
-    }
-
-    _setupEventListeners() {
-        this.editor.onDidChangeModelContent(() => {
-            if (this.lintTimeout) {
-                clearTimeout(this.lintTimeout);
-            }
-            
-            this.currentVersion++;
-            
-            this.pendingRequests.forEach((req, id) => {
-                if (req.resolve) {
-                    req.resolve([]);
-                }
-                clearTimeout(req.timeout);
-            });
-            this.pendingRequests.clear();
-            
-            this.lintTimeout = setTimeout(() => {
-                this.lint();
-            }, 250);
+        editor.onDidChangeModelContent((event) => {
+            this.scheduleLint();
         });
+
+        this.scheduleLint();
     }
 
-    async lint(force = false) {
-        const code = this.editor.getValue();
-        
-        if (!force && code === this.latestProcessedCode) {
-            return;
+    scheduleLint() {
+        if (this.debounceTimer) {
+            clearTimeout(this.debounceTimer);
         }
 
-        console.log('[LintChecker] 开始检查代码，版本:', this.currentVersion);
-        console.log('[LintChecker] 代码内容:', code.substring(0, 200) + (code.length > 200 ? '...' : ''));
-
-        this.currentVersion++;
-        const version = this.currentVersion;
-        
-        let issues = [];
-
-        try {
-            if (this.worker) {
-                console.log('[LintChecker] 使用 Web Worker 检查代码');
-                issues = await this._getIssuesFromWorker(code, version);
-            } else {
-                console.log('[LintChecker] 使用同步模式检查代码');
-                issues = this._analyzeCodeSync(code);
-            }
-            console.log('[LintChecker] 检查完成，发现', issues.length, '个问题');
-        } catch (e) {
-            console.error('[LintChecker] 代码检查失败:', e);
-            issues = [];
-        }
-
-        if (code !== this.editor.getValue()) {
-            console.log('[LintChecker] lint 完成但代码已变化，跳过更新');
-            return;
-        }
-
-        this.latestProcessedCode = code;
-        this.lastKnownIssues = issues;
-
-        this._updateDecorations(issues);
-        this.onIssuesChange(issues);
+        this.debounceTimer = setTimeout(() => {
+            this.performLint();
+        }, 300);
     }
 
-    _getIssuesFromWorker(code, version) {
-        return new Promise((resolve) => {
-            const id = ++this.requestIdCounter;
-            
-            const timeoutId = setTimeout(() => {
-                if (this.pendingRequests.has(id)) {
-                    this.pendingRequests.delete(id);
-                    console.log('Lint 请求超时');
-                    resolve([]);
-                }
-            }, 1500);
+    forceLint() {
+        this.performLint();
+    }
 
-            this.pendingRequests.set(id, { 
-                resolve, 
-                code: code, 
-                version: version,
-                timeout: timeoutId
-            });
-            
+    handleWorkerMessage(event) {
+        const { type, data } = event.data;
+        if (type === 'lint_result') {
+            this.processLintResults(data.issues || []);
+        }
+    }
+
+    performLint() {
+        const model = this.editor.getModel();
+        const code = model.getValue();
+
+        const issues = this.analyzeCode(code, model);
+        this.processLintResults(issues);
+
+        if (this.worker) {
             this.worker.postMessage({
-                task: 'lint',
-                code: code,
-                id: id,
-                version: version
+                type: 'lint',
+                data: { code }
             });
-        });
+        }
     }
 
-    _analyzeCodeSync(code) {
-        return this._analyzeCode(code);
+    analyzeCode(code, model) {
+        const issues = [];
+
+        issues.push(...this.checkSyntaxErrors(code, model));
+        issues.push(...this.checkUndefinedVariables(code, model));
+        issues.push(...this.checkMissingBraces(code, model));
+        issues.push(...this.checkUnclosedStrings(code, model));
+        issues.push(...this.checkMissingParentheses(code, model));
+        issues.push(...this.checkMissingSemicolons(code, model));
+        issues.push(...this.checkDuplicateDeclarations(code, model));
+
+        return this.deduplicateIssues(issues);
     }
 
-    _analyzeCode(code) {
+    checkSyntaxErrors(code, model) {
         const issues = [];
         const lines = code.split('\n');
-        
-        const declarations = this._collectAllDeclarations(code);
-        const definedVariables = declarations.variables;
-        const definedFunctions = declarations.functions;
-        const definedParams = declarations.parameters;
-        
-        const openParensTotal = (code.match(/\(/g) || []).length;
-        const closeParensTotal = (code.match(/\)/g) || []).length;
-        const totalParensMismatch = openParensTotal - closeParensTotal;
-        
-        const openBracesTotal = (code.match(/\{/g) || []).length;
-        const closeBracesTotal = (code.match(/\}/g) || []).length;
-        const totalBracesMismatch = openBracesTotal - closeBracesTotal;
-        
-        const openBracketsTotal = (code.match(/\[/g) || []).length;
-        const closeBracketsTotal = (code.match(/\]/g) || []).length;
-        const totalBracketsMismatch = openBracketsTotal - closeBracketsTotal;
 
-        lines.forEach((line, lineIndex) => {
-            const lineNum = lineIndex + 1;
-            const trimmedLine = line.trim();
-            
-            const forLoopMatch = line.match(/for\s*\(([^)]*)\)\s*$/);
-            if (forLoopMatch) {
-                const nextLine = lines[lineIndex + 1] || '';
-                if (!nextLine.trim().startsWith('{') && !line.includes('{')) {
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+
+            const openParen = (line.match(/\(/g) || []).length;
+            const closeParen = (line.match(/\)/g) || []).length;
+            if (openParen !== closeParen) {
+                const net = openParen - closeParen;
+                if (net > 0 && !this.isBalancedAcrossLines(lines, i, '(', ')')) {
                     issues.push({
-                        type: 'warning',
-                        message: '缺少花括号，建议使用花括号包裹循环体',
-                        line: lineNum,
+                        line: i + 1,
                         column: line.length + 1,
-                        severity: 'warning'
+                        message: `缺少 ${net} 个右括号 ')'`,
+                        severity: 'error'
+                    });
+                } else if (net < 0) {
+                    issues.push({
+                        line: i + 1,
+                        column: line.lastIndexOf(')') + 1,
+                        message: '多余的右括号',
+                        severity: 'error'
                     });
                 }
             }
-            
-            const ifMatch = line.match(/if\s*\(([^)]*)\)\s*$/);
-            if (ifMatch) {
-                const nextLine = lines[lineIndex + 1] || '';
-                if (!nextLine.trim().startsWith('{') && !line.includes('{')) {
+
+            const openBracket = (line.match(/\[/g) || []).length;
+            const closeBracket = (line.match(/\]/g) || []).length;
+            if (openBracket !== closeBracket) {
+                const net = openBracket - closeBracket;
+                if (net > 0 && !this.isBalancedAcrossLines(lines, i, '[', ']')) {
                     issues.push({
-                        type: 'warning',
-                        message: '缺少花括号，建议使用花括号包裹代码块',
-                        line: lineNum,
+                        line: i + 1,
                         column: line.length + 1,
-                        severity: 'warning'
+                        message: `缺少 ${net} 个右方括号 ']'`,
+                        severity: 'error'
                     });
-                }
-            }
-
-            if (totalParensMismatch > 0) {
-                const lineOpenParens = (line.match(/\(/g) || []).length;
-                const lineCloseParens = (line.match(/\)/g) || []).length;
-                const lineParensDelta = lineOpenParens - lineCloseParens;
-                
-                if (lineParensDelta > 0) {
+                } else if (net < 0) {
                     issues.push({
-                        type: 'warning',
-                        message: '可能缺少右括号 )',
-                        line: lineNum,
-                        column: line.length + 1,
-                        severity: 'warning'
+                        line: i + 1,
+                        column: line.lastIndexOf(']') + 1,
+                        message: '多余的右方括号',
+                        severity: 'error'
                     });
                 }
-            }
-            
-            if (totalBracesMismatch > 0) {
-                const lineOpenBraces = (line.match(/\{/g) || []).length;
-                const lineCloseBraces = (line.match(/\}/g) || []).length;
-                const lineBracesDelta = lineOpenBraces - lineCloseBraces;
-                
-                if (lineBracesDelta > 0) {
-                    issues.push({
-                        type: 'warning',
-                        message: '可能缺少右花括号 }',
-                        line: lineNum,
-                        column: line.length + 1,
-                        severity: 'warning'
-                    });
-                }
-            }
-            
-            if (totalBracketsMismatch > 0) {
-                const lineOpenBrackets = (line.match(/\[/g) || []).length;
-                const lineCloseBrackets = (line.match(/\]/g) || []).length;
-                const lineBracketsDelta = lineOpenBrackets - lineCloseBrackets;
-                
-                if (lineBracketsDelta > 0) {
-                    issues.push({
-                        type: 'warning',
-                        message: '可能缺少右方括号 ]',
-                        line: lineNum,
-                        column: line.length + 1,
-                        severity: 'warning'
-                    });
-                }
-            }
-            
-            const semicolonStatements = [
-                /^.*var\s+\w+\s*=.*[^;{}]\s*$/,
-                /^.*let\s+\w+\s*=.*[^;{}]\s*$/,
-                /^.*const\s+\w+\s*=.*[^;{}]\s*$/,
-                /^.*return\s+\w+.*[^;{}]\s*$/
-            ];
-            
-            const jsKeywords = ['if', 'else', 'for', 'while', 'do', 'switch', 'function', 'class', 'try', 'catch', 'finally'];
-            const isBlockStart = jsKeywords.some(kw => trimmedLine.startsWith(kw + '(')) || 
-                               trimmedLine.includes('{') ||
-                               trimmedLine.endsWith('{') ||
-                               trimmedLine.startsWith('//') ||
-                               trimmedLine.startsWith('/*') ||
-                               trimmedLine.startsWith('*') ||
-                               trimmedLine === '';
-            
-            if (!isBlockStart && trimmedLine.length > 0 && !trimmedLine.endsWith(';') && !trimmedLine.endsWith('{') && !trimmedLine.endsWith('}')) {
-                if (semicolonStatements.some(re => re.test(trimmedLine))) {
-                    issues.push({
-                        type: 'warning',
-                        message: '建议添加分号',
-                        line: lineNum,
-                        column: line.length,
-                        severity: 'warning'
-                    });
-                }
-            }
-        });
-
-        const variableIssues = this._checkVariableUsage(code, definedVariables, definedFunctions, definedParams);
-        issues.push(...variableIssues);
-
-        const deduplicated = this._deduplicateIssues(issues);
-        return deduplicated;
-    }
-
-    _collectAllDeclarations(code) {
-        const variables = new Set();
-        const functions = new Set();
-        const parameters = new Set();
-        
-        const lines = code.split('\n');
-        let inMultilineComment = false;
-        let inString = false;
-        let stringType = null;
-        let escapeNext = false;
-
-        for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-            const line = lines[lineIndex];
-            
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                const nextChar = line[i + 1] || '';
-                
-                if (escapeNext) {
-                    escapeNext = false;
-                    continue;
-                }
-                
-                if (char === '\\') {
-                    escapeNext = true;
-                    continue;
-                }
-                
-                if (!inString) {
-                    if (char === '/' && nextChar === '*') {
-                        inMultilineComment = true;
-                        i++;
-                        continue;
-                    }
-                    
-                    if (inMultilineComment && char === '*' && nextChar === '/') {
-                        inMultilineComment = false;
-                        i++;
-                        continue;
-                    }
-                    
-                    if (char === '/' && nextChar === '/') {
-                        break;
-                    }
-                }
-                
-                if (!inMultilineComment) {
-                    if (inString) {
-                        if (char === stringType) {
-                            inString = false;
-                            stringType = null;
-                        }
-                    } else if (char === '"' || char === "'" || char === '`') {
-                        inString = true;
-                        stringType = char;
-                    }
-                }
-            }
-            
-            if (inMultilineComment) {
-                continue;
-            }
-
-            const lineWithoutComments = this._removeStringsAndComments(line);
-            if (!lineWithoutComments.trim()) continue;
-
-            const varDeclRegex = /\b(?:var|let|const)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
-            let match;
-            while ((match = varDeclRegex.exec(lineWithoutComments)) !== null) {
-                variables.add(match[1]);
-            }
-
-            const funcDeclRegex = /\bfunction\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g;
-            while ((match = funcDeclRegex.exec(lineWithoutComments)) !== null) {
-                functions.add(match[1]);
-            }
-
-            const funcExprRegex = /(?:var|let|const)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*(?:function\s*\(|\([^)]*\)\s*=>)/g;
-            while ((match = funcExprRegex.exec(lineWithoutComments)) !== null) {
-                functions.add(match[1]);
-            }
-
-            const classDeclRegex = /\bclass\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
-            while ((match = classDeclRegex.exec(lineWithoutComments)) !== null) {
-                functions.add(match[1]);
-            }
-
-            const importRegex = /\bimport\s+(?:\{[^}]*\}\s+from\s+)?['"][^'"]+['"]/g;
-            const importMatches = lineWithoutComments.match(importRegex);
-            if (importMatches) {
-                const importNames = lineWithoutComments.match(/\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?:,\s*\{|\s+from\s+|,|\})/g);
-                if (importNames) {
-                    importNames.forEach(name => {
-                        const cleanName = name.match(/[a-zA-Z_$][a-zA-Z0-9_$]*/);
-                        if (cleanName) variables.add(cleanName[0]);
-                    });
-                }
-                
-                const defaultImport = lineWithoutComments.match(/import\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?:,|\s+from)/);
-                if (defaultImport) variables.add(defaultImport[1]);
-            }
-
-            const funcParamRegex = /(?:function\s+[a-zA-Z_$][a-zA-Z0-9_$]*\s*\(|function\s*\(|=>\s*\(|[a-zA-Z_$][a-zA-Z0-9_$]*\s*=\s*function\s*\(|\([^)]*\)\s*=>)/g;
-            const funcMatches = lineWithoutComments.match(funcParamRegex);
-            if (funcMatches) {
-                funcMatches.forEach(funcMatch => {
-                    const paramsMatch = funcMatch.match(/\(([^)]*)\)/);
-                    if (paramsMatch) {
-                        const params = paramsMatch[1].split(',').map(p => p.trim());
-                        params.forEach(param => {
-                            const paramName = param.match(/^([a-zA-Z_$][a-zA-Z0-9_$]*)/);
-                            if (paramName) {
-                                parameters.add(paramName[1]);
-                            }
-                        });
-                    }
-                });
-            }
-
-            const forInRegex = /\bfor\s*\(\s*(?:var|let|const)?\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\s+(?:in|of)\s+/g;
-            while ((match = forInRegex.exec(lineWithoutComments)) !== null) {
-                variables.add(match[1]);
-            }
-
-            const forInitRegex = /\bfor\s*\(\s*(?:var|let|const)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=/g;
-            while ((match = forInitRegex.exec(lineWithoutComments)) !== null) {
-                variables.add(match[1]);
-            }
-
-            const catchRegex = /\bcatch\s*\(\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\)/g;
-            while ((match = catchRegex.exec(lineWithoutComments)) !== null) {
-                parameters.add(match[1]);
             }
         }
-
-        return { variables, functions, parameters };
-    }
-
-    _removeStringsAndComments(line) {
-        let result = '';
-        let inString = false;
-        let stringType = null;
-        let escapeNext = false;
-
-        for (let i = 0; i < line.length; i++) {
-            const char = line[i];
-            const nextChar = line[i + 1] || '';
-
-            if (escapeNext) {
-                escapeNext = false;
-                continue;
-            }
-
-            if (char === '\\') {
-                escapeNext = true;
-                continue;
-            }
-
-            if (!inString && char === '/' && nextChar === '/') {
-                break;
-            }
-
-            if (!inString) {
-                if (char === '"' || char === "'" || char === '`') {
-                    inString = true;
-                    stringType = char;
-                    continue;
-                }
-            } else {
-                if (char === stringType) {
-                    inString = false;
-                    stringType = null;
-                    continue;
-                }
-            }
-
-            if (!inString) {
-                result += char;
-            }
-        }
-
-        return result;
-    }
-
-    _checkVariableUsage(code, definedVariables, definedFunctions, definedParams) {
-        const issues = [];
-        const lines = code.split('\n');
-        
-        const globalBuiltins = new Set([
-            'document', 'window', 'console', 'Math', 'Date', 'Array', 'Object', 'String', 'Number',
-            'Boolean', 'JSON', 'Promise', 'Map', 'Set', 'Symbol', 'Function', 'RegExp', 'Error',
-            'undefined', 'null', 'true', 'false', 'this', 'new', 'typeof', 'instanceof',
-            'in', 'delete', 'void', 'arguments', 'eval', 'isNaN', 'isFinite', 'parseFloat',
-            'parseInt', 'encodeURI', 'encodeURIComponent', 'decodeURI', 'decodeURIComponent',
-            'alert', 'confirm', 'prompt', 'setTimeout', 'setInterval', 'clearTimeout', 'clearInterval',
-            'localStorage', 'sessionStorage', 'fetch', 'location', 'history', 'navigator', 'screen',
-            'performance', 'Intl', 'ArrayBuffer', 'DataView', 'Float32Array', 'Float64Array',
-            'Int8Array', 'Int16Array', 'Int32Array', 'Uint8Array', 'Uint16Array', 'Uint32Array',
-            'WeakMap', 'WeakSet', 'Proxy', 'Reflect', 'Atomics', 'SharedArrayBuffer',
-            'BigInt', 'BigInt64Array', 'BigUint64Array', 'FinalizationRegistry', 'WeakRef',
-            'TextDecoder', 'TextEncoder', 'URL', 'URLSearchParams', 'FormData', 'Blob',
-            'File', 'FileReader', 'Headers', 'Request', 'Response', 'AbortController',
-            'AbortSignal', 'EventSource', 'WebSocket', 'MutationObserver', 'IntersectionObserver',
-            'ResizeObserver', 'queueMicrotask', 'structuredClone'
-        ]);
-
-        const commonDOMObjects = new Set([
-            'element', 'el', 'div', 'span', 'input', 'button', 'form', 'ul', 'li',
-            'e', 'event', 'evt', 'error', 'err', 'data', 'response', 'res', 'result',
-            'item', 'items', 'obj', 'arr', 'list', 'map', 'value', 'val', 'key', 'keys',
-            'index', 'idx', 'i', 'j', 'k', 'n', 'x', 'y', 'z', 'count', 'length',
-            'callback', 'cb', 'handler', 'fn', 'func', 'name', 'id', 'class', 'className'
-        ]);
-
-        const variableUsageRegex = /([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
-        const usedNames = new Set();
-        const declarationNames = new Set();
-
-        lines.forEach((line, lineIndex) => {
-            const lineNum = lineIndex + 1;
-            const lineWithoutComments = this._removeStringsAndComments(line);
-            
-            let match;
-            const lineUsed = new Set();
-            const lineDeclared = new Set();
-
-            const declRegex = /\b(?:var|let|const|function)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
-            while ((match = declRegex.exec(lineWithoutComments)) !== null) {
-                lineDeclared.add(match[1]);
-                declarationNames.add(match[1]);
-            }
-
-            const assignDeclRegex = /(?:^|[\s;{(,])([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=[^=]/g;
-            while ((match = assignDeclRegex.exec(lineWithoutComments)) !== null) {
-                if (!match[1].match(/^(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|false|finally|for|function|if|import|in|instanceof|new|null|return|super|switch|this|throw|true|try|typeof|var|void|while|with|yield|async|await|let|static|as|from|of|constructor|get|set|arguments|eval)$/)) {
-                    lineDeclared.add(match[1]);
-                    declarationNames.add(match[1]);
-                }
-            }
-
-            while ((match = variableUsageRegex.exec(lineWithoutComments)) !== null) {
-                const varName = match[1];
-                
-                const isKeyword = /^(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|false|finally|for|function|if|import|in|instanceof|new|null|return|super|switch|this|throw|true|try|typeof|var|void|while|with|yield|async|await|let|static|as|from|of|constructor|get|set|arguments|eval)$/.test(varName);
-                const isNumber = /^\d+$/.test(varName);
-                const isPropertyAccessor = match.index > 0 && lineWithoutComments[match.index - 1] === '.';
-                const isMethodCall = match.index > 0 && lineWithoutComments[match.index - 1] === '.';
-                
-                if (isKeyword || isNumber || isPropertyAccessor || isMethodCall) {
-                    continue;
-                }
-
-                if (lineDeclared.has(varName)) {
-                    continue;
-                }
-
-                if (lineUsed.has(varName)) {
-                    continue;
-                }
-
-                if (globalBuiltins.has(varName)) {
-                    continue;
-                }
-
-                if (definedVariables.has(varName) || definedFunctions.has(varName) || definedParams.has(varName)) {
-                    continue;
-                }
-
-                if (declarationNames.has(varName)) {
-                    continue;
-                }
-
-                lineUsed.add(varName);
-                usedNames.add(varName);
-
-                if (commonDOMObjects.has(varName.toLowerCase()) || commonDOMObjects.has(varName)) {
-                    continue;
-                }
-
-                if (varName.length <= 2) {
-                    continue;
-                }
-
-                if (varName.startsWith('on') && varName.length > 3) {
-                    continue;
-                }
-
-                issues.push({
-                    type: 'warning',
-                    message: `变量 '${varName}' 可能未定义`,
-                    line: lineNum,
-                    column: match.index + 1,
-                    severity: 'warning'
-                });
-            }
-        });
 
         return issues;
     }
 
-    _deduplicateIssues(issues) {
-        const seen = new Set();
-        const unique = [];
+    isBalancedAcrossLines(lines, startLine, openChar, closeChar) {
+        let balance = 0;
+        for (let i = 0; i < lines.length; i++) {
+            const open = (lines[i].match(new RegExp(`\\${openChar}`, 'g')) || []).length;
+            const close = (lines[i].match(new RegExp(`\\${closeChar}`, 'g')) || []).length;
+            balance += (open - close);
+        }
+        return balance === 0;
+    }
 
-        for (const issue of issues) {
-            const key = `${issue.line}:${issue.column}:${issue.message}`;
-            if (!seen.has(key)) {
-                seen.add(key);
-                unique.push(issue);
+    checkUndefinedVariables(code, model) {
+        const issues = [];
+        const definedVars = new Set([
+            'console', 'document', 'window', 'Math', 'Array', 'Object', 'String', 'Number',
+            'Boolean', 'JSON', 'Date', 'RegExp', 'Map', 'Set', 'Promise', 'NaN', 'Infinity',
+            'undefined', 'null', 'true', 'false', 'this', 'arguments', 'globalThis',
+            'eval', 'parseInt', 'parseFloat', 'isNaN', 'isFinite', 'decodeURI',
+            'decodeURIComponent', 'encodeURI', 'encodeURIComponent', 'escape', 'unescape',
+            'Symbol', 'BigInt', 'Intl', 'Atomics', 'SharedArrayBuffer', 'WebAssembly'
+        ]);
+
+        const varDeclRegex = /\b(?:const|let|var|function)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
+        const classDeclRegex = /\bclass\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
+        let match;
+
+        while ((match = varDeclRegex.exec(code)) !== null) {
+            definedVars.add(match[1]);
+        }
+
+        while ((match = classDeclRegex.exec(code)) !== null) {
+            definedVars.add(match[1]);
+        }
+
+        const paramRegex = /\bfunction\s+[a-zA-Z_$][a-zA-Z0-9_$]*\s*\(([^)]*)\)/g;
+        while ((match = paramRegex.exec(code)) !== null) {
+            const params = match[1].split(',').map(p => p.trim().split('=')[0].trim());
+            params.forEach(p => {
+                if (p) definedVars.add(p);
+            });
+        }
+
+        const arrowFuncRegex = /([a-zA-Z_$][a-zA-Z0-9_$]*|\([^)]*\))\s*=>/g;
+        while ((match = arrowFuncRegex.exec(code)) !== null) {
+            let params = match[1];
+            if (params.startsWith('(')) {
+                params = params.slice(1, -1).split(',').map(p => p.trim().split('=')[0].trim());
+            } else {
+                params = [params];
+            }
+            params.forEach(p => {
+                if (p && p !== '...') definedVars.add(p);
+            });
+        }
+
+        const lines = code.split('\n');
+        const identifiers = /[a-zA-Z_$][a-zA-Z0-9_$]*/g;
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const lineWithoutStrings = this.removeStringsAndComments(line);
+            let idMatch;
+
+            while ((idMatch = identifiers.exec(lineWithoutStrings)) !== null) {
+                const identifier = idMatch[0];
+                if (!definedVars.has(identifier)) {
+                    if (this.isLikelyPropertyAccess(code, identifier, idMatch.index)) {
+                        continue;
+                    }
+
+                    issues.push({
+                        line: i + 1,
+                        column: idMatch.index + 1,
+                        message: `可能未定义的变量: ${identifier}`,
+                        severity: 'warning'
+                    });
+                }
             }
         }
 
-        return unique;
+        return issues;
     }
 
-    _updateDecorations(issues) {
+    removeStringsAndComments(line) {
+        return line
+            .replace(/\/\/.*$/, '')
+            .replace(/\/\*[\s\S]*?\*\//g, '')
+            .replace(/(['"`])[^'"`]*?\1/g, match => ' '.repeat(match.length))
+            .replace(/\.[a-zA-Z_$][a-zA-Z0-9_$]*/g, match => ' '.repeat(match.length))
+            .replace(/\b(new\s+)[a-zA-Z_$][a-zA-Z0-9_$]*/g, (match, prefix) => prefix + ' '.repeat(match.length - prefix.length));
+    }
+
+    isLikelyPropertyAccess(code, identifier, position) {
+        const before = Math.max(0, position - 50);
+        const context = code.substring(before, position);
+        return /\.\s*$/.test(context);
+    }
+
+    checkMissingBraces(code, model) {
+        const issues = [];
+        const lines = code.split('\n');
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmed = line.trim();
+
+            const missingBracePatterns = [
+                {
+                    pattern: /^(if|for|while|switch|with)\s*\([^)]*\)\s*$/,
+                    message: '控制语句缺少花括号或语句体',
+                    severity: 'warning'
+                },
+                {
+                    pattern: /^(if|for|while|switch|with)\s*\([^)]*\)\s*[^{]\s*$/,
+                    message: '建议使用花括号包围代码块',
+                    severity: 'warning'
+                }
+            ];
+
+            for (const { pattern, message, severity } of missingBracePatterns) {
+                if (pattern.test(trimmed)) {
+                    const braceBalance = this.checkBraceBalance(code, i);
+                    if (!braceBalance.balanced) {
+                        issues.push({
+                            line: i + 1,
+                            column: line.length + 1,
+                            message: message + (braceBalance.missing > 0 ? ` (缺少 ${braceBalance.missing} 个右花括号)` : ''),
+                            severity
+                        });
+                    }
+                    break;
+                }
+            }
+
+            const forLoopPattern = /^for\s*\([^)]*\)\s*$/;
+            if (forLoopPattern.test(trimmed)) {
+                issues.push({
+                    line: i + 1,
+                    column: line.length + 1,
+                    message: 'for 循环缺少花括号或循环体',
+                    severity: 'warning'
+                });
+            }
+        }
+
+        const totalOpen = (code.match(/{/g) || []).length;
+        const totalClose = (code.match(/}/g) || []).length;
+        if (totalOpen !== totalClose) {
+            const missing = Math.abs(totalOpen - totalClose);
+            const lineWithProblem = totalOpen > totalClose 
+                ? this.findLastLineWithChar(lines, '{')
+                : this.findLastLineWithChar(lines, '}');
+            
+            issues.push({
+                line: lineWithProblem + 1,
+                column: 1,
+                message: totalOpen > totalClose 
+                    ? `代码块缺少 ${missing} 个右花括号 '}'`
+                    : `有 ${missing} 个多余的右花括号 '}'`,
+                severity: 'error'
+            });
+        }
+
+        return issues;
+    }
+
+    findLastLineWithChar(lines, char) {
+        for (let i = lines.length - 1; i >= 0; i--) {
+            if (lines[i].includes(char)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    checkBraceBalance(code, lineIndex) {
+        const lines = code.split('\n');
+        let openCount = 0;
+        let closeCount = 0;
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].replace(/['"`][^'"`]*['"`]/g, '').replace(/\/\/.*$/, '');
+            openCount += (line.match(/{/g) || []).length;
+            closeCount += (line.match(/}/g) || []).length;
+        }
+
+        return {
+            balanced: openCount === closeCount,
+            missing: openCount - closeCount
+        };
+    }
+
+    checkUnclosedStrings(code, model) {
+        const issues = [];
+        const lines = code.split('\n');
+
+        let inMultiLineComment = false;
+        let stringDelimiter = null;
+
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i];
+            let lineForCheck = line;
+
+            if (inMultiLineComment) {
+                const commentEnd = line.indexOf('*/');
+                if (commentEnd !== -1) {
+                    inMultiLineComment = false;
+                    lineForCheck = line.substring(commentEnd + 2);
+                } else {
+                    continue;
+                }
+            }
+
+            lineForCheck = lineForCheck.replace(/\/\*[\s\S]*?\*\//g, '');
+
+            const multiLineStart = lineForCheck.indexOf('/*');
+            if (multiLineStart !== -1 && lineForCheck.indexOf('*/', multiLineStart) === -1) {
+                inMultiLineComment = true;
+            }
+
+            lineForCheck = lineForCheck.replace(/\/\/.*$/, '');
+
+            if (stringDelimiter) {
+                const stringEnd = lineForCheck.indexOf(stringDelimiter);
+                if (stringEnd === -1 || (stringDelimiter !== '`' && lineForCheck.lastIndexOf('\\', stringEnd) === stringEnd - 1)) {
+                    continue;
+                }
+                stringDelimiter = null;
+            }
+
+            let j = 0;
+            while (j < lineForCheck.length) {
+                const char = lineForCheck[j];
+                
+                if (char === '\\' && j < lineForCheck.length - 1) {
+                    j += 2;
+                    continue;
+                }
+
+                if (char === "'" || char === '"' || char === '`') {
+                    if (stringDelimiter === null) {
+                        stringDelimiter = char;
+                    } else if (stringDelimiter === char) {
+                        stringDelimiter = null;
+                    }
+                }
+                j++;
+            }
+
+            if (stringDelimiter) {
+                issues.push({
+                    line: i + 1,
+                    column: line.length + 1,
+                    message: `字符串未闭合 (缺少 ${stringDelimiter})`,
+                    severity: 'error'
+                });
+                break;
+            }
+        }
+
+        return issues;
+    }
+
+    checkMissingParentheses(code, model) {
+        const issues = [];
+        const lines = code.split('\n');
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const lineWithoutStrings = line
+                .replace(/['"`][^'"`]*['"`]/g, '')
+                .replace(/\/\/.*$/, '');
+
+            const ifWhileForPattern = /\b(if|while|for|switch|catch)\s*([^(])/g;
+            let match;
+
+            while ((match = ifWhileForPattern.exec(lineWithoutStrings)) !== null) {
+                if (match[2] !== '(') {
+                    issues.push({
+                        line: i + 1,
+                        column: match.index + match[1].length + 2,
+                        message: `${match[1]} 语句需要使用括号`,
+                        severity: 'error'
+                    });
+                }
+            }
+        }
+
+        return issues;
+    }
+
+    checkMissingSemicolons(code, model) {
+        const issues = [];
+        const lines = code.split('\n');
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmed = line.trim();
+
+            if (!trimmed || trimmed.endsWith(';') || trimmed.endsWith('{') || trimmed.endsWith('}') ||
+                trimmed.endsWith(',') || trimmed.startsWith('//') || trimmed.startsWith('/*') ||
+                trimmed.endsWith('*/') || trimmed.endsWith(')') || trimmed.endsWith(']') ||
+                trimmed.endsWith('`') || trimmed.startsWith('{') || trimmed.startsWith('}') ||
+                trimmed.startsWith('if') || trimmed.startsWith('else') || trimmed.startsWith('for') ||
+                trimmed.startsWith('while') || trimmed.startsWith('do') || trimmed.startsWith('switch') ||
+                trimmed.startsWith('case') || trimmed.startsWith('class') || trimmed.startsWith('function') ||
+                trimmed.startsWith('return') || trimmed.startsWith('throw') || trimmed.startsWith('try') ||
+                trimmed.startsWith('catch') || trimmed.startsWith('finally') || trimmed.startsWith('import') ||
+                trimmed.startsWith('export') || trimmed.startsWith('async') || trimmed.startsWith('await')) {
+                continue;
+            }
+
+            const needsSemicolon = /^[a-zA-Z_$][a-zA-Z0-9_$]*\s*=\s*[^;]+$/.test(trimmed) ||
+                                   /^[a-zA-Z_$][a-zA-Z0-9_$]*\s*\([^)]*\)\s*[^;{]*$/.test(trimmed);
+
+            if (needsSemicolon) {
+                issues.push({
+                    line: i + 1,
+                    column: line.length + 1,
+                    message: '可能缺少分号',
+                    severity: 'warning'
+                });
+            }
+        }
+
+        return issues;
+    }
+
+    checkDuplicateDeclarations(code, model) {
+        const issues = [];
+        const lines = code.split('\n');
+        const declarations = new Map();
+
+        const constLetRegex = /\b(const|let)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
+        let match;
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const lineWithoutStrings = line
+                .replace(/['"`][^'"`]*['"`]/g, '')
+                .replace(/\/\/.*$/, '');
+
+            while ((match = constLetRegex.exec(lineWithoutStrings)) !== null) {
+                const varName = match[2];
+                const type = match[1];
+
+                if (declarations.has(varName)) {
+                    issues.push({
+                        line: i + 1,
+                        column: match.index + 1,
+                        message: `重复声明: ${varName} (${type} 不能重复声明)`,
+                        severity: 'error'
+                    });
+                } else {
+                    declarations.set(varName, { line: i + 1, type });
+                }
+            }
+        }
+
+        return issues;
+    }
+
+    deduplicateIssues(issues) {
+        const seen = new Set();
+        return issues.filter(issue => {
+            const key = `${issue.line}-${issue.column}-${issue.message}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }
+
+    processLintResults(issues) {
+        this.currentIssues = issues;
+
+        this.updateDecorations(issues);
+
+        if (this.callbacks.onIssuesChange) {
+            this.callbacks.onIssuesChange(issues);
+        }
+    }
+
+    updateDecorations(issues) {
         const model = this.editor.getModel();
-        const oldDecorations = this.decorations;
-        const newDecorations = [];
+        if (!model) return;
 
-        issues.forEach(issue => {
-            const lineNumber = issue.line;
-            const column = issue.column || 1;
+        const newDecorations = issues.map(issue => {
+            const lineNumber = Math.min(issue.line, model.getLineCount());
             const lineContent = model.getLineContent(lineNumber) || '';
-            const endColumn = Math.min(column + 1, lineContent.length + 1);
+            const column = Math.min(issue.column || 1, lineContent.length + 1);
 
-            newDecorations.push({
+            return {
                 range: new this.monaco.Range(
                     lineNumber,
-                    Math.max(1, column),
+                    1,
                     lineNumber,
-                    endColumn
+                    lineContent.length + 1
                 ),
                 options: {
-                    isWholeLine: issue.type === 'error' ? false : true,
+                    isWholeLine: false,
                     className: issue.severity === 'error' 
                         ? 'lint-decoration-error' 
                         : 'lint-decoration-warning',
                     glyphMarginClassName: issue.severity === 'error' 
                         ? 'lint-glyph-error' 
                         : 'lint-glyph-warning',
-                    minimap: {
-                        color: issue.severity === 'error' ? '#ff0000' : '#ffa500'
-                    }
+                    glyphMarginHoverMessage: { value: issue.message }
                 }
-            });
+            };
         });
 
-        const markers = issues.map(issue => ({
-            startLineNumber: issue.line,
-            startColumn: issue.column || 1,
-            endLineNumber: issue.line,
-            endColumn: (issue.column || 1) + 1,
-            message: issue.message,
-            severity: issue.severity === 'error' 
-                ? 8 
-                : 4
-        }));
-
-        this.monaco.editor.setModelMarkers(model, 'code-auto-completer', markers);
-
-        this.decorations = this.editor.deltaDecorations(oldDecorations, newDecorations);
-    }
-
-    forceLint() {
-        if (this.lintTimeout) {
-            clearTimeout(this.lintTimeout);
-        }
-        this.currentVersion++;
-        this.lint(true);
+        this.decorations = model.deltaDecorations(this.decorations, newDecorations);
     }
 
     getCurrentIssues() {
-        return this.lastKnownIssues || [];
-    }
-
-    destroy() {
-        if (this.worker) {
-            this.worker.terminate();
-            this.worker = null;
-        }
-        if (this.lintTimeout) {
-            clearTimeout(this.lintTimeout);
-        }
-        this.pendingRequests.forEach(req => clearTimeout(req.timeout));
-        this.pendingRequests.clear();
+        return this.currentIssues;
     }
 }

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旅行路线规划器</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🗺️ 旅行路线规划器</h1>
+            <p class="subtitle">智能POI提取 · 最优路径规划 · AI文艺润色</p>
+        </header>
+
+        <div class="input-section">
+            <div class="input-group">
+                <label for="tripInput">输入目的地和天数：</label>
+                <input type="text" id="tripInput" placeholder="例如：北京，3天" value="北京，3天" />
+            </div>
+            <button id="generateBtn" class="btn-primary">生成路线</button>
+        </div>
+
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>正在规划您的完美旅程...</p>
+        </div>
+
+        <div class="content" id="content" style="display: none;">
+            <div class="result-header">
+                <h2 id="resultTitle">北京3天行程</h2>
+                <p class="distance-info" id="totalDistance">总步行距离：-- 米</p>
+            </div>
+
+            <div class="main-content">
+                <div class="map-section">
+                    <div id="map"></div>
+                    <div class="legend">
+                        <span class="legend-item"><span class="marker-icon">📍</span> 景点</span>
+                        <span class="legend-item"><span class="route-line"></span> 步行路线</span>
+                    </div>
+                </div>
+
+                <div class="route-section">
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="itinerary">行程安排</button>
+                        <button class="tab-btn" data-tab="polished">文艺游记</button>
+                    </div>
+
+                    <div id="itinerary" class="tab-content active">
+                        <div id="daysList"></div>
+                    </div>
+
+                    <div id="polished" class="tab-content">
+                        <div class="polished-content">
+                            <h3 id="polishedTitle"></h3>
+                            <div id="polishedText"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>

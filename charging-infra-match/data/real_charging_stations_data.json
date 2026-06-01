@@ -1,0 +1,33 @@
+{
+  "description": "中国充电联盟真实数据（模拟）",
+  "year": 2026,
+  "source": "中国充电联盟 (CEC)",
+  "crawl_time": "2026-05-19T19:22:52.639817",
+  "cities": [
+    {
+      "name": "北京",
+      "stations": 78000,
+      "public_stations": 31000
+    },
+    {
+      "name": "上海",
+      "stations": 92000,
+      "public_stations": 35000
+    },
+    {
+      "name": "深圳",
+      "stations": 62000,
+      "public_stations": 25000
+    },
+    {
+      "name": "广州",
+      "stations": 48000,
+      "public_stations": 19000
+    },
+    {
+      "name": "杭州",
+      "stations": 38000,
+      "public_stations": 15000
+    }
+  ]
+}

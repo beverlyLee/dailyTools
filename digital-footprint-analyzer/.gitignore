@@ -1,0 +1,1 @@
+# Dependencies\n/node_modules\n/.pnp\n.pnp.js\n\n# Testing\n/coverage\n\n# Next.js\n/.next/\n/out/\n\n# Production\n/build\n\n# Misc\n.DS_Store\n*.pem\n\n# Debug\nnpm-debug.log*\nyarn-debug.log*\nyarn-error.log*\n\n# Local env files\n.env*.local\n\n# Vercel\n.vercel\n\n# TypeScript\n*.tsbuildinfo\nnext-env.d.ts\n"

@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  height: 100%;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900 antialiased;
+}
+
+.react-flow__node {
+  @apply select-none;
+}
+
+.react-flow__node-input {
+  @apply bg-blue-600 text-white rounded-lg shadow-lg px-4 py-2;
+}
+
+.react-flow__node-default {
+  @apply bg-white border-2 border-gray-200 rounded-lg shadow px-4 py-2;
+}
+
+.react-flow__edge-path {
+  @apply stroke-gray-400 stroke-2;
+}

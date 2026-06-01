@@ -1,0 +1,210 @@
+{
+  "version": "1.0.0",
+  "description": "Star data for AR Stellar Guide - equatorial coordinates (J2000)",
+  "threshold": 35,
+  "constellations": {
+    "Ursa Major": {
+      "name": "Ursa Major",
+      "chineseName": "大熊座",
+      "color": "#4FC3F7",
+      "stars": [
+        { "id": "dubhe", "name": "Dubhe", "ra": 11.062, "dec": 61.751, "mag": 1.86 },
+        { "id": "merak", "name": "Merak", "ra": 11.075, "dec": 56.382, "mag": 2.37 },
+        { "id": "phecda", "name": "Phecda", "ra": 11.895, "dec": 53.695, "mag": 2.44 },
+        { "id": "megrez", "name": "Megrez", "ra": 12.275, "dec": 57.013, "mag": 3.31 },
+        { "id": "alioth", "name": "Alioth", "ra": 12.901, "dec": 55.960, "mag": 1.76 },
+        { "id": "mizar", "name": "Mizar", "ra": 13.399, "dec": 54.925, "mag": 2.04 },
+        { "id": "alkaid", "name": "Alkaid", "ra": 13.793, "dec": 49.311, "mag": 1.86 }
+      ],
+      "lines": [
+        ["dubhe", "merak"],
+        ["merak", "phecda"],
+        ["phecda", "megrez"],
+        ["megrez", "dubhe"],
+        ["megrez", "alioth"],
+        ["alioth", "mizar"],
+        ["mizar", "alkaid"]
+      ]
+    },
+    "Ursa Minor": {
+      "name": "Ursa Minor",
+      "chineseName": "小熊座",
+      "color": "#FFD54F",
+      "stars": [
+        { "id": "polaris", "name": "Polaris", "ra": 2.530, "dec": 89.264, "mag": 1.98 },
+        { "id": "kochab", "name": "Kochab", "ra": 14.839, "dec": 74.156, "mag": 2.08 },
+        { "id": "pherkad", "name": "Pherkad", "ra": 15.024, "dec": 71.828, "mag": 3.05 },
+        { "id": "epsilon_umi", "name": "Epsilon UMi", "ra": 16.351, "dec": 82.462, "mag": 4.21 },
+        { "id": "zeta_umi", "name": "Zeta UMi", "ra": 15.223, "dec": 77.743, "mag": 4.32 },
+        { "id": "eta_umi", "name": "Eta UMi", "ra": 16.183, "dec": 75.833, "mag": 4.95 },
+        { "id": "thuban", "name": "Thuban", "ra": 14.026, "dec": 64.376, "mag": 3.65 }
+      ],
+      "lines": [
+        ["polaris", "epsilon_umi"],
+        ["epsilon_umi", "zeta_umi"],
+        ["zeta_umi", "eta_umi"],
+        ["eta_umi", "kochab"],
+        ["kochab", "pherkad"],
+        ["pherkad", "zeta_umi"]
+      ]
+    },
+    "Orion": {
+      "name": "Orion",
+      "chineseName": "猎户座",
+      "color": "#FF7043",
+      "stars": [
+        { "id": "betelgeuse", "name": "Betelgeuse", "ra": 5.920, "dec": 7.407, "mag": 0.50 },
+        { "id": "bellatrix", "name": "Bellatrix", "ra": 5.679, "dec": -6.344, "mag": 1.64 },
+        { "id": "mintaka", "name": "Mintaka", "ra": 5.593, "dec": -0.299, "mag": 2.23 },
+        { "id": "alnilam", "name": "Alnilam", "ra": 5.604, "dec": -1.202, "mag": 1.69 },
+        { "id": "alnitak", "name": "Alnitak", "ra": 5.605, "dec": -1.943, "mag": 1.70 },
+        { "id": "saiph", "name": "Saiph", "ra": 5.788, "dec": -9.670, "mag": 2.06 },
+        { "id": "rigel", "name": "Rigel", "ra": 5.242, "dec": -8.201, "mag": 0.13 }
+      ],
+      "lines": [
+        ["betelgeuse", "bellatrix"],
+        ["betelgeuse", "mintaka"],
+        ["bellatrix", "mintaka"],
+        ["mintaka", "alnilam"],
+        ["alnilam", "alnitak"],
+        ["alnitak", "saiph"],
+        ["mintaka", "rigel"],
+        ["saiph", "rigel"]
+      ]
+    },
+    "Cassiopeia": {
+      "name": "Cassiopeia",
+      "chineseName": "仙后座",
+      "color": "#BA68C8",
+      "stars": [
+        { "id": "schedar", "name": "Schedar", "ra": 0.987, "dec": 56.537, "mag": 2.24 },
+        { "id": "caph", "name": "Caph", "ra": 0.152, "dec": 59.150, "mag": 2.28 },
+        { "id": "gamma_cas", "name": "Gamma Cas", "ra": 0.735, "dec": 60.717, "mag": 2.47 },
+        { "id": "rucbah", "name": "Rucbah", "ra": 1.513, "dec": 60.382, "mag": 2.68 },
+        { "id": "segin", "name": "Segin", "ra": 1.970, "dec": 63.664, "mag": 3.35 }
+      ],
+      "lines": [
+        ["caph", "gamma_cas"],
+        ["gamma_cas", "schedar"],
+        ["schedar", "rucbah"],
+        ["rucbah", "segin"]
+      ]
+    },
+    "Leo": {
+      "name": "Leo",
+      "chineseName": "狮子座",
+      "color": "#FFB74D",
+      "stars": [
+        { "id": "regulus", "name": "Regulus", "ra": 10.140, "dec": 11.967, "mag": 1.35 },
+        { "id": "alphard", "name": "Alphard", "ra": 9.467, "dec": -8.659, "mag": 1.98 },
+        { "id": "denebola", "name": "Denebola", "ra": 11.828, "dec": 14.573, "mag": 2.14 },
+        { "id": "gamma_leo", "name": "Gamma Leo", "ra": 10.622, "dec": 19.842, "mag": 2.01 },
+        { "id": "delta_leo", "name": "Delta Leo", "ra": 10.595, "dec": 20.524, "mag": 2.56 }
+      ],
+      "lines": [
+        ["regulus", "alphard"],
+        ["alphard", "denebola"],
+        ["denebola", "gamma_leo"],
+        ["gamma_leo", "delta_leo"],
+        ["delta_leo", "regulus"]
+      ]
+    },
+    "Scorpius": {
+      "name": "Scorpius",
+      "chineseName": "天蝎座",
+      "color": "#EF5350",
+      "stars": [
+        { "id": "antares", "name": "Antares", "ra": 16.490, "dec": -26.432, "mag": 1.09 },
+        { "id": "graffias", "name": "Graffias", "ra": 16.157, "dec": -19.513, "mag": 2.89 },
+        { "id": "dschubba", "name": "Dschubba", "ra": 16.210, "dec": -22.610, "mag": 2.29 },
+        { "id": "sigma_sco", "name": "Sigma Sco", "ra": 16.404, "dec": -25.579, "mag": 2.88 },
+        { "id": "tau_sco", "name": "Tau Sco", "ra": 16.566, "dec": -28.126, "mag": 2.82 },
+        { "id": "shaula", "name": "Shaula", "ra": 17.584, "dec": -37.103, "mag": 1.62 },
+        { "id": "lesath", "name": "Lesath", "ra": 17.623, "dec": -37.341, "mag": 2.69 }
+      ],
+      "lines": [
+        ["graffias", "dschubba"],
+        ["dschubba", "sigma_sco"],
+        ["sigma_sco", "antares"],
+        ["antares", "tau_sco"],
+        ["tau_sco", "shaula"],
+        ["shaula", "lesath"]
+      ]
+    },
+    "Cygnus": {
+      "name": "Cygnus",
+      "chineseName": "天鹅座",
+      "color": "#81C784",
+      "stars": [
+        { "id": "deneb", "name": "Deneb", "ra": 20.697, "dec": 45.280, "mag": 1.25 },
+        { "id": "sadr", "name": "Sadr", "ra": 20.136, "dec": 40.257, "mag": 2.23 },
+        { "id": "gienah", "name": "Gienah", "ra": 20.472, "dec": 33.967, "mag": 2.48 },
+        { "id": "delta_cyg", "name": "Delta Cyg", "ra": 19.933, "dec": 45.221, "mag": 2.87 },
+        { "id": "albireo", "name": "Albireo", "ra": 19.543, "dec": 27.960, "mag": 3.08 }
+      ],
+      "lines": [
+        ["deneb", "sadr"],
+        ["sadr", "gienah"],
+        ["sadr", "delta_cyg"],
+        ["sadr", "albireo"],
+        ["delta_cyg", "deneb"]
+      ]
+    },
+    "Lyra": {
+      "name": "Lyra",
+      "chineseName": "天琴座",
+      "color": "#4DD0E1",
+      "stars": [
+        { "id": "vega", "name": "Vega", "ra": 18.615, "dec": 38.783, "mag": 0.03 },
+        { "id": "epsilon_lyr", "name": "Epsilon Lyr", "ra": 18.858, "dec": 39.625, "mag": 4.61 },
+        { "id": "zeta_lyr", "name": "Zeta Lyr", "ra": 18.818, "dec": 37.576, "mag": 4.34 },
+        { "id": "beta_lyr", "name": "Beta Lyr", "ra": 18.703, "dec": 33.361, "mag": 3.52 },
+        { "id": "gamma_lyr", "name": "Gamma Lyr", "ra": 18.789, "dec": 32.683, "mag": 3.24 }
+      ],
+      "lines": [
+        ["vega", "epsilon_lyr"],
+        ["vega", "zeta_lyr"],
+        ["zeta_lyr", "beta_lyr"],
+        ["beta_lyr", "gamma_lyr"],
+        ["gamma_lyr", "epsilon_lyr"]
+      ]
+    },
+    "Aquila": {
+      "name": "Aquila",
+      "chineseName": "天鹰座",
+      "color": "#FFCA28",
+      "stars": [
+        { "id": "altair", "name": "Altair", "ra": 19.846, "dec": 8.868, "mag": 0.77 },
+        { "id": "beta_aql", "name": "Beta Aql", "ra": 19.531, "dec": 6.498, "mag": 3.71 },
+        { "id": "gamma_aql", "name": "Gamma Aql", "ra": 19.266, "dec": 10.608, "mag": 2.72 },
+        { "id": "delta_aql", "name": "Delta Aql", "ra": 19.775, "dec": 2.933, "mag": 3.36 },
+        { "id": "zeta_aql", "name": "Zeta Aql", "ra": 19.934, "dec": 13.841, "mag": 2.99 }
+      ],
+      "lines": [
+        ["altair", "beta_aql"],
+        ["beta_aql", "gamma_aql"],
+        ["altair", "zeta_aql"],
+        ["altair", "delta_aql"]
+      ]
+    },
+    "Taurus": {
+      "name": "Taurus",
+      "chineseName": "金牛座",
+      "color": "#F06292",
+      "stars": [
+        { "id": "aldebaran", "name": "Aldebaran", "ra": 4.599, "dec": 16.509, "mag": 0.85 },
+        { "id": "beta_tau", "name": "Beta Tau", "ra": 5.278, "dec": 15.988, "mag": 1.65 },
+        { "id": "zeta_tau", "name": "Zeta Tau", "ra": 5.648, "dec": 21.272, "mag": 3.00 },
+        { "id": "delta_tau", "name": "Delta Tau", "ra": 4.226, "dec": 17.589, "mag": 3.76 },
+        { "id": "epsilon_tau", "name": "Epsilon Tau", "ra": 4.458, "dec": 19.275, "mag": 3.53 }
+      ],
+      "lines": [
+        ["aldebaran", "beta_tau"],
+        ["beta_tau", "zeta_tau"],
+        ["aldebaran", "delta_tau"],
+        ["delta_tau", "epsilon_tau"],
+        ["epsilon_tau", "zeta_tau"]
+      ]
+    }
+  }
+}

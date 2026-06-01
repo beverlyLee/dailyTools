@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>珊瑚礁生长模拟 - Coral Reef Growth Simulation</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      overflow: hidden;
+      background: #0a1628;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    .info-panel {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(10, 22, 40, 0.85);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(100, 180, 255, 0.3);
+      border-radius: 12px;
+      padding: 16px 20px;
+      color: #e0f0ff;
+      z-index: 100;
+      max-width: 280px;
+    }
+
+    .info-panel h1 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: #7dd3fc;
+      font-weight: 600;
+    }
+
+    .info-panel p {
+      font-size: 13px;
+      line-height: 1.6;
+      opacity: 0.9;
+      margin-bottom: 6px;
+    }
+
+    .info-panel .coral-types {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(100, 180, 255, 0.2);
+    }
+
+    .info-panel .coral-types span {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .info-panel .coral-item {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      margin: 4px 0;
+      opacity: 0.85;
+    }
+
+    .controls-hint {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 22, 40, 0.85);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(100, 180, 255, 0.3);
+      border-radius: 20px;
+      padding: 10px 20px;
+      color: #e0f0ff;
+      font-size: 13px;
+      z-index: 100;
+    }
+
+    .controls-hint kbd {
+      background: rgba(100, 180, 255, 0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin: 0 2px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="info-panel">
+    <h1>🪸 珊瑚礁生长模拟</h1>
+    <p>使用 L-System 分形算法模拟珊瑚在海底的自然生长过程。每一代珊瑚会向光源方向弯曲并分叉。</p>
+    <div class="coral-types">
+      <div class="coral-item">
+        <span style="background: #ff7f50;"></span>
+        橙色枝状珊瑚
+      </div>
+      <div class="coral-item">
+        <span style="background: #ff69b4;"></span>
+        粉色脑纹珊瑚
+      </div>
+      <div class="coral-item">
+        <span style="background: #9370db;"></span>
+        紫色鹿角珊瑚
+      </div>
+      <div class="coral-item">
+        <span style="background: #98fb98;"></span>
+        绿色丘状珊瑚
+      </div>
+      <div class="coral-item">
+        <span style="background: #40e0d0;"></span>
+        蓝色海扇珊瑚
+      </div>
+    </div>
+  </div>
+
+  <div class="controls-hint">
+    <kbd>鼠标左键</kbd> 旋转视角 | <kbd>鼠标滚轮</kbd> 缩放 | <kbd>鼠标右键</kbd> 平移
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

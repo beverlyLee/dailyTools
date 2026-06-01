@@ -1,44 +1,65 @@
 class MealAnalyzer {
-    constructor(foodDatabase) {
-        this.foodDatabase = foodDatabase;
-        this.foods = foodDatabase.foods;
-        this.foodIndex = this.buildFoodIndex();
-    }
-
-    buildFoodIndex() {
-        const index = new Map();
-        for (const food of this.foods) {
-            index.set(food.name, food);
-            for (const alias of food.aliases || []) {
-                if (!index.has(alias)) {
-                    index.set(alias, food);
-                }
-            }
-        }
-        return index;
+    constructor(dynamicFoodDatabase, llmFoodProvider = null) {
+        this.dynamicDatabase = dynamicFoodDatabase;
+        this.llmFoodProvider = llmFoodProvider;
+        this.mealPortionEstimates = dynamicFoodDatabase?.mealPortionEstimates || {};
     }
 
     findFood(query) {
-        if (!query) return null;
-        const normalized = query.trim().toLowerCase();
+        return this.dynamicDatabase?.findFood(query) || null;
+    }
 
-        if (this.foodIndex.has(query)) {
-            return this.foodIndex.get(query);
+    async getFoodWithLLMFallback(foodName) {
+        let food = this.findFood(foodName);
+        
+        if (food) {
+            return {
+                found: true,
+                food,
+                source: this.dynamicDatabase.isDynamicFood(food) ? 'dynamic' : 'static'
+            };
         }
 
-        for (const [key, food] of this.foodIndex.entries()) {
-            if (key.toLowerCase().includes(normalized) || normalized.includes(key.toLowerCase())) {
-                return food;
-            }
+        console.log('[MealAnalyzer] 数据库中未找到食物，尝试调用大模型获取:', foodName);
+        
+        if (!this.llmFoodProvider || !this.llmFoodProvider.isAvailable()) {
+            return {
+                found: false,
+                food: null,
+                source: null,
+                error: '数据库中未找到该食物，且大模型未配置'
+            };
         }
 
-        for (const food of this.foods) {
-            if (food.name.includes(query) || query.includes(food.name)) {
-                return food;
-            }
+        const result = await this.llmFoodProvider.getFoodInfo(foodName);
+        
+        if (!result.success) {
+            console.warn('[MealAnalyzer] 大模型获取食物信息失败:', result.error);
+            return {
+                found: false,
+                food: null,
+                source: null,
+                error: result.error
+            };
         }
 
-        return null;
+        const newFood = this.dynamicDatabase.addDynamicFood(result.data);
+        
+        if (newFood) {
+            return {
+                found: true,
+                food: newFood,
+                source: 'llm_new',
+                llmResult: result
+            };
+        }
+
+        return {
+            found: false,
+            food: null,
+            source: null,
+            error: '保存新食物到数据库失败'
+        };
     }
 
     parsePortion(text) {
@@ -63,7 +84,7 @@ class MealAnalyzer {
     }
 
     estimateAmount(text, food) {
-        const portionMap = this.foodDatabase.mealPortionEstimates || {};
+        const portionMap = this.mealPortionEstimates || {};
         
         for (const [phrase, amountStr] of Object.entries(portionMap)) {
             if (text.includes(phrase)) {
@@ -233,6 +254,68 @@ class MealAnalyzer {
             items,
             aggregate,
             matchedCount: items.length
+        };
+    }
+
+    async analyzeWithLLM(mealText) {
+        const items = mealText
+            .split(/[+、,，\s]+/)
+            .map(s => s.trim())
+            .filter(s => s.length > 0);
+
+        const parsedItems = [];
+        const newFoods = [];
+        const errors = [];
+
+        for (const item of items) {
+            const result = await this.getFoodWithLLMFallback(item);
+            
+            if (result.found && result.food) {
+                const estimatedAmount = this.estimateAmount(item, result.food);
+                const servingAmount = this.parseServingAmount(result.food.serving);
+                const ratio = servingAmount > 0 ? estimatedAmount.value / servingAmount : 1;
+
+                parsedItems.push({
+                    name: result.food.name,
+                    matchedText: item,
+                    food: result.food,
+                    source: result.source,
+                    amount: estimatedAmount.value,
+                    unit: estimatedAmount.unit,
+                    ratio,
+                    nutrition: this.scaleNutrition(result.food, ratio)
+                });
+
+                if (result.source === 'llm_new') {
+                    newFoods.push({
+                        name: result.food.name,
+                        source: result.source,
+                        llmResult: result.llmResult
+                    });
+                }
+            } else {
+                errors.push({
+                    name: item,
+                    error: result.error
+                });
+            }
+        }
+
+        const aggregate = this.aggregateNutrition(parsedItems);
+
+        return {
+            rawInput: mealText,
+            items: parsedItems,
+            aggregate,
+            matchedCount: parsedItems.length,
+            newFoods,
+            errors,
+            stats: {
+                static: parsedItems.filter(i => i.source === 'static').length,
+                dynamic: parsedItems.filter(i => i.source === 'dynamic').length,
+                llmNew: newFoods.length,
+                errors: errors.length
+            }
         };
     }
 }

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>疫情时空分析系统 - 国家卫健委流感数据可视化</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">
+                    <span class="icon">🌍</span>
+                    疫情时空分析系统
+                </h1>
+                <p class="subtitle">国家卫生健康委员会 - 流感疫情数据可视化平台</p>
+            </div>
+            <div class="actions">
+                <button id="refreshBtn" class="btn btn-primary">
+                    <span>🔄</span> 刷新数据
+                </button>
+                <button id="viewHeatmapBtn" class="btn btn-secondary">
+                    <span>🗺️</span> 查看热力图
+                </button>
+                <button id="viewScatterBtn" class="btn btn-secondary">
+                    <span>📍</span> 查看散点图
+                </button>
+            </div>
+        </header>
+
+        <section class="stats-section">
+            <h2 class="section-title">📊 数据统计概览</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalProvinces">31</div>
+                    <div class="stat-label">覆盖省份</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalCases">0</div>
+                    <div class="stat-label">流感病例总数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgPercentage">0%</div>
+                    <div class="stat-label">平均病例百分比</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="topProvince">-</div>
+                    <div class="stat-label">疫情最严重省份</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="chart-section">
+            <h2 class="section-title">🗺️ 中国省份流感热力图</h2>
+            <div class="chart-container">
+                <iframe id="heatmapFrame" src="/charts/flu_heatmap.html" class="chart-frame"></iframe>
+            </div>
+        </section>
+
+        <section class="chart-section">
+            <h2 class="section-title">📍 流感病例地理分布</h2>
+            <div class="chart-container">
+                <iframe id="scatterFrame" src="/charts/flu_scatter.html" class="chart-frame"></iframe>
+            </div>
+        </section>
+
+        <section class="data-section">
+            <h2 class="section-title">📋 各省份详细数据</h2>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>省份</th>
+                            <th>流感样病例百分比</th>
+                            <th>病例数</th>
+                            <th>风险等级</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>数据来源：国家卫生健康委员会 | 更新时间：<span id="updateTime"></span></p>
+            <p class="disclaimer">本系统仅供学习研究使用，数据仅供参考</p>
+        </footer>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <iframe id="modalFrame" class="modal-frame"></iframe>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

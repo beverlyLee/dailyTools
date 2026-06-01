@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chaotic Pendulum - 双摆混沌系统</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="app"></div>
+    <canvas id="canvas"></canvas>
+    <div class="hud">
+      <div class="hud-title">CHAOTIC PENDULUM</div>
+      <div class="hud-subtitle">蝴蝶效应 · Butterfly Effect</div>
+    </div>
+    <div class="panel">
+      <div class="panel-row">
+        <span class="label">系统1 (蓝)</span>
+        <span class="label">系统2 (紫)</span>
+      </div>
+      <div class="panel-row">
+        <span class="value" id="theta1-blue">θ₁: 0.00°</span>
+        <span class="value magenta" id="theta1-magenta">θ₁: 0.00°</span>
+      </div>
+      <div class="panel-row">
+        <span class="value" id="theta2-blue">θ₂: 0.00°</span>
+        <span class="value magenta" id="theta2-magenta">θ₂: 0.00°</span>
+      </div>
+      <div class="divergence">
+        <span class="label">发散度</span>
+        <span class="value" id="divergence">0.000</span>
+      </div>
+      <div class="time">
+        <span class="label">运行时间</span>
+        <span class="value" id="time">0.00s</span>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="btn-reset" class="btn">重置</button>
+      <button id="btn-pause" class="btn">暂停</button>
+      <button id="btn-fastforward" class="btn btn-primary">快进5秒</button>
+      <button id="btn-clear" class="btn">清除轨迹</button>
+    </div>
+    <div class="guide-tip" id="guide-tip">
+      <div class="tip-icon">💡</div>
+      <div class="tip-text">前5秒轨迹几乎重合，请注意观察差异逐渐扩大的过程</div>
+      <button class="tip-close" id="tip-close">×</button>
+    </div>
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color cyan"></div>
+        <span>系统1: θ₁=120°, θ₂=125°</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color magenta"></div>
+        <span>系统2: θ₁=120.08°, θ₂=125.08° (+0.08°)</span>
+      </div>
+    </div>
+    <div class="divergence-log">
+      <div class="log-title">发散度记录 / Divergence Log</div>
+      <div class="log-entry"><span class="log-time">0s:</span><span class="log-value" id="log-0s">---</span></div>
+      <div class="log-entry"><span class="log-time">5s:</span><span class="log-value" id="log-5s">---</span></div>
+      <div class="log-entry"><span class="log-time">15s:</span><span class="log-value" id="log-15s">---</span></div>
+      <div class="log-entry"><span class="log-time">30s:</span><span class="log-value" id="log-30s">---</span></div>
+      <div class="log-chart-container">
+        <div class="log-chart-title">对数增长曲线 / Log Scale</div>
+        <canvas id="chart-canvas" width="220" height="80"></canvas>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -4,6 +4,7 @@ class FraudDetectorApp {
         this.anomalyScorer = null;
         this.riskInterceptor = null;
         this.history = [];
+        this.currentTransaction = null;
         this.init();
     }
 
@@ -16,11 +17,27 @@ class FraudDetectorApp {
         
         await this.anomalyScorer.init();
         
+        this.syncThresholds();
+        
         this.setupEventHandlers();
         this.setDefaultTime();
         this.setupRiskInterceptors();
+        this.updateBaselineUI();
         
         console.log('✅ 欺诈交易检测系统初始化完成！');
+    }
+
+    syncThresholds() {
+        const scorerThresholds = this.anomalyScorer.getThresholds();
+        const interceptorThresholds = this.riskInterceptor.getThresholds();
+        
+        for (const [level, value] of Object.entries(scorerThresholds)) {
+            if (interceptorThresholds[level] !== value) {
+                this.riskInterceptor.setThreshold(level, value);
+            }
+        }
+        
+        console.log('🔄 阈值已同步:', scorerThresholds);
     }
 
     setupEventHandlers() {
@@ -44,7 +61,7 @@ class FraudDetectorApp {
 
         const clearHistoryBtn = document.getElementById('clearHistory');
         if (clearHistoryBtn) {
-            clearHistoryBtn.addEventListener('click', () => this.clearHistory());
+            clearHistoryBtn.addEventListener('click', () => this.clearAllHistory());
         }
 
         const modalClose = document.getElementById('modalClose');
@@ -85,10 +102,15 @@ class FraudDetectorApp {
 
         this.riskInterceptor.on('onAlert', (result, transaction) => {
             console.log('⚠️ 风险警报:', result.message);
+            this.riskInterceptor.showAlert(result, transaction);
         });
 
         this.riskInterceptor.on('onNotify', (result, transaction) => {
             console.log('📢 通知:', result.message);
+        });
+
+        this.riskInterceptor.on('onLog', (logEntry) => {
+            console.log('📋 审计日志:', logEntry);
         });
     }
 
@@ -134,6 +156,13 @@ class FraudDetectorApp {
                 location: '日本东京',
                 merchant: '秋叶原电器',
                 merchantCategory: '零售'
+            },
+            'multiple-high-value': {
+                amount: 100000,
+                time: '2024-01-15T11:00',
+                location: '中国上海',
+                merchant: '高端珠宝店',
+                merchantCategory: '零售'
             }
         };
 
@@ -144,6 +173,8 @@ class FraudDetectorApp {
             document.getElementById('location').value = example.location;
             document.getElementById('merchant').value = example.merchant;
             document.getElementById('merchantCategory').value = example.merchantCategory;
+            
+            console.log(`📋 已加载示例: ${type}`);
         }
     }
 
@@ -156,12 +187,20 @@ class FraudDetectorApp {
             return;
         }
 
+        this.currentTransaction = transaction;
+
         try {
             const result = await this.processTransaction(transaction);
             this.displayResult(result, transaction);
             this.addToHistory(transaction, result);
+            
+            this.featureExtractor.addToHistory(transaction, result.features);
+            
+            this.updateBaselineUI();
+            
+            console.log('✅ 交易处理完成');
         } catch (error) {
-            console.error('检测失败:', error);
+            console.error('❌ 检测失败:', error);
             alert('检测过程中发生错误，请重试！');
         }
     }
@@ -190,9 +229,13 @@ class FraudDetectorApp {
         console.log('🔍 正在分析交易:', transaction);
         
         const features = this.featureExtractor.extract(transaction);
-        console.log('📊 提取的特征:', features);
+        console.log('📊 提取的特征:', this.summarizeFeatures(features));
         
-        const scoreResult = this.anomalyScorer.calculateScore(features, transaction);
+        const scoreResult = await this.anomalyScorer.scoreTransaction(
+            features, 
+            transaction, 
+            this.featureExtractor
+        );
         console.log('📈 风险评分:', scoreResult);
         
         const interceptResult = this.riskInterceptor.intercept(scoreResult, transaction);
@@ -205,46 +248,33 @@ class FraudDetectorApp {
         };
     }
 
+    summarizeFeatures(features) {
+        return {
+            amount: features.amount,
+            isLargeAmount: features.isLargeAmount,
+            isExtremeAmount: features.isExtremeAmount,
+            amountDeviation: features.amountDeviation.toFixed(3),
+            amountZScore: features.amountZScore.toFixed(3),
+            isOddHour: features.isOddHour,
+            isLateNight: features.isLateNight,
+            isForeignLocation: features.isForeignLocation,
+            locationChange: features.locationChange,
+            rapidLocationChange: features.rapidLocationChange,
+            firstTimeLocation: features.firstTimeLocation
+        };
+    }
+
     displayResult(result, transaction) {
         const resultContent = document.getElementById('resultContent');
         const { scoreResult, interceptResult } = result;
         const riskLevel = scoreResult.riskLevel;
         const scorePercent = (scoreResult.score * 100).toFixed(1);
 
-        let anomaliesHtml = '';
-        if (scoreResult.anomalies && scoreResult.anomalies.length > 0) {
-            anomaliesHtml = `
-                <div class="anomalies-section">
-                    <h4>🚨 检测到的异常</h4>
-                    <ul class="anomalies-list">
-                        ${scoreResult.anomalies.map(anomaly => `
-                            <li class="anomaly-item severity-${anomaly.severity}">
-                                <span class="anomaly-icon">${this.getAnomalyIcon(anomaly.type)}</span>
-                                <span class="anomaly-message">${anomaly.message}</span>
-                                <span class="anomaly-severity">${this.getSeverityLabel(anomaly.severity)}</span>
-                            </li>
-                        `).join('')}
-                    </ul>
-                </div>
-            `;
-        }
-
-        let recommendationsHtml = '';
-        if (interceptResult.recommendations && interceptResult.recommendations.length > 0) {
-            recommendationsHtml = `
-                <div class="recommendations-section">
-                    <h4>💡 建议措施</h4>
-                    <ul class="recommendations-list">
-                        ${interceptResult.recommendations.map(rec => `
-                            <li class="recommendation-item priority-${rec.priority}">
-                                <div class="rec-title">${this.getRecIcon(rec.type)} ${rec.title}</div>
-                                <div class="rec-description">${rec.description}</div>
-                            </li>
-                        `).join('')}
-                    </ul>
-                </div>
-            `;
-        }
+        const anomaliesHtml = this.generateAnomaliesHtml(scoreResult);
+        const recommendationsHtml = this.generateRecommendationsHtml(interceptResult);
+        const scoreBreakdownHtml = this.generateScoreBreakdownHtml(scoreResult);
+        const modelInfoHtml = this.generateModelInfoHtml(scoreResult);
+        const baselineHtml = this.generateBaselineComparisonHtml(transaction, scoreResult);
 
         resultContent.innerHTML = `
             <div class="result-card risk-${riskLevel.level}">
@@ -292,24 +322,184 @@ class FraudDetectorApp {
 
                     ${anomaliesHtml}
                     ${recommendationsHtml}
+                    ${baselineHtml}
+                    ${scoreBreakdownHtml}
+                    ${modelInfoHtml}
+                </div>
+            </div>
+        `;
+    }
 
-                    <div class="score-breakdown">
-                        <h4>📊 详细评分</h4>
-                        <div class="score-grid">
-                            ${Object.entries(scoreResult.detailedScores).map(([key, value]) => `
-                                <div class="score-item">
-                                    <span class="score-label">${this.getScoreLabel(key)}</span>
-                                    <div class="score-bar">
-                                        <div class="score-fill" style="width: ${value * 100}%"></div>
-                                    </div>
-                                    <span class="score-percent">${(value * 100).toFixed(0)}%</span>
-                                </div>
-                            `).join('')}
+    generateAnomaliesHtml(scoreResult) {
+        if (!scoreResult.anomalies || scoreResult.anomalies.length === 0) {
+            return `
+                <div class="anomalies-section">
+                    <h4>✅ 异常检测</h4>
+                    <div class="no-anomalies">
+                        <span>未检测到异常特征</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="anomalies-section">
+                <h4>🚨 检测到的异常 (${scoreResult.anomalies.length}项)</h4>
+                <ul class="anomalies-list">
+                    ${scoreResult.anomalies.map(anomaly => `
+                        <li class="anomaly-item severity-${anomaly.severity}">
+                            <span class="anomaly-icon">${this.getAnomalyIcon(anomaly.type)}</span>
+                            <div class="anomaly-content">
+                                <span class="anomaly-message">${anomaly.message}</span>
+                                ${anomaly.description ? `<span class="anomaly-desc">${anomaly.description}</span>` : ''}
+                            </div>
+                            <span class="anomaly-severity">${this.getSeverityLabel(anomaly.severity)}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        `;
+    }
+
+    generateRecommendationsHtml(interceptResult) {
+        if (!interceptResult.recommendations || interceptResult.recommendations.length === 0) {
+            return '';
+        }
+
+        return `
+            <div class="recommendations-section">
+                <h4>💡 建议措施</h4>
+                <ul class="recommendations-list">
+                    ${interceptResult.recommendations.map(rec => `
+                        <li class="recommendation-item priority-${rec.priority}">
+                            <div class="rec-title">${rec.icon || '📌'} ${rec.title}</div>
+                            <div class="rec-description">${rec.description}</div>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        `;
+    }
+
+    generateScoreBreakdownHtml(scoreResult) {
+        if (!scoreResult.detailedScores) {
+            return '';
+        }
+
+        return `
+            <div class="score-breakdown">
+                <h4>📊 详细评分</h4>
+                <div class="score-grid">
+                    ${Object.entries(scoreResult.detailedScores).map(([key, value]) => `
+                        <div class="score-item">
+                            <span class="score-label">${this.getScoreLabel(key)}</span>
+                            <div class="score-bar">
+                                <div class="score-fill" style="width: ${Math.min(value * 100, 100)}%"></div>
+                            </div>
+                            <span class="score-percent">${Math.min(value * 100, 100).toFixed(0)}%</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    generateModelInfoHtml(scoreResult) {
+        const scoreComposition = scoreResult.scoreComposition;
+        if (!scoreComposition) {
+            return '';
+        }
+
+        return `
+            <div class="model-info-section">
+                <h4>🤖 模型信息</h4>
+                <div class="model-info">
+                    <div class="model-type">
+                        <span class="info-label">模型类型:</span>
+                        <span class="info-value">${scoreResult.modelType || '未知'}</span>
+                    </div>
+                    <div class="score-composition">
+                        <div class="comp-item">
+                            <span>规则引擎:</span>
+                            <span class="comp-value">${(scoreComposition.ruleBased * 100).toFixed(1)}%</span>
+                        </div>
+                        ${scoreComposition.modelBased !== null ? `
+                            <div class="comp-item">
+                                <span>模型预测:</span>
+                                <span class="comp-value">${(scoreComposition.modelBased * 100).toFixed(1)}%</span>
+                            </div>
+                        ` : `
+                            <div class="comp-item">
+                                <span>模型预测:</span>
+                                <span class="comp-value">不可用</span>
+                            </div>
+                        `}
+                        <div class="comp-item final">
+                            <span>综合分数:</span>
+                            <span class="comp-value">${(scoreComposition.final * 100).toFixed(1)}%</span>
                         </div>
                     </div>
                 </div>
             </div>
         `;
+    }
+
+    generateBaselineComparisonHtml(transaction, scoreResult) {
+        const baseline = this.featureExtractor.getBaseline();
+        const features = scoreResult.detailedScores;
+        
+        if (!baseline || baseline.totalTransactions === 0) {
+            return '';
+        }
+
+        const amountComparison = transaction.amount / baseline.medianAmount;
+        const deviation = Math.abs(transaction.amount - baseline.medianAmount);
+
+        return `
+            <div class="baseline-section">
+                <h4>📈 历史基线对比</h4>
+                <div class="baseline-grid">
+                    <div class="baseline-item">
+                        <span class="baseline-label">历史中位数</span>
+                        <span class="baseline-value">¥${baseline.medianAmount.toLocaleString()}</span>
+                    </div>
+                    <div class="baseline-item">
+                        <span class="baseline-label">历史平均值</span>
+                        <span class="baseline-value">¥${baseline.avgAmount.toFixed(0).toLocaleString()}</span>
+                    </div>
+                    <div class="baseline-item">
+                        <span class="baseline-label">交易次数</span>
+                        <span class="baseline-value">${baseline.totalTransactions}次</span>
+                    </div>
+                    <div class="baseline-item highlight ${amountComparison > 3 ? 'high' : ''}">
+                        <span class="baseline-label">相对比例</span>
+                        <span class="baseline-value">${amountComparison.toFixed(1)}倍</span>
+                    </div>
+                </div>
+                ${features && features.amountDeviation ? `
+                    <div class="deviation-info">
+                        <span>金额偏差: ${deviation.toLocaleString()}元 (${(features.amountDeviation * 100).toFixed(0)}%)</span>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    updateBaselineUI() {
+        const baseline = this.featureExtractor.getBaseline();
+        const baselineSection = document.getElementById('baselineInfo');
+        
+        if (baselineSection && baseline.totalTransactions > 0) {
+            baselineSection.innerHTML = `
+                <div class="baseline-summary">
+                    <span>📊 已学习 ${baseline.totalTransactions} 笔历史交易</span>
+                    <span>|</span>
+                    <span>中位数: ¥${baseline.medianAmount.toLocaleString()}</span>
+                    <span>|</span>
+                    <span>常用地点: ${baseline.commonLocations.slice(0, 3).join(', ')}</span>
+                </div>
+            `;
+        }
     }
 
     getLevelIcon(level) {
@@ -324,10 +514,24 @@ class FraudDetectorApp {
 
     getAnomalyIcon(type) {
         const icons = {
+            extreme_amount: '💰',
+            large_amount: '💴',
+            zscore: '📊',
+            late_night: '🌙',
+            odd_hour: '⏰',
+            unusual_hour: '🕐',
+            foreign: '🌍',
+            rapid_location: '✈️',
+            location_change: '📍',
+            new_location: '🆕',
+            unusual_location: '🗺️',
+            merchant: '🏪',
+            new_merchant: '🛒',
+            same_amount: '🔄',
+            rapid: '⚡',
             amount: '💰',
             time: '⏰',
             location: '📍',
-            merchant: '🏪',
             deviation: '📉'
         };
         return icons[type] || '⚠️';
@@ -335,6 +539,7 @@ class FraudDetectorApp {
 
     getSeverityLabel(severity) {
         const labels = {
+            critical: '极高',
             high: '高',
             medium: '中',
             low: '低'
@@ -347,6 +552,9 @@ class FraudDetectorApp {
             block: '🚫',
             verify: '🔐',
             monitor: '👁️',
+            observe: '📋',
+            approve: '✅',
+            investigate: '🔍',
             amount: '💰',
             time: '⏰',
             location: '📍',
@@ -360,11 +568,28 @@ class FraudDetectorApp {
         const labels = {
             amount: '金额风险',
             isLargeAmount: '大额标记',
+            isExtremeAmount: '极端金额',
             amountDeviation: '金额偏差',
+            amountZScore: 'Z-Score',
+            amountPercentile: '金额百分位',
+            isOddHour: '深夜标记',
+            isLateNight: '凌晨标记',
+            hourUnusualness: '时段异常度',
             time: '时间风险',
+            isForeignLocation: '境外标记',
+            locationChange: '地点变更',
+            rapidLocationChange: '快速移动',
+            locationUnusualness: '地点异常度',
             location: '地点风险',
-            isForeignLocation: '异地标记',
-            merchant: '商户风险'
+            locationAnomaly: '旅行异常',
+            merchantAnomaly: '商户异常',
+            merchantUnusualness: '商户异常度',
+            sameAmountConsecutive: '连续相同',
+            rapidTransactions: '频繁交易',
+            firstTimeLocation: '首次地点',
+            firstTimeMerchant: '首次商户',
+            merchant: '商户风险',
+            isForeignLocation: '异地标记'
         };
         return labels[key] || key;
     }
@@ -379,7 +604,7 @@ class FraudDetectorApp {
         
         this.history.unshift(historyItem);
         
-        if (this.history.length > 20) {
+        if (this.history.length > 50) {
             this.history.pop();
         }
         
@@ -388,8 +613,9 @@ class FraudDetectorApp {
 
     renderHistory() {
         const historyList = document.getElementById('historyList');
+        if (!historyList) return;
         
-        if (this.history.length === 0) {
+        if (!this.history || !Array.isArray(this.history) || this.history.length === 0) {
             historyList.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">📜</div>
@@ -400,44 +626,77 @@ class FraudDetectorApp {
         }
 
         historyList.innerHTML = this.history.map(item => {
-            const riskLevel = item.result.scoreResult.riskLevel;
+            if (!item || !item.result || !item.result.scoreResult) {
+                return '';
+            }
+            
+            const riskLevel = item.result.scoreResult.riskLevel || { level: 'low', color: '#28a745', label: '低风险' };
+            const anomalies = (item.result.scoreResult && item.result.scoreResult.anomalies) || [];
+            const transaction = item.transaction || { merchant: '未知商户', amount: 0, location: '未知地点' };
+            
             return `
-                <div class="history-item risk-${riskLevel.level}" data-id="${item.id}">
+                <div class="history-item risk-${riskLevel.level}" data-id="${item.id || Date.now()}">
                     <div class="history-left">
-                        <div class="history-icon" style="background-color: ${riskLevel.color}">
+                        <div class="history-icon" style="background-color: ${riskLevel.color || '#28a745'}">
                             ${this.getLevelIcon(riskLevel.level)}
                         </div>
                         <div class="history-info">
-                            <div class="history-merchant">${item.transaction.merchant}</div>
+                            <div class="history-merchant">${transaction.merchant || '未知商户'}</div>
                             <div class="history-details">
-                                <span>¥${item.transaction.amount.toLocaleString()}</span>
+                                <span>¥${(transaction.amount || 0).toLocaleString()}</span>
                                 <span>·</span>
-                                <span>${item.transaction.location}</span>
+                                <span>${transaction.location || '未知地点'}</span>
                             </div>
-                            <div class="history-time">${item.timestamp}</div>
+                            <div class="history-time">${item.timestamp || new Date().toLocaleString()}</div>
+                            ${anomalies.length > 0 ? `
+                                <div class="history-anomalies">
+                                    ${anomalies.slice(0, 2).map(a => `<span class="mini-tag">${this.getAnomalyIcon(a.type)} ${a.message}</span>`).join('')}
+                                    ${anomalies.length > 2 ? `<span class="mini-tag more">+${anomalies.length - 2}</span>` : ''}
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
                     <div class="history-right">
-                        <div class="history-level" style="color: ${riskLevel.color}">
-                            ${riskLevel.label}
+                        <div class="history-level" style="color: ${riskLevel.color || '#28a745'}">
+                            ${riskLevel.label || '未知'}
                         </div>
                         <div class="history-score">
-                            ${(item.result.scoreResult.score * 100).toFixed(0)}分
+                            ${((item.result.scoreResult && item.result.scoreResult.score) || 0 * 100).toFixed(0)}分
                         </div>
                     </div>
                 </div>
             `;
-        }).join('');
+        }).filter(Boolean).join('');
     }
 
-    clearHistory() {
+    clearAllHistory() {
+        if (!confirm('确定要清空所有历史记录吗？这将重置消费基线和所有学习到的模式。')) {
+            return;
+        }
+        
         this.history = [];
+        this.currentTransaction = null;
+        
+        if (this.featureExtractor) {
+            this.featureExtractor.clearHistory();
+        }
+        
+        if (this.riskInterceptor) {
+            this.riskInterceptor.clearAuditLog();
+        }
+        
         this.renderHistory();
+        this.updateBaselineUI();
+        this.clearForm();
+        
+        console.log('🗑️ 所有历史记录、基线数据和审计日志已清空');
+        alert('✅ 历史记录已重置！您可以开始新的测试。');
     }
 
     clearForm() {
         document.getElementById('transactionForm').reset();
         this.setDefaultTime();
+        this.currentTransaction = null;
         
         const resultContent = document.getElementById('resultContent');
         resultContent.innerHTML = `
@@ -474,20 +733,22 @@ class FraudDetectorApp {
                 </div>
                 <div class="modal-alert-body">
                     <div class="alert-transaction">
-                        <h4>交易信息</h4>
+                        <h4>📋 交易信息</h4>
                         <p><strong>金额:</strong> ¥${transaction.amount.toLocaleString()}</p>
                         <p><strong>时间:</strong> ${new Date(transaction.time).toLocaleString()}</p>
                         <p><strong>地点:</strong> ${transaction.location}</p>
                         <p><strong>商户:</strong> ${transaction.merchant}</p>
                     </div>
                     <div class="alert-message">
-                        <p>${result.message}</p>
+                        <pre>${result.message}</pre>
                     </div>
                     ${result.recommendations && result.recommendations.length > 0 ? `
                         <div class="alert-recommendations">
-                            <h4>建议措施</h4>
+                            <h4>💡 建议措施</h4>
                             <ul>
-                                ${result.recommendations.map(rec => `<li>${rec.title}: ${rec.description}</li>`).join('')}
+                                ${result.recommendations.slice(0, 3).map(rec => `
+                                    <li><strong>${rec.icon || '📌'} ${rec.title}:</strong> ${rec.description}</li>
+                                `).join('')}
                             </ul>
                         </div>
                     ` : ''}
@@ -506,6 +767,10 @@ class FraudDetectorApp {
     handleAuthConfirm() {
         alert('✅ 身份验证成功！交易已放行。');
         this.hideModal();
+        
+        if (this.currentTransaction) {
+            console.log('🔓 已授权交易:', this.currentTransaction);
+        }
     }
 }
 

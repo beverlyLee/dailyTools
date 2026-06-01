@@ -1,218 +1,152 @@
 class SyntaxAnalyzer {
     constructor() {
         this.editor = null;
-        this.onCursorChange = null;
-        this.onContentChange = null;
+        this.callbacks = {};
+        this.debounceTimer = null;
     }
 
     init(editor, callbacks = {}) {
         this.editor = editor;
-        this.onCursorChange = callbacks.onCursorChange || (() => {});
-        this.onContentChange = callbacks.onContentChange || (() => {});
+        this.callbacks = callbacks;
 
-        this._setupEventListeners();
+        editor.onDidChangeCursorPosition((event) => {
+            this.handleCursorChange(event.position);
+        });
+
+        editor.onDidChangeModelContent((event) => {
+            this.handleContentChange(event);
+        });
     }
 
-    _setupEventListeners() {
-        this.editor.onDidChangeCursorPosition((event) => {
-            const position = event.position;
-            const context = this.analyzeContext(position);
-            this.onCursorChange(position, context);
-        });
+    handleCursorChange(position) {
+        const context = this.analyzeContext(position);
+        if (this.callbacks.onCursorChange) {
+            this.callbacks.onCursorChange(position, context);
+        }
+    }
 
-        this.editor.onDidChangeModelContent(() => {
-            this.onContentChange(this.editor.getValue());
-        });
+    handleContentChange(event) {
+        if (this.debounceTimer) {
+            clearTimeout(this.debounceTimer);
+        }
+        this.debounceTimer = setTimeout(() => {
+            if (this.callbacks.onContentChange) {
+                const code = this.editor.getValue();
+                this.callbacks.onContentChange(code);
+            }
+        }, 100);
     }
 
     analyzeContext(position) {
         const model = this.editor.getModel();
-        const value = model.getValue();
-        const offset = model.getOffsetAt(position);
         const lineContent = model.getLineContent(position.lineNumber);
-        const column = position.column;
+        const prefix = lineContent.substring(0, position.column - 1);
+        const word = this.getCurrentWord(prefix);
 
-        const context = {
-            position: position,
-            offset: offset,
-            lineContent: lineContent,
-            textBeforeCursor: lineContent.substring(0, column - 1),
-            textAfterCursor: lineContent.substring(column - 1),
-            contextType: this._detectContextType(lineContent, column),
-            currentWord: this._getCurrentWord(lineContent, column),
-            isInString: this._isInString(value, offset),
-            isInComment: this._isInComment(value, offset),
-            isInFunctionCall: this._isInFunctionCall(lineContent, column),
-            functionName: this._getFunctionName(lineContent, column)
+        const contextType = this.determineContextType(prefix);
+
+        return {
+            contextType,
+            currentWord: word,
+            lineContent,
+            prefix,
+            position: { ...position }
         };
-
-        return context;
     }
 
-    _detectContextType(lineContent, column) {
-        const textBefore = lineContent.substring(0, column - 1).trim();
+    getCurrentWord(prefix) {
+        const match = prefix.match(/[a-zA-Z0-9_$]+$/);
+        return match ? match[0] : '';
+    }
 
-        if (textBefore.includes('//') || textBefore.includes('/*')) {
-            return 'comment';
+    determineContextType(prefix) {
+        const trimmed = prefix.trim();
+
+        if (/\b(function|class|const|let|var|if|else|for|while|do|switch|try|catch|return)\s*$/.test(trimmed)) {
+            return 'keyword_context';
         }
 
-        const lastChar = textBefore[textBefore.length - 1];
-        const secondLastChar = textBefore.length >= 2 ? textBefore[textBefore.length - 2] : '';
-
-        if (lastChar === '.') {
-            return 'property';
+        if (/\.[a-zA-Z0-9_$]*$/.test(trimmed)) {
+            return 'member_access';
         }
 
-        if (lastChar === '(') {
-            return 'argument';
+        if (/\b(console|document|window|Math|Array|Object|String|Number|Boolean)\.$/.test(trimmed)) {
+            return 'builtin_member';
         }
 
-        if (lastChar === '=') {
-            return 'assignment';
+        if (/\bnew\s+[a-zA-Z0-9_$]*$/.test(trimmed)) {
+            return 'constructor';
         }
 
-        if (this._startsWithKeyword(textBefore)) {
-            return 'statement';
+        if (/[a-zA-Z0-9_$]+\s*\($/.test(trimmed)) {
+            return 'function_call';
         }
 
-        const wordMatch = textBefore.match(/(\w+)\s*$/);
-        if (wordMatch) {
+        if (/['"`][^'"`]*$/.test(trimmed)) {
+            return 'string';
+        }
+
+        if (/\/\/.*$/.test(trimmed)) {
+            return 'comment_line';
+        }
+
+        if (/\/\*[\s\S]*$/.test(trimmed)) {
+            return 'comment_block';
+        }
+
+        if (/^[a-zA-Z0-9_$]+$/.test(trimmed)) {
             return 'identifier';
+        }
+
+        if (/^\s*[a-zA-Z0-9_$]*$/.test(trimmed)) {
+            return 'identifier_at_start';
         }
 
         return 'unknown';
     }
 
-    _startsWithKeyword(text) {
-        const keywords = ['var ', 'let ', 'const ', 'function ', 'return ', 'if ', 'else ', 'for ', 'while ', 'switch ', 'case ', 'class ', 'new ', 'throw ', 'try ', 'catch '];
-        return keywords.some(keyword => text.endsWith(keyword));
-    }
-
-    _getCurrentWord(lineContent, column) {
-        const textBefore = lineContent.substring(0, column - 1);
-        const wordMatch = textBefore.match(/(\w+)$/);
-        return wordMatch ? wordMatch[1] : '';
-    }
-
-    _isInString(value, offset) {
-        let inString = false;
-        let stringType = null;
-        let escapeNext = false;
-
-        for (let i = 0; i < offset; i++) {
-            const char = value[i];
-            
-            if (escapeNext) {
-                escapeNext = false;
-                continue;
-            }
-
-            if (char === '\\') {
-                escapeNext = true;
-                continue;
-            }
-
-            if (inString) {
-                if (char === stringType) {
-                    inString = false;
-                    stringType = null;
-                }
-            } else {
-                if (char === '"' || char === "'" || char === '`') {
-                    inString = true;
-                    stringType = char;
-                }
-            }
-        }
-
-        return inString;
-    }
-
-    _isInComment(value, offset) {
-        const text = value.substring(0, offset);
-        
-        let inBlockComment = false;
-        let inString = false;
-        let stringType = null;
-        let escapeNext = false;
-
-        for (let i = 0; i < text.length; i++) {
-            if (escapeNext) {
-                escapeNext = false;
-                continue;
-            }
-
-            const char = text[i];
-            const nextChar = text[i + 1] || '';
-
-            if (!inString) {
-                if (char === '/' && nextChar === '*') {
-                    inBlockComment = true;
-                    i++;
-                    continue;
-                }
-                
-                if (char === '*' && nextChar === '/' && inBlockComment) {
-                    inBlockComment = false;
-                    i++;
-                    continue;
-                }
-                
-                if (char === '/' && nextChar === '/') {
-                    const lineEnd = text.indexOf('\n', i);
-                    if (lineEnd === -1 || lineEnd > offset - 1) {
-                        return true;
-                    }
-                    i = lineEnd;
-                    continue;
-                }
-            }
-
-            if (char === '\\') {
-                escapeNext = true;
-                continue;
-            }
-
-            if (!inBlockComment) {
-                if (inString) {
-                    if (char === stringType) {
-                        inString = false;
-                        stringType = null;
-                    }
-                } else if (char === '"' || char === "'" || char === '`') {
-                    inString = true;
-                    stringType = char;
-                }
-            }
-        }
-
-        return inBlockComment;
-    }
-
-    _isInFunctionCall(lineContent, column) {
-        const textBefore = lineContent.substring(0, column - 1);
-        const openParens = (textBefore.match(/\(/g) || []).length;
-        const closeParens = (textBefore.match(/\)/g) || []).length;
-        return openParens > closeParens;
-    }
-
-    _getFunctionName(lineContent, column) {
-        const textBefore = lineContent.substring(0, column - 1);
-        const match = textBefore.match(/(\w+)\s*\([^)]*$/);
-        return match ? match[1] : null;
-    }
-
-    getSurroundingCode(position, linesBefore = 3, linesAfter = 1) {
+    getCurrentLine(position) {
         const model = this.editor.getModel();
-        const totalLines = model.getLineCount();
-        const startLine = Math.max(1, position.lineNumber - linesBefore);
-        const endLine = Math.min(totalLines, position.lineNumber + linesAfter);
+        return model.getLineContent(position.lineNumber);
+    }
+
+    getLineUntilCursor(position) {
+        const model = this.editor.getModel();
+        const lineContent = model.getLineContent(position.lineNumber);
+        return lineContent.substring(0, position.column - 1);
+    }
+
+    getPreviousLines(position, count = 5) {
+        const model = this.editor.getModel();
+        const lines = [];
+        const startLine = Math.max(1, position.lineNumber - count);
         
-        return model.getValueInRange({
-            startLineNumber: startLine,
-            startColumn: 1,
-            endLineNumber: endLine,
-            endColumn: model.getLineLength(endLine) + 1
-        });
+        for (let i = startLine; i < position.lineNumber; i++) {
+            lines.push(model.getLineContent(i));
+        }
+        
+        return lines.join('\n');
+    }
+
+    extractVariables(code) {
+        const variables = new Set();
+        const varRegex = /\b(?:const|let|var)\s+([a-zA-Z0-9_$]+)/g;
+        let match;
+        
+        while ((match = varRegex.exec(code)) !== null) {
+            variables.add(match[1]);
+        }
+
+        const funcRegex = /\bfunction\s+([a-zA-Z0-9_$]+)/g;
+        while ((match = funcRegex.exec(code)) !== null) {
+            variables.add(match[1]);
+        }
+
+        const classRegex = /\bclass\s+([a-zA-Z0-9_$]+)/g;
+        while ((match = classRegex.exec(code)) !== null) {
+            variables.add(match[1]);
+        }
+
+        return Array.from(variables);
     }
 }

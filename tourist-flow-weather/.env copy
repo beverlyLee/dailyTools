@@ -1,0 +1,17 @@
+# 火山引擎API配置
+ARK_API_KEY=2514cedf-530b-446a-94b0-87afb6d04735
+ARK_MODEL_ENDPOINT=https://ark.cn-beijing.volces.com/api/v3/chat/completions
+ARK_MODEL=doubao-seed-2-0-lite-260428
+
+# 爬虫配置
+USE_MOCK_DATA=true
+CRAWLER_INTERVAL=3600
+CRAWLER_JD_ENABLED=true
+CRAWLER_TM_ENABLED=false
+
+# 数据库配置
+DATABASE_PATH=./data/baijiu.db
+
+# 服务配置
+API_HOST=0.0.0.0
+API_PORT=8000

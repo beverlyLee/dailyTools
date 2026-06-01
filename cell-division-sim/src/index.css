@@ -1,0 +1,88 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0a0a0f;
+}
+
+.app-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ui-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.ui-overlay > * {
+  pointer-events: auto;
+}
+
+.title {
+  color: #fff;
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-shadow: 0 0 20px rgba(100, 200, 255, 0.5);
+  letter-spacing: 2px;
+}
+
+.split-btn {
+  padding: 14px 36px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #00d4ff 0%, #7b2ff7 100%);
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  letter-spacing: 1px;
+}
+
+.split-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 30px rgba(0, 212, 255, 0.6);
+}
+
+.split-btn:active {
+  transform: scale(0.98);
+}
+
+.split-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.status-text {
+  color: #888;
+  font-size: 14px;
+  margin-top: 16px;
+  letter-spacing: 1px;
+}

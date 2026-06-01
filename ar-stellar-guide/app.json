@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "AR Stellar Guide",
+    "slug": "ar-stellar-guide",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to show the night sky with AR constellations.",
+        "NSMotionUsageDescription": "This app uses device motion sensors to track the sky orientation."
+      }
+    },
+    "android": {
+      "permissions": [
+        "CAMERA"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow AR Stellar Guide to access your camera."
+        }
+      ]
+    ]
+  }
+}

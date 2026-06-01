@@ -1,0 +1,162 @@
+[
+  {
+    "job_title": "算法工程师",
+    "company": "AI科技有限公司",
+    "salary": "35K-60K",
+    "location": "北京",
+    "description": "负责人工智能、机器学习、深度学习相关算法研发，使用TensorFlow、PyTorch进行大模型训练和优化，参与NLP自然语言处理项目，计算机视觉算法开发。要求熟悉人工智能算法，有机器学习实战经验，掌握深度学习框架。",
+    "requirements": "硕士以上学历，人工智能、计算机相关专业，3年以上算法经验"
+  },
+  {
+    "job_title": "高级算法工程师",
+    "company": "智能科技集团",
+    "salary": "40K-70K",
+    "location": "上海",
+    "description": "从事人工智能核心算法研究，包括大模型LLM、GPT技术，深度学习架构设计，机器学习平台建设。负责NLP、CV等人工智能方向的技术攻关。",
+    "requirements": "博士优先，5年以上人工智能相关经验，发表过顶会论文"
+  },
+  {
+    "job_title": "机器学习工程师",
+    "company": "数据智能公司",
+    "salary": "30K-50K",
+    "location": "深圳",
+    "description": "负责机器学习模型的开发和部署，参与人工智能产品研发，使用Python进行数据处理和模型训练，熟悉TensorFlow和PyTorch框架。",
+    "requirements": "本科以上，3年以上机器学习经验"
+  },
+  {
+    "job_title": "人工智能研究员",
+    "company": "未来科技研究院",
+    "salary": "50K-80K",
+    "location": "杭州",
+    "description": "专注人工智能前沿技术研究，包括大语言模型、多模态AI、深度学习优化等方向。发表高水平论文，推动人工智能技术创新。",
+    "requirements": "博士学历，人工智能领域深厚背景"
+  },
+  {
+    "job_title": "AI算法工程师",
+    "company": "智联科技",
+    "salary": "38K-65K",
+    "location": "广州",
+    "description": "负责人工智能推荐算法优化，深度学习模型训练，NLP自然语言处理应用开发，计算机视觉图像识别项目。",
+    "requirements": "硕士以上，熟悉人工智能主流算法"
+  },
+  {
+    "job_title": "测试工程师",
+    "company": "软件开发公司",
+    "salary": "15K-25K",
+    "location": "北京",
+    "description": "负责软件产品的功能测试、自动化测试编写，执行测试用例，提交Bug报告，参与测试计划制定。熟悉测试流程，掌握自动化测试工具。",
+    "requirements": "本科以上，2年以上测试经验，熟悉测试方法论"
+  },
+  {
+    "job_title": "软件测试工程师",
+    "company": "互联网科技公司",
+    "salary": "12K-22K",
+    "location": "上海",
+    "description": "负责Web和移动端产品测试，编写测试用例，进行功能测试、性能测试，参与自动化测试框架建设。",
+    "requirements": "本科以上，1-3年测试工作经验"
+  },
+  {
+    "job_title": "QA测试工程师",
+    "company": "金融科技公司",
+    "salary": "14K-24K",
+    "location": "深圳",
+    "description": "负责金融系统测试，质量保证流程执行，测试文档编写，Bug跟踪管理。熟悉测试工具和方法。",
+    "requirements": "本科以上，2年以上QA测试经验"
+  },
+  {
+    "job_title": "自动化测试工程师",
+    "company": "电商平台",
+    "salary": "18K-28K",
+    "location": "杭州",
+    "description": "负责自动化测试脚本开发，CI/CD集成，性能测试执行，测试框架维护。",
+    "requirements": "本科以上，3年以上自动化测试经验"
+  },
+  {
+    "job_title": "Python后端工程师",
+    "company": "互联网公司",
+    "salary": "25K-40K",
+    "location": "北京",
+    "description": "使用Python、Flask、Django进行后端开发，设计高可用架构，优化系统性能。熟悉MySQL、Redis、MongoDB等数据库。",
+    "requirements": "本科以上，3年以上Python开发经验"
+  },
+  {
+    "job_title": "Java开发工程师",
+    "company": "企业服务公司",
+    "salary": "22K-38K",
+    "location": "上海",
+    "description": "使用Java、SpringBoot进行微服务开发，分布式系统设计，性能调优。熟悉MySQL、Redis消息队列。",
+    "requirements": "本科以上，3年以上Java开发经验"
+  },
+  {
+    "job_title": "前端工程师",
+    "company": "科技公司",
+    "salary": "20K-35K",
+    "location": "深圳",
+    "description": "使用Vue、React、JavaScript进行前端开发，优化用户体验，提升页面性能。熟悉TypeScript、Node.js。",
+    "requirements": "本科以上，2年以上前端开发经验"
+  },
+  {
+    "job_title": "全栈工程师",
+    "company": "创业公司",
+    "salary": "28K-45K",
+    "location": "北京",
+    "description": "负责前后端全栈开发，使用React、Node.js、Python等技术栈，参与产品从0到1的建设。",
+    "requirements": "本科以上，5年以上全栈开发经验"
+  },
+  {
+    "job_title": "数据工程师",
+    "company": "大数据公司",
+    "salary": "26K-42K",
+    "location": "上海",
+    "description": "负责数据仓库建设，ETL开发，大数据处理，使用Spark、Hadoop进行数据分析。",
+    "requirements": "本科以上，3年以上大数据开发经验"
+  },
+  {
+    "job_title": "DevOps工程师",
+    "company": "云服务公司",
+    "salary": "24K-40K",
+    "location": "深圳",
+    "description": "负责CI/CD流程建设，Docker、K8s容器化部署，监控系统维护，自动化运维脚本开发。",
+    "requirements": "本科以上，3年以上DevOps经验"
+  },
+  {
+    "job_title": "人工智能产品经理",
+    "company": "AI产品公司",
+    "salary": "35K-55K",
+    "location": "北京",
+    "description": "负责人工智能产品线规划，需求分析，产品设计，协调算法和开发团队，推动AI产品落地。",
+    "requirements": "本科以上，有人工智能产品经验优先"
+  },
+  {
+    "job_title": "NLP算法工程师",
+    "company": "智能对话公司",
+    "salary": "40K-65K",
+    "location": "上海",
+    "description": "专注自然语言处理NLP算法研发，包括文本分类、情感分析、对话系统、大模型微调等人工智能方向。",
+    "requirements": "硕士以上，NLP相关研究背景"
+  },
+  {
+    "job_title": "计算机视觉工程师",
+    "company": "图像识别公司",
+    "salary": "38K-62K",
+    "location": "深圳",
+    "description": "负责CV计算机视觉算法开发，图像识别、目标检测、人脸识别等人工智能技术落地。",
+    "requirements": "硕士以上，计算机视觉相关经验"
+  },
+  {
+    "job_title": "深度学习工程师",
+    "company": "AI芯片公司",
+    "salary": "42K-68K",
+    "location": "杭州",
+    "description": "负责深度学习模型优化，神经网络压缩，人工智能算法在端侧设备部署。",
+    "requirements": "硕士以上，深度学习扎实基础"
+  },
+  {
+    "job_title": "大模型算法工程师",
+    "company": "大模型创业公司",
+    "salary": "55K-90K",
+    "location": "北京",
+    "description": "专注大语言模型LLM研发，包括预训练、微调、推理优化等人工智能核心技术。",
+    "requirements": "博士优先，有大模型训练经验"
+  }
+]

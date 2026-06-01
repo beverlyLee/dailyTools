@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const problemsPanel = document.getElementById('problems-panel');
     const outputPanel = document.getElementById('output-panel');
 
-    require.config({ 
+    window.monacoRequire = window.monacoRequire || require;
+    window.monacoRequire.config({ 
         paths: { 
             'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' 
         }
@@ -96,7 +97,7 @@ greet('World');
     function initEditor() {
         console.log('[Main] 开始初始化 Monaco Editor');
         
-        require(['vs/editor/editor.main'], function(monaco) {
+        monacoRequire(['vs/editor/editor.main'], function(monaco) {
             console.log('[Main] Monaco Editor 核心模块已加载');
             updateStatus('loading', '加载编辑器中...');
 

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 智能表单填写助手</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>✍️ AI 智能表单填写助手</h1>
+            <p class="subtitle">基于字段识别与实体匹配的智能自动填充系统</p>
+        </header>
+
+        <main class="main-content">
+            <div class="column">
+                <section class="card profile-card">
+                    <h2 class="card-title">📋 个人资料</h2>
+                    <p class="card-desc">填写您的常用信息，智能助手会记住并自动填入各类表单。</p>
+                    
+                    <div class="section-title">基本信息</div>
+                    
+                    <div class="form-group">
+                        <label>姓名</label>
+                        <input type="text" id="profile-name" placeholder="例如：张三">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>手机号</label>
+                            <input type="tel" id="profile-phone" placeholder="例如：13800138000">
+                        </div>
+                        <div class="form-group">
+                            <label>邮箱</label>
+                            <input type="email" id="profile-email" placeholder="例如：user@example.com">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>身份证号</label>
+                            <input type="text" id="profile-idcard" placeholder="可选，用于实名认证表单">
+                        </div>
+                        <div class="form-group">
+                            <label>性别</label>
+                            <select id="profile-gender">
+                                <option value="">请选择</option>
+                                <option value="male">男</option>
+                                <option value="female">女</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>年龄</label>
+                            <input type="number" id="profile-age" placeholder="例如：28">
+                        </div>
+                        <div class="form-group">
+                            <label>生日</label>
+                            <input type="date" id="profile-birthday">
+                        </div>
+                    </div>
+
+                    <div class="section-title">地址信息</div>
+                    
+                    <div class="form-group">
+                        <label>省/市/区</label>
+                        <input type="text" id="profile-region" placeholder="例如：北京市朝阳区">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>详细地址</label>
+                        <input type="text" id="profile-address" placeholder="例如：XX街道XX号">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>邮编</label>
+                            <input type="text" id="profile-zipcode" placeholder="例如：100000">
+                        </div>
+                        <div class="form-group">
+                            <label>国家</label>
+                            <input type="text" id="profile-country" placeholder="例如：中国">
+                        </div>
+                    </div>
+
+                    <div class="section-title">账号信息</div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>用户名</label>
+                            <input type="text" id="profile-username" placeholder="例如：zhangsan">
+                        </div>
+                        <div class="form-group">
+                            <label>昵称</label>
+                            <input type="text" id="profile-nickname" placeholder="例如：小张三">
+                        </div>
+                    </div>
+
+                    <div class="section-title">其他信息</div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>公司名称</label>
+                            <input type="text" id="profile-company" placeholder="可选">
+                        </div>
+                        <div class="form-group">
+                            <label>职位</label>
+                            <input type="text" id="profile-job" placeholder="可选">
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button id="save-profile-btn" class="btn btn-primary">💾 保存资料</button>
+                        <button id="fill-demo-btn" class="btn btn-secondary">📝 自动填充下方演示表单</button>
+                    </div>
+                    
+                    <div id="profile-status" class="status-message" style="display:none;"></div>
+                </section>
+            </div>
+
+            <div class="column">
+                <section class="card demo-card">
+                    <h2 class="card-title">🎯 演示表单</h2>
+                    <p class="card-desc">这是一个模拟的注册/表单页面，用于测试智能填充功能。</p>
+                    
+                    <div class="demo-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>姓名</label>
+                                <input type="text" name="name" id="demo-name" placeholder="请输入姓名">
+                            </div>
+                            <div class="form-group">
+                                <label>手机号码</label>
+                                <input type="tel" name="phone" id="demo-phone" placeholder="请输入手机号">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>电子邮箱</label>
+                                <input type="email" name="email" id="demo-email" placeholder="请输入邮箱">
+                            </div>
+                            <div class="form-group">
+                                <label>用户名</label>
+                                <input type="text" name="username" id="demo-username" placeholder="请输入用户名">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>性别</label>
+                                <select name="gender" id="demo-gender">
+                                    <option value="">请选择</option>
+                                    <option value="male">男</option>
+                                    <option value="female">女</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>出生日期</label>
+                                <input type="date" name="birthday" id="demo-birthday">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>所在地区</label>
+                            <input type="text" name="region" id="demo-region" placeholder="省/市/区">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>详细地址</label>
+                            <input type="text" name="address" id="demo-address" placeholder="街道门牌号">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>邮政编码</label>
+                                <input type="text" name="zipcode" id="demo-zipcode" placeholder="邮编">
+                            </div>
+                            <div class="form-group">
+                                <label>身份证号</label>
+                                <input type="text" name="idcard" id="demo-idcard" placeholder="身份证号码">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>公司</label>
+                                <input type="text" name="company" id="demo-company" placeholder="公司名称">
+                            </div>
+                            <div class="form-group">
+                                <label>职位</label>
+                                <input type="text" name="job" id="demo-job" placeholder="职位">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="fill-status" class="fill-status" style="display:none;"></div>
+                    <div id="fill-report" class="fill-report" style="display:none;"></div>
+                </section>
+            </div>
+
+            <div class="column">
+                <section class="card rules-card">
+                    <h2 class="card-title">🔍 字段识别规则</h2>
+                    <p class="card-desc">系统使用以下规则识别表单字段含义。</p>
+                    
+                    <div id="rules-list" class="rules-list"></div>
+                </section>
+
+                <section class="card history-card">
+                    <h2 class="card-title">📊 操作记录</h2>
+                    <p class="card-desc">记录最近的自动填充操作。</p>
+                    
+                    <div id="history-list" class="history-list">
+                        <div class="placeholder">
+                            <p>暂无操作记录</p>
+                        </div>
+                    </div>
+                    
+                    <button id="clear-history-btn" class="btn btn-secondary" style="margin-top: 12px;">清空历史</button>
+                </section>
+
+                <section class="card help-card">
+                    <h2 class="card-title">❓ 使用说明</h2>
+                    <div class="help-content">
+                        <p><strong>1. 填写个人资料：</strong>在左侧填写您的常用信息并保存。</p>
+                        <p><strong>2. 测试功能：</strong>点击"自动填充下方演示表单"按钮测试。</p>
+                        <p><strong>3. 实际使用：</strong>在浏览器插件中使用时，点击插件按钮即可自动填充当前页面的表单。</p>
+                        <p><strong>4. 数据安全：</strong>所有资料仅保存在您的浏览器本地 (LocalStorage)，不会上传到任何服务器。</p>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>AI Form Filler v1.0 | 纯前端实现，数据本地存储</p>
+        </footer>
+    </div>
+
+    <script src="FieldIdentifier.js"></script>
+    <script src="EntityMatcher.js"></script>
+    <script src="AutoFiller.js"></script>
+    <script src="ProfileStorage.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

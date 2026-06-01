@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>亲子出行地图 - 带娃避坑指南</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <div class="loading-overlay" v-if="loading">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">正在加载亲子地图...</p>
+        </div>
+
+        <header class="top-header">
+            <div class="logo-section">
+                <span class="logo-icon">👶</span>
+                <h1 class="logo-title">亲子出行地图</h1>
+            </div>
+            <div class="header-actions">
+                <button class="filter-btn" @click="toggleFilterPanel">
+                    <span class="filter-icon">🔍</span>
+                    <span>筛选</span>
+                </button>
+                <button class="refresh-btn" @click="loadPois">
+                    <span>🔄</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="legend-bar">
+            <div class="legend-item" v-for="level in scoreLevels" :key="level.key">
+                <span class="legend-dot" :style="{ backgroundColor: level.color }"></span>
+                <span class="legend-label">{{ level.label }}</span>
+            </div>
+        </div>
+
+        <div id="map-container"></div>
+
+        <div class="filter-panel" :class="{ open: showFilterPanel }">
+            <div class="filter-header">
+                <h3>筛选条件</h3>
+                <button class="close-btn" @click="toggleFilterPanel">✕</button>
+            </div>
+            
+            <div class="filter-section">
+                <h4>场所类型</h4>
+                <div class="filter-tags">
+                    <label class="filter-tag" v-for="type in poiTypes" :key="type.value">
+                        <input type="checkbox" :value="type.value" v-model="selectedTypes">
+                        <span class="custom-checkbox">
+                            <svg viewBox="0 0 24 24">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </span>
+                        <span class="tag-icon">{{ type.icon }}</span>
+                        <span class="tag-label">{{ type.label }}</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h4>最低评分</h4>
+                <div class="score-slider">
+                    <input type="range" min="0" max="10" step="1" v-model="minScore" class="range-slider">
+                    <div class="score-labels">
+                        <span>0</span>
+                        <span class="current-score">{{ minScore }} 分</span>
+                        <span>10</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h4>搜索半径</h4>
+                <div class="radius-buttons">
+                    <button 
+                        v-for="r in radiusOptions" 
+                        :key="r.value"
+                        :class="{ active: selectedRadius === r.value }"
+                        @click="selectedRadius = r.value"
+                    >
+                        {{ r.label }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-actions">
+                <button class="reset-filter-btn" @click="resetFilters">
+                    ↺ 重置筛选
+                </button>
+                <button class="apply-filter-btn" @click="applyFilters">
+                    应用筛选
+                </button>
+            </div>
+        </div>
+
+        <div class="info-popup" :class="{ open: showPopup }" v-if="selectedPoi">
+            <div class="popup-overlay" @click="closePopup"></div>
+            <div class="popup-content" :class="'level-' + selectedPoi.scoreLevel">
+                <button class="popup-close" @click="closePopup">✕</button>
+                
+                <div class="popup-header">
+                    <div class="poi-type-badge" :class="'type-' + selectedPoi.type">
+                        {{ getTypeIcon(selectedPoi.type) }} {{ selectedPoi.typeName }}
+                    </div>
+                    <div class="poi-score-display">
+                        <div class="score-circle" :style="{ borderColor: getScoreColor(selectedPoi.scoreLevel) }">
+                            <span class="score-value">{{ selectedPoi.totalScore.toFixed(1) }}</span>
+                        </div>
+                        <span class="score-level-text">{{ getScoreLabel(selectedPoi.scoreLevel) }}</span>
+                    </div>
+                </div>
+
+                <h2 class="poi-name">{{ selectedPoi.name }}</h2>
+                <p class="poi-address">📍 {{ selectedPoi.address }}</p>
+
+                <div class="facilities-section" v-if="selectedPoi.facilities">
+                    <h3>亲子设施</h3>
+                    <div class="facilities-grid">
+                        <div class="facility-item" v-for="(facility, key) in selectedPoi.facilities" :key="key">
+                            <div class="facility-icon" :class="{ available: facility.available, unavailable: !facility.available }">
+                                {{ getFacilityIcon(key) }}
+                            </div>
+                            <div class="facility-info">
+                                <div class="facility-name">{{ facility.name }}</div>
+                                <div class="facility-status" :class="{ available: facility.available, unavailable: !facility.available }">
+                                    {{ facility.available ? '✓ 可用' : '✗ 缺失' }}
+                                </div>
+                                <div class="facility-score-bar">
+                                    <div class="score-fill" :style="{ width: (facility.score * 10) + '%', backgroundColor: getScoreColorByValue(facility.score) }"></div>
+                                </div>
+                                <div class="facility-desc" v-if="facility.description">{{ facility.description }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-facilities" v-else>
+                    <span class="quick-facility" :class="{ available: selectedPoi.hasBabyRoom, unavailable: !selectedPoi.hasBabyRoom }">
+                    🍼 母婴室 {{ selectedPoi.hasBabyRoom ? '✓' : '✗' }}
+                    </span>
+                    <span class="quick-facility" :class="{ available: selectedPoi.hasChangingTable, unavailable: !selectedPoi.hasChangingTable }">
+                    🚼 尿布台 {{ selectedPoi.hasChangingTable ? '✓' : '✗' }}
+                    </span>
+                    <span class="quick-facility" :class="{ available: selectedPoi.hasStrollerRental, unavailable: !selectedPoi.hasStrollerRental }">
+                    👶 推车租赁 {{ selectedPoi.hasStrollerRental ? '✓' : '✗' }}
+                    </span>
+                </div>
+
+                <div class="reviews-section" v-if="selectedPoi.reviewSnippets && selectedPoi.reviewSnippets.length > 0">
+                    <h3>💬 用户评价摘要</h3>
+                    <div class="review-snippets">
+                        <div class="review-item" v-for="(review, index) in selectedPoi.reviewSnippets" :key="index">
+                            "{{ review }}"
+                        </div>
+                    </div>
+                </div>
+
+                <div class="source-info">
+                    <span class="source-badge">数据来源: {{ selectedPoi.source }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://webapi.amap.com/loader.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>

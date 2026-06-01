@@ -1,0 +1,150 @@
+{
+  "date": "2026-05-16",
+  "fetched_at": "2026-05-16T12:00:00",
+  "repos": [
+    {
+      "name": "tinyhumansai/openhuman",
+      "url": "https://github.com/tinyhumansai/openhuman",
+      "owner": "tinyhumansai",
+      "repo_name": "openhuman",
+      "description": "Your Personal AI super intelligence. Private, Simple and extremely powerful.",
+      "language": "Rust",
+      "stars": 9247,
+      "forks": 779,
+      "today_stars": 1271,
+      "translated_description": "项目名：openhuman；项目描述：你的个人超级人工智能，私密、简洁且极其强大。\n亮点：主打个人专属，严格保障隐私，操作极简，性能超强。"
+    },
+    {
+      "name": "obra/superpowers",
+      "url": "https://github.com/obra/superpowers",
+      "owner": "obra",
+      "repo_name": "superpowers",
+      "description": "An agentic skills framework & software development methodology that works.",
+      "language": "Shell",
+      "stars": 193014,
+      "forks": 17162,
+      "today_stars": 1648,
+      "translated_description": "一套行之有效的具自主能动性技能框架与软件开发方法论\n总结亮点：经实践验证，将自主能动性技能设计与软件开发方法论结合的实用方案"
+    },
+    {
+      "name": "K-Dense-AI/scientific-agent-skills",
+      "url": "https://github.com/K-Dense-AI/scientific-agent-skills",
+      "owner": "K-Dense-AI",
+      "repo_name": "scientific-agent-skills",
+      "description": "A set of ready to use Agent Skills for research, science, engineering, analysis, finance and writing.",
+      "language": "Python",
+      "stars": 22573,
+      "forks": 2438,
+      "today_stars": 646,
+      "translated_description": "科学智能体技能库\n一套面向研究、科学、工程、分析、金融与写作的开箱即用智能体技能\n覆盖科研、工程、金融等多领域，所有技能无需额外准备即可直接应用"
+    },
+    {
+      "name": "supertone-inc/supertonic",
+      "url": "https://github.com/supertone-inc/supertonic",
+      "owner": "supertone-inc",
+      "repo_name": "supertonic",
+      "description": "Lightning-Fast, On-Device, Multilingual TTS — running natively via ONNX.",
+      "language": "Swift",
+      "stars": 6145,
+      "forks": 607,
+      "today_stars": 719,
+      "translated_description": "Supertonic\n项目描述翻译：超快速、端侧运行的多语言文本转语音——通过ONNX原生执行。\n项目亮点：依托ONNX实现端侧原生超快速多语言TTS，免云端，效率高、隐私好。"
+    },
+    {
+      "name": "ruvnet/RuView",
+      "url": "https://github.com/ruvnet/RuView",
+      "owner": "ruvnet",
+      "repo_name": "RuView",
+      "description": "π RuView turns commodity WiFi signals into real-time spatial intelligence, vital sign monitoring, and presence detection — all without a single pixel of video.",
+      "language": "Rust",
+      "stars": 57617,
+      "forks": 7562,
+      "today_stars": 1859,
+      "translated_description": "π RuView将普通WiFi信号转化为实时空间感知、生命体征监测与人员存在检测——全程无需任何视频画面。\n亮点：无需摄像头，仅用民用WiFi，同时实现实时空间感知、生命体征监测、人员存在检测。"
+    },
+    {
+      "name": "influxdata/telegraf",
+      "url": "https://github.com/influxdata/telegraf",
+      "owner": "influxdata",
+      "repo_name": "telegraf",
+      "description": "Agent for collecting, processing, aggregating, and writing metrics, logs, and other arbitrary data.",
+      "language": "Go",
+      "stars": 17447,
+      "forks": 5803,
+      "today_stars": 212,
+      "translated_description": "telegraf：用于采集、处理、聚合并写入指标、日志及其他任意数据的代理工具。\n亮点：一站式数据代理，支持指标、日志等多类型数据的采集、处理、聚合与写入全流程。"
+    },
+    {
+      "name": "anthropics/skills",
+      "url": "https://github.com/anthropics/skills",
+      "owner": "anthropics",
+      "repo_name": "skills",
+      "description": "Public repository for Agent Skills",
+      "language": "Python",
+      "stars": 135292,
+      "forks": 15949,
+      "today_stars": 689,
+      "translated_description": "翻译：项目名：技能；项目描述：智能体技能的公共仓库\n总结：是面向开发者的智能体技能公共可复用资源库"
+    },
+    {
+      "name": "czlonkowski/n8n-mcp",
+      "url": "https://github.com/czlonkowski/n8n-mcp",
+      "owner": "czlonkowski",
+      "repo_name": "n8n-mcp",
+      "description": "A MCP for Claude Desktop / Claude Code / Windsurf / Cursor to build n8n workflows for you",
+      "language": "TypeScript",
+      "stars": 20934,
+      "forks": 3401,
+      "today_stars": 68,
+      "translated_description": "一款适用于 Claude Desktop、Claude Code、Windsurf、Cursor 的 MCP，可为您构建 n8n 工作流。\n项目亮点：为 Claude 生态编辑器与 IDE 提供 n8n 自动化工作流构建支持，简化低代码自动化搭建流程。"
+    },
+    {
+      "name": "NVIDIA-AI-Blueprints/video-search-and-summarization",
+      "url": "https://github.com/NVIDIA-AI-Blueprints/video-search-and-summarization",
+      "owner": "NVIDIA-AI-Blueprints",
+      "repo_name": "video-search-and-summarization",
+      "description": "Suite of reference architectures for building GPU-accelerated vision agents and AI-powered video analytics applications.",
+      "language": "Python",
+      "stars": 1212,
+      "forks": 266,
+      "today_stars": 308,
+      "translated_description": "项目名：视频搜索与摘要\n项目描述：一套用于构建GPU加速视觉智能体、AI驱动视频分析应用的参考架构套件\n项目亮点：提供GPU加速相关AI开发的参考架构，易快速落地"
+    },
+    {
+      "name": "oven-sh/bun",
+      "url": "https://github.com/oven-sh/bun",
+      "owner": "oven-sh",
+      "repo_name": "bun",
+      "description": "Incredibly fast JavaScript runtime, bundler, test runner, and package manager – all in one",
+      "language": "Rust",
+      "stars": 90655,
+      "forks": 4518,
+      "today_stars": 448,
+      "translated_description": "翻译：极速 JavaScript 运行时、打包工具、测试运行器与包管理器——四合一\n项目亮点：集 JS 生态常用核心工具于一身，主打极速，简化开发流程"
+    },
+    {
+      "name": "mattpocock/skills",
+      "url": "https://github.com/mattpocock/skills",
+      "owner": "mattpocock",
+      "repo_name": "skills",
+      "description": "Skills for Real Engineers. Straight from my .claude directory.",
+      "language": "Shell",
+      "stars": 85269,
+      "forks": 7388,
+      "today_stars": 3132,
+      "translated_description": "项目名称：skills\n项目描述：真工程师的实用技能，直接来自我的.claude目录。\n项目亮点：\n分享Claude本地配置中的真实工程实用技能。"
+    },
+    {
+      "name": "joeseesun/qiaomu-anything-to-notebooklm",
+      "url": "https://github.com/joeseesun/qiaomu-anything-to-notebooklm",
+      "owner": "joeseesun",
+      "repo_name": "qiaomu-anything-to-notebooklm",
+      "description": "Claude Skill: Multi-source content processor for NotebookLM. Supports WeChat articles, web pages, YouTube, PDF, Markdown, search queries → Podcast/PPT/MindMap/Quiz etc.",
+      "language": "Python",
+      "stars": 2799,
+      "forks": 284,
+      "today_stars": 438,
+      "translated_description": "项目名称：qiaomu-anything-to-notebooklm\n项目描述：克劳德技能：面向NotebookLM的多源内容处理器。支持微信文章、网页、YouTube、PDF、Markdown、搜索查询→播客/PPT/思维导图/测验等。\n项目亮点：对接NotebookLM的Claude技能，兼容多元内容源输入，可生成播客、思维导图等多样实用产出。"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "mortise-tenon-builder",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "generate:models": "node generate-models.mjs"
+  },
+  "dependencies": {
+    "three": "^0.169.0",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@types/three": "^0.169.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "canvas": "^3.2.3",
+    "playwright": "^1.60.0",
+    "typescript": "~5.6.3",
+    "vite": "^6.0.1",
+    "vue-tsc": "^2.1.10"
+  }
+}

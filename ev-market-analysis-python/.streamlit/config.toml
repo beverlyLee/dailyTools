@@ -1,0 +1,23 @@
+[client]
+showErrorDetails = false
+
+[theme]
+base = "light"
+primaryColor = "#1f77b4"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f0f2f6"
+textColor = "#31333F"
+font = "sans serif"
+
+[server]
+enableCORS = true
+enableXsrfProtection = true
+fileWatcherType = "polling"
+headless = false
+port = 8501
+maxUploadSize = 200
+
+[browser]
+gatherUsageStats = false
+serverAddress = "localhost"
+serverPort = 8501

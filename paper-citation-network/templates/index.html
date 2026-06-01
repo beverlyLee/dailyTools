@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>论文引用网络分析器 - Paper Citation Network Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script type="text/javascript" src="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>📚 论文引用网络分析器</h1>
+            <p class="subtitle">Paper Citation Network Analyzer</p>
+        </header>
+
+        <div class="search-section">
+            <div class="search-box">
+                <select id="dataSourceSelect" onchange="updateDataSourceUI()">
+                    <option value="crossref">CrossRef API（推荐）</option>
+                    <option value="test">内置测试数据</option>
+                    <option value="custom">上传自定义数据</option>
+                </select>
+                <input type="text" id="keywordInput" placeholder="输入搜索关键词，如：Large Language Model" 
+                       value="Large Language Model">
+                <button id="searchBtn" onclick="searchNetwork()">🔍 分析</button>
+                <button id="testBtn" onclick="loadTestData()" class="btn-secondary">📊 演示数据</button>
+            </div>
+            
+            <div class="options">
+                <label>
+                    <input type="checkbox" id="showLabels" checked onchange="updateVisualization()">
+                    显示节点标签
+                </label>
+                <span id="dataSourceBadge" class="data-source-badge">数据源: 未选择</span>
+            </div>
+            
+            <div id="dataSourceInfo" class="data-source-info">
+                <h4>📋 当前数据源说明</h4>
+                <p id="dsDescription"></p>
+                <div class="ds-features">
+                    <strong>功能：</strong>
+                    <span id="dsFeatures"></span>
+                </div>
+                <div class="ds-limitations">
+                    <strong>限制：</strong>
+                    <span id="dsLimitations"></span>
+                </div>
+            </div>
+            
+            <div id="customUploadSection" style="display: none; margin-top: 15px;">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <p>拖拽文件到此处或点击选择文件</p>
+                    <p style="font-size: 12px; color: #666;">支持 JSON 和 CSV 格式</p>
+                    <input type="file" id="fileInput" accept=".json,.csv" style="display: none;">
+                    <button class="btn-small" onclick="document.getElementById('fileInput').click()">选择文件</button>
+                </div>
+                <div style="margin-top: 10px;">
+                    <button class="btn-small" onclick="showTemplate('json')">查看 JSON 模板</button>
+                    <button class="btn-small" onclick="showTemplate('csv')">查看 CSV 模板</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="templateModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="templateTitle">数据格式模板</h3>
+                    <button class="modal-close" onclick="closeTemplate()">×</button>
+                </div>
+                <div class="modal-body">
+                    <pre id="templateContent"></pre>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-small" onclick="copyTemplate()">复制模板</button>
+                    <button class="btn-small btn-secondary" onclick="closeTemplate()">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="network-panel">
+                <div class="panel-header">
+                    <h3>引用网络图</h3>
+                    <div class="legend">
+                        <span class="legend-item">
+                            <span class="legend-color" style="background: #ff6b6b;"></span>
+                            高 PageRank
+                        </span>
+                        <span class="legend-item">
+                            <span class="legend-color" style="background: #4ecdc4;"></span>
+                            中 PageRank
+                        </span>
+                        <span class="legend-item">
+                            <span class="legend-color" style="background: #45b7d1;"></span>
+                            低 PageRank
+                        </span>
+                    </div>
+                </div>
+                <div id="network"></div>
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>正在构建引用网络，请稍候...</p>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <div class="stats-card">
+                    <h3>📈 网络统计</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-value" id="nodeCount">-</span>
+                            <span class="stat-label">论文数</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="edgeCount">-</span>
+                            <span class="stat-label">引用关系</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="density">-</span>
+                            <span class="stat-label">网络密度</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="top-papers-card">
+                    <h3>🏆 核心论文 (按 PageRank)</h3>
+                    <div id="topPapersList" class="papers-list">
+                        <p class="placeholder">点击"分析"或"使用示例数据"查看结果</p>
+                    </div>
+                </div>
+
+                <div id="paperDetailCard" class="paper-detail-card" style="display: none;">
+                    <h3>📄 论文详情</h3>
+                    <div id="paperDetailContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>数据来源：CrossRef API | 内置测试数据 | 用户自定义上传</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

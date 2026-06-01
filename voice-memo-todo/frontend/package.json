@@ -1,0 +1,23 @@
+{
+  "name": "voice-memo-todo-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "check-deps": "node -e \"try{require('next');require('react');require('axios');console.log('✓ 前端依赖检查通过');}catch(e){console.log('✗ 依赖未安装，请先执行 npm install');process.exit(1);}\""
+  },
+  "dependencies": {
+    "next": "14.1.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "axios": "1.6.8"
+  },
+  "devDependencies": {
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "@types/react-dom": "18.2.25",
+    "typescript": "5.4.5"
+  }
+}

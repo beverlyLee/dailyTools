@@ -95,6 +95,7 @@ class CommentGeneratorApp {
         const samples = {
             javascript: `// 选中下方的代码，点击"生成注释"按钮
 
+// ========== 测试用例1: 复杂邮箱解析函数 ==========
 function parseEmailList(inputString) {
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/;
     const emails = [];
@@ -115,11 +116,13 @@ function parseEmailList(inputString) {
     return emails;
 }
 
+// ========== 测试用例2: URL验证函数 ==========
 const validateURL = (url) => {
     const pattern = /^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$/;
     return pattern.test(url);
 };
 
+// ========== 测试用例3: 网络请求函数 ==========
 async function fetchUserData(userId, options = {}) {
     const baseURL = 'https://api.example.com/users';
     const timeout = options.timeout || 5000;
@@ -140,6 +143,40 @@ async function fetchUserData(userId, options = {}) {
         console.error('Failed to fetch user data:', error);
         throw error;
     }
+}
+
+// ========== 测试用例4: 订单金额计算函数 ==========
+function calculateOrderTotal(orderItems, taxRate = 0.1, discountCode = null) {
+    let subtotal = 0;
+    
+    for (const item of orderItems) {
+        if (item.quantity <= 0) {
+            console.warn(\`Invalid quantity for item \${item.id}\`);
+            continue;
+        }
+        subtotal += item.price * item.quantity;
+    }
+    
+    let discount = 0;
+    if (discountCode) {
+        const discountPattern = /^(SAVE|OFF)(\\d+)$/;
+        const match = discountCode.match(discountPattern);
+        if (match) {
+            const discountPercent = parseInt(match[2], 10);
+            discount = subtotal * (discountPercent / 100);
+        }
+    }
+    
+    const taxableAmount = subtotal - discount;
+    const tax = taxableAmount * taxRate;
+    const total = taxableAmount + tax;
+    
+    return {
+        subtotal,
+        discount,
+        tax,
+        total: Math.round(total * 100) / 100
+    };
 }`,
 
             typescript: `interface User {
@@ -356,36 +393,134 @@ class UserManager:
             'regex': '正则表达式'
         };
 
+        const complexityColors = {
+            'low': '#4ec9b0',
+            'medium': '#dcdcaa',
+            'high': '#ce9178',
+            'very-high': '#f48771'
+        };
+
         const color = typeColors[node.type] || '#d4d4d4';
         const label = typeLabels[node.type] || node.type;
+        const complexityColor = complexityColors[context.complexity] || '#858585';
 
         let html = `<div style="margin-bottom: 24px; padding: 16px; background: #252526; border-radius: 6px; border: 1px solid #333;">`;
         
-        html += `<div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">`;
-        html += `<span style="color: ${color}; font-weight: 600;">${label}: ${node.name || (node.pattern ? '/' + node.pattern + '/' + (node.flags || '') : '...')}</span>`;
-        html += `<span style="color: #858585; font-size: 12px;">复杂度: ${context.complexity}</span>`;
+        html += `<div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">`;
+        html += `<span style="color: ${color}; font-weight: 600; font-size: 14px;">${label}: ${node.name || (node.pattern ? '/' + node.pattern + '/' + (node.flags || '') : '...')}</span>`;
+        html += `<span style="color: ${complexityColor}; font-size: 12px; padding: 2px 8px; background: ${complexityColor}22; border-radius: 4px;">复杂度: ${context.complexity}</span>`;
         html += `</div>`;
 
         if (context.purpose) {
-            html += `<div style="margin-bottom: 12px; color: #9cdcfe; font-size: 13px;">${context.purpose}</div>`;
+            html += `<div style="margin-bottom: 8px; color: #9cdcfe; font-size: 14px; font-weight: 500;">📌 ${context.purpose}</div>`;
         }
 
-        if (context.keywords && context.keywords.length > 0) {
+        if (context.businessPurpose) {
+            html += `<div style="margin-bottom: 12px; padding: 8px 12px; background: #1e4c6d33; border-left: 3px solid #007acc; border-radius: 0 4px 4px 0;">`;
+            html += `<span style="color: #4fc1ff; font-size: 12px;">💡 业务语义: ${context.businessPurpose}</span>`;
+            html += `</div>`;
+        }
+
+        if (context.category || context.subCategory) {
             html += `<div style="margin-bottom: 12px;">`;
-            for (const keyword of context.keywords.slice(0, 5)) {
-                html += `<span style="display: inline-block; padding: 2px 8px; margin-right: 6px; background: #3c3c3c; border-radius: 4px; font-size: 11px; color: #ce9178;">${keyword}</span>`;
+            if (context.category) {
+                html += `<span style="display: inline-block; padding: 3px 10px; margin-right: 6px; background: #3c3c3c; border-radius: 4px; font-size: 11px; color: #569cd6;">分类: ${context.category}</span>`;
+            }
+            if (context.subCategory) {
+                html += `<span style="display: inline-block; padding: 3px 10px; margin-right: 6px; background: #3c3c3c; border-radius: 4px; font-size: 11px; color: #4ec9b0;">子类: ${context.subCategory}</span>`;
             }
             html += `</div>`;
         }
 
-        html += `<div style="background: #1e1e1e; padding: 12px; border-radius: 4px; border: 1px solid #333;">`;
-        html += `<pre style="margin: 0; white-space: pre-wrap; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; line-height: 1.5; color: #6a9955;">${this.escapeHtml(comment)}</pre>`;
+        if (context.keywords && context.keywords.length > 0) {
+            html += `<div style="margin-bottom: 12px;">`;
+            html += `<span style="color: #858585; font-size: 11px; margin-right: 6px;">关键词:</span>`;
+            for (const keyword of context.keywords.slice(0, 6)) {
+                html += `<span style="display: inline-block; padding: 2px 8px; margin-right: 4px; margin-bottom: 4px; background: #2d2d2d; border-radius: 3px; font-size: 11px; color: #ce9178; border: 1px solid #3c3c3c;">${keyword}</span>`;
+            }
+            if (context.keywords.length > 6) {
+                html += `<span style="color: #858585; font-size: 11px;">+${context.keywords.length - 6} 更多</span>`;
+            }
+            html += `</div>`;
+        }
+
+        if (context.logicFlow && context.logicFlow.length > 0) {
+            html += `<div style="margin-bottom: 12px; padding: 10px; background: #1e1e1e; border-radius: 4px;">`;
+            html += `<div style="color: #858585; font-size: 11px; margin-bottom: 6px;">🔄 执行流程 (${context.logicFlow.length} 步):</div>`;
+            html += `<div style="display: flex; flex-wrap: wrap; gap: 6px;">`;
+            for (const step of context.logicFlow.slice(0, 5)) {
+                const typeColorsFlow = {
+                    'condition': '#dcdcaa',
+                    'loop': '#4fc1ff',
+                    'data': '#ce9178',
+                    'validation': '#4ec9b0',
+                    'return': '#c586c0',
+                    'error': '#f48771',
+                    'network': '#569cd6',
+                    'storage': '#d7ba7d'
+                };
+                const stepColor = typeColorsFlow[step.type] || '#858585';
+                html += `<span style="display: inline-flex; align-items: center; padding: 2px 8px; background: #2d2d2d; border-radius: 3px; font-size: 11px; color: ${stepColor};">`;
+                html += `<span style="color: #858585; margin-right: 4px;">${step.step}.</span>`;
+                html += `${step.action}`;
+                html += `</span>`;
+            }
+            if (context.logicFlow.length > 5) {
+                html += `<span style="color: #858585; font-size: 11px;">...</span>`;
+            }
+            html += `</div>`;
+            html += `</div>`;
+        }
+
+        if (context.sideEffects && context.sideEffects.length > 0) {
+            html += `<div style="margin-bottom: 12px;">`;
+            html += `<div style="color: #858585; font-size: 11px; margin-bottom: 4px;">⚠️ 副作用分析:</div>`;
+            html += `<div style="display: flex; flex-wrap: wrap; gap: 6px;">`;
+            for (const effect of context.sideEffects) {
+                const severityColors = {
+                    'high': '#f48771',
+                    'medium': '#dcdcaa',
+                    'low': '#4ec9b0'
+                };
+                const effectColor = severityColors[effect.severity] || '#858585';
+                html += `<span style="display: inline-flex; align-items: center; padding: 3px 10px; background: ${effectColor}22; border: 1px solid ${effectColor}44; border-radius: 4px; font-size: 11px; color: ${effectColor};">`;
+                html += `${effect.description} (${effect.severity})`;
+                html += `</span>`;
+            }
+            html += `</div>`;
+            html += `</div>`;
+        }
+
+        if (context.dependencies && context.dependencies.length > 0) {
+            html += `<div style="margin-bottom: 12px;">`;
+            html += `<div style="color: #858585; font-size: 11px; margin-bottom: 4px;">📦 依赖分析:</div>`;
+            html += `<div style="display: flex; flex-wrap: wrap; gap: 6px;">`;
+            for (const dep of context.dependencies) {
+                const typeColors = {
+                    'external': '#569cd6',
+                    'webapi': '#4ec9b0',
+                    'builtin': '#c586c0'
+                };
+                const depColor = typeColors[dep.type] || '#858585';
+                html += `<span style="display: inline-flex; align-items: center; padding: 2px 8px; background: #2d2d2d; border-radius: 3px; font-size: 11px; color: ${depColor};">`;
+                html += `${dep.name}`;
+                html += `</span>`;
+            }
+            html += `</div>`;
+            html += `</div>`;
+        }
+
+        html += `<div style="margin-top: 12px; border-top: 1px solid #3c3c3c; padding-top: 12px;">`;
+        html += `<div style="color: #858585; font-size: 11px; margin-bottom: 8px;">📝 生成的注释:</div>`;
+        html += `<div style="background: #1e1e1e; padding: 12px; border-radius: 4px; border: 1px solid #333; max-height: 400px; overflow: auto;">`;
+        html += `<pre style="margin: 0; white-space: pre-wrap; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; line-height: 1.6; color: #6a9955;">${this.escapeHtml(comment)}</pre>`;
+        html += `</div>`;
         html += `</div>`;
 
-        html += `<div style="margin-top: 8px;">`;
+        html += `<div style="margin-top: 12px; display: flex; gap: 8px;">`;
         html += `<button onclick="navigator.clipboard.writeText(\`${this.escapeForTemplate(comment)}\`).then(() => { alert('已复制到剪贴板'); })" 
-            style="padding: 4px 12px; background: #0e639c; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px;">
-            复制注释
+            style="padding: 6px 16px; background: #0e639c; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px; font-weight: 500;">
+            📋 复制注释
         </button>`;
         html += `</div>`;
 

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二手自行车/电动车市场分析</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚲 二手自行车/电动车市场分析</h1>
+            <p class="subtitle">基于闲鱼/转转流通数据，辅助短途通勤决策</p>
+        </header>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>类型筛选:</label>
+                <select id="typeFilter">
+                    <option value="all">全部</option>
+                    <option value="自行车">自行车</option>
+                    <option value="电动自行车">电动自行车</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>关键词搜索:</label>
+                <select id="keywordFilter">
+                    <option value="">全部品牌</option>
+                    <option value="捷安特">捷安特</option>
+                    <option value="美利达">美利达</option>
+                    <option value="小牛">小牛</option>
+                    <option value="雅迪">雅迪</option>
+                    <option value="爱玛">爱玛</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>显示模式:</label>
+                <select id="displayMode">
+                    <option value="heatmap">热力图</option>
+                    <option value="markers">标记点</option>
+                </select>
+            </div>
+            <button id="refreshBtn" class="btn-refresh">🔄 刷新数据</button>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stat-card">
+                <div class="stat-label">商品总数</div>
+                <div class="stat-value" id="totalCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">平均价格</div>
+                <div class="stat-value" id="avgPrice">¥0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">价格中位数</div>
+                <div class="stat-value" id="medianPrice">¥0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">交易热点</div>
+                <div class="stat-value" id="hotspotCount">0</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+            <div class="sidebar">
+                <div class="hotspot-list">
+                    <h3>🔥 交易热点排行榜</h3>
+                    <div id="hotspotList"></div>
+                </div>
+                <div class="location-stats">
+                    <h3>📍 热门地区分布</h3>
+                    <div id="locationStats"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

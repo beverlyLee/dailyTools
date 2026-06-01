@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>马拉松赛事与城市GDP相关性分析</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .stats-panel {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .chart-container {
+            padding: 30px;
+        }
+
+        .chart-title {
+            text-align: center;
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            max-width: 250px;
+        }
+
+        .tooltip h4 {
+            margin-bottom: 8px;
+            font-size: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 6px;
+        }
+
+        .tooltip p {
+            margin: 4px 0;
+            line-height: 1.5;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .legend-circle {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+
+        .axis-label {
+            font-size: 14px;
+            fill: #555;
+            font-weight: 500;
+        }
+
+        .highlight-note {
+            text-align: center;
+            padding: 15px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            margin: 20px 30px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        .data-source-panel {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 15px 20px;
+            background: #e7f3ff;
+            border-bottom: 1px solid #b8daff;
+        }
+
+        .data-source-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .data-source-btn {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .data-source-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .data-source-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .data-source-info {
+            display: flex;
+            gap: 30px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .data-source-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .data-source-label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .data-source-value {
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        .data-source-value.sample {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .data-source-value.csv {
+            background: #17a2b8;
+        }
+
+        .data-source-value.real {
+            background: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏃 马拉松赛事与城市GDP相关性分析</h1>
+            <p>探索城市经济发展与马拉松赛事热度的关联</p>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stat-item">
+                <div class="stat-value" id="correlation">--</div>
+                <div class="stat-label">相关系数 (赛事数量 vs GDP)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="city-count">--</div>
+                <div class="stat-label">城市数量</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="event-count">--</div>
+                <div class="stat-label">赛事总数量</div>
+            </div>
+        </div>
+
+        <div class="data-source-panel">
+            <div class="data-source-info">
+                <div class="data-source-item">
+                    <span class="data-source-label">赛事数据:</span>
+                    <span class="data-source-value real" id="event-data-source">中国田径协会认证</span>
+                </div>
+                <div class="data-source-item">
+                    <span class="data-source-label">GDP数据:</span>
+                    <span class="data-source-value csv" id="gdp-data-source">各地统计局公报</span>
+                </div>
+                <div class="data-source-item">
+                    <span class="data-source-label">城市数量:</span>
+                    <span class="data-source-value" id="total-cities">--</span>
+                </div>
+                <div class="data-source-item">
+                    <span class="data-source-label">赛事数量:</span>
+                    <span class="data-source-value" id="total-events">--</span>
+                </div>
+                <div class="data-source-item">
+                    <span class="data-source-label">有赛事城市:</span>
+                    <span class="data-source-value" id="cities-with-events">--</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="highlight-note">
+            💡 <strong>北上广深杭</strong>等高GDP城市位于图表右上角，显示出GDP与赛事数量的正相关关系
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">城市GDP与马拉松赛事数量散点图（气泡大小表示参赛总人数）</div>
+            <svg id="scatter-chart"></svg>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-circle" style="background: #667eea;"></div>
+                <span>一线城市（北上广深）</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-circle" style="background: #764ba2;"></div>
+                <span>新一线城市</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-circle" style="background: #f093fb;"></div>
+                <span>其他城市</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip" style="display: none;"></div>
+
+    <script>
+        const firstTierCities = ['北京', '上海', '广州', '深圳'];
+        const newTierCities = ['杭州', '成都', '武汉', '南京', '苏州', '重庆', '天津', '西安', '长沙', '青岛', '沈阳', '郑州', '大连', '厦门', '宁波', '合肥', '福州', '济南', '哈尔滨'];
+
+        function getCityColor(city) {
+            if (firstTierCities.includes(city)) return '#667eea';
+            if (newTierCities.includes(city)) return '#764ba2';
+            return '#f093fb';
+        }
+
+        let currentData = [];
+
+        async function loadData() {
+            try {
+                const response = await fetch('/api/scatter-data');
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                return { data: [], data_source: {} };
+            }
+        }
+
+        async function loadCorrelation() {
+            try {
+                const response = await fetch('/api/correlation');
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('Failed to load correlation:', error);
+                return null;
+            }
+        }
+
+        function updateDataSourceInfo(result, dataSource) {
+            const eventDataSourceEl = document.getElementById('event-data-source');
+            const gdpDataSourceEl = document.getElementById('gdp-data-source');
+            const totalCitiesEl = document.getElementById('total-cities');
+            const totalEventsEl = document.getElementById('total-events');
+            const citiesWithEventsEl = document.getElementById('cities-with-events');
+
+            if (dataSource && dataSource.event_data) {
+                eventDataSourceEl.textContent = '中国田径协会认证';
+                eventDataSourceEl.className = 'data-source-value real';
+            }
+
+            if (dataSource && dataSource.gdp_data) {
+                gdpDataSourceEl.textContent = '各地统计局公报';
+                gdpDataSourceEl.className = 'data-source-value csv';
+            }
+
+            if (result) {
+                totalCitiesEl.textContent = result.total_cities || '--';
+                citiesWithEventsEl.textContent = result.cities_with_events || '--';
+            }
+        }
+
+        function createScatterChart(data) {
+            const container = document.querySelector('.chart-container');
+            const width = container.clientWidth - 60;
+            const height = 550;
+            const margin = { top: 30, right: 30, bottom: 70, left: 70 };
+
+            d3.select('#scatter-chart').html('');
+
+            const svg = d3.select('#scatter-chart')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+            const maxY = Math.ceil(d3.max(data, d => d.event_count) * 1.1);
+
+            const x = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.gdp) * 1.1])
+                .range([0, width]);
+
+            const y = d3.scaleLinear()
+                .domain([0, maxY])
+                .range([height, 0]);
+
+            const r = d3.scaleLinear()
+                .domain(d3.extent(data, d => d.total_participants))
+                .range([8, 30]);
+
+            svg.append('g')
+                .attr('transform', `translate(0, ${height})`)
+                .call(d3.axisBottom(x).ticks(10).tickFormat(d => d + '亿'))
+                .selectAll('text')
+                .style('font-size', '12px');
+
+            svg.append('g')
+                .call(d3.axisLeft(y).ticks(maxY).tickFormat(d3.format('d')))
+                .selectAll('text')
+                .style('font-size', '12px');
+
+            svg.append('text')
+                .attr('class', 'axis-label')
+                .attr('x', width / 2)
+                .attr('y', height + 50)
+                .attr('text-anchor', 'middle')
+                .text('GDP (亿元)');
+
+            svg.append('text')
+                .attr('class', 'axis-label')
+                .attr('transform', 'rotate(-90)')
+                .attr('x', -height / 2)
+                .attr('y', -50)
+                .attr('text-anchor', 'middle')
+                .text('赛事数量 (场)');
+
+            svg.append('g')
+                .selectAll('dot')
+                .data(data)
+                .enter()
+                .append('circle')
+                .attr('cx', d => x(d.gdp))
+                .attr('cy', d => y(d.event_count))
+                .attr('r', d => r(d.total_participants))
+                .style('fill', d => getCityColor(d.city))
+                .style('opacity', 0.8)
+                .style('stroke', '#fff')
+                .style('stroke-width', '2px')
+                .style('cursor', 'pointer')
+                .on('mouseover', function(event, d) {
+                    d3.select(this)
+                        .style('opacity', 1)
+                        .style('stroke-width', '3px');
+
+                    const tooltip = document.getElementById('tooltip');
+                    tooltip.style.display = 'block';
+                    tooltip.innerHTML = `
+                        <h4>${d.city}</h4>
+                        <p><strong>GDP:</strong> ${d.gdp.toLocaleString()} 亿元</p>
+                        <p><strong>赛事数量:</strong> ${d.event_count} 场</p>
+                        <p><strong>参赛总人数:</strong> ${d.total_participants.toLocaleString()} 人</p>
+                        <p><strong>人均GDP:</strong> ${d.gdp_per_capita.toLocaleString()} 元</p>
+                        <p><strong>赛事:</strong> ${d.events.join(', ')}</p>
+                    `;
+                    const tooltipRect = tooltip.getBoundingClientRect();
+                    let left = event.pageX + 15;
+                    let top = event.pageY - 10;
+
+                    if (left + tooltipRect.width > window.innerWidth) {
+                        left = event.pageX - tooltipRect.width - 15;
+                    }
+                    if (top + tooltipRect.height > window.innerHeight) {
+                        top = event.pageY - tooltipRect.height - 10;
+                    }
+
+                    tooltip.style.left = left + 'px';
+                    tooltip.style.top = top + 'px';
+                })
+                .on('mousemove', function(event) {
+                    const tooltip = document.getElementById('tooltip');
+                    const tooltipRect = tooltip.getBoundingClientRect();
+                    let left = event.pageX + 15;
+                    let top = event.pageY - 10;
+
+                    if (left + tooltipRect.width > window.innerWidth) {
+                        left = event.pageX - tooltipRect.width - 15;
+                    }
+                    if (top + tooltipRect.height > window.innerHeight) {
+                        top = event.pageY - tooltipRect.height - 10;
+                    }
+
+                    tooltip.style.left = left + 'px';
+                    tooltip.style.top = top + 'px';
+                })
+                .on('mouseout', function() {
+                    d3.select(this)
+                        .style('opacity', 0.8)
+                        .style('stroke-width', '2px');
+                    document.getElementById('tooltip').style.display = 'none';
+                });
+
+            svg.selectAll('label')
+                .data(data.filter(d => firstTierCities.includes(d.city) || d.city === '杭州'))
+                .enter()
+                .append('text')
+                .attr('x', d => x(d.gdp) + r(d.total_participants) + 5)
+                .attr('y', d => y(d.event_count) + 5)
+                .text(d => d.city)
+                .style('font-size', '12px')
+                .style('font-weight', 'bold')
+                .style('fill', '#333');
+        }
+
+        async function loadAndRender() {
+            const result = await loadData();
+            const correlation = await loadCorrelation();
+
+            currentData = result.data || [];
+
+            if (correlation) {
+                document.getElementById('correlation').textContent = 
+                    correlation.correlations.event_count_vs_gdp.correlation.toFixed(4);
+            }
+
+            updateDataSourceInfo(result, result.data_source);
+
+            document.getElementById('city-count').textContent = currentData.length;
+            document.getElementById('event-count').textContent = 
+                currentData.reduce((sum, d) => sum + d.event_count, 0);
+
+            const totalEventsEl = document.getElementById('total-events');
+            if (totalEventsEl) {
+                totalEventsEl.textContent = currentData.reduce((sum, d) => sum + d.event_count, 0);
+            }
+
+            if (currentData.length > 0) {
+                createScatterChart(currentData);
+            }
+        }
+
+        async function init() {
+            await loadAndRender();
+        }
+
+        init();
+
+        window.addEventListener('resize', () => {
+            if (currentData.length > 0) {
+                createScatterChart(currentData);
+            }
+        });
+    </script>
+</body>
+</html>

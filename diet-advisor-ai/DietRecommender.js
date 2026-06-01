@@ -1,10 +1,22 @@
 class DietRecommender {
     constructor(healthRules, foodDatabase, ruleEngine, bayesianNetwork) {
-        this.healthRules = healthRules;
-        this.foodDatabase = foodDatabase;
-        this.foods = foodDatabase.foods;
+        this.healthRules = healthRules || { foodReplacementRules: [], conditionConfigs: {} };
+        this.foodDatabase = foodDatabase || { foods: [], mealPortionEstimates: {} };
+        this.foods = Array.isArray(foodDatabase?.foods) ? foodDatabase.foods : [];
         this.ruleEngine = ruleEngine;
         this.bayesianNetwork = bayesianNetwork;
+        
+        if (!Array.isArray(this.healthRules.foodReplacementRules)) {
+            this.healthRules.foodReplacementRules = [];
+        }
+        if (!this.healthRules.conditionConfigs) {
+            this.healthRules.conditionConfigs = {};
+        }
+        
+        console.log('[DietRecommender] 初始化完成:', {
+            foodCount: this.foods.length,
+            replacementRules: this.healthRules.foodReplacementRules.length
+        });
     }
 
     generateRecommendations(mealResult, healthProfile, ruleEvaluation) {
@@ -113,11 +125,14 @@ class DietRecommender {
     }
 
     findReplacements(food, conditions) {
+        if (!food) return [];
+        
         const rules = this.healthRules.foodReplacementRules || [];
         const replacements = [];
+        const aliases = Array.isArray(food.aliases) ? food.aliases : [];
 
         for (const rule of rules) {
-            if (food.name === rule.from || food.aliases.includes(rule.from)) {
+            if (food.name === rule.from || aliases.includes(rule.from)) {
                 const matchedCondition = conditions.find(c => (rule.conditions || []).includes(c));
                 if (matchedCondition) {
                     replacements.push({

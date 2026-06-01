@@ -86,20 +86,60 @@
                 <section class="card meal-card">
                     <h2 class="card-title">餐食分析</h2>
                     
-                    <div class="form-group">
-                        <label>请输入今日餐食（用 + 连接多种食物）</label>
-                        <input type="text" id="meal-input" placeholder="例如：米饭+可乐 或 鸡肉+西兰花+米饭">
-                        <small class="hint">提示：支持别名，如"白饭"也能识别</small>
+                    <div class="input-tabs">
+                        <button class="tab-btn active" data-tab="text">📝 文字输入</button>
+                        <button class="tab-btn" data-tab="image">📷 图片识别</button>
                     </div>
                     
-                    <button id="analyze-btn" class="btn btn-primary">分析餐食</button>
+                    <div id="tab-text" class="tab-content active">
+                        <div class="form-group">
+                            <label>请输入今日餐食（用 + 连接多种食物）</label>
+                            <input type="text" id="meal-input" placeholder="例如：米饭+可乐 或 鸡肉+西兰花+米饭">
+                            <small class="hint">提示：支持别名，如"白饭"也能识别</small>
+                        </div>
+                        
+                        <button id="analyze-btn" class="btn btn-primary">分析餐食</button>
+                        
+                        <div class="examples">
+                            <span class="examples-label">示例：</span>
+                            <button class="example-tag" data-meal="米饭+可乐">米饭+可乐</button>
+                            <button class="example-tag" data-meal="燕麦+无糖酸奶+苹果">健康早餐</button>
+                            <button class="example-tag" data-meal="鱼肉+西兰花+糙米">健康午餐</button>
+                            <button class="example-tag" data-meal="面包+薯片+巧克力">高热量组合</button>
+                        </div>
+                    </div>
                     
-                    <div class="examples">
-                        <span class="examples-label">示例：</span>
-                        <button class="example-tag" data-meal="米饭+可乐">米饭+可乐</button>
-                        <button class="example-tag" data-meal="燕麦+无糖酸奶+苹果">健康早餐</button>
-                        <button class="example-tag" data-meal="鱼肉+西兰花+糙米">健康午餐</button>
-                        <button class="example-tag" data-meal="面包+薯片+巧克力">高热量组合</button>
+                    <div id="tab-image" class="tab-content">
+                        <div class="image-upload-area">
+                            <input type="file" id="image-input" accept="image/*" style="display: none;">
+                            <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;">
+                            
+                            <div id="image-preview-container" class="image-preview-container">
+                                <div class="image-placeholder">
+                                    <p class="preview-icon">📷</p>
+                                    <p class="preview-text">上传或拍照识别食物</p>
+                                </div>
+                            </div>
+                            
+                            <div class="image-actions">
+                                <button id="upload-image-btn" class="btn btn-secondary">上传图片</button>
+                                <button id="take-photo-btn" class="btn btn-secondary">📷 拍照</button>
+                            </div>
+                        </div>
+                        
+                        <div id="image-result-container" class="image-result-container" style="display: none;">
+                            <div class="form-group">
+                                <label>识别结果（可修改后再分析）</label>
+                                <input type="text" id="image-meal-input" placeholder="模型识别结果将显示在这里">
+                            </div>
+                            <button id="analyze-image-btn" class="btn btn-primary">分析识别结果</button>
+                        </div>
+                        
+                        <div id="image-status" class="image-status" style="display: none;"></div>
+                        
+                        <div class="model-hint">
+                            <small>💡 图片识别需要在「模型配置」中设置火山引擎视觉模型</small>
+                        </div>
                     </div>
                 </section>
 
@@ -123,6 +163,95 @@
                     </div>
                 </section>
 
+                <section class="card model-config-card">
+                    <h2 class="card-title">
+                        ⚙️ 模型配置
+                        <span id="model-status-badge" class="status-badge status-unconfigured">未配置</span>
+                    </h2>
+                    
+                    <div class="config-tabs">
+                        <button class="config-tab-btn active" data-config-tab="basic">基本设置</button>
+                        <button class="config-tab-btn" data-config-tab="vision">图片识别</button>
+                    </div>
+                    
+                    <div id="config-tab-basic" class="config-tab-content active">
+                        <div class="form-group">
+                            <label>服务提供商</label>
+                            <select id="config-provider">
+                                <option value="volcengine">火山引擎 (Volcengine)</option>
+                                <option value="openai">OpenAI 兼容</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>API Key</label>
+                            <input type="password" id="config-api-key" placeholder="输入 API Key">
+                            <small class="hint">火山引擎：从控制台获取 API Key</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Endpoint</label>
+                            <input type="text" id="config-endpoint" placeholder="https://ark.cn-beijing.volces.com/api/v3">
+                            <small class="hint">默认：https://ark.cn-beijing.volces.com/api/v3</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>模型 ID</label>
+                            <input type="text" id="config-model" placeholder="例如：doubao-seed-2-0-code">
+                            <small class="hint">在火山引擎控制台创建模型后获取</small>
+                        </div>
+                        
+                        <div class="config-actions">
+                            <button id="save-config-btn" class="btn btn-secondary">保存配置</button>
+                            <button id="test-config-btn" class="btn btn-primary">测试连接</button>
+                        </div>
+                        
+                        <div id="config-status" class="config-status" style="display: none;"></div>
+                    </div>
+                    
+                    <div id="config-tab-vision" class="config-tab-content">
+                        <div class="form-group">
+                            <label class="checkbox-label" style="width: 100%; justify-content: flex-start;">
+                                <input type="checkbox" id="config-vision-enabled">
+                                <span style="font-weight: 600;">启用图片识别</span>
+                            </label>
+                        </div>
+                        
+                        <div id="vision-config-fields" style="display: none;">
+                            <div class="form-group">
+                                <label>视觉模型 ID</label>
+                                <input type="text" id="config-vision-model" placeholder="例如：doubao-vision-pro-1-0">
+                                <small class="hint">需要支持图像识别的模型（Vision 模型）</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>温度参数 (temperature)</label>
+                                <input type="number" id="config-temperature" min="0" max="2" step="0.1" value="0.3">
+                                <small class="hint">值越低，输出越稳定；值越高，输出越有创意</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>最大输出 Token</label>
+                                <input type="number" id="config-max-tokens" min="100" max="4096" step="100" value="2048">
+                            </div>
+                        </div>
+                        
+                        <div class="vision-info-box">
+                            <p><strong>📌 获取火山引擎模型：</strong></p>
+                            <ol>
+                                <li>访问 <a href="https://console.volcengine.com/ark" target="_blank">火山引擎 Ark 控制台</a></li>
+                                <li>开通火山方舟服务</li>
+                                <li>创建模型推理接入点（Endpoint）</li>
+                                <li>选择视觉模型（如 Doubao-Vision）</li>
+                                <li>将生成的模型 ID 填入上方</li>
+                            </ol>
+                            <p style="margin-top: 10px; font-size: 0.85rem; color: #666;">
+                                详细说明：<a href="https://console.volcengine.com/ark/region:ark+cn-beijing/model/detail?Id=doubao-seed-2-0-code" target="_blank">查看示例</a>
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
                 <section class="card database-card">
                     <h2 class="card-title">食物数据库</h2>
                     <div class="search-box">
@@ -138,11 +267,15 @@
         </footer>
     </div>
 
+    <script src="ModelConfig.js"></script>
+    <script src="DynamicFoodDatabase.js"></script>
+    <script src="LLMFoodProvider.js"></script>
     <script src="HealthProfiler.js"></script>
     <script src="MealAnalyzer.js"></script>
     <script src="RuleEngine.js"></script>
     <script src="BayesianNetwork.js"></script>
     <script src="DietRecommender.js"></script>
+    <script src="ImageRecognizer.js"></script>
     <script src="main.js"></script>
 </body>
 </html>

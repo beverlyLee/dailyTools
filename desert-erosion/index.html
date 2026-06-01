@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>沙漠风蚀模拟 - Desert Erosion Simulator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    }
+
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      background: linear-gradient(to bottom, #87CEEB 0%, #F4A460 70%, #DEB887 100%);
+    }
+
+    canvas {
+      display: block;
+    }
+
+    .control-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 300px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      color: #3D2914;
+      z-index: 100;
+    }
+
+    .panel-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #5C4033;
+      border-bottom: 2px solid rgba(139, 115, 85, 0.3);
+      padding-bottom: 8px;
+    }
+
+    .control-group {
+      margin-bottom: 16px;
+    }
+
+    .control-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #5C4033;
+    }
+
+    .control-slider {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(139, 115, 85, 0.2);
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .control-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #8B7355;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .control-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      background: #A0522D;
+    }
+
+    .control-slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #8B7355;
+      cursor: pointer;
+      border: none;
+    }
+
+    .control-value {
+      display: inline-block;
+      margin-left: 8px;
+      font-size: 12px;
+      color: #8B7355;
+      font-weight: 500;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #8B7355 0%, #5C4033 100%);
+      color: #F5DEB3;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #A0522D 0%, #8B4513 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(92, 64, 51, 0.3);
+    }
+
+    .btn-primary.active {
+      background: linear-gradient(135deg, #CD853F 0%, #D2691E 100%);
+    }
+
+    .btn-secondary {
+      background: rgba(139, 115, 85, 0.2);
+      color: #5C4033;
+      border: 1px solid rgba(139, 115, 85, 0.4);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(139, 115, 85, 0.3);
+    }
+
+    .info-panel {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      padding: 16px 20px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #3D2914;
+      font-size: 13px;
+      z-index: 100;
+      min-width: 220px;
+    }
+
+    .info-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #5C4033;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .info-label {
+      color: #8B7355;
+    }
+
+    .info-value {
+      font-weight: 600;
+      color: #5C4033;
+    }
+
+    .wind-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 18px;
+    }
+
+    .title {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      color: #5C4033;
+      z-index: 100;
+    }
+
+    .title h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+    }
+
+    .title p {
+      font-size: 13px;
+      color: #8B7355;
+    }
+
+    .toggle-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid rgba(139, 115, 85, 0.4);
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      color: #5C4033;
+      transition: all 0.2s;
+    }
+
+    .toggle-btn.active {
+      background: rgba(139, 115, 85, 0.4);
+      color: #F5DEB3;
+    }
+
+    .toggle-btn:hover {
+      background: rgba(139, 115, 85, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .control-panel {
+        width: calc(100% - 40px);
+        top: auto;
+        bottom: 20px;
+        right: 20px;
+        left: 20px;
+        max-height: 45vh;
+        overflow-y: auto;
+      }
+
+      .info-panel {
+        bottom: calc(45vh + 40px);
+        left: 20px;
+        right: 20px;
+        min-width: auto;
+      }
+
+      .title {
+        top: 10px;
+        left: 10px;
+      }
+
+      .title h1 {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <div class="title">
+    <h1>🏜️ 沙漠风蚀模拟</h1>
+    <p>Desert Wind Erosion Simulator</p>
+  </div>
+
+  <div class="control-panel">
+    <div class="panel-title">⚙️ 控制面板</div>
+
+    <div class="control-group">
+      <button id="btn-erode" class="btn btn-primary">🌬️ 开始风蚀</button>
+      <button id="btn-reset" class="btn btn-secondary">🔄 重置岩石</button>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label">
+        风速
+        <span id="wind-speed-value" class="control-value">1.0</span>
+      </label>
+      <input type="range" id="wind-speed" class="control-slider" min="0.1" max="3.0" step="0.1" value="1.0">
+    </div>
+
+    <div class="control-group">
+      <label class="control-label">
+        侵蚀强度
+        <span id="erosion-strength-value" class="control-value">1.0</span>
+      </label>
+      <input type="range" id="erosion-strength" class="control-slider" min="0.1" max="3.0" step="0.1" value="1.0">
+    </div>
+
+    <div class="control-group">
+      <label class="control-label">风向</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" data-direction="left">← 左</button>
+        <button class="toggle-btn" data-direction="right">右 →</button>
+        <button class="toggle-btn" data-direction="front">前</button>
+        <button class="toggle-btn" data-direction="back">后</button>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label">
+        <input type="checkbox" id="auto-rotate" checked>
+        自动旋转视角
+      </label>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-title">📊 实时数据</div>
+    <div class="info-row">
+      <span class="info-label">侵蚀状态</span>
+      <span id="erosion-status" class="info-value">⏸️ 已停止</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">当前风向</span>
+      <span id="wind-direction" class="info-value wind-indicator">← 左</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">侵蚀时间</span>
+      <span id="erosion-time" class="info-value">0.0 s</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">顶点位移总量</span>
+      <span id="total-displacement" class="info-value">0.000</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">迎风面顶点</span>
+      <span id="windward-count" class="info-value">0</span>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

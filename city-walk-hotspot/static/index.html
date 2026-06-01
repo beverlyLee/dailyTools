@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>城市漫步路线评估工具 - City Walk Hotspot</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 360px;
+            background: white;
+            border-right: 1px solid #e8e8e8;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .filter-section {
+            margin-bottom: 24px;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8edf3 100%);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .stats-card-title {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .legend-section {
+            margin-bottom: 24px;
+        }
+
+        .legend-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .legend-subtitle {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .legend-line {
+            width: 50px;
+            height: 4px;
+            border-radius: 2px;
+            margin-right: 10px;
+            background: #666;
+        }
+
+        .legend-color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .poi-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .poi-tag {
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            background: #f3f4f6;
+            border-radius: 6px;
+            font-size: 11px;
+        }
+
+        .poi-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .route-list {
+            margin-top: 16px;
+        }
+
+        .route-item {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+        .route-item:hover {
+            background: #f3f4f6;
+            transform: translateX(4px);
+        }
+
+        .route-item.active {
+            border-left-color: #667eea;
+            background: #eef2ff;
+        }
+
+        .route-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #1f2937;
+        }
+
+        .route-meta {
+            font-size: 12px;
+            color: #6b7280;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .route-hotness {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            min-width: 200px;
+        }
+
+        .overlay-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1f2937;
+        }
+
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            color: #4b5563;
+            cursor: pointer;
+        }
+
+        .toggle-item input {
+            margin-right: 8px;
+        }
+
+        .tooltip-content {
+            font-size: 12px;
+            min-width: 180px;
+        }
+
+        .tooltip-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #1f2937;
+        }
+
+        .tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            color: #6b7280;
+        }
+
+        .tooltip-value {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .heat-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .heat-badge.extreme { background: #dc2626; }
+        .heat-badge.very_high { background: #ea580c; }
+        .heat-badge.high { background: #d97706; }
+        .heat-badge.medium { background: #6b7280; }
+        .heat-badge.low { background: #9ca3af; }
+
+        .overlap-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .legend-line-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .legend-line-sample {
+            width: 60px;
+            margin-right: 10px;
+        }
+
+        .city-switcher {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 999px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
+
+        .city-pill {
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: 2px solid transparent;
+            color: #6b7280;
+            background: #f3f4f6;
+            white-space: nowrap;
+        }
+
+        .city-pill:hover {
+            background: #e5e7eb;
+            transform: translateY(-1px);
+        }
+
+        .city-pill.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .city-pill.active:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+        }
+
+        .city-pill.beijing {
+            padding-left: 28px;
+            position: relative;
+        }
+
+        .city-pill.beijing::before {
+            content: "🏮";
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+        }
+
+        .city-pill.shanghai {
+            padding-left: 28px;
+            position: relative;
+        }
+
+        .city-pill.shanghai::before {
+            content: "🏙️";
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+        }
+
+        .city-pill.all {
+            padding-left: 28px;
+            position: relative;
+        }
+
+        .city-pill.all::before {
+            content: "🌐";
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚶 城市漫步路线评估工具</h1>
+        <p>分析小红书、抖音、快手等平台推荐路线，计算热门程度与商业化程度，寻找最具烟火气的路线</p>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="filter-section">
+                <div class="filter-label">选择城市</div>
+                <select id="citySelect" class="filter-select">
+                    <option value="">全部城市</option>
+                </select>
+            </div>
+
+            <div class="filter-section">
+                <div class="filter-label">选择平台</div>
+                <select id="platformSelect" class="filter-select">
+                    <option value="">全部平台</option>
+                </select>
+            </div>
+
+            <div class="stats-card">
+                <div class="stats-card-title">📊 热门程度统计</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalRoutes">0</div>
+                        <div class="stat-label">路线总数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="avgHotness">0</div>
+                        <div class="stat-label">平均热度</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="corePaths">0</div>
+                        <div class="stat-label">核心路段</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="maxHotness">0</div>
+                        <div class="stat-label">最高热度</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <div class="stats-card-title">🏪 商业化分析</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="commercialScore">0</div>
+                        <div class="stat-label">商业化指数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="poiDensity">0</div>
+                        <div class="stat-label">POI密度(个/km)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="legend-section">
+                <div class="legend-title">📏 线宽（重叠次数）</div>
+                <div class="legend-subtitle">线宽优先由重叠次数决定</div>
+                <div class="legend-item">
+                    <div class="legend-line" style="height:10px; background:#666;"></div>
+                    <span>≥5次重叠 (10px)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-line" style="height:8.5px; background:#666;"></div>
+                    <span>4次重叠 (8.5px)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-line" style="height:7px; background:#666;"></div>
+                    <span>3次重叠 (7px)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-line" style="height:5.5px; background:#666;"></div>
+                    <span>2次重叠 (5.5px)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-line" style="height:3px; background:#666;"></div>
+                    <span>1次重叠 (3px)</span>
+                </div>
+            </div>
+
+            <div class="legend-section">
+                <div class="legend-title">🎨 颜色（热度等级）</div>
+                <div class="legend-item">
+                    <div class="legend-color-dot" style="background:#dc2626"></div>
+                    <span>极热门 (热度>80)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color-dot" style="background:#ea580c"></div>
+                    <span>非常热门 (热度>50)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color-dot" style="background:#d97706"></div>
+                    <span>热门 (热度>30)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color-dot" style="background:#6b7280"></div>
+                    <span>中等 (热度>15)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color-dot" style="background:#9ca3af"></div>
+                    <span>普通</span>
+                </div>
+            </div>
+
+            <div class="legend-section">
+                <div class="legend-title">📍 POI类型</div>
+                <div class="poi-legend">
+                    <div class="poi-tag"><div class="poi-dot" style="background:#8B4513"></div>咖啡馆</div>
+                    <div class="poi-tag"><div class="poi-dot" style="background:#FF69B4"></div>甜品店</div>
+                    <div class="poi-tag"><div class="poi-dot" style="background:#FF4500"></div>餐厅</div>
+                    <div class="poi-tag"><div class="poi-dot" style="background:#4169E1"></div>商店</div>
+                    <div class="poi-tag"><div class="poi-dot" style="background:#9370DB"></div>服装店</div>
+                    <div class="poi-tag"><div class="poi-dot" style="background:#228B22"></div>书店</div>
+                    <div class="poi-tag"><div class="poi-dot" style="background:#DC143C"></div>酒吧</div>
+                    <div class="poi-tag"><div class="poi-dot" style="background:#FFA500"></div>小吃</div>
+                    <div class="poi-tag"><div class="poi-dot" style="background:#32CD32"></div>公园</div>
+                </div>
+            </div>
+
+            <div class="route-list">
+                <div class="legend-title">📝 路线列表</div>
+                <div id="routeList"></div>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="city-switcher">
+                <div class="city-pill all active" data-city="">全部城市</div>
+                <div class="city-pill beijing" data-city="北京">北京胡同</div>
+                <div class="city-pill shanghai" data-city="上海">上海武康路</div>
+            </div>
+            <div class="map-overlay">
+                <div class="overlay-title">🎛️ 显示控制</div>
+                <div class="toggle-group">
+                    <label class="toggle-item">
+                        <input type="checkbox" id="showHeat" checked> 显示热度路线
+                    </label>
+                    <label class="toggle-item">
+                        <input type="checkbox" id="showPOI" checked> 显示商铺POI
+                    </label>
+                    <label class="toggle-item">
+                        <input type="checkbox" id="showMarkers" checked> 显示途经点
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const POI_COLORS = {
+            "coffee": "#8B4513",
+            "dessert": "#FF69B4",
+            "restaurant": "#FF4500",
+            "shop": "#4169E1",
+            "clothing": "#9370DB",
+            "bookstore": "#228B22",
+            "bar": "#DC143C",
+            "snack": "#FFA500",
+            "park": "#32CD32"
+        };
+
+        const POI_NAMES = {
+            "coffee": "咖啡馆",
+            "dessert": "甜品店",
+            "restaurant": "餐厅",
+            "shop": "商店",
+            "clothing": "服装店",
+            "bookstore": "书店",
+            "bar": "酒吧",
+            "snack": "小吃",
+            "park": "公园"
+        };
+
+        const HEAT_COLORS = {
+            "extreme": "#dc2626",
+            "very_high": "#ea580c",
+            "high": "#d97706",
+            "medium": "#6b7280",
+            "low": "#9ca3af"
+        };
+
+        let map;
+        let currentData = null;
+        let appConfig = null;
+        let routeLayers = [];
+        let poiLayers = [];
+        let markerLayers = [];
+        let walkingPathCache = {};
+        let isMapInitialized = false;
+        let segmentWalkingGlobalCache = {};
+        const MAX_CONCURRENT_REQUESTS = 3;
+        const MAX_RETRIES = 3;
+
+        async function fetchWithRetry(url, retries = MAX_RETRIES, delay = 500) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const resp = await fetch(url);
+                    if (!resp.ok) {
+                        throw new Error(`HTTP ${resp.status}`);
+                    }
+                    return await resp.json();
+                } catch (error) {
+                    if (i < retries - 1) {
+                        await new Promise(r => setTimeout(r, delay * (i + 1)));
+                    } else {
+                        throw error;
+                    }
+                }
+            }
+        }
+
+        async function fetchSegmentsWithConcurrency(segments, routeWalkingPaths) {
+            const results = new Map();
+            const pending = new Set();
+            const queue = [...segments];
+            const failedSegments = [];
+            
+            async function processNext() {
+                while (queue.length > 0 && pending.size < MAX_CONCURRENT_REQUESTS) {
+                    const seg = queue.shift();
+                    const segKey = `${seg.start.lat},${seg.start.lng}-${seg.end.lat},${seg.end.lng}`;
+                    
+                    if (segmentWalkingGlobalCache[segKey]) {
+                        results.set(segKey, segmentWalkingGlobalCache[segKey]);
+                        continue;
+                    }
+                    
+                    let matched = false;
+                    for (const routeId of (seg.route_ids || [])) {
+                        if (routeWalkingPaths[routeId]) {
+                            const path = routeWalkingPaths[routeId];
+                            const startMatch = path.findIndex(p => 
+                                Math.abs(p[0] - seg.start.lat) < 0.0015 && 
+                                Math.abs(p[1] - seg.start.lng) < 0.0015
+                            );
+                            const endMatch = path.findIndex(p => 
+                                Math.abs(p[0] - seg.end.lat) < 0.0015 && 
+                                Math.abs(p[1] - seg.end.lng) < 0.0015
+                            );
+                            
+                            if (startMatch >= 0 && endMatch >= 0) {
+                                const startIdx = Math.min(startMatch, endMatch);
+                                const endIdx = Math.max(startMatch, endMatch);
+                                const subPath = path.slice(startIdx, endIdx + 1);
+                                if (subPath.length > 1) {
+                                    segmentWalkingGlobalCache[segKey] = subPath;
+                                    results.set(segKey, subPath);
+                                    matched = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (!matched) {
+                        const promise = (async () => {
+                            try {
+                                const data = await fetchWithRetry(
+                                    `/api/route/walking?origin_lng=${seg.start.lng}&origin_lat=${seg.start.lat}&dest_lng=${seg.end.lng}&dest_lat=${seg.end.lat}`
+                                );
+                                if (data.coords && data.coords.length > 1) {
+                                    segmentWalkingGlobalCache[segKey] = data.coords;
+                                    results.set(segKey, data.coords);
+                                } else {
+                                    failedSegments.push(seg);
+                                }
+                            } catch (error) {
+                                console.warn(`路段路径规划失败(${seg.start_name}->${seg.end_name}):`, error.message);
+                                failedSegments.push(seg);
+                            } finally {
+                                pending.delete(promise);
+                            }
+                        })();
+                        pending.add(promise);
+                    }
+                }
+                
+                if (pending.size > 0) {
+                    await Promise.race(pending);
+                }
+            }
+            
+            while (queue.length > 0 || pending.size > 0) {
+                await processNext();
+            }
+            
+            return { results, failedSegments };
+        }
+
+        async function renderOverlaySegments() {
+            const segments = currentData.overlay_segments || [];
+            const routes = currentData.routes || [];
+            
+            const routeWalkingPaths = {};
+            for (const route of routes) {
+                const walkingPath = await fetchWalkingPath(route.route_id, route.points || []);
+                if (walkingPath) {
+                    routeWalkingPaths[route.route_id] = walkingPath;
+                }
+            }
+            
+            const { results: segmentResults, failedSegments } = await fetchSegmentsWithConcurrency(segments, routeWalkingPaths);
+            
+            if (failedSegments.length > 0) {
+                console.warn(`以下路段路径规划失败，将使用插值近似:`, 
+                    failedSegments.map(s => `${s.start_name}->${s.end_name}`).join(', '));
+            }
+            
+            for (const seg of segments) {
+                const color = HEAT_COLORS[seg.heat_level] || '#9ca3af';
+                const lineWidth = seg.line_width || 3;
+                
+                const segKey = `${seg.start.lat},${seg.start.lng}-${seg.end.lat},${seg.end.lng}`;
+                let latlngs = segmentResults.get(segKey);
+                
+                if (!latlngs || latlngs.length < 2) {
+                    if (failedSegments.includes(seg)) {
+                        latlngs = generateInterpolatedPath(
+                            seg.start.lat, seg.start.lng,
+                            seg.end.lat, seg.end.lng
+                        );
+                    } else {
+                        latlngs = [
+                            [seg.start.lat, seg.start.lng],
+                            [seg.end.lat, seg.end.lng]
+                        ];
+                    }
+                }
+                
+                const line = L.polyline(latlngs, {
+                    color: color,
+                    weight: lineWidth,
+                    opacity: 0.85,
+                    lineJoin: 'round',
+                    lineCap: 'round',
+                    dashArray: failedSegments.includes(seg) ? '8, 8' : null
+                }).addTo(map);
+
+                const tooltipContent = `
+                    <div class="tooltip-content">
+                        <div class="tooltip-title">${seg.start_name} - ${seg.end_name}</div>
+                        <div class="tooltip-row"><span>重叠次数:</span><span class="tooltip-value overlap-badge">${seg.overlap_count}次</span></div>
+                        <div class="tooltip-row"><span>平均热度:</span><span class="tooltip-value">${seg.avg_hotness}</span></div>
+                        <div class="tooltip-row"><span>线宽:</span><span class="tooltip-value">${lineWidth}px</span></div>
+                        <div class="tooltip-row"><span>商业化指数:</span><span class="tooltip-value">${seg.commercial_intensity}</span></div>
+                        <div class="tooltip-row"><span>POI数量:</span><span class="tooltip-value">${seg.total_pois}</span></div>
+                        <div class="tooltip-row"><span>热度等级:</span><span class="heat-badge ${seg.heat_level}">${getHeatLevelName(seg.heat_level)}</span></div>
+                        ${failedSegments.includes(seg) ? '<div class="tooltip-row"><span>路径类型:</span><span class="tooltip-value" style="color:#ea580c">近似插值</span></div>' : ''}
+                    </div>
+                `;
+
+                line.bindTooltip(tooltipContent, {sticky: true});
+                routeLayers.push(line);
+            }
+        }
+
+        function generateInterpolatedPath(lat1, lng1, lat2, lng2) {
+            const points = [];
+            const steps = 10;
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const lat = lat1 + (lat2 - lat1) * t;
+                const lng = lng1 + (lng2 - lng1) * t;
+                points.push([lat, lng]);
+            }
+            return points;
+        }
+
+        async function init() {
+            await loadConfig();
+            await loadCities();
+            await loadPlatforms();
+            initMap();
+            await loadRoutes();
+            
+            document.getElementById('citySelect').addEventListener('change', loadRoutes);
+            document.getElementById('platformSelect').addEventListener('change', loadRoutes);
+            document.getElementById('showHeat').addEventListener('change', toggleHeat);
+            document.getElementById('showPOI').addEventListener('change', togglePOI);
+            document.getElementById('showMarkers').addEventListener('change', toggleMarkers);
+            
+            document.querySelectorAll('.city-pill').forEach(pill => {
+                pill.addEventListener('click', () => switchCity(pill));
+            });
+        }
+
+        function switchCity(pill) {
+            const city = pill.dataset.city;
+            document.querySelectorAll('.city-pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            
+            const citySelect = document.getElementById('citySelect');
+            citySelect.value = city;
+            
+            loadRoutes();
+        }
+
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/config');
+                appConfig = await response.json();
+            } catch (error) {
+                console.error('加载配置失败:', error);
+                appConfig = { gaode_js_api_key: '', gaode_api_key: '' };
+            }
+        }
+
+        async function loadCities() {
+            try {
+                const response = await fetch('/api/cities');
+                const data = await response.json();
+                const select = document.getElementById('citySelect');
+                data.cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('加载城市列表失败:', error);
+            }
+        }
+
+        async function loadPlatforms() {
+            try {
+                const response = await fetch('/api/platforms');
+                const data = await response.json();
+                const select = document.getElementById('platformSelect');
+                data.platforms.forEach(platform => {
+                    const option = document.createElement('option');
+                    option.value = platform;
+                    option.textContent = platform;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('加载平台列表失败:', error);
+            }
+        }
+
+        function initMap() {
+            map = L.map('map', {
+                center: [35.0, 115.0],
+                zoom: 5,
+                zoomControl: true
+            });
+            
+            const gaodeKey = appConfig?.gaode_js_api_key || appConfig?.gaode_api_key || '';
+            
+            if (gaodeKey) {
+                L.tileLayer(`https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}`, {
+                    subdomains: ['1', '2', '3', '4'],
+                    attribution: '&copy; 高德地图',
+                    maxZoom: 18
+                }).addTo(map);
+            } else {
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+            }
+            isMapInitialized = true;
+        }
+
+        function fitMapToAllRoutes() {
+            if (!currentData?.routes?.length) return;
+            
+            const allPoints = [];
+            currentData.routes.forEach(route => {
+                route.points?.forEach(point => {
+                    allPoints.push([point.lat, point.lng]);
+                });
+            });
+            
+            if (allPoints.length > 0) {
+                const bounds = L.latLngBounds(allPoints);
+                map.fitBounds(bounds, { padding: [80, 80], maxZoom: 14 });
+            }
+        }
+
+        async function fetchWalkingPath(routeId, points) {
+            if (walkingPathCache[routeId]) {
+                return walkingPathCache[routeId];
+            }
+            
+            if (points.length < 2) {
+                walkingPathCache[routeId] = null;
+                return null;
+            }
+            
+            try {
+                const pointsParam = JSON.stringify(points.map(p => ({lng: p.lng, lat: p.lat})));
+                const response = await fetch(`/api/route/full_walking?points=${encodeURIComponent(pointsParam)}`);
+                const data = await response.json();
+                
+                if (data.coords && data.coords.length > 0) {
+                    walkingPathCache[routeId] = data.coords;
+                    return data.coords;
+                }
+            } catch (error) {
+                console.error('获取步行路径失败:', error);
+            }
+            
+            walkingPathCache[routeId] = null;
+            return null;
+        }
+
+        async function loadRoutes() {
+            const city = document.getElementById('citySelect').value;
+            const platform = document.getElementById('platformSelect').value;
+            
+            let url = '/api/routes';
+            const params = new URLSearchParams();
+            if (city) params.append('city', city);
+            if (platform) params.append('platform', platform);
+            if (params.toString()) url += '?' + params.toString();
+
+            try {
+                const response = await fetch(url);
+                currentData = await response.json();
+                await renderMap();
+                updateStats();
+                renderRouteList();
+            } catch (error) {
+                console.error('加载路线数据失败:', error);
+            }
+        }
+
+        function clearLayers() {
+            routeLayers.forEach(layer => map.removeLayer(layer));
+            poiLayers.forEach(layer => map.removeLayer(layer));
+            markerLayers.forEach(layer => map.removeLayer(layer));
+            routeLayers = [];
+            poiLayers = [];
+            markerLayers = [];
+        }
+
+        async function renderMap() {
+            clearLayers();
+            
+            if (!currentData || !currentData.routes) return;
+
+            if (currentData.filter?.city) {
+                const center = currentData.center || {lat: 35.0, lng: 115.0};
+                map.setView([center.lat, center.lng], 14);
+            } else {
+                fitMapToAllRoutes();
+            }
+
+            if (document.getElementById('showHeat').checked) {
+                await renderOverlaySegments();
+            }
+
+            if (document.getElementById('showPOI').checked) {
+                renderPOIs();
+            }
+
+            if (document.getElementById('showMarkers').checked) {
+                renderMarkers();
+            }
+        }
+
+        async function renderOverlaySegments() {
+            const segments = currentData.overlay_segments || [];
+            const routes = currentData.routes || [];
+            
+            const routeWalkingPaths = {};
+            for (const route of routes) {
+                const walkingPath = await fetchWalkingPath(route.route_id, route.points || []);
+                if (walkingPath) {
+                    routeWalkingPaths[route.route_id] = walkingPath;
+                }
+            }
+            
+            const segmentWalkingCache = {};
+            
+            for (const seg of segments) {
+                const color = HEAT_COLORS[seg.heat_level] || '#9ca3af';
+                const lineWidth = seg.line_width || 3;
+                
+                let latlngs = null;
+                
+                const matchingRouteIds = seg.route_ids || [];
+                
+                for (const routeId of matchingRouteIds) {
+                    if (routeWalkingPaths[routeId]) {
+                        const path = routeWalkingPaths[routeId];
+                        const startMatch = path.findIndex(p => 
+                            Math.abs(p[0] - seg.start.lat) < 0.0015 && 
+                            Math.abs(p[1] - seg.start.lng) < 0.0015
+                        );
+                        const endMatch = path.findIndex(p => 
+                            Math.abs(p[0] - seg.end.lat) < 0.0015 && 
+                            Math.abs(p[1] - seg.end.lng) < 0.0015
+                        );
+                        
+                        if (startMatch >= 0 && endMatch >= 0) {
+                            const startIdx = Math.min(startMatch, endMatch);
+                            const endIdx = Math.max(startMatch, endMatch);
+                            latlngs = path.slice(startIdx, endIdx + 1);
+                            break;
+                        }
+                    }
+                }
+                
+                if (!latlngs || latlngs.length < 2) {
+                    const segKey = `${seg.start.lat},${seg.start.lng}-${seg.end.lat},${seg.end.lng}`;
+                    
+                    if (segmentWalkingCache[segKey]) {
+                        latlngs = segmentWalkingCache[segKey];
+                    } else {
+                        try {
+                            const walkingResp = await fetch(
+                                `/api/route/walking?origin_lng=${seg.start.lng}&origin_lat=${seg.start.lat}&dest_lng=${seg.end.lng}&dest_lat=${seg.end.lat}`
+                            );
+                            const walkingData = await walkingResp.json();
+                            if (walkingData.coords && walkingData.coords.length > 1) {
+                                latlngs = walkingData.coords;
+                                segmentWalkingCache[segKey] = latlngs;
+                            }
+                        } catch (error) {
+                            console.error('获取路段步行路径失败:', error);
+                        }
+                    }
+                }
+                
+                if (!latlngs || latlngs.length < 2) {
+                    latlngs = [
+                        [seg.start.lat, seg.start.lng],
+                        [seg.end.lat, seg.end.lng]
+                    ];
+                }
+                
+                const line = L.polyline(latlngs, {
+                    color: color,
+                    weight: lineWidth,
+                    opacity: 0.85,
+                    lineJoin: 'round',
+                    lineCap: 'round'
+                }).addTo(map);
+
+                const tooltipContent = `
+                    <div class="tooltip-content">
+                        <div class="tooltip-title">${seg.start_name} - ${seg.end_name}</div>
+                        <div class="tooltip-row"><span>重叠次数:</span><span class="tooltip-value overlap-badge">${seg.overlap_count}次</span></div>
+                        <div class="tooltip-row"><span>平均热度:</span><span class="tooltip-value">${seg.avg_hotness}</span></div>
+                        <div class="tooltip-row"><span>线宽:</span><span class="tooltip-value">${lineWidth}px</span></div>
+                        <div class="tooltip-row"><span>商业化指数:</span><span class="tooltip-value">${seg.commercial_intensity}</span></div>
+                        <div class="tooltip-row"><span>POI数量:</span><span class="tooltip-value">${seg.total_pois}</span></div>
+                        <div class="tooltip-row"><span>热度等级:</span><span class="heat-badge ${seg.heat_level}">${getHeatLevelName(seg.heat_level)}</span></div>
+                    </div>
+                `;
+
+                line.bindTooltip(tooltipContent, {sticky: true});
+                routeLayers.push(line);
+            }
+        }
+
+        function renderPOIs() {
+            const routes = currentData.routes || [];
+            
+            routes.forEach(route => {
+                (route.pois || []).forEach(poi => {
+                    const color = POI_COLORS[poi.type] || '#808080';
+                    const marker = L.circleMarker([poi.lat, poi.lng], {
+                        radius: 6,
+                        fillColor: color,
+                        color: '#fff',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.9
+                    }).addTo(map);
+
+                    const tooltipContent = `
+                        <div class="tooltip-content">
+                            <div class="tooltip-title">${poi.name}</div>
+                            <div class="tooltip-row"><span>类型:</span><span class="tooltip-value">${POI_NAMES[poi.type] || poi.type}</span></div>
+                        </div>
+                    `;
+
+                    marker.bindTooltip(tooltipContent, {sticky: true});
+                    poiLayers.push(marker);
+                });
+            });
+        }
+
+        function renderMarkers() {
+            const routes = currentData.routes || [];
+            
+            routes.forEach(route => {
+                (route.points || []).forEach(point => {
+                    const marker = L.marker([point.lat, point.lng]).addTo(map);
+                    
+                    const tooltipContent = `
+                        <div class="tooltip-content">
+                            <div class="tooltip-title">${point.name}</div>
+                            <div class="tooltip-row"><span>所属路线:</span><span class="tooltip-value">${route.note_title}</span></div>
+                            <div class="tooltip-row"><span>热度:</span><span class="tooltip-value">${route.hotness}</span></div>
+                        </div>
+                    `;
+
+                    marker.bindTooltip(tooltipContent);
+                    markerLayers.push(marker);
+                });
+            });
+        }
+
+        function getHeatLevelName(level) {
+            const names = {
+                "extreme": "极热门",
+                "very_high": "非常热门",
+                "high": "热门",
+                "medium": "中等",
+                "low": "普通"
+            };
+            return names[level] || level;
+        }
+
+        function updateStats() {
+            if (!currentData) return;
+
+            const hotness = currentData.hotness_stats || {};
+            const commercial = currentData.commercial_analysis || {};
+            
+            const corePathsCount = currentData.core_paths_count || currentData.core_paths?.length || 0;
+
+            document.getElementById('totalRoutes').textContent = hotness.total_routes || 0;
+            document.getElementById('avgHotness').textContent = hotness.avg_hotness || 0;
+            document.getElementById('maxHotness').textContent = hotness.max_hotness || 0;
+            document.getElementById('corePaths').textContent = corePathsCount;
+            document.getElementById('commercialScore').textContent = commercial.avg_commercial_score || 0;
+            document.getElementById('poiDensity').textContent = commercial.poi_per_km || 0;
+        }
+
+        function renderRouteList() {
+            const container = document.getElementById('routeList');
+            container.innerHTML = '';
+
+            if (!currentData || !currentData.routes) return;
+
+            const routes = currentData.routes;
+            
+            routes.forEach((route, index) => {
+                const item = document.createElement('div');
+                item.className = 'route-item';
+                item.innerHTML = `
+                    <div class="route-title">${route.note_title}</div>
+                    <div class="route-meta">
+                        <span>${route.city} · ${route.platform}</span>
+                        <span class="route-hotness">🔥 ${route.hotness}</span>
+                    </div>
+                `;
+                
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.route-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    const bounds = L.latLngBounds(
+                        route.points.map(p => [p.lat, p.lng])
+                    );
+                    map.fitBounds(bounds, {padding: [50, 50]});
+                });
+
+                container.appendChild(item);
+            });
+        }
+
+        async function toggleHeat() {
+            await renderMap();
+        }
+
+        async function togglePOI() {
+            await renderMap();
+        }
+
+        async function toggleMarkers() {
+            await renderMap();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

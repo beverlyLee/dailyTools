@@ -1,0 +1,19 @@
+{
+  "cities": [
+    {"name": "北京", "avg_sleep_hours": 6.2, "avg_bedtime": "01:30"},
+    {"name": "上海", "avg_sleep_hours": 6.4, "avg_bedtime": "01:15"},
+    {"name": "广州", "avg_sleep_hours": 6.8, "avg_bedtime": "00:45"},
+    {"name": "深圳", "avg_sleep_hours": 6.3, "avg_bedtime": "01:20"},
+    {"name": "成都", "avg_sleep_hours": 7.8, "avg_bedtime": "23:30"},
+    {"name": "杭州", "avg_sleep_hours": 6.5, "avg_bedtime": "01:00"},
+    {"name": "西安", "avg_sleep_hours": 7.2, "avg_bedtime": "23:50"},
+    {"name": "重庆", "avg_sleep_hours": 7.1, "avg_bedtime": "23:55"},
+    {"name": "武汉", "avg_sleep_hours": 6.9, "avg_bedtime": "00:15"},
+    {"name": "沈阳", "avg_sleep_hours": 7.5, "avg_bedtime": "23:20"},
+    {"name": "哈尔滨", "avg_sleep_hours": 7.7, "avg_bedtime": "23:10"},
+    {"name": "长春", "avg_sleep_hours": 7.6, "avg_bedtime": "23:15"},
+    {"name": "大连", "avg_sleep_hours": 7.3, "avg_bedtime": "23:35"},
+    {"name": "青岛", "avg_sleep_hours": 7.0, "avg_bedtime": "23:45"},
+    {"name": "南京", "avg_sleep_hours": 6.7, "avg_bedtime": "00:30"}
+  ]
+}

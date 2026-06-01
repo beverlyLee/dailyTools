@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>狗品种地域分布图</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; color: white; margin-bottom: 30px; }
+        header h1 { font-size: 2.5rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        header p { font-size: 1.1rem; opacity: 0.9; }
+        
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .tab { padding: 10px 25px; border: none; border-radius: 25px; cursor: pointer; font-size: 1rem; transition: all 0.3s; }
+        .tab.active { background: white; color: #667eea; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .tab:not(.active) { background: rgba(255,255,255,0.2); color: white; }
+        .tab:hover:not(.active) { background: rgba(255,255,255,0.3); }
+        
+        .content { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        
+        #chord-container { display: flex; justify-content: center; align-items: center; min-height: 600px; }
+        .chord-diagram { width: 100%; max-width: 900px; height: 700px; }
+        
+        .node { cursor: pointer; }
+        .node text { font-size: 12px; pointer-events: none; }
+        .group text { font-size: 14px; font-weight: 600; }
+        .chord { opacity: 0.6; }
+        .chord:hover { opacity: 1; }
+        
+        .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 20px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; padding: 5px 12px; background: #f5f5f5; border-radius: 20px; }
+        .legend-color { width: 12px; height: 12px; border-radius: 50%; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px; }
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; padding: 20px; color: white; }
+        .stat-card h3 { margin-bottom: 15px; font-size: 1.2rem; }
+        .stat-card ul { list-style: none; }
+        .stat-card li { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .stat-card li:last-child { border-bottom: none; }
+        .stat-card .breed-name { display: inline-block; width: 60px; }
+        .stat-card .breed-count { float: right; font-weight: 600; }
+        
+        .profile-section { display: none; }
+        .profile-section.active { display: block; }
+        .profile-container { display: flex; gap: 30px; flex-wrap: wrap; }
+        .profile-card { flex: 1; min-width: 200px; background: #f8f9fa; border-radius: 15px; padding: 20px; }
+        .profile-card h3 { color: #667eea; margin-bottom: 15px; }
+        .profile-card p { margin: 10px 0; color: #666; }
+        .profile-card .label { font-weight: 600; color: #333; }
+        
+        .city-selector { margin-bottom: 20px; }
+        .city-selector label { font-weight: 600; margin-right: 10px; }
+        .city-selector select { padding: 10px 20px; border-radius: 10px; border: 2px solid #667eea; font-size: 1rem; outline: none; }
+        
+        .region-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .region-tab { padding: 8px 16px; border: 2px solid #667eea; border-radius: 20px; background: white; color: #667eea; cursor: pointer; transition: all 0.3s; }
+        .region-tab.active { background: #667eea; color: white; }
+        
+        .highlight { background: #fff3cd; padding: 10px; border-radius: 8px; margin-top: 20px; }
+        .highlight strong { color: #856404; }
+        
+        .breed-icon { width: 30px; height: 30px; display: inline-block; vertical-align: middle; margin-right: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐕 狗品种地域分布图</h1>
+            <p>探索不同城市的犬种偏好，洞察宠物主人画像</p>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('chord')">弦图可视化</button>
+            <button class="tab" onclick="showTab('region')">地域排行</button>
+            <button class="tab" onclick="showTab('profile')">主人画像</button>
+        </div>
+        
+        <div class="content">
+            <div id="chord-section" class="profile-section active">
+                <div id="chord-container">
+                    <svg class="chord-diagram"></svg>
+                </div>
+                <div class="legend" id="legend"></div>
+                <div class="highlight">
+                    <strong>验证要点：</strong>东北三省偏好"二哈"(哈士奇)；江浙沪偏好"泰迪"和"比熊"；川渝地区"柴犬"受欢迎
+                </div>
+            </div>
+            
+            <div id="region-section" class="profile-section">
+                <div class="region-tabs">
+                    <button class="region-tab active" data-region="all">全国</button>
+                    <button class="region-tab" data-region="东北">东北</button>
+                    <button class="region-tab" data-region="华东">华东</button>
+                    <button class="region-tab" data-region="西南">西南</button>
+                    <button class="region-tab" data-region="华北">华北</button>
+                    <button class="region-tab" data-region="华南">华南</button>
+                    <button class="region-tab" data-region="华中">华中</button>
+                    <button class="region-tab" data-region="西北">西北</button>
+                </div>
+                <div class="stats-grid" id="region-stats"></div>
+            </div>
+            
+            <div id="profile-section" class="profile-section">
+                <div class="city-selector">
+                    <label for="city-select">选择城市：</label>
+                    <select id="city-select" onchange="loadProfile()"></select>
+                </div>
+                <div class="profile-container" id="profile-container"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        let chordData = null;
+        let cityBreedRank = null;
+        let cities = [];
+        
+        async function loadData() {
+            const [chordRes, rankRes, citiesRes] = await Promise.all([
+                fetch('/api/chord-data'),
+                fetch('/api/city-breed-rank'),
+                fetch('/api/cities')
+            ]);
+            chordData = await chordRes.json();
+            cityBreedRank = await rankRes.json();
+            cities = await citiesRes.json();
+            
+            initChord();
+            initRegionStats();
+            initCitySelector();
+        }
+        
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.tab:nth-child(${['chord', 'region', 'profile'].indexOf(tabName) + 1})`).classList.add('active');
+            
+            document.querySelectorAll('.profile-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(`${tabName}-section`).classList.add('active');
+        }
+        
+        function initChord() {
+            const svg = d3.select('.chord-diagram');
+            const width = svg.node().getBoundingClientRect().width;
+            const height = Math.min(width, 700);
+            const innerRadius = Math.min(width, height) * 0.35;
+            const outerRadius = innerRadius * 1.15;
+            
+            svg.attr('width', width).attr('height', height);
+            
+            const g = svg.append('g').attr('transform', `translate(${width/2}, ${height/2})`);
+            
+            const breedColors = {
+                '泰迪': '#e74c3c', '金毛': '#f39c12', '哈士奇': '#3498db',
+                '比熊': '#9b59b6', '柴犬': '#e67e22', '柯基': '#1abc9c',
+                '萨摩耶': '#34495e', '拉布拉多': '#27ae60', '贵宾': '#95a5a6',
+                '博美': '#16a085'
+            };
+            
+            const cityColors = {
+                '北京': '#1f77b4', '天津': '#ff7f0e', '石家庄': '#2ca02c',
+                '哈尔滨': '#d62728', '长春': '#9467bd', '沈阳': '#8c564b',
+                '上海': '#e377c2', '南京': '#7f7f7f', '杭州': '#bcbd22',
+                '苏州': '#17becf', '无锡': '#ff9896', '宁波': '#c5b0d5',
+                '成都': '#ffbb78', '重庆': '#98df8a', '西安': '#ff9896',
+                '广州': '#aec7e8', '深圳': '#ffbb78', '武汉': '#98df8a',
+                '长沙': '#d62728', '郑州': '#c49c94'
+            };
+            
+            const getNodeColor = (node) => {
+                if (node.type === 'breed') return breedColors[node.name] || '#666';
+                return cityColors[node.name] || '#999';
+            };
+            
+            const chord = d3.chord()
+                .padAngle(0.03)
+                .sortSubgroups(d3.descending)
+                .sortChords(d3.descending);
+            
+            const arc = d3.arc()
+                .innerRadius(innerRadius)
+                .outerRadius(outerRadius);
+            
+            const ribbon = d3.ribbon()
+                .radius(innerRadius);
+            
+            const chords = chord(chordData.matrix);
+            
+            g.selectAll('.group')
+                .data(chords.groups)
+                .enter().append('g')
+                .attr('class', 'group')
+                .on('mouseenter', function(event, d) {
+                    g.selectAll('.chord')
+                        .style('opacity', 0.1);
+                    g.selectAll('.chord')
+                        .filter(c => c.source.index === d.index || c.target.index === d.index)
+                        .style('opacity', 0.8);
+                })
+                .on('mouseleave', function() {
+                    g.selectAll('.chord').style('opacity', 0.6);
+                });
+            
+            g.selectAll('.group path')
+                .data(chords.groups)
+                .enter().append('path')
+                .style('fill', d => getNodeColor(chordData.nodes[d.index]))
+                .style('stroke', '#fff')
+                .style('stroke-width', 2)
+                .attr('d', arc)
+                .attr('class', 'node');
+            
+            g.selectAll('.chord')
+                .data(chords)
+                .enter().append('path')
+                .attr('d', ribbon)
+                .style('fill', d => getNodeColor(chordData.nodes[d.source.index]))
+                .style('opacity', 0.6)
+                .attr('class', 'chord')
+                .on('mouseenter', function(event, d) {
+                    d3.select(this).style('opacity', 1);
+                    const sourceNode = chordData.nodes[d.source.index];
+                    const targetNode = chordData.nodes[d.target.index];
+                    showTooltip(event, `${sourceNode.name} ↔ ${targetNode.name}: ${d.source.value}`);
+                })
+                .on('mouseleave', function() {
+                    d3.select(this).style('opacity', 0.6);
+                    hideTooltip();
+                });
+            
+            const groupTicks = d3.range(0, 360, 90);
+            
+            g.selectAll('.group text')
+                .data(chords.groups)
+                .enter().append('text')
+                .each(function(d) {
+                    d.angle = (d.startAngle + d.endAngle) / 2;
+                    d.x = Math.cos(d.angle) * (outerRadius + 20);
+                    d.y = Math.sin(d.angle) * (outerRadius + 20);
+                    d.rotate = (d.angle * 180 / Math.PI);
+                    if (d.rotate > 90 && d.rotate < 270) d.rotate += 180;
+                })
+                .attr('x', d => d.x)
+                .attr('y', d => d.y)
+                .attr('text-anchor', 'middle')
+                .attr('alignment-baseline', 'middle')
+                .attr('transform', d => `rotate(${d.rotate}, ${d.x}, ${d.y})`)
+                .style('fill', '#333')
+                .style('font-size', '11px')
+                .style('font-weight', '500')
+                .text(d => chordData.nodes[d.index].name);
+            
+            const legend = d3.select('#legend');
+            legend.html('');
+            
+            Object.entries(breedColors).forEach(([breed, color]) => {
+                legend.append('div').attr('class', 'legend-item')
+                    .html(`<span class="legend-color" style="background:${color}"></span>${breed}`);
+            });
+        }
+        
+        function showTooltip(event, text) {
+            hideTooltip();
+            const tooltip = d3.select('body').append('div')
+                .style('position', 'absolute')
+                .style('background', 'rgba(0,0,0,0.8)')
+                .style('color', 'white')
+                .style('padding', '8px 12px')
+                .style('border-radius', '5px')
+                .style('font-size', '14px')
+                .style('pointer-events', 'none')
+                .style('z-index', '1000')
+                .text(text);
+            
+            tooltip.style('left', (event.pageX + 10) + 'px')
+                .style('top', (event.pageY - 10) + 'px');
+        }
+        
+        function hideTooltip() {
+            d3.selectAll('body > div[style*="position: absolute"]').remove();
+        }
+        
+        function initRegionStats() {
+            document.querySelectorAll('.region-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.region-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    updateRegionStats(tab.dataset.region);
+                });
+            });
+            updateRegionStats('all');
+        }
+        
+        function updateRegionStats(region) {
+            const filteredCities = region === 'all' 
+                ? cities 
+                : cities.filter(c => c.region === region);
+            
+            const statsGrid = document.getElementById('region-stats');
+            statsGrid.innerHTML = '';
+            
+            filteredCities.forEach(city => {
+                const breeds = cityBreedRank[city.name] || [];
+                if (breeds.length === 0) return;
+                
+                const card = document.createElement('div');
+                card.className = 'stat-card';
+                card.innerHTML = `
+                    <h3>${city.name} (${city.region})</h3>
+                    <ul>
+                        ${breeds.map((b, i) => `
+                            <li>
+                                <span class="breed-name">${['🥇', '🥈', '🥉'][i]} ${b.breed}</span>
+                                <span class="breed-count">${b.count} 篇</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                `;
+                statsGrid.appendChild(card);
+            });
+        }
+        
+        function initCitySelector() {
+            const select = document.getElementById('city-select');
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city.name;
+                option.textContent = `${city.name} (${city.region})`;
+                select.appendChild(option);
+            });
+            loadProfile();
+        }
+        
+        async function loadProfile() {
+            const city = document.getElementById('city-select').value;
+            const res = await fetch(`/api/owner-profile/${encodeURIComponent(city)}`);
+            const data = await res.json();
+            
+            const container = document.getElementById('profile-container');
+            container.innerHTML = `
+                <div class="profile-card">
+                    <h3>📍 ${data.city}</h3>
+                    <p><span class="label">最受欢迎犬种：</span>${data.top_breed}</p>
+                </div>
+                <div class="profile-card">
+                    <h3>👤 主人画像</h3>
+                    <p><span class="label">年龄范围：</span>${data.profile.age_range}</p>
+                    <p><span class="label">性别分布：</span>${data.profile.gender}</p>
+                    <p><span class="label">职业特征：</span>${data.profile.occupation}</p>
+                    <p><span class="label">生活方式：</span>${data.profile.lifestyle}</p>
+                    <p><span class="label">性格特点：</span>${data.profile.personality}</p>
+                </div>
+            `;
+        }
+        
+        window.addEventListener('resize', initChord);
+        loadData();
+    </script>
+</body>
+</html>

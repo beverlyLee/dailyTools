@@ -1,0 +1,157 @@
+[
+  {
+    "province": "北京",
+    "percentage": 6.5,
+    "cases": 25611
+  },
+  {
+    "province": "天津",
+    "percentage": 4.7,
+    "cases": 14207
+  },
+  {
+    "province": "河北",
+    "percentage": 4.9,
+    "cases": 24734
+  },
+  {
+    "province": "山西",
+    "percentage": 4.0,
+    "cases": 11866
+  },
+  {
+    "province": "内蒙古",
+    "percentage": 3.5,
+    "cases": 8670
+  },
+  {
+    "province": "辽宁",
+    "percentage": 5.5,
+    "cases": 19421
+  },
+  {
+    "province": "吉林",
+    "percentage": 5.7,
+    "cases": 17077
+  },
+  {
+    "province": "黑龙江",
+    "percentage": 4.4,
+    "cases": 15275
+  },
+  {
+    "province": "上海",
+    "percentage": 7.2,
+    "cases": 28661
+  },
+  {
+    "province": "江苏",
+    "percentage": 7.4,
+    "cases": 37243
+  },
+  {
+    "province": "浙江",
+    "percentage": 7.8,
+    "cases": 31134
+  },
+  {
+    "province": "安徽",
+    "percentage": 5.1,
+    "cases": 17934
+  },
+  {
+    "province": "福建",
+    "percentage": 5.7,
+    "cases": 17084
+  },
+  {
+    "province": "江西",
+    "percentage": 4.7,
+    "cases": 14127
+  },
+  {
+    "province": "山东",
+    "percentage": 6.2,
+    "cases": 34069
+  },
+  {
+    "province": "河南",
+    "percentage": 6.6,
+    "cases": 36182
+  },
+  {
+    "province": "湖北",
+    "percentage": 5.8,
+    "cases": 20208
+  },
+  {
+    "province": "湖南",
+    "percentage": 7.2,
+    "cases": 25267
+  },
+  {
+    "province": "广东",
+    "percentage": 9.3,
+    "cases": 46649
+  },
+  {
+    "province": "广西",
+    "percentage": 4.8,
+    "cases": 14373
+  },
+  {
+    "province": "海南",
+    "percentage": 4.3,
+    "cases": 6450
+  },
+  {
+    "province": "重庆",
+    "percentage": 7.7,
+    "cases": 27030
+  },
+  {
+    "province": "四川",
+    "percentage": 7.1,
+    "cases": 31735
+  },
+  {
+    "province": "贵州",
+    "percentage": 5.6,
+    "cases": 14048
+  },
+  {
+    "province": "云南",
+    "percentage": 6.7,
+    "cases": 20056
+  },
+  {
+    "province": "西藏",
+    "percentage": 2.7,
+    "cases": 2039
+  },
+  {
+    "province": "陕西",
+    "percentage": 5.8,
+    "cases": 17290
+  },
+  {
+    "province": "甘肃",
+    "percentage": 5.5,
+    "cases": 12799
+  },
+  {
+    "province": "青海",
+    "percentage": 3.7,
+    "cases": 4649
+  },
+  {
+    "province": "宁夏",
+    "percentage": 4.4,
+    "cases": 5319
+  },
+  {
+    "province": "新疆",
+    "percentage": 3.8,
+    "cases": 9381
+  }
+]

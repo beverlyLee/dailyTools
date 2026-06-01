@@ -4,83 +4,158 @@ export class AstParser {
     }
 
     parse(code) {
-        const nodes = [];
-        const lines = code.split('\n');
-        
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            const trimmedLine = line.trim();
-            
-            if (this.language === 'javascript' || this.language === 'typescript') {
-                const funcNode = this.parseJSFunction(trimmedLine, lines, i);
-                if (funcNode) {
-                    nodes.push(funcNode);
-                    i = funcNode.endLine;
-                    continue;
-                }
-                
-                const regexNode = this.parseRegex(trimmedLine, i);
-                if (regexNode) {
-                    nodes.push(regexNode);
-                }
-                
-                const classNode = this.parseJSClass(trimmedLine, lines, i);
-                if (classNode) {
-                    nodes.push(classNode);
-                    i = classNode.endLine;
-                }
-            } else if (this.language === 'python') {
-                const funcNode = this.parsePythonFunction(trimmedLine, lines, i);
-                if (funcNode) {
-                    nodes.push(funcNode);
-                    i = funcNode.endLine;
-                    continue;
-                }
-                
-                const classNode = this.parsePythonClass(trimmedLine, lines, i);
-                if (classNode) {
-                    nodes.push(classNode);
-                    i = classNode.endLine;
-                }
-            }
-        }
+        const ast = this.buildAst(code);
+        const nodes = this.extractTopLevelNodes(ast);
         
         return {
+            ast,
             nodes,
             rawCode: code,
-            language: this.language
+            language: this.language,
+            summary: this.generateAstSummary(ast)
         };
     }
 
-    parseJSFunction(line, lines, startLine) {
-        const funcPatterns = [
-            /^function\s+(\w+)\s*\(([^)]*)\)/,
-            /^(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?function\s*\(([^)]*)\)/,
-            /^(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\(([^)]*)\)\s*(?::\s*[^=]+)?\s*=>/,
-            /^(\w+)\s*\(([^)]*)\)\s*(?::{[^}]+})?\s*(?:\{|=>)/,
-            /^async\s+function\s+(\w+)\s*\(([^)]*)\)/,
-            /^async\s+(\w+)\s*\(([^)]*)\)/
-        ];
-        
-        for (const pattern of funcPatterns) {
-            const match = line.match(pattern);
-            if (match) {
-                const funcName = match[1];
-                const paramsStr = match[2];
-                const params = this.parseParams(paramsStr);
-                const endLine = this.findFunctionEnd(lines, startLine);
-                const code = lines.slice(startLine, endLine + 1).join('\n');
+    buildAst(code) {
+        const lines = code.split('\n');
+        const root = {
+            type: 'Program',
+            children: [],
+            rawCode: code,
+            lineCount: lines.length
+        };
+
+        let currentScope = root;
+        const scopeStack = [root];
+        let inString = false;
+        let stringChar = '';
+        let inComment = false;
+        let commentType = null;
+
+        for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+            const line = lines[lineIndex];
+            const trimmedLine = line.trim();
+
+            if (trimmedLine.startsWith('//') || trimmedLine.startsWith('#')) {
+                const commentNode = {
+                    type: 'Comment',
+                    content: trimmedLine,
+                    line: lineIndex
+                };
+                currentScope.children.push(commentNode);
+                continue;
+            }
+
+            if (trimmedLine.startsWith('/*') || trimmedLine.startsWith('"""')) {
+                inComment = true;
+                commentType = trimmedLine.startsWith('/*') ? 'block' : 'docstring';
+                continue;
+            }
+
+            if (inComment) {
+                if (trimmedLine.endsWith('*/') || (commentType === 'docstring' && trimmedLine.endsWith('"""'))) {
+                    inComment = false;
+                }
+                continue;
+            }
+
+            const classNode = this.parseClassDeclaration(trimmedLine, line, lineIndex);
+            if (classNode) {
+                classNode.parent = currentScope;
+                currentScope.children.push(classNode);
+                scopeStack.push(classNode);
+                currentScope = classNode;
+                continue;
+            }
+
+            const funcNode = this.parseFunctionDeclaration(trimmedLine, lineIndex, code, lines);
+            if (funcNode) {
+                funcNode.parent = currentScope;
+                currentScope.children.push(funcNode);
+                scopeStack.push(funcNode);
+                currentScope = funcNode;
                 
+                const funcBody = this.extractFunctionBody(code, funcNode);
+                funcNode.bodyAst = this.analyzeFunctionBody(funcBody);
+                funcNode.calls = funcNode.bodyAst.calls;
+                funcNode.variableDeclarations = funcNode.bodyAst.variables;
+                funcNode.internalCalls = funcNode.bodyAst.internalCalls;
+                funcNode.returnStatements = funcNode.bodyAst.returns;
+                funcNode.conditionalBranches = funcNode.bodyAst.conditionals;
+                funcNode.loops = funcNode.bodyAst.loops;
+                
+                scopeStack.pop();
+                currentScope = scopeStack[scopeStack.length - 1];
+                continue;
+            }
+
+            const varDecl = this.parseVariableDeclaration(trimmedLine, lineIndex);
+            if (varDecl) {
+                varDecl.parent = currentScope;
+                currentScope.children.push(varDecl);
+                
+                if (varDecl.initializer) {
+                    const initAnalysis = this.analyzeExpression(varDecl.initializer);
+                    if (initAnalysis.calls) {
+                        varDecl.initializerCalls = initAnalysis.calls;
+                    }
+                    if (initAnalysis.regex) {
+                        varDecl.isRegex = true;
+                        varDecl.regexPattern = initAnalysis.regex;
+                    }
+                }
+            }
+
+            const callExpr = this.parseCallExpression(trimmedLine, lineIndex);
+            if (callExpr) {
+                callExpr.parent = currentScope;
+                currentScope.children.push(callExpr);
+            }
+
+            const openBraces = this.countBraces(line, '{');
+            const closeBraces = this.countBraces(line, '}');
+            const netBraces = openBraces - closeBraces;
+
+            if (netBraces < 0 && scopeStack.length > 1) {
+                for (let i = 0; i < Math.abs(netBraces) && scopeStack.length > 1; i++) {
+                    scopeStack.pop();
+                    currentScope = scopeStack[scopeStack.length - 1];
+                }
+            }
+        }
+
+        return root;
+    }
+
+    parseClassDeclaration(line, rawLine, lineIndex) {
+        let match;
+        
+        if (this.language === 'python') {
+            match = line.match(/^class\s+(\w+)(?:\(([^)]+)\))?\s*:/);
+            if (match) {
                 return {
-                    type: 'function',
-                    name: funcName,
-                    params,
-                    returns: this.inferReturnType(code),
-                    code,
-                    startLine,
-                    endLine,
-                    isAsync: line.includes('async'),
-                    isArrow: line.includes('=>')
+                    type: 'ClassDeclaration',
+                    name: match[1],
+                    extends: match[2] ? match[2].trim() : null,
+                    line: lineIndex,
+                    children: [],
+                    methods: [],
+                    properties: [],
+                    parentMethods: match[2] ? this.analyzeParentClass(match[2]) : []
+                };
+            }
+        } else {
+            match = line.match(/^class\s+(\w+)(?:\s+extends\s+(\w+))?/);
+            if (match) {
+                return {
+                    type: 'ClassDeclaration',
+                    name: match[1],
+                    extends: match[2] || null,
+                    line: lineIndex,
+                    children: [],
+                    methods: [],
+                    properties: [],
+                    parentMethods: match[2] ? this.analyzeParentClass(match[2]) : []
                 };
             }
         }
@@ -88,85 +163,373 @@ export class AstParser {
         return null;
     }
 
-    parsePythonFunction(line, lines, startLine) {
-        const match = line.match(/^def\s+(\w+)\s*\(([^)]*)\)\s*(?:->\s*([^:]+))?\s*:/);
-        if (match) {
-            const funcName = match[1];
-            const paramsStr = match[2];
-            const returnType = match[3]?.trim();
-            const params = this.parsePythonParams(paramsStr);
-            const endLine = this.findPythonFunctionEnd(lines, startLine);
-            const code = lines.slice(startLine, endLine + 1).join('\n');
-            
-            return {
-                type: 'function',
-                name: funcName,
-                params,
-                returns: returnType || this.inferPythonReturnType(code),
-                code,
-                startLine,
-                endLine
-            };
-        }
-        return null;
-    }
-
-    parseJSClass(line, lines, startLine) {
-        const match = line.match(/^class\s+(\w+)/);
-        if (match) {
-            const className = match[1];
-            const endLine = this.findBlockEnd(lines, startLine);
-            const code = lines.slice(startLine, endLine + 1).join('\n');
-            
-            return {
-                type: 'class',
-                name: className,
-                code,
-                startLine,
-                endLine
-            };
-        }
-        return null;
-    }
-
-    parsePythonClass(line, lines, startLine) {
-        const match = line.match(/^class\s+(\w+)/);
-        if (match) {
-            const className = match[1];
-            const endLine = this.findPythonFunctionEnd(lines, startLine);
-            const code = lines.slice(startLine, endLine + 1).join('\n');
-            
-            return {
-                type: 'class',
-                name: className,
-                code,
-                startLine,
-                endLine
-            };
-        }
-        return null;
-    }
-
-    parseRegex(line, lineNum) {
-        const regexPattern = /\/(.+?)\/([gimsuy]*)/g;
-        const regexes = [];
+    parseFunctionDeclaration(line, lineIndex, fullCode, lines) {
         let match;
-        
-        while ((match = regexPattern.exec(line)) !== null) {
-            if (match.index > 0 && line[match.index - 1] === '.') {
-                continue;
+        let funcType = 'function';
+        let isAsync = false;
+        let isArrow = false;
+        let isMethod = false;
+
+        if (this.language === 'python') {
+            match = line.match(/^def\s+(\w+)\s*\(([^)]*)\)\s*(?:->\s*([^:]+))?\s*:/);
+            if (match) {
+                const paramsStr = match[2];
+                const params = this.parsePythonParams(paramsStr);
+                
+                return {
+                    type: 'FunctionDeclaration',
+                    funcType: 'function',
+                    name: match[1],
+                    params,
+                    returnType: match[3]?.trim() || null,
+                    line: lineIndex,
+                    children: [],
+                    isAsync: false,
+                    isMethod: paramsStr.includes('self') || paramsStr.includes('cls')
+                };
             }
+        } else {
+            match = line.match(/^async\s+function\s+(\w+)\s*\(([^)]*)\)/);
+            if (match) {
+                return {
+                    type: 'FunctionDeclaration',
+                    funcType: 'function',
+                    name: match[1],
+                    params: this.parseParams(match[2]),
+                    line: lineIndex,
+                    children: [],
+                    isAsync: true,
+                    isArrow: false,
+                    isMethod: false
+                };
+            }
+
+            match = line.match(/^function\s+(\w+)\s*\(([^)]*)\)/);
+            if (match) {
+                return {
+                    type: 'FunctionDeclaration',
+                    funcType: 'function',
+                    name: match[1],
+                    params: this.parseParams(match[2]),
+                    line: lineIndex,
+                    children: [],
+                    isAsync: false,
+                    isArrow: false,
+                    isMethod: false
+                };
+            }
+
+            match = line.match(/^async\s+(\w+)\s*\(([^)]*)\)/);
+            if (match && !line.includes('=')) {
+                return {
+                    type: 'FunctionDeclaration',
+                    funcType: 'method',
+                    name: match[1],
+                    params: this.parseParams(match[2]),
+                    line: lineIndex,
+                    children: [],
+                    isAsync: true,
+                    isArrow: false,
+                    isMethod: true
+                };
+            }
+
+            match = line.match(/^(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?function\s*\(([^)]*)\)/);
+            if (match) {
+                return {
+                    type: 'FunctionDeclaration',
+                    funcType: 'function',
+                    name: match[1],
+                    params: this.parseParams(match[2]),
+                    line: lineIndex,
+                    children: [],
+                    isAsync: line.includes('async'),
+                    isArrow: false,
+                    isMethod: false
+                };
+            }
+
+            match = line.match(/^(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\(([^)]*)\)\s*=>/);
+            if (match) {
+                return {
+                    type: 'FunctionDeclaration',
+                    funcType: 'arrow',
+                    name: match[1],
+                    params: this.parseParams(match[2]),
+                    line: lineIndex,
+                    children: [],
+                    isAsync: line.includes('async'),
+                    isArrow: true,
+                    isMethod: false
+                };
+            }
+
+            match = line.match(/^(\w+)\s*\(([^)]*)\)/);
+            if (match && !line.includes('=') && !line.includes('return')) {
+                return {
+                    type: 'FunctionDeclaration',
+                    funcType: 'method',
+                    name: match[1],
+                    params: this.parseParams(match[2]),
+                    line: lineIndex,
+                    children: [],
+                    isAsync: false,
+                    isArrow: false,
+                    isMethod: true
+                };
+            }
+        }
+
+        return null;
+    }
+
+    analyzeFunctionBody(bodyCode) {
+        const analysis = {
+            calls: [],
+            variables: [],
+            internalCalls: [],
+            returns: [],
+            conditionals: [],
+            loops: [],
+            regexPatterns: []
+        };
+
+        const lines = bodyCode.split('\n');
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
             
-            regexes.push({
-                type: 'regex',
-                pattern: match[1],
-                flags: match[2],
-                code: match[0],
-                line: lineNum
-            });
+            const callMatch = line.match(/(\w+(?:\.\w+)*)\s*\(([^)]*)\)/g);
+            if (callMatch) {
+                for (const call of callMatch) {
+                    const funcMatch = call.match(/(\w+(?:\.\w+)*)\s*\(/);
+                    if (funcMatch) {
+                        const funcName = funcMatch[1];
+                        analysis.calls.push({
+                            name: funcName,
+                            line: i,
+                            isMethod: funcName.includes('.'),
+                            receiver: funcName.includes('.') ? funcName.split('.')[0] : null,
+                            method: funcName.includes('.') ? funcName.split('.').pop() : null
+                        });
+                    }
+                }
+            }
+
+            const varMatch = line.match(/^(?:const|let|var)\s+(\w+)\s*=\s*(.+)$/);
+            if (varMatch) {
+                analysis.variables.push({
+                    name: varMatch[1],
+                    initializer: varMatch[2].trim(),
+                    line: i
+                });
+            }
+
+            const regexMatch = line.match(/\/([^/]+)\/([gimsuy]*)/);
+            if (regexMatch && !line.includes('//')) {
+                analysis.regexPatterns.push({
+                    pattern: regexMatch[1],
+                    flags: regexMatch[2],
+                    line: i
+                });
+            }
+
+            if (line.match(/^if\s*\(/)) {
+                analysis.conditionals.push({
+                    type: 'if',
+                    line: i
+                });
+            } else if (line.match(/^else\s*if\s*\(/)) {
+                analysis.conditionals.push({
+                    type: 'else-if',
+                    line: i
+                });
+            } else if (line.match(/^else\s*\{?/)) {
+                analysis.conditionals.push({
+                    type: 'else',
+                    line: i
+                });
+            }
+
+            if (line.match(/^for\s*\(/)) {
+                analysis.loops.push({
+                    type: 'for',
+                    line: i
+                });
+            } else if (line.match(/^while\s*\(/)) {
+                analysis.loops.push({
+                    type: 'while',
+                    line: i
+                });
+            }
+
+            const returnMatch = line.match(/^return\s*(.+)?$/);
+            if (returnMatch) {
+                analysis.returns.push({
+                    value: returnMatch[1]?.trim() || 'undefined',
+                    line: i,
+                    isEarly: i < lines.length - 3
+                });
+            }
+        }
+
+        const uniqueCalls = [...new Map(analysis.calls.map(c => [c.name, c])).values()];
+        analysis.calls = uniqueCalls;
+
+        return analysis;
+    }
+
+    extractFunctionBody(fullCode, funcNode) {
+        const lines = fullCode.split('\n');
+        const startLine = funcNode.line;
+        let depth = 0;
+        let foundStart = false;
+        const bodyLines = [];
+
+        for (let i = startLine; i < lines.length; i++) {
+            const line = lines[i];
+            
+            for (const char of line) {
+                if (char === '{') {
+                    depth++;
+                    foundStart = true;
+                } else if (char === '}') {
+                    depth--;
+                }
+            }
+
+            if (foundStart) {
+                bodyLines.push(line);
+            }
+
+            if (foundStart && depth === 0) {
+                break;
+            }
+        }
+
+        return bodyLines.join('\n');
+    }
+
+    parseVariableDeclaration(line, lineIndex) {
+        if (this.language === 'python') {
+            const match = line.match(/^(\w+)\s*=\s*(.+)$/);
+            if (match) {
+                return {
+                    type: 'VariableDeclaration',
+                    name: match[1],
+                    initializer: match[2].trim(),
+                    line: lineIndex,
+                    kind: 'assignment'
+                };
+            }
+        } else {
+            const match = line.match(/^(const|let|var)\s+(\w+)(?:\s*:\s*([^=]+))?(?:\s*=\s*(.+))?/);
+            if (match) {
+                return {
+                    type: 'VariableDeclaration',
+                    kind: match[1],
+                    name: match[2],
+                    typeAnnotation: match[3]?.trim() || null,
+                    initializer: match[4]?.trim() || null,
+                    line: lineIndex
+                };
+            }
+        }
+        return null;
+    }
+
+    parseCallExpression(line, lineIndex) {
+        const match = line.match(/(\w+(?:\.\w+)*)\s*\(([^)]*)\)/);
+        if (match && !line.startsWith('function') && !line.startsWith('def')) {
+            return {
+                type: 'CallExpression',
+                callee: match[1],
+                arguments: match[2],
+                line: lineIndex,
+                isMethodCall: match[1].includes('.')
+            };
+        }
+        return null;
+    }
+
+    analyzeExpression(expr) {
+        const result = { calls: [], regex: null };
+
+        const callMatch = expr.match(/(\w+(?:\.\w+)*)\s*\(([^)]*)\)/g);
+        if (callMatch) {
+            for (const call of callMatch) {
+                const funcMatch = call.match(/(\w+(?:\.\w+)*)\s*\(/);
+                if (funcMatch) {
+                    result.calls.push({
+                        name: funcMatch[1],
+                        isMethod: funcMatch[1].includes('.')
+                    });
+                }
+            }
+        }
+
+        const regexMatch = expr.match(/^\/([^/]+)\/([gimsuy]*)$/);
+        if (regexMatch) {
+            result.regex = {
+                pattern: regexMatch[1],
+                flags: regexMatch[2]
+            };
+        }
+
+        return result;
+    }
+
+    extractTopLevelNodes(ast) {
+        const nodes = [];
+        
+        for (const child of ast.children) {
+            if (child.type === 'FunctionDeclaration') {
+                nodes.push(this.convertToLegacyNode(child));
+            } else if (child.type === 'ClassDeclaration') {
+                nodes.push(this.convertClassToLegacyNode(child));
+            }
         }
         
-        return regexes.length > 0 ? regexes[0] : null;
+        return nodes;
+    }
+
+    convertToLegacyNode(astNode) {
+        return {
+            type: 'function',
+            name: astNode.name,
+            params: astNode.params || [],
+            returns: astNode.returnType || this.inferReturnTypeFromAst(astNode),
+            code: astNode.bodyAst ? this.reconstructCode(astNode) : '',
+            startLine: astNode.line,
+            endLine: astNode.line,
+            isAsync: astNode.isAsync || false,
+            isArrow: astNode.isArrow || false,
+            isMethod: astNode.isMethod || false,
+            funcType: astNode.funcType,
+            astInfo: {
+                calls: astNode.calls || [],
+                variables: astNode.variableDeclarations || [],
+                returns: astNode.returnStatements || [],
+                conditionals: astNode.conditionalBranches || [],
+                loops: astNode.loops || []
+            }
+        };
+    }
+
+    convertClassToLegacyNode(classNode) {
+        return {
+            type: 'class',
+            name: classNode.name,
+            extends: classNode.extends,
+            code: '',
+            startLine: classNode.line,
+            endLine: classNode.line,
+            astInfo: {
+                methods: classNode.methods || [],
+                properties: classNode.properties || [],
+                parentMethods: classNode.parentMethods || []
+            }
+        };
     }
 
     parseParams(paramsStr) {
@@ -261,145 +624,108 @@ export class AstParser {
         return parts;
     }
 
-    findFunctionEnd(lines, startLine) {
-        let depth = 0;
-        let inString = false;
-        let stringChar = '';
-        let foundStart = false;
-        
-        for (let i = startLine; i < lines.length; i++) {
-            const line = lines[i];
-            
-            for (let j = 0; j < line.length; j++) {
-                const char = line[j];
-                
-                if ((char === '"' || char === "'" || char === '`') && (j === 0 || line[j - 1] !== '\\')) {
-                    if (!inString) {
-                        inString = true;
-                        stringChar = char;
-                    } else if (char === stringChar) {
-                        inString = false;
-                    }
-                }
-                
-                if (!inString) {
-                    if (char === '{' || char === '(') {
-                        depth++;
-                        foundStart = true;
-                    } else if (char === '}' || char === ')') {
-                        depth--;
-                    }
-                }
-            }
-            
-            if (foundStart && depth === 0) {
-                return i;
-            }
-        }
-        
-        return lines.length - 1;
-    }
-
-    findPythonFunctionEnd(lines, startLine) {
-        const baseIndent = this.getIndentation(lines[startLine]);
-        
-        for (let i = startLine + 1; i < lines.length; i++) {
-            const line = lines[i];
-            if (line.trim() === '') continue;
-            
-            const currentIndent = this.getIndentation(line);
-            if (currentIndent <= baseIndent && !line.trim().startsWith('#')) {
-                return i - 1;
-            }
-        }
-        
-        return lines.length - 1;
-    }
-
-    findBlockEnd(lines, startLine) {
-        let depth = 0;
-        let inString = false;
-        let stringChar = '';
-        
-        for (let i = startLine; i < lines.length; i++) {
-            const line = lines[i];
-            
-            for (let j = 0; j < line.length; j++) {
-                const char = line[j];
-                
-                if ((char === '"' || char === "'" || char === '`') && (j === 0 || line[j - 1] !== '\\')) {
-                    if (!inString) {
-                        inString = true;
-                        stringChar = char;
-                    } else if (char === stringChar) {
-                        inString = false;
-                    }
-                }
-                
-                if (!inString) {
-                    if (char === '{') depth++;
-                    else if (char === '}') depth--;
-                }
-            }
-            
-            if (i > startLine && depth === 0) {
-                return i;
-            }
-        }
-        
-        return lines.length - 1;
-    }
-
-    getIndentation(line) {
+    countBraces(line, brace) {
         let count = 0;
-        for (const char of line) {
-            if (char === ' ') count++;
-            else if (char === '\t') count += 4;
-            else break;
+        let inString = false;
+        let stringChar = '';
+        
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            
+            if ((char === '"' || char === "'" || char === '`') && (i === 0 || line[i - 1] !== '\\')) {
+                if (!inString) {
+                    inString = true;
+                    stringChar = char;
+                } else if (char === stringChar) {
+                    inString = false;
+                }
+            }
+            
+            if (!inString && char === brace) {
+                count++;
+            }
         }
+        
         return count;
     }
 
-    inferReturnType(code) {
-        if (code.includes('return ')) {
-            const returnMatch = code.match(/return\s+(.+?)(?:;|\n|$)/);
-            if (returnMatch) {
-                const value = returnMatch[1].trim();
-                if (value === 'true' || value === 'false') return 'boolean';
-                if (/^\d+/.test(value)) return 'number';
-                if (value.startsWith("'") || value.startsWith('"') || value.startsWith('`')) return 'string';
-                if (value.startsWith('[') || value.includes('.map(') || value.includes('.filter(')) return 'array';
-                if (value.startsWith('{')) return 'object';
-                if (value === 'null') return 'null';
-                if (value === 'undefined') return 'undefined';
-            }
+    inferReturnTypeFromAst(astNode) {
+        if (!astNode.returnStatements || astNode.returnStatements.length === 0) {
+            return 'void';
         }
-        if (code.includes('Promise') || code.includes('await')) return 'Promise';
-        return 'void';
+
+        const returns = astNode.returnStatements;
+        const hasArray = returns.some(r => r.value.includes('[') || r.value.includes('.map') || r.value.includes('.filter'));
+        const hasObject = returns.some(r => r.value.startsWith('{'));
+        const hasBoolean = returns.some(r => r.value === 'true' || r.value === 'false');
+        const hasPromise = returns.some(r => r.value.includes('await') || r.value.includes('Promise'));
+
+        if (hasPromise || astNode.isAsync) return 'Promise';
+        if (hasArray) return 'array';
+        if (hasObject) return 'object';
+        if (hasBoolean) return 'boolean';
+        
+        return 'any';
     }
 
-    inferPythonReturnType(code) {
-        if (code.includes('return ')) {
-            const returnMatch = code.match(/return\s+(.+?)(?:\n|$)/);
-            if (returnMatch) {
-                const value = returnMatch[1].trim();
-                if (value === 'True' || value === 'False') return 'bool';
-                if (/^\d+/.test(value)) return 'int';
-                if (value.startsWith("'") || value.startsWith('"')) return 'str';
-                if (value.startsWith('[') || value.includes('.append(')) return 'list';
-                if (value.startsWith('{')) return 'dict';
-                if (value === 'None') return 'None';
-            }
-        }
-        return 'None';
+    analyzeParentClass(parentName) {
+        const commonMethods = {
+            'Object': ['toString', 'valueOf', 'hasOwnProperty', 'isPrototypeOf'],
+            'Array': ['map', 'filter', 'reduce', 'forEach', 'find', 'push', 'pop'],
+            'Error': ['message', 'name', 'stack'],
+            'EventEmitter': ['on', 'emit', 'off', 'once'],
+            'Component': ['render', 'componentDidMount', 'componentWillUnmount', 'setState']
+        };
+        
+        return commonMethods[parentName] || [];
     }
 
-    getSelectedCode(editor) {
-        const selection = editor.getSelection();
-        if (selection && !selection.isEmpty()) {
-            const model = editor.getModel();
-            return model.getValueInRange(selection);
-        }
-        return null;
+    reconstructCode(astNode) {
+        if (!astNode.bodyAst) return '';
+        
+        const params = astNode.params?.map(p => {
+            let str = p.name;
+            if (p.type) str += `: ${p.type}`;
+            if (p.default) str += ` = ${p.default}`;
+            return str;
+        }).join(', ') || '';
+        
+        const async = astNode.isAsync ? 'async ' : '';
+        
+        return `${async}function ${astNode.name}(${params}) { ... }`;
+    }
+
+    generateAstSummary(ast) {
+        const summary = {
+            totalNodes: 0,
+            functionCount: 0,
+            classCount: 0,
+            methodCount: 0,
+            callCount: 0,
+            variableCount: 0
+        };
+
+        const traverse = (node) => {
+            summary.totalNodes++;
+            
+            if (node.type === 'FunctionDeclaration') {
+                summary.functionCount++;
+                if (node.isMethod) summary.methodCount++;
+                if (node.calls) summary.callCount += node.calls.length;
+                if (node.variableDeclarations) summary.variableCount += node.variableDeclarations.length;
+            }
+            if (node.type === 'ClassDeclaration') {
+                summary.classCount++;
+            }
+            
+            if (node.children) {
+                for (const child of node.children) {
+                    traverse(child);
+                }
+            }
+        };
+
+        traverse(ast);
+        return summary;
     }
 }

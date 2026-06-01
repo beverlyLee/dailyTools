@@ -1,6 +1,19 @@
 class HealthProfiler {
     constructor(healthRules) {
-        this.healthRules = healthRules;
+        this.healthRules = healthRules || {
+            bmRanges: {
+                underweight: { min: 0, max: 18.5, label: '偏瘦' },
+                normal: { min: 18.5, max: 24, label: '正常' },
+                overweight: { min: 24, max: 28, label: '偏胖' },
+                obese: { min: 28, max: 999, label: '肥胖' }
+            },
+            activityMultipliers: {
+                sedentary: 1.2,
+                moderate: 1.55,
+                active: 1.725
+            }
+        };
+        console.log('[HealthProfiler] 初始化完成');
     }
 
     calculateBMI(heightCm, weightKg) {
@@ -14,7 +27,7 @@ class HealthProfiler {
 
     getBMICategory(bmi) {
         if (bmi === null || bmi === undefined) return null;
-        const ranges = this.healthRules.bmRanges;
+        const ranges = this.healthRules.bmRanges || {};
         for (const [key, range] of Object.entries(ranges)) {
             if (bmi >= range.min && bmi < range.max) {
                 return { key, label: range.label };

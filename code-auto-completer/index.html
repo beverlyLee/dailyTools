@@ -43,13 +43,14 @@
         </footer>
     </div>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
-    <script>
-        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
-    </script>
     <script src="SyntaxAnalyzer.js"></script>
     <script src="CompletionProvider.js"></script>
     <script src="LintChecker.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+    <script>
+        window.monacoRequire = require;
+        window.monacoRequire.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+    </script>
     <script src="main.js"></script>
 </body>
 </html>

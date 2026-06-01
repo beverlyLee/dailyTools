@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sand Table War · 沙盘推演</title>
+    <style>
+      html, body, #app {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #1a1a1a;
+      }
+      canvas {
+        display: block;
+      }
+      .health-label {
+        color: white;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 11px;
+        font-weight: bold;
+        text-shadow: 
+          -1px -1px 0 #000,
+          1px -1px 0 #000,
+          -1px 1px 0 #000,
+          1px 1px 0 #000;
+        white-space: nowrap;
+        pointer-events: none;
+        user-select: none;
+        text-align: center;
+      }
+      .health-label.red { color: #ff6666; }
+      .health-label.blue { color: #6699ff; }
+      
+      .toolbar {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 12px;
+        padding: 12px 20px;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(8px);
+        border-radius: 12px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        z-index: 10;
+      }
+      .toolbar button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: white;
+      }
+      .toolbar .red-btn {
+        background: linear-gradient(135deg, #ff4444, #cc0000);
+      }
+      .toolbar .red-btn:hover {
+        background: linear-gradient(135deg, #ff6666, #ee2222);
+        transform: translateY(-1px);
+      }
+      .toolbar .blue-btn {
+        background: linear-gradient(135deg, #4488ff, #0044cc);
+      }
+      .toolbar .blue-btn:hover {
+        background: linear-gradient(135deg, #66aaff, #2266ee);
+        transform: translateY(-1px);
+      }
+      .toolbar .reset-btn {
+        background: linear-gradient(135deg, #666666, #333333);
+      }
+      .toolbar .reset-btn:hover {
+        background: linear-gradient(135deg, #888888, #555555);
+        transform: translateY(-1px);
+      }
+      .toolbar .stress-btn {
+        background: linear-gradient(135deg, #aa44ff, #7700cc);
+      }
+      .toolbar .stress-btn:hover {
+        background: linear-gradient(135deg, #bb66ff, #8822dd);
+        transform: translateY(-1px);
+      }
+      .toolbar .active {
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+      }
+      .tip {
+        position: fixed;
+        left: 50%;
+        bottom: 20px;
+        transform: translateX(-50%);
+        color: rgba(255, 255, 255, 0.55);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 13px;
+        letter-spacing: 1px;
+        pointer-events: none;
+        user-select: none;
+      }
+      .stats {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        padding: 12px 16px;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(8px);
+        border-radius: 12px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: white;
+        font-size: 13px;
+        z-index: 10;
+        min-width: 140px;
+      }
+      .stats .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        margin: 4px 0;
+      }
+      .stats .red { color: #ff6666; font-weight: 600; }
+      .stats .blue { color: #6699ff; font-weight: 600; }
+      .stats .fps { color: #ffcc00; font-weight: 600; }
+      .stats .memory { color: #66ffcc; font-weight: 600; }
+      .stats .separator {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.2);
+        margin: 8px 0;
+      }
+      
+      .rules-panel {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        padding: 14px 18px;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(8px);
+        border-radius: 12px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: white;
+        font-size: 12px;
+        z-index: 10;
+        max-width: 220px;
+      }
+      .rules-panel h3 {
+        margin: 0 0 10px 0;
+        font-size: 14px;
+        color: #ffcc00;
+      }
+      .rules-panel ul {
+        margin: 0;
+        padding-left: 16px;
+        line-height: 1.6;
+      }
+      .rules-panel li {
+        margin: 4px 0;
+        color: rgba(255, 255, 255, 0.8);
+      }
+      
+      .winner-message {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 30px 60px;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(12px);
+        border-radius: 16px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 32px;
+        font-weight: 700;
+        color: white;
+        z-index: 100;
+        display: none;
+        animation: popIn 0.3s ease-out;
+        box-shadow: 0 0 40px rgba(255, 255, 255, 0.2);
+      }
+      @keyframes popIn {
+        0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+        100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div class="rules-panel">
+      <h3>📋 交战规则</h3>
+      <ul>
+        <li>选择阵营后点击沙地放置士兵</li>
+        <li>士兵自动寻找最近敌人并移动</li>
+        <li>攻击范围: 1.8 | 冷却: 0.8秒</li>
+        <li>伤害: 15 | 生命值: 100</li>
+        <li>一方全灭则另一方获胜</li>
+        <li>士兵间会自动保持间距</li>
+      </ul>
+    </div>
+    <div class="toolbar">
+      <button class="red-btn" id="redBtn">🔴 放置红方</button>
+      <button class="blue-btn" id="blueBtn">🔵 放置蓝方</button>
+      <button class="stress-btn" id="stressBtn">⚡ 压力测试 (30人)</button>
+      <button class="reset-btn" id="resetBtn">🔄 重置</button>
+    </div>
+    <div class="stats">
+      <div class="row"><span>红方兵力:</span><span class="red" id="redCount">0</span></div>
+      <div class="row"><span>蓝方兵力:</span><span class="blue" id="blueCount">0</span></div>
+      <div class="separator"></div>
+      <div class="row"><span>FPS:</span><span class="fps" id="fpsCount">60</span></div>
+      <div class="row"><span>内存:</span><span class="memory" id="memUsage">0 MB</span></div>
+    </div>
+    <div class="winner-message" id="winnerMessage">🎉 获胜！</div>
+    <div class="tip">选择阵营后点击沙地放置士兵</div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

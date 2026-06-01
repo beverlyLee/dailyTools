@@ -1,7 +1,12 @@
 class RuleEngine {
     constructor(healthRules) {
-        this.healthRules = healthRules;
-        this.conditionProfiles = healthRules.conditionProfiles;
+        this.healthRules = healthRules || { conditionProfiles: {}, tagRules: {} };
+        this.conditionProfiles = this.healthRules.conditionProfiles || {};
+        this.tagRules = this.healthRules.tagRules || {};
+        console.log('[RuleEngine] 初始化完成:', {
+            conditionProfiles: Object.keys(this.conditionProfiles).length,
+            tagRules: Object.keys(this.tagRules).length
+        });
     }
 
     evaluateMealAgainstCondition(mealAggregate, condition) {

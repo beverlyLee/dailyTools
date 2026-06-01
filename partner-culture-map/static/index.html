@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搭子文化地图分析平台</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 20px 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #888;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .container {
+            padding: 30px 40px;
+        }
+
+        .control-panel {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group label {
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .control-group select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e0e0e0;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .control-group select:focus {
+            border-color: #00d4ff;
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .stat-card h3 {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 600;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-card .sub {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .chart-subtitle {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 15px;
+        }
+
+        .bubble-chart {
+            width: 100%;
+            height: 500px;
+        }
+
+        .bubble {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bubble:hover {
+            opacity: 0.8;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+        }
+
+        .tooltip strong {
+            color: #00d4ff;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .ranking-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .ranking-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .ranking-card h3 {
+            font-size: 15px;
+            margin-bottom: 15px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ranking-list {
+            list-style: none;
+        }
+
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .ranking-item:last-child {
+            border-bottom: none;
+        }
+
+        .ranking-item .rank {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .ranking-item:nth-child(1) .rank {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #000;
+        }
+
+        .ranking-item:nth-child(2) .rank {
+            background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+            color: #000;
+        }
+
+        .ranking-item:nth-child(3) .rank {
+            background: linear-gradient(135deg, #cd7f32, #b87333);
+            color: #fff;
+        }
+
+        .ranking-item .name {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .ranking-item .score {
+            font-size: 14px;
+            font-weight: 600;
+            color: #00d4ff;
+        }
+
+        .axis text {
+            fill: #888;
+            font-size: 12px;
+        }
+
+        .axis path,
+        .axis line {
+            stroke: rgba(255, 255, 255, 0.2);
+        }
+
+        .grid line {
+            stroke: rgba(255, 255, 255, 0.05);
+        }
+
+        .grid path {
+            stroke-width: 0;
+        }
+
+        .verification-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .badge-success {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .badge-warning {
+            background: rgba(255, 170, 0, 0.2);
+            color: #ffaa00;
+            border: 1px solid rgba(255, 170, 0, 0.3);
+        }
+
+        .badge-fail {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .verification-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .verification-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .verification-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .verification-item h4 {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .verification-item .status {
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .verification-item .status.pass {
+            color: #00ff88;
+        }
+
+        .verification-item .status.fail {
+            color: #ff6b6b;
+        }
+
+        .verification-item .ranking-list {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            font-size: 16px;
+            color: #888;
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(0, 212, 255, 0.2);
+            border-top-color: #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🗺️ 搭子文化地图分析平台</h1>
+        <p>分析不同城市的社交差异，量化"孤独经济"与新型社交关系</p>
+    </div>
+
+    <div class="container">
+        <div class="control-panel">
+            <div class="control-group">
+                <label>选择城市：</label>
+                <select id="citySelect">
+                    <option value="all">全部城市</option>
+                    <option value="北京">北京</option>
+                    <option value="上海">上海</option>
+                    <option value="广州">广州</option>
+                    <option value="深圳">深圳</option>
+                    <option value="成都">成都</option>
+                    <option value="长沙">长沙</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>选择类型：</label>
+                <select id="typeSelect">
+                    <option value="all">全部类型</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="stats-panel" id="statsPanel">
+            <div class="stat-card">
+                <h3>城市覆盖</h3>
+                <div class="value" id="cityCount">6</div>
+                <div class="sub">北上广深 + 成都长沙</div>
+            </div>
+            <div class="stat-card">
+                <h3>搭子类型</h3>
+                <div class="value" id="typeCount">10</div>
+                <div class="sub">涵盖主流社交场景</div>
+            </div>
+            <div class="stat-card">
+                <h3>孤独指数均值</h3>
+                <div class="value" id="avgLoneliness">-</div>
+                <div class="sub">基于每万人发帖数计算</div>
+            </div>
+            <div class="stat-card">
+                <h3>最活跃城市</h3>
+                <div class="value" id="topCity">-</div>
+                <div class="sub">按活跃度排名</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">
+                📊 搭子文化活跃度气泡图
+                <span class="verification-badge badge-success" id="verificationBadge">数据验证中...</span>
+            </div>
+            <div class="chart-subtitle">
+                X轴：孤独指数（2-10，基于每万人发帖数线性归一化） | Y轴：活跃度得分 | 气泡大小：供需失衡程度 | 颜色：城市
+            </div>
+            <div id="bubbleChart" class="bubble-chart"></div>
+            <div class="legend" id="legend"></div>
+        </div>
+
+        <div class="ranking-panel">
+            <div class="ranking-card">
+                <h3>🏆 城市活跃度排名</h3>
+                <ul class="ranking-list" id="cityRanking"></ul>
+            </div>
+            <div class="ranking-card">
+                <h3>🥇 饭搭子指数排名</h3>
+                <ul class="ranking-list" id="mealRanking"></ul>
+            </div>
+            <div class="ranking-card">
+                <h3>💪 健身搭子指数排名</h3>
+                <ul class="ranking-list" id="fitnessRanking"></ul>
+            </div>
+            <div class="ranking-card">
+                <h3>🎮 游戏搭子需求排名</h3>
+                <ul class="ranking-list" id="gameRanking"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <div class="verification-modal" id="verificationModal">
+        <div class="modal-content">
+            <h2>📊 数据验证详情</h2>
+            <div id="verificationDetails"></div>
+            <button class="close-btn" onclick="closeVerificationModal()">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        
+        const cityColors = {
+            "北京": "#ff6b6b",
+            "上海": "#4ecdc4",
+            "广州": "#45b7d1",
+            "深圳": "#96ceb4",
+            "成都": "#ffa502",
+            "长沙": "#ff6348"
+        };
+
+        let allData = [];
+        let allTypes = [];
+
+        async function init() {
+            try {
+                const [bubbleData, types, verifyData] = await Promise.all([
+                    fetch(`${API_BASE}/api/bubble-chart-data`).then(r => r.json()),
+                    fetch(`${API_BASE}/api/partner-types`).then(r => r.json()),
+                    fetch(`${API_BASE}/api/verify`).then(r => r.json())
+                ]);
+
+                allData = bubbleData.data;
+                allTypes = types.data;
+
+                populateTypeSelect();
+                updateVerification(verifyData);
+                updateStats();
+                renderBubbleChart();
+                renderRankings();
+
+                document.getElementById('citySelect').addEventListener('change', updateChart);
+                document.getElementById('typeSelect').addEventListener('change', updateChart);
+
+            } catch (error) {
+                console.error('初始化失败:', error);
+                document.getElementById('bubbleChart').innerHTML = 
+                    '<div class="loading"><div class="spinner"></div>数据加载失败...</div>';
+            }
+        }
+
+        function populateTypeSelect() {
+            const select = document.getElementById('typeSelect');
+            allTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                select.appendChild(option);
+            });
+        }
+
+        function updateVerification(data) {
+            const badge = document.getElementById('verificationBadge');
+            const v = data.verification;
+            
+            if (v.all_passed) {
+                badge.textContent = '✓ 验证通过 (点击查看详情)';
+                badge.className = 'verification-badge badge-success';
+            } else {
+                const passedCount = Object.values(v.details).filter(d => d.passed).length;
+                const totalCount = Object.keys(v.details).length;
+                badge.textContent = `⚠ ${passedCount}/${totalCount} 项验证通过 (点击查看详情)`;
+                badge.className = 'verification-badge badge-warning';
+            }
+            
+            badge.onclick = () => showVerificationModal(v);
+        }
+
+        function showVerificationModal(verification) {
+            const modal = document.getElementById('verificationModal');
+            const container = document.getElementById('verificationDetails');
+            
+            let html = '';
+            Object.entries(verification.details).forEach(([key, detail]) => {
+                const statusClass = detail.passed ? 'pass' : 'fail';
+                const statusText = detail.passed ? '✓ 通过' : '✗ 未通过';
+                
+                let rankingHtml = '';
+                if (detail.ranking && detail.ranking.length > 0) {
+                    rankingHtml = '<div class="ranking-list">排名: ' + 
+                        detail.ranking.map((r, i) => `${i+1}.${r.city}(${r.score || r.demand})`).join(' → ') + 
+                        '</div>';
+                }
+                
+                html += `
+                    <div class="verification-item">
+                        <h4>${key}</h4>
+                        <div class="status ${statusClass}">${statusText}</div>
+                        <div>期望值: ${detail.expected} | 实际值: ${detail.actual}</div>
+                        <div>得分: ${detail.score}</div>
+                        ${rankingHtml}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function closeVerificationModal() {
+            document.getElementById('verificationModal').classList.remove('active');
+        }
+
+        function updateStats() {
+            const filteredData = getFilteredData();
+            
+            const avgLoneliness = filteredData.length > 0 
+                ? (filteredData.reduce((sum, d) => sum + d.x, 0) / filteredData.length).toFixed(2)
+                : 0;
+            
+            const cityActivity = {};
+            filteredData.forEach(d => {
+                cityActivity[d.city] = (cityActivity[d.city] || 0) + d.y;
+            });
+            
+            const topCity = Object.entries(cityActivity)
+                .sort((a, b) => b[1] - a[1])[0];
+
+            document.getElementById('avgLoneliness').textContent = avgLoneliness;
+            document.getElementById('topCity').textContent = topCity ? topCity[0] : '-';
+        }
+
+        function getFilteredData() {
+            const city = document.getElementById('citySelect').value;
+            const type = document.getElementById('typeSelect').value;
+            
+            return allData.filter(d => {
+                if (city !== 'all' && d.city !== city) return false;
+                if (type !== 'all' && d.partner_type !== type) return false;
+                return true;
+            });
+        }
+
+        function updateChart() {
+            updateStats();
+            renderBubbleChart();
+            renderRankings();
+        }
+
+        function renderBubbleChart() {
+            const container = document.getElementById('bubbleChart');
+            container.innerHTML = '';
+
+            const data = getFilteredData();
+            
+            if (data.length === 0) {
+                container.innerHTML = '<div class="loading">暂无数据</div>';
+                return;
+            }
+
+            const width = container.clientWidth;
+            const height = 500;
+            const margin = { top: 30, right: 30, bottom: 50, left: 60 };
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
+
+            const svg = d3.select(container)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.x) * 1.1])
+                .range([0, innerWidth]);
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.y) * 1.1])
+                .range([innerHeight, 0]);
+
+            const size = d3.scaleSqrt()
+                .domain([0, d3.max(data, d => d.size)])
+                .range([5, 40]);
+
+            g.append('g')
+                .attr('class', 'grid')
+                .call(d3.axisLeft(y)
+                    .tickSize(-innerWidth)
+                    .tickFormat('')
+                );
+
+            g.append('g')
+                .attr('class', 'grid')
+                .attr('transform', `translate(0,${innerHeight})`)
+                .call(d3.axisBottom(x)
+                    .tickSize(-innerHeight)
+                    .tickFormat('')
+                );
+
+            g.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${innerHeight})`)
+                .call(d3.axisBottom(x).ticks(5));
+
+            g.append('g')
+                .attr('class', 'axis')
+                .call(d3.axisLeft(y).ticks(5));
+
+            g.append('text')
+                .attr('class', 'axis-label')
+                .attr('x', innerWidth / 2)
+                .attr('y', innerHeight + 40)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#888')
+                .text('孤独指数');
+
+            g.append('text')
+                .attr('class', 'axis-label')
+                .attr('transform', 'rotate(-90)')
+                .attr('x', -innerHeight / 2)
+                .attr('y', -45)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#888')
+                .text('活跃度得分');
+
+            const tooltip = d3.select('#tooltip');
+
+            const bubbles = g.selectAll('.bubble')
+                .data(data)
+                .enter()
+                .append('circle')
+                .attr('class', 'bubble')
+                .attr('cx', d => x(d.x))
+                .attr('cy', d => y(d.y))
+                .attr('r', d => size(d.size))
+                .attr('fill', d => cityColors[d.city] || '#888')
+                .attr('opacity', 0.7)
+                .attr('stroke', d => cityColors[d.city] || '#888')
+                .attr('stroke-width', 2);
+
+            bubbles.on('mouseover', function(event, d) {
+                d3.select(this).attr('opacity', 1);
+                
+                let dsStatus = '';
+                if (d.is_demand_gt_supply) {
+                    dsStatus = '<span style="color: #ff6b6b">需求 > 供给 (失衡)</span>';
+                } else if (d.is_supply_gt_demand) {
+                    dsStatus = '<span style="color: #00ff88">供给 > 需求</span>';
+                } else {
+                    dsStatus = '<span style="color: #aaa">供需基本平衡</span>';
+                }
+                
+                tooltip
+                    .style('opacity', 1)
+                    .html(`
+                        <strong>${d.city} - ${d.partner_type}</strong><br>
+                        <hr style="border-color: rgba(255,255,255,0.1); margin: 8px 0">
+                        <strong>【孤独指数】</strong> ${d.x.toFixed(2)}<br>
+                        <small>每万人发帖: ${d.per_10k}</small><br>
+                        <hr style="border-color: rgba(255,255,255,0.1); margin: 8px 0">
+                        <strong>【活跃度】</strong> ${d.y.toFixed(2)}<br>
+                        <hr style="border-color: rgba(255,255,255,0.1); margin: 8px 0">
+                        <strong>【供需数据】</strong><br>
+                        需求量: ${d.demand} 人<br>
+                        供给量: ${d.supply} 人<br>
+                        供需比: ${d.demand_supply_ratio.toFixed(2)}<br>
+                        状态: ${dsStatus}
+                    `);
+            })
+            .on('mousemove', function(event) {
+                tooltip
+                    .style('left', (event.pageX + 15) + 'px')
+                    .style('top', (event.pageY - 10) + 'px');
+            })
+            .on('mouseout', function() {
+                d3.select(this).attr('opacity', 0.7);
+                tooltip.style('opacity', 0);
+            });
+
+            const legend = document.getElementById('legend');
+            legend.innerHTML = '';
+            Object.entries(cityColors).forEach(([city, color]) => {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                item.innerHTML = `
+                    <div class="legend-color" style="background: ${color}"></div>
+                    <span>${city}</span>
+                `;
+                legend.appendChild(item);
+            });
+
+            bubbles.transition()
+                .duration(800)
+                .attr('cx', d => x(d.x))
+                .attr('cy', d => y(d.y));
+        }
+
+        async function renderRankings() {
+            try {
+                const response = await fetch(`${API_BASE}/api/cities/summary`);
+                const data = await response.json();
+                
+                const cities = data.data;
+                
+                const cityRanking = [...cities].sort((a, b) => b.total_activity - a.total_activity);
+                renderRankingList('cityRanking', cityRanking.map(c => ({
+                    name: c.city,
+                    score: c.total_activity
+                })));
+
+                const mealData = cities.map(c => {
+                    const meal = c.details.find(d => d.partner_type === '饭搭子');
+                    return { name: c.city, score: meal ? meal.activity_score : 0 };
+                }).sort((a, b) => b.score - a.score);
+                renderRankingList('mealRanking', mealData);
+
+                const fitnessData = cities.map(c => {
+                    const fitness = c.details.find(d => d.partner_type === '健身搭子');
+                    return { name: c.city, score: fitness ? fitness.activity_score : 0 };
+                }).sort((a, b) => b.score - a.score);
+                renderRankingList('fitnessRanking', fitnessData);
+
+                const gameData = cities.map(c => {
+                    const game = c.details.find(d => d.partner_type === '游戏搭子');
+                    return { name: c.city, score: game ? game.demand_count : 0 };
+                }).sort((a, b) => b.score - a.score);
+                renderRankingList('gameRanking', gameData);
+
+            } catch (error) {
+                console.error('获取排名数据失败:', error);
+            }
+        }
+
+        function renderRankingList(elementId, data) {
+            const list = document.getElementById(elementId);
+            list.innerHTML = '';
+            
+            data.slice(0, 6).forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'ranking-item';
+                li.innerHTML = `
+                    <span class="rank">${index + 1}</span>
+                    <span class="name">${item.name}</span>
+                    <span class="score">${item.score.toFixed(1)}</span>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>

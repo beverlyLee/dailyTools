@@ -17,9 +17,9 @@ export class PlaylistMapper {
                 icon: '🎵',
                 description: '综合音乐推荐',
                 tracks: [
-                    { title: '轻松时光', artist: '未知艺术家', file: 'music/default1.mp3' },
-                    { title: '午后阳光', artist: '未知艺术家', file: 'music/default2.mp3' },
-                    { title: '微风轻拂', artist: '未知艺术家', file: 'music/default3.mp3' }
+                    { title: 'Toccata and Fugue', artist: 'Bach', file: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/b/b1/Johann_Sebastian_Bach_-_Toccata_and_Fugue_in_D_minor_-_BR_Klassik.ogg/Johann_Sebastian_Bach_-_Toccata_and_Fugue_in_D_minor_-_BR_Klassik.ogg.mp3' },
+                    { title: 'Symphony No.5', artist: 'Beethoven', file: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/4/4b/Ludwig_van_Beethoven_-_Symphony_No_5_in_C_minor%2C_Op_67_-_I._Allegro_con_brio.ogg/Ludwig_van_Beethoven_-_Symphony_No_5_in_C_minor%2C_Op_67_-_I._Allegro_con_brio.ogg.mp3' },
+                    { title: 'Moonlight Sonata', artist: 'Beethoven', file: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/4/42/Beethoven_-_Piano_Sonata_No.14_in_C-Sharp_Minor%2C_Op.27_No.2_-_I._Adagio_sostenuto.ogg/Beethoven_-_Piano_Sonata_No.14_in_C-Sharp_Minor%2C_Op.27_No.2_-_I._Adagio_sostenuto.ogg.mp3' }
                 ]
             },
             pop: {
@@ -28,9 +28,9 @@ export class PlaylistMapper {
                 icon: '🎤',
                 description: '欢快的流行音乐',
                 tracks: [
-                    { title: '快乐节拍', artist: '流行歌手', file: 'music/pop1.mp3' },
-                    { title: '阳光明媚', artist: '流行歌手', file: 'music/pop2.mp3' },
-                    { title: '好心情', artist: '流行歌手', file: 'music/pop3.mp3' }
+                    { title: 'Happy Vibes', artist: 'Pop Artist', file: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_4d491d4e8c.mp3' },
+                    { title: 'Upbeat Pop', artist: 'Pop Artist', file: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3' },
+                    { title: 'Summer Party', artist: 'Pop Artist', file: 'https://cdn.pixabay.com/download/audio/2022/10/25/audio_7491f00230.mp3' }
                 ]
             },
             classical: {
@@ -39,9 +39,9 @@ export class PlaylistMapper {
                 icon: '🎻',
                 description: '舒缓的古典音乐',
                 tracks: [
-                    { title: '月光奏鸣曲', artist: '贝多芬', file: 'music/classical1.mp3' },
-                    { title: '致爱丽丝', artist: '贝多芬', file: 'music/classical2.mp3' },
-                    { title: '小夜曲', artist: '莫扎特', file: 'music/classical3.mp3' }
+                    { title: 'Clair de Lune', artist: 'Debussy', file: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/4/4b/Suite_bergamasque_-_3._Clair_de_Lune.ogg/Suite_bergamasque_-_3._Clair_de_Lune.ogg.mp3' },
+                    { title: 'Eine Kleine', artist: 'Mozart', file: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/6/6d/Wolfgang_Amadeus_Mozart_-_Eine_kleine_Nachtmusik_-_I._Allegro.ogg/Wolfgang_Amadeus_Mozart_-_Eine_kleine_Nachtmusik_-_I._Allegro.ogg.mp3' },
+                    { title: 'Canon in D', artist: 'Pachelbel', file: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/c/cd/Canon_in_D_Major_-_Johann_Pachelbel.ogg/Canon_in_D_Major_-_Johann_Pachelbel.ogg.mp3' }
                 ]
             },
             rock: {
@@ -50,9 +50,9 @@ export class PlaylistMapper {
                 icon: '🎸',
                 description: '释放情绪的摇滚',
                 tracks: [
-                    { title: '自由之路', artist: '摇滚乐队', file: 'music/rock1.mp3' },
-                    { title: '狂野之心', artist: '摇滚乐队', file: 'music/rock2.mp3' },
-                    { title: '呐喊', artist: '摇滚乐队', file: 'music/rock3.mp3' }
+                    { title: 'Rock Guitar', artist: 'Rock Band', file: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_f7b204c21b.mp3' },
+                    { title: 'Heavy Beat', artist: 'Rock Band', file: 'https://cdn.pixabay.com/download/audio/2021/08/02/audio_b676e12a0e.mp3' },
+                    { title: 'Rock Energy', artist: 'Rock Band', file: 'https://cdn.pixabay.com/download/audio/2022/03/24/audio_96335261d1.mp3' }
                 ]
             },
             ambient: {
@@ -61,9 +61,9 @@ export class PlaylistMapper {
                 icon: '🌊',
                 description: '平静的环境音乐',
                 tracks: [
-                    { title: '宁静之夜', artist: '环境艺术家', file: 'music/ambient1.mp3' },
-                    { title: '森林呼吸', artist: '环境艺术家', file: 'music/ambient2.mp3' },
-                    { title: '星空漫步', artist: '环境艺术家', file: 'music/ambient3.mp3' }
+                    { title: 'Ambient Calm', artist: 'Ambient Artist', file: 'https://cdn.pixabay.com/download/audio/2021/08/09/audio_001601e0c6.mp3' },
+                    { title: 'Peaceful Mood', artist: 'Ambient Artist', file: 'https://cdn.pixabay.com/download/audio/2022/08/23/audio_d16713bd38.mp3' },
+                    { title: 'Soft Ambience', artist: 'Ambient Artist', file: 'https://cdn.pixabay.com/download/audio/2022/10/14/audio_f77949331f.mp3' }
                 ]
             },
             electronic: {
@@ -72,9 +72,9 @@ export class PlaylistMapper {
                 icon: '🎧',
                 description: '动感的电子音乐',
                 tracks: [
-                    { title: '电音派对', artist: '电子制作人', file: 'music/electronic1.mp3' },
-                    { title: '未来之声', artist: '电子制作人', file: 'music/electronic2.mp3' },
-                    { title: '脉冲节奏', artist: '电子制作人', file: 'music/electronic3.mp3' }
+                    { title: 'Electronic Beat', artist: 'Electronic Producer', file: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_352ed9f2e5.mp3' },
+                    { title: 'Synth Wave', artist: 'Electronic Producer', file: 'https://cdn.pixabay.com/download/audio/2021/09/06/audio_5ca5391702.mp3' },
+                    { title: 'Future Bass', artist: 'Electronic Producer', file: 'https://cdn.pixabay.com/download/audio/2022/11/22/audio_3de74078ee.mp3' }
                 ]
             },
             chill: {
@@ -83,9 +83,9 @@ export class PlaylistMapper {
                 icon: '☕',
                 description: '放松的舒缓音乐',
                 tracks: [
-                    { title: '咖啡时光', artist: '舒缓艺术家', file: 'music/chill1.mp3' },
-                    { title: '慢生活', artist: '舒缓艺术家', file: 'music/chill2.mp3' },
-                    { title: '心灵港湾', artist: '舒缓艺术家', file: 'music/chill3.mp3' }
+                    { title: 'Chill Lounge', artist: 'Chill Artist', file: 'https://cdn.pixabay.com/download/audio/2021/11/25/audio_338cb3cd07.mp3' },
+                    { title: 'Coffee Break', artist: 'Chill Artist', file: 'https://cdn.pixabay.com/download/audio/2022/05/13/audio_0f9b042a66.mp3' },
+                    { title: 'Relax Time', artist: 'Chill Artist', file: 'https://cdn.pixabay.com/download/audio/2022/10/02/audio_824c149757.mp3' }
                 ]
             },
             jazz: {
@@ -94,9 +94,9 @@ export class PlaylistMapper {
                 icon: '🎷',
                 description: '优雅的爵士乐',
                 tracks: [
-                    { title: '爵士咖啡', artist: '爵士大师', file: 'music/jazz1.mp3' },
-                    { title: '蓝调夜晚', artist: '爵士大师', file: 'music/jazz2.mp3' },
-                    { title: '即兴演奏', artist: '爵士大师', file: 'music/jazz3.mp3' }
+                    { title: 'Jazz Cafe', artist: 'Jazz Master', file: 'https://cdn.pixabay.com/download/audio/2021/09/06/audio_18b79f3e6e.mp3' },
+                    { title: 'Smooth Jazz', artist: 'Jazz Master', file: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_8ab1f3d6d7.mp3' },
+                    { title: 'Jazz Night', artist: 'Jazz Master', file: 'https://cdn.pixabay.com/download/audio/2021/08/20/audio_e1535e18e2.mp3' }
                 ]
             }
         };

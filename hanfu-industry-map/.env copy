@@ -1,0 +1,27 @@
+# 和风天气API密钥
+# 申请地址: https://dev.qweather.com/
+QWEATHER_KEY=y04afbcdaea21492bbe7dc4a4aec3dc91
+
+# 火山引擎API密钥
+# 申请地址: https://www.volcengine.com/product/ark
+ARK_API_KEY=2514cedf-530b-446a-94b0-87afb6d04735
+ARK_API_URL=https://ark.cn-beijing.volces.com/api/v3/responses
+ARK_MODEL=doubao-seed-1-8-251228
+
+# 爬虫配置
+USE_MOCK_DATA=true
+CRAWLER_INTERVAL=3600
+CRAWLER_JD_ENABLED=true
+CRAWLER_TM_ENABLED=false
+
+# 数据库配置
+DATABASE_PATH=./data/baijiu.db
+
+# 服务配置
+API_HOST=0.0.0.0
+API_PORT=8000
+
+GAODE_API_KEY=e916094afb359d1ee24c45a4220d3ccd
+
+FLASK_ENV=development
+

@@ -1,0 +1,92 @@
+.app-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.app-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.hud {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  gap: 24px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.hud-item {
+  background: rgba(0, 20, 40, 0.8);
+  border: 1px solid rgba(74, 144, 217, 0.5);
+  border-radius: 8px;
+  padding: 12px 20px;
+  backdrop-filter: blur(10px);
+}
+
+.hud-label {
+  display: block;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.hud-value {
+  display: block;
+  font-size: 28px;
+  font-weight: bold;
+  color: #4fc3f7;
+  font-family: 'Courier New', monospace;
+}
+
+.controls-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  background: rgba(0, 20, 40, 0.8);
+  border: 1px solid rgba(74, 144, 217, 0.3);
+  border-radius: 8px;
+  padding: 12px 24px;
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.controls-hint p {
+  margin: 4px 0;
+}
+
+.victory-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  background: rgba(0, 20, 40, 0.95);
+  border: 2px solid #4fc3f7;
+  border-radius: 16px;
+  padding: 40px 60px;
+  z-index: 200;
+  box-shadow: 0 0 40px rgba(79, 195, 247, 0.5);
+}
+
+.victory-message h2 {
+  color: #4fc3f7;
+  font-size: 36px;
+  margin-bottom: 16px;
+}
+
+.victory-message p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 18px;
+  margin: 8px 0;
+}

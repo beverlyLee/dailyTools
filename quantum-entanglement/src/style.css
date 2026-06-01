@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+SC:wght@300;400;500&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Noto Sans SC', sans-serif;
+  background: #0a0a1a;
+  color: #ffffff;
+}
+
+#scene {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.info-panel {
+  position: fixed;
+  top: 30px;
+  left: 30px;
+  padding: 25px 30px;
+  background: rgba(10, 10, 30, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(100, 200, 255, 0.2);
+  border-radius: 16px;
+  z-index: 100;
+  max-width: 360px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+              0 0 60px rgba(100, 200, 255, 0.1);
+}
+
+.info-panel h1 {
+  font-family: 'Orbitron', 'Noto Sans SC', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  background: linear-gradient(135deg, #00ffff, #ff00ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 1px;
+}
+
+.info-panel p {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.info-panel .subtext {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 18px;
+}
+
+.info-panel .status {
+  display: flex;
+  gap: 25px;
+  margin: 18px 0;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-panel .status span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.color-dot {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #00ffff;
+  box-shadow: 0 0 10px currentColor;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.info-panel .hint {
+  margin-top: 15px;
+  font-size: 12px;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.4);
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+  .info-panel {
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    max-width: none;
+    padding: 18px 20px;
+  }
+
+  .info-panel h1 {
+    font-size: 18px;
+  }
+
+  .info-panel p {
+    font-size: 13px;
+  }
+}

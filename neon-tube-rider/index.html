@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Tube Rider</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      overflow: hidden;
+      background: #000;
+      font-family: 'Arial', sans-serif;
+    }
+    canvas {
+      display: block;
+    }
+    #speed {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      color: #0ff;
+      font-size: 24px;
+      text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+      z-index: 100;
+    }
+    #title {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #f0f;
+      font-size: 48px;
+      text-shadow: 0 0 20px #f0f, 0 0 40px #f0f, 0 0 60px #f0f;
+      z-index: 100;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    #verify {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      color: #0f0;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      white-space: pre;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border: 1px solid #0f0;
+      border-radius: 4px;
+      text-shadow: 0 0 5px currentColor;
+      z-index: 100;
+      max-width: 400px;
+    }
+    #title-verify {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      color: #0ff;
+      font-size: 11px;
+      font-family: 'Courier New', monospace;
+      white-space: pre;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 8px;
+      border: 1px solid #0ff;
+      border-radius: 4px;
+      text-shadow: 0 0 5px currentColor;
+      z-index: 100;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+  </style>
+</head>
+<body>
+  <div id="speed">SPEED: 0</div>
+  <div id="title">NEON TUBE RIDER</div>
+  <div id="verify">Initializing render verification...</div>
+  <div id="title-verify">Waiting for title verification...</div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

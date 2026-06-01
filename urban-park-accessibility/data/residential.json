@@ -1,0 +1,722 @@
+[
+  {
+    "id": 1,
+    "name": "小区 1",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.9349299492327,
+        22.540602620314626
+      ]
+    },
+    "population": 983
+  },
+  {
+    "id": 2,
+    "name": "小区 2",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.9507876230523,
+        22.54249540109029
+      ]
+    },
+    "population": 912
+  },
+  {
+    "id": 3,
+    "name": "小区 3",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93145083401981,
+        22.56223847411106
+      ]
+    },
+    "population": 509
+  },
+  {
+    "id": 4,
+    "name": "小区 4",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.94179335606295,
+        22.547336981681
+      ]
+    },
+    "population": 1779
+  },
+  {
+    "id": 5,
+    "name": "小区 5",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.9312263257913,
+        22.543575822593628
+      ]
+    },
+    "population": 916
+  },
+  {
+    "id": 6,
+    "name": "小区 6",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93376207750421,
+        22.541033953416164
+      ]
+    },
+    "population": 1337
+  },
+  {
+    "id": 7,
+    "name": "小区 7",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.9439774481368,
+        22.536777528637337
+      ]
+    },
+    "population": 1956
+  },
+  {
+    "id": 8,
+    "name": "小区 8",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.95294676493063,
+        22.576531260952407
+      ]
+    },
+    "population": 1227
+  },
+  {
+    "id": 9,
+    "name": "小区 9",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93974916734929,
+        22.549799118800376
+      ]
+    },
+    "population": 814
+  },
+  {
+    "id": 10,
+    "name": "小区 10",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.95339814440516,
+        22.558436020112843
+      ]
+    },
+    "population": 2495
+  },
+  {
+    "id": 11,
+    "name": "小区 11",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.9408054999484,
+        22.567590777953903
+      ]
+    },
+    "population": 1511
+  },
+  {
+    "id": 12,
+    "name": "小区 12",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.95168239508287,
+        22.529460278498103
+      ]
+    },
+    "population": 1190
+  },
+  {
+    "id": 13,
+    "name": "小区 13",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.9387171553742,
+        22.548603412388427
+      ]
+    },
+    "population": 925
+  },
+  {
+    "id": 14,
+    "name": "小区 14",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.94339930021268,
+        22.54701992198148
+      ]
+    },
+    "population": 1864
+  },
+  {
+    "id": 15,
+    "name": "小区 15",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.92513050563937,
+        22.572570486423366
+      ]
+    },
+    "population": 1274
+  },
+  {
+    "id": 16,
+    "name": "小区 16",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.91686329022177,
+        22.54585154472228
+      ]
+    },
+    "population": 1696
+  },
+  {
+    "id": 17,
+    "name": "小区 17",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93620763677917,
+        22.5494431602642
+      ]
+    },
+    "population": 1024
+  },
+  {
+    "id": 18,
+    "name": "小区 18",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.95973127944846,
+        22.542346616591715
+      ]
+    },
+    "population": 1053
+  },
+  {
+    "id": 19,
+    "name": "小区 19",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93634320864217,
+        22.54695265065886
+      ]
+    },
+    "population": 1658
+  },
+  {
+    "id": 20,
+    "name": "小区 20",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.95178085042794,
+        22.557089410181018
+      ]
+    },
+    "population": 2015
+  },
+  {
+    "id": 21,
+    "name": "小区 21",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.92472705949996,
+        22.556010809264528
+      ]
+    },
+    "population": 1026
+  },
+  {
+    "id": 22,
+    "name": "小区 22",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.94432890634164,
+        22.548395121527978
+      ]
+    },
+    "population": 1460
+  },
+  {
+    "id": 23,
+    "name": "小区 23",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.94052247426808,
+        22.543128729909657
+      ]
+    },
+    "population": 1751
+  },
+  {
+    "id": 24,
+    "name": "小区 24",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.94165093318387,
+        22.554003681975306
+      ]
+    },
+    "population": 1109
+  },
+  {
+    "id": 25,
+    "name": "小区 25",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.9307419834399,
+        22.5452716250056
+      ]
+    },
+    "population": 1158
+  },
+  {
+    "id": 26,
+    "name": "小区 26",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93082256486245,
+        22.550415333704642
+      ]
+    },
+    "population": 1309
+  },
+  {
+    "id": 27,
+    "name": "小区 27",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.95723431167787,
+        22.546476177020786
+      ]
+    },
+    "population": 1184
+  },
+  {
+    "id": 28,
+    "name": "小区 28",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93331920687002,
+        22.55340747003245
+      ]
+    },
+    "population": 2309
+  },
+  {
+    "id": 29,
+    "name": "小区 29",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93925627353012,
+        22.546969746391905
+      ]
+    },
+    "population": 1428
+  },
+  {
+    "id": 30,
+    "name": "小区 30",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.92601874810589,
+        22.53919783366641
+      ]
+    },
+    "population": 1453
+  },
+  {
+    "id": 31,
+    "name": "小区 31",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.94785866842831,
+        22.549424500229257
+      ]
+    },
+    "population": 1757
+  },
+  {
+    "id": 32,
+    "name": "小区 32",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.92382341359883,
+        22.559622915253307
+      ]
+    },
+    "population": 1429
+  },
+  {
+    "id": 33,
+    "name": "小区 33",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.95921597417187,
+        22.543058827921108
+      ]
+    },
+    "population": 654
+  },
+  {
+    "id": 34,
+    "name": "小区 34",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.94605456899038,
+        22.54701619555574
+      ]
+    },
+    "population": 1827
+  },
+  {
+    "id": 35,
+    "name": "小区 35",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93232734051425,
+        22.546464921232282
+      ]
+    },
+    "population": 2093
+  },
+  {
+    "id": 36,
+    "name": "小区 36",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.94080693849811,
+        22.550638586076584
+      ]
+    },
+    "population": 1322
+  },
+  {
+    "id": 37,
+    "name": "小区 37",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93401618763882,
+        22.551150201450863
+      ]
+    },
+    "population": 2056
+  },
+  {
+    "id": 38,
+    "name": "小区 38",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.9179850472737,
+        22.560058718558476
+      ]
+    },
+    "population": 538
+  },
+  {
+    "id": 39,
+    "name": "小区 39",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93752452808748,
+        22.523810370355907
+      ]
+    },
+    "population": 2363
+  },
+  {
+    "id": 40,
+    "name": "小区 40",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93778842982854,
+        22.578065225593903
+      ]
+    },
+    "population": 1449
+  },
+  {
+    "id": 41,
+    "name": "小区 41",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.92768227944977,
+        22.573318348832416
+      ]
+    },
+    "population": 2206
+  },
+  {
+    "id": 42,
+    "name": "小区 42",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93980002920877,
+        22.53905089932649
+      ]
+    },
+    "population": 1204
+  },
+  {
+    "id": 43,
+    "name": "小区 43",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93948395146325,
+        22.544080620880674
+      ]
+    },
+    "population": 2131
+  },
+  {
+    "id": 44,
+    "name": "小区 44",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.94688328343702,
+        22.549651371568462
+      ]
+    },
+    "population": 804
+  },
+  {
+    "id": 45,
+    "name": "小区 45",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.96137459050169,
+        22.55597713769283
+      ]
+    },
+    "population": 2369
+  },
+  {
+    "id": 46,
+    "name": "小区 46",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.94163696963959,
+        22.550666656011256
+      ]
+    },
+    "population": 2486
+  },
+  {
+    "id": 47,
+    "name": "小区 47",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93541894352337,
+        22.53556761337446
+      ]
+    },
+    "population": 2362
+  },
+  {
+    "id": 48,
+    "name": "小区 48",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.95323542363246,
+        22.55006170436701
+      ]
+    },
+    "population": 1352
+  },
+  {
+    "id": 49,
+    "name": "小区 49",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.94175790404934,
+        22.548554851062832
+      ]
+    },
+    "population": 1993
+  },
+  {
+    "id": 50,
+    "name": "小区 50",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.94106160089463,
+        22.52604496942442
+      ]
+    },
+    "population": 1545
+  },
+  {
+    "id": 51,
+    "name": "小区 51",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.95410956347055,
+        22.554961818028925
+      ]
+    },
+    "population": 2403
+  },
+  {
+    "id": 52,
+    "name": "小区 52",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.94828500710312,
+        22.54967388589947
+      ]
+    },
+    "population": 542
+  },
+  {
+    "id": 53,
+    "name": "小区 53",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.92024374402826,
+        22.54480245830356
+      ]
+    },
+    "population": 2226
+  },
+  {
+    "id": 54,
+    "name": "小区 54",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.9362427069861,
+        22.57733160039972
+      ]
+    },
+    "population": 1458
+  },
+  {
+    "id": 55,
+    "name": "小区 55",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93948969268736,
+        22.54647261682498
+      ]
+    },
+    "population": 1529
+  },
+  {
+    "id": 56,
+    "name": "小区 56",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.94078948426605,
+        22.54665101575759
+      ]
+    },
+    "population": 1214
+  },
+  {
+    "id": 57,
+    "name": "小区 57",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.96561977724723,
+        22.55196795403931
+      ]
+    },
+    "population": 840
+  },
+  {
+    "id": 58,
+    "name": "小区 58",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.93480952427205,
+        22.571100947965395
+      ]
+    },
+    "population": 2166
+  },
+  {
+    "id": 59,
+    "name": "小区 59",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.9317969819677,
+        22.528396926736495
+      ]
+    },
+    "population": 1217
+  },
+  {
+    "id": 60,
+    "name": "小区 60",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        113.95086195318567,
+        22.529120026167394
+      ]
+    },
+    "population": 2012
+  }
+]

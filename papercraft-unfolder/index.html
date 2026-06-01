@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D 折纸展开工具 - Papercraft Unfolder</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow: hidden;
+      background: #1a1a2e;
+    }
+    #app {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+    }
+    .controls {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .btn {
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    .btn:active {
+      transform: translateY(0);
+    }
+    .btn-secondary {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+    }
+    .btn-secondary:hover {
+      box-shadow: 0 6px 20px rgba(17, 153, 142, 0.6);
+    }
+    .info {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.6;
+      backdrop-filter: blur(10px);
+    }
+    .info h3 {
+      margin-bottom: 8px;
+      color: #667eea;
+    }
+    .mode-indicator {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+    }
+    .mode-3d {
+      color: #667eea;
+    }
+    .mode-2d {
+      color: #38ef7d;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="canvas-container"></div>
+    <div class="controls">
+      <button id="unfoldBtn" class="btn">🔓 一键展开</button>
+      <button id="resetBtn" class="btn btn-secondary">🔄 重置模型</button>
+    </div>
+    <div class="mode-indicator">
+      当前模式: <span id="modeText" class="mode-3d">3D 视图</span>
+    </div>
+    <div class="info">
+      <h3>📋 使用说明</h3>
+      <div>🖱️ 拖动鼠标旋转模型</div>
+      <div>🔍 滚轮缩放视图</div>
+      <div>🔓 点击展开按钮生成折纸图纸</div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

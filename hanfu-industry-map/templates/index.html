@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汉服商家分布地图 - 产业集群分析</title>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=62894d3a0f745186ad4c99050a491b2f&plugin=AMap.MarkerCluster,AMap.ToolBar,AMap.Scale,AMap.MapType"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        #app {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .stats {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .stat-label {
+            opacity: 0.9;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        .map-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        #map-container {
+            flex: 1;
+            position: relative;
+            min-height: 400px;
+            background: #e8f4f8;
+        }
+        .map-fallback {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            z-index: 50;
+            text-align: center;
+            padding: 20px;
+        }
+        .map-fallback h3 {
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+        .map-fallback p {
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        .city-distribution {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            max-width: 600px;
+        }
+        .city-badge {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .city-badge:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+        .city-badge .name {
+            font-weight: 600;
+        }
+        .city-badge .count {
+            margin-left: 5px;
+            opacity: 0.9;
+        }
+        .merchant-list-section {
+            background: white;
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .merchant-list-section h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .horizontal-merchant-list {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        .horizontal-merchant-item {
+            min-width: 200px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        .horizontal-merchant-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .horizontal-merchant-item .name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .horizontal-merchant-item .info {
+            font-size: 12px;
+            color: #666;
+        }
+        .horizontal-merchant-item .sales {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        .sidebar {
+            width: 320px;
+            background: white;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.05);
+        }
+        .sidebar h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .merchant-list {
+            list-style: none;
+        }
+        .merchant-item {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .merchant-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        .merchant-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .merchant-info {
+            font-size: 12px;
+            color: #666;
+        }
+        .merchant-sales {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        .legend h4 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 14px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .legend-dot.core {
+            background: #e74c3c;
+        }
+        .legend-dot.important {
+            background: #f39c12;
+        }
+        .legend-dot.emerging {
+            background: #3498db;
+        }
+        .legend-dot.general {
+            background: #95a5a6;
+        }
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: #667eea;
+            z-index: 101;
+        }
+        .error-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 101;
+        }
+        .error-message button {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .error-message button:hover {
+            background: #5a6fd6;
+        }
+        .city-tab {
+            display: inline-block;
+            padding: 5px 12px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .city-tab:hover {
+            background: #e0e0e0;
+        }
+        .city-tab.active {
+            background: #667eea;
+            color: white;
+        }
+        .city-tab .count {
+            margin-left: 5px;
+            font-weight: 600;
+        }
+        .toast {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 2000;
+            animation: fadeInOut 2s ease-in-out;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        {% raw %}
+        <div class="header">
+            <h1>🏯 汉服商家分布地图 - 产业集群分析</h1>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value">{{ totalMerchants }}</div>
+                    <div class="stat-label">商家总数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ totalCities }}</div>
+                    <div class="stat-label">覆盖城市</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ totalSalesText }}</div>
+                    <div class="stat-label">总销售额</div>
+                </div>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="map-section">
+                <div id="map-container">
+                    <div v-if="loading" class="loading">加载中...</div>
+                    <div v-if="showMapFallback" class="map-fallback">
+                        <h3>🗺️ 汉服产业集群分布</h3>
+                        <p>地图加载中或 API Key 需要配置，请查看下方商家列表</p>
+                        <div class="city-distribution">
+                            <div class="city-badge" v-for="cluster in clustersByCount" :key="cluster.city" @click="showCityMerchants(cluster.city)">
+                                <span class="name">{{ cluster.city }}</span>
+                                <span class="count">{{ cluster.merchant_count }}家</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="legend" v-if="!loading && !error">
+                        <h4>产业带等级</h4>
+                        <div class="legend-item">
+                            <span class="legend-dot core"></span>
+                            核心产业带
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot important"></span>
+                            重要产业带
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot emerging"></span>
+                            新兴产业带
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot general"></span>
+                            一般区域
+                        </div>
+                    </div>
+                </div>
+                <div class="merchant-list-section" v-if="!loading && !error">
+                    <h4>🔥 热门商家快速浏览（点击可高亮显示）</h4>
+                    <div class="horizontal-merchant-list">
+                        <div class="horizontal-merchant-item" v-for="merchant in topMerchantsAll" :key="merchant.name" @click="handleMerchantClick(merchant)">
+                            <div class="name">{{ merchant.name }}</div>
+                            <div class="info">
+                                <span>{{ merchant.city }}</span><br>
+                                <span class="sales">销售额: {{ merchant.sales.toLocaleString() }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar">
+                <h3 v-if="selectedCity">{{ selectedCity }} - 头部商家</h3>
+                <h3 v-else>按城市筛选商家</h3>
+                <div v-if="!selectedCity" style="margin-bottom: 15px;">
+                    <span class="city-tab" :class="{active: selectedCity === ''}" @click="clearCityFilter">
+                        全部<span class="count">({{ totalMerchants }})</span>
+                    </span>
+                    <span class="city-tab" v-for="cluster in clustersByCount" :key="cluster.city" :class="{active: selectedCity === cluster.city}" @click="showCityMerchants(cluster.city)">
+                        {{ cluster.city }}<span class="count">({{ cluster.merchant_count }})</span>
+                    </span>
+                </div>
+                <ul class="merchant-list" v-if="displayMerchants.length > 0">
+                    <li class="merchant-item" v-for="(merchant, index) in displayMerchants" :key="index" @click="handleMerchantClick(merchant)">
+                        <div class="merchant-name">{{ index + 1 }}. {{ merchant.name }}</div>
+                        <div class="merchant-info">
+                            <span>{{ merchant.address }}</span><br>
+                            <span class="merchant-sales">销售额: {{ merchant.sales.toLocaleString() }}</span>
+                        </div>
+                    </li>
+                </ul>
+                <p v-else style="color: #999; text-align: center; margin-top: 50px;">
+                    暂无商家数据
+                </p>
+            </div>
+        </div>
+        <div v-if="toastMessage" class="toast">{{ toastMessage }}</div>
+        {% endraw %}
+    </div>
+
+    <script>
+        const { createApp, nextTick } = Vue;
+        
+        createApp({
+            data() {
+                return {
+                    loading: true,
+                    error: '',
+                    showMapFallback: false,
+                    merchants: [],
+                    clusters: [],
+                    totalMerchants: 0,
+                    totalCities: 0,
+                    totalSales: 0,
+                    selectedCity: '',
+                    topMerchants: [],
+                    map: null,
+                    markerCluster: null,
+                    markers: [],
+                    toastMessage: ''
+                };
+            },
+            computed: {
+                totalSalesText() {
+                    if (this.totalSales >= 10000) {
+                        return (this.totalSales / 10000).toFixed(1) + '万';
+                    }
+                    return this.totalSales.toLocaleString();
+                },
+                topMerchantsAll() {
+                    return [...this.merchants].sort((a, b) => b.sales - a.sales).slice(0, 10);
+                },
+                clustersByCount() {
+                    return [...this.clusters].sort((a, b) => b.merchant_count - a.merchant_count);
+                },
+                displayMerchants() {
+                    if (this.selectedCity) {
+                        return this.topMerchants;
+                    }
+                    return [...this.merchants].sort((a, b) => b.sales - a.sales).slice(0, 20);
+                }
+            },
+            mounted() {
+                this.initData();
+            },
+            methods: {
+                showToast(message) {
+                    this.toastMessage = message;
+                    setTimeout(() => {
+                        this.toastMessage = '';
+                    }, 2000);
+                },
+                async initData() {
+                    this.loading = true;
+                    this.error = '';
+                    try {
+                        const [merchantsRes, clusterRes] = await Promise.all([
+                            axios.get('/api/merchants'),
+                            axios.get('/api/merchants/cluster')
+                        ]);
+                        
+                        if (merchantsRes.data.success) {
+                            this.merchants = merchantsRes.data.data;
+                            this.totalMerchants = merchantsRes.data.total;
+                            this.totalSales = this.merchants.reduce((sum, m) => sum + m.sales, 0);
+                            console.log('商家数据加载成功:', this.merchants.length, '家');
+                        } else {
+                            throw new Error(merchantsRes.data.message || '获取商家数据失败');
+                        }
+                        
+                        if (clusterRes.data.success) {
+                            this.clusters = clusterRes.data.data;
+                            this.totalCities = this.clusters.length;
+                        } else {
+                            throw new Error(clusterRes.data.message || '获取聚类数据失败');
+                        }
+                        
+                        await nextTick();
+                        
+                        setTimeout(() => {
+                            this.tryInitMap();
+                        }, 200);
+                    } catch (error) {
+                        console.error('加载数据失败:', error);
+                        this.error = error.message || '数据加载失败';
+                        this.showMapFallback = true;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                retry() {
+                    this.initData();
+                },
+                clearCityFilter() {
+                    this.selectedCity = '';
+                    this.topMerchants = [];
+                },
+                tryInitMap() {
+                    if (typeof AMap === 'undefined') {
+                        console.warn('AMap 未定义，使用备选商家列表视图');
+                        this.showMapFallback = true;
+                        return;
+                    }
+                    
+                    const mapContainer = document.getElementById('map-container');
+                    if (!mapContainer) {
+                        console.error('找不到 map-container 元素');
+                        this.showMapFallback = true;
+                        return;
+                    }
+                    
+                    console.log('开始初始化地图...');
+                    
+                    try {
+                        this.map = new AMap.Map('map-container', {
+                            zoom: 5,
+                            center: [115, 35],
+                            mapStyle: 'amap://styles/light'
+                        });
+
+                        console.log('地图实例创建成功');
+                        this.showMapFallback = false;
+
+                        this.map.plugin(['AMap.ToolBar', 'AMap.Scale', 'AMap.MapType'], () => {
+                            const toolBar = new AMap.ToolBar({
+                                position: 'RT'
+                            });
+                            const scale = new AMap.Scale({
+                                position: 'LB'
+                            });
+                            const mapType = new AMap.MapType({
+                                defaultType: 0,
+                                showRoad: true,
+                                showTraffic: false
+                            });
+                            
+                            this.map.addControl(toolBar);
+                            this.map.addControl(scale);
+                            this.map.addControl(mapType);
+                            console.log('地图控件添加成功');
+                        });
+
+                        this.markers = [];
+                        const levelColors = {
+                            'core': '#e74c3c',
+                            'important': '#f39c12',
+                            'emerging': '#3498db',
+                            'general': '#95a5a6'
+                        };
+
+                        const cityOffsets = {};
+                        const getCityOffset = (city) => {
+                            if (!cityOffsets[city]) {
+                                cityOffsets[city] = { index: 0, count: 0 };
+                            }
+                            const offset = {
+                                lng: (cityOffsets[city].index % 5 - 2) * 0.02,
+                                lat: (Math.floor(cityOffsets[city].index / 5) - 2) * 0.02
+                            };
+                            cityOffsets[city].index++;
+                            return offset;
+                        };
+
+                        this.merchants.forEach(m => {
+                            if (!cityOffsets[m.city]) {
+                                cityOffsets[m.city] = { index: 0, count: 0 };
+                            }
+                            cityOffsets[m.city].count++;
+                        });
+
+                        console.log('开始创建标记点, 商家数量:', this.merchants.length);
+
+                        this.merchants.forEach((merchant) => {
+                            const offset = getCityOffset(merchant.city);
+                            const offsetLng = merchant.lng + offset.lng;
+                            const offsetLat = merchant.lat + offset.lat;
+
+                            const marker = new AMap.Marker({
+                                position: [offsetLng, offsetLat],
+                                title: merchant.name,
+                                content: `<div style="
+                                    width: ${merchant.belt_level === 'core' ? 24 : 20}px;
+                                    height: ${merchant.belt_level === 'core' ? 24 : 20}px;
+                                    background: ${levelColors[merchant.belt_level] || '#95a5a6'};
+                                    border-radius: 50%;
+                                    border: 3px solid white;
+                                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                                "></div>`,
+                                offset: new AMap.Pixel(-10, -10)
+                            });
+
+                            marker.on('click', () => {
+                                console.log('点击标记点:', merchant.name);
+                                this.showCityMerchants(merchant.city);
+                                this.showToast(`📍 已定位: ${merchant.name}`);
+                            });
+
+                            marker.merchantData = merchant;
+                            this.markers.push(marker);
+                        });
+
+                        console.log('标记点创建完成，数量:', this.markers.length);
+
+                        if (typeof AMap.MarkerCluster !== 'undefined') {
+                            console.log('创建 MarkerCluster...');
+                            
+                            this.markerCluster = new AMap.MarkerCluster(this.map, this.markers, {
+                                gridSize: 80,
+                                maxClusterRadius: 100,
+                                minClusterSize: 2,
+                                renderClusterMarker: (context) => {
+                                    const count = context.count;
+                                    const size = Math.min(50, 28 + count * 2);
+                                    const color = count > 10 ? '#e74c3c' : (count > 5 ? '#f39c12' : '#667eea');
+                                    
+                                    return `<div style="
+                                        width: ${size}px;
+                                        height: ${size}px;
+                                        background: ${color};
+                                        border-radius: 50%;
+                                        color: white;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        font-weight: bold;
+                                        font-size: ${Math.max(12, size / 3)}px;
+                                        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                                        border: 3px solid white;
+                                        cursor: pointer;
+                                    ">${count}</div>`;
+                                }
+                            });
+
+                            console.log('MarkerCluster 创建成功');
+
+                            this.markerCluster.on('clusterClick', (e) => {
+                                console.log('点击聚合点:', e);
+                                if (e.markers && e.markers.length > 0) {
+                                    const marker = e.markers[0];
+                                    if (marker && marker.merchantData) {
+                                        this.showCityMerchants(marker.merchantData.city);
+                                        this.showToast(`📍 ${marker.merchantData.city} - ${e.markers.length}家商家`);
+                                    }
+                                }
+                            });
+                        } else {
+                            console.warn('MarkerCluster 插件不可用，直接添加标记点');
+                            this.markers.forEach(marker => {
+                                this.map.add(marker);
+                            });
+                        }
+
+                    } catch (error) {
+                        console.error('地图初始化失败:', error);
+                        this.showMapFallback = true;
+                    }
+                },
+                handleMerchantClick(merchant) {
+                    console.log('点击商家:', merchant.name, merchant);
+                    this.showCityMerchants(merchant.city);
+                    
+                    if (this.map && !this.showMapFallback) {
+                        this.map.setZoomAndCenter(10, [merchant.lng, merchant.lat]);
+                        
+                        const matchingMarker = this.markers.find(m => 
+                            m.merchantData && m.merchantData.name === merchant.name
+                        );
+                        
+                        if (matchingMarker) {
+                            matchingMarker.setAnimation('AMAP_ANIMATION_BOUNCE');
+                            setTimeout(() => {
+                                matchingMarker.setAnimation(null);
+                            }, 1500);
+                        }
+                        
+                        this.showToast(`📍 已定位: ${merchant.name}`);
+                    } else {
+                        this.showToast(`✅ 已选中: ${merchant.name}`);
+                    }
+                },
+                async showCityMerchants(city) {
+                    try {
+                        const res = await axios.get('/api/merchants/top', {
+                            params: { city: encodeURIComponent(city), top_n: 20 }
+                        });
+                        if (res.data.success) {
+                            this.selectedCity = city;
+                            this.topMerchants = res.data.data;
+                            
+                            if (this.map && !this.showMapFallback && this.topMerchants.length > 0) {
+                                const firstMerchant = this.topMerchants[0];
+                                this.map.setZoomAndCenter(10, [firstMerchant.lng, firstMerchant.lat]);
+                            }
+                        } else {
+                            console.error('获取商家列表失败:', res.data.message);
+                        }
+                    } catch (error) {
+                        console.error('获取商家列表失败:', error);
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

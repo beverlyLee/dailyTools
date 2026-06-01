@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>充电桩基础设施匹配分析系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .stat-card.safe .value {
+            color: #27ae60;
+        }
+
+        .stat-card.gap .value {
+            color: #e74c3c;
+        }
+
+        .stat-card.warning .value {
+            color: #f39c12;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .chart-card h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.2rem;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 500px;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .legend-color.safe {
+            background: #27ae60;
+        }
+
+        .legend-color.warning {
+            background: #f39c12;
+        }
+
+        .legend-color.gap {
+            background: #e74c3c;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .city-table {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .city-table h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-badge.safe {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.gap {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .control-group input, .control-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .toggle-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn.mock {
+            background: #667eea;
+            color: white;
+        }
+
+        .toggle-btn.real {
+            background: #27ae60;
+            color: white;
+        }
+
+        .toggle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .data-source-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            background: #e9ecef;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="app-container">
+        <div class="header">
+            <h1>🚗 充电桩基础设施匹配分析系统</h1>
+            <p>分析充电桩建设是否跟上新能源车销量增长
+                <span class="data-source-badge">{{ useMockData ? '模拟数据' : '真实数据' }}</span>
+            </p>
+        </div>
+
+        <div v-if="loading" class="loading">数据加载中...</div>
+
+        <template v-else>
+            <div class="controls">
+                <div class="control-group">
+                    <label>数据源:</label>
+                    <button :class="['toggle-btn', useMockData ? 'mock' : 'real']" @click="toggleDataSource">
+                        {{ useMockData ? '切换到真实数据' : '切换到模拟数据' }}
+                    </button>
+                </div>
+                <div class="control-group">
+                    <label>充足阈值:</label>
+                    <input type="number" v-model.number="safeThreshold" min="1" max="20" step="0.5" style="width: 80px;" disabled>
+                    <span>:1</span>
+                </div>
+                <div class="control-group">
+                    <label>警戒线:</label>
+                    <input type="number" v-model.number="warningRatio" min="1" max="20" step="0.5" style="width: 80px;">
+                    <span>:1</span>
+                </div>
+                <div class="control-group">
+                    <label>排序方式:</label>
+                    <select v-model="sortBy">
+                        <option value="sales">按销量</option>
+                        <option value="ratio">按车桩比</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="value">{{ statistics.total_cities || 0 }}</div>
+                    <div class="label">分析城市总数</div>
+                </div>
+                <div class="stat-card safe">
+                    <div class="value">{{ statistics.safe_cities_count || 0 }}</div>
+                    <div class="label">充电设施充足</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="value">{{ statistics.warning_cities_count || 0 }}</div>
+                    <div class="label">预警状态</div>
+                </div>
+                <div class="stat-card gap">
+                    <div class="value">{{ statistics.gap_cities_count || 0 }}</div>
+                    <div class="label">存在充电缺口 ({{ statistics.gap_percentage || 0 }}%)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value">{{ (statistics.average_ratio || 0) }}:1</div>
+                    <div class="label">全国平均车桩比</div>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color safe"></div>
+                    <span>充足 (车桩比 &lt; {{ safeThreshold }}:1)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color warning"></div>
+                    <span>预警 ({{ safeThreshold }}:1 ≤ 车桩比 &lt; {{ warningRatio }}:1)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color gap"></div>
+                    <span>缺口 (车桩比 ≥ {{ warningRatio }}:1)</span>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-card">
+                    <h3>📍 全国城市车桩比气泡图</h3>
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 10px;">
+                        气泡大小代表新能源车销量，颜色代表车桩比状态
+                    </p>
+                    <div id="bubbleChart" class="chart-container"></div>
+                </div>
+                <div class="chart-card">
+                    <h3>📊 城市车桩比排行</h3>
+                    <div id="barChart" class="chart-container"></div>
+                </div>
+            </div>
+
+            <div class="city-table">
+                <h3>🏙️ 城市详细数据</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>城市</th>
+                            <th>新能源车销量</th>
+                            <th>充电桩数量</th>
+                            <th>车桩比</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="city in sortedCities" :key="city.name">
+                            <td><strong>{{ city.name }}</strong></td>
+                            <td>{{ city.sales.toLocaleString() }}</td>
+                            <td>{{ city.stations.toLocaleString() }}</td>
+                            <td><strong>{{ city.car_to_station_ratio }}:1</strong></td>
+                            <td>
+                                <span :class="['status-badge', city.status]">
+                                    {{ city.status === 'safe' ? '充足' : city.status === 'warning' ? '预警' : '缺口' }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, watch, nextTick, onUnmounted } = Vue;
+
+        const app = createApp({
+            setup() {
+                const loading = ref(true);
+                const statistics = ref({});
+                const cities = ref([]);
+                const safeThreshold = ref(4.5);
+                const warningRatio = ref(5.0);
+                const sortBy = ref('ratio');
+                const useMockData = ref(true);
+
+                let bubbleChart = null;
+                let barChart = null;
+                let resizeHandler = null;
+
+                const sortedCities = computed(() => {
+                    const sorted = [...cities.value];
+                    if (sortBy.value === 'sales') {
+                        return sorted.sort((a, b) => b.sales - a.sales);
+                    } else {
+                        return sorted.sort((a, b) => b.car_to_station_ratio - a.car_to_station_ratio);
+                    }
+                });
+
+                function toggleDataSource() {
+                    useMockData.value = !useMockData.value;
+                    fetchData();
+                }
+
+                async function fetchData() {
+                    loading.value = true;
+                    try {
+                        console.log('正在获取可视化数据...');
+                        const response = await fetch(`/api/visualization?warning_ratio=${warningRatio.value}&mock=${useMockData.value}`);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        console.log('获取到的数据:', data);
+                        
+                        statistics.value = data.statistics || {};
+                        cities.value = data.cities || [];
+                        
+                        if (data.thresholds) {
+                            safeThreshold.value = data.thresholds.safe;
+                            warningRatio.value = data.thresholds.warning;
+                        }
+                        
+                        console.log('阈值 - safe:', safeThreshold.value, 'warning:', warningRatio.value);
+                        
+                        await nextTick();
+                        await nextTick();
+                        
+                        setTimeout(() => {
+                            renderCharts();
+                        }, 50);
+                    } catch (error) {
+                        console.error('数据加载失败:', error);
+                    } finally {
+                        loading.value = false;
+                    }
+                }
+
+                function renderCharts() {
+                    console.log('开始渲染图表, cities数量:', cities.value.length);
+                    renderBubbleChart();
+                    renderBarChart();
+                }
+
+                function renderBubbleChart() {
+                    const chartDom = document.getElementById('bubbleChart');
+                    if (!chartDom) {
+                        console.error('bubbleChart DOM元素未找到，当前DOM状态:', document.body.innerHTML.length);
+                        return;
+                    }
+
+                    console.log('初始化气泡图');
+                    
+                    try {
+                        if (!bubbleChart) {
+                            bubbleChart = echarts.init(chartDom);
+                        }
+
+                        const data = cities.value.map(city => ({
+                            name: city.name,
+                            value: [city.lng, city.lat, city.sales / 5000, city.car_to_station_ratio],
+                            itemStyle: {
+                                color: city.color
+                            }
+                        }));
+
+                        const option = {
+                            tooltip: {
+                                trigger: 'item',
+                                formatter: function(params) {
+                                    const city = cities.value.find(c => c.name === params.name);
+                                    if (city) {
+                                        return `
+                                            <div style="padding: 5px;">
+                                                <strong>${city.name}</strong><br/>
+                                                新能源车销量: ${city.sales.toLocaleString()} 辆<br/>
+                                                充电桩数量: ${city.stations.toLocaleString()} 个<br/>
+                                                车桩比: ${city.car_to_station_ratio}:1<br/>
+                                                状态: ${city.status === 'safe' ? '充足' : city.status === 'warning' ? '预警' : '缺口'}
+                                            </div>
+                                        `;
+                                    }
+                                    return params.name;
+                                }
+                            },
+                            xAxis: {
+                                type: 'value',
+                                name: '经度',
+                                min: 73,
+                                max: 135,
+                                splitLine: {
+                                    lineStyle: {
+                                        type: 'dashed'
+                                    }
+                                },
+                                axisLabel: {
+                                    formatter: '{value}°E'
+                                }
+                            },
+                            yAxis: {
+                                type: 'value',
+                                name: '纬度',
+                                min: 18,
+                                max: 54,
+                                splitLine: {
+                                    lineStyle: {
+                                        type: 'dashed'
+                                    }
+                                },
+                                axisLabel: {
+                                    formatter: '{value}°N'
+                                }
+                            },
+                            series: [
+                                {
+                                    name: '城市车桩比',
+                                    type: 'scatter',
+                                    data: data,
+                                    symbolSize: function(val) {
+                                        return Math.max(15, Math.sqrt(val[2]) * 8);
+                                    },
+                                    label: {
+                                        show: true,
+                                        formatter: function(params) {
+                                            return params.name;
+                                        },
+                                        position: 'right',
+                                        fontSize: 11,
+                                        color: '#333',
+                                        fontWeight: 500
+                                    },
+                                    emphasis: {
+                                        label: {
+                                            show: true,
+                                            fontSize: 14,
+                                            fontWeight: 'bold'
+                                        },
+                                        itemStyle: {
+                                            shadowBlur: 20,
+                                            shadowColor: 'rgba(0, 0, 0, 0.4)'
+                                        }
+                                    }
+                                }
+                            ]
+                        };
+
+                        bubbleChart.setOption(option);
+                        console.log('气泡图渲染完成');
+                    } catch (error) {
+                        console.error('气泡图渲染失败:', error);
+                    }
+                }
+
+                function renderBarChart() {
+                    const chartDom = document.getElementById('barChart');
+                    if (!chartDom) {
+                        console.error('barChart DOM元素未找到');
+                        return;
+                    }
+
+                    console.log('初始化柱状图');
+                    
+                    try {
+                        if (!barChart) {
+                            barChart = echarts.init(chartDom);
+                        }
+
+                        const sortedData = [...cities.value].sort((a, b) => b.car_to_station_ratio - a.car_to_station_ratio);
+                        const names = sortedData.map(c => c.name);
+                        const ratios = sortedData.map(c => c.car_to_station_ratio);
+                        const colors = sortedData.map(c => c.color);
+
+                        const option = {
+                            tooltip: {
+                                trigger: 'axis',
+                                axisPointer: {
+                                    type: 'shadow'
+                                },
+                                formatter: function(params) {
+                                    const city = sortedData.find(c => c.name === params[0].name);
+                                    return `
+                                        <strong>${city.name}</strong><br/>
+                                        车桩比: ${city.car_to_station_ratio}:1<br/>
+                                        销量: ${city.sales.toLocaleString()} 辆<br/>
+                                        充电桩: ${city.stations.toLocaleString()} 个
+                                    `;
+                                }
+                            },
+                            grid: {
+                                left: '3%',
+                                right: '4%',
+                                bottom: '3%',
+                                top: '10%',
+                                containLabel: true
+                            },
+                            xAxis: {
+                                type: 'value',
+                                name: '车桩比',
+                                nameLocation: 'end',
+                                axisLabel: {
+                                    formatter: '{value}:1'
+                                }
+                            },
+                            yAxis: {
+                                type: 'category',
+                                data: names,
+                                axisLabel: {
+                                    fontSize: 10,
+                                    interval: 0
+                                }
+                            },
+                            series: [
+                                {
+                                    name: '车桩比',
+                                    type: 'bar',
+                                    data: ratios.map((value, index) => ({
+                                        value: value,
+                                        itemStyle: {
+                                            color: colors[index]
+                                        }
+                                    })),
+                                    markLine: {
+                                        silent: true,
+                                        lineStyle: {
+                                            color: '#e74c3c',
+                                            type: 'dashed'
+                                        },
+                                        label: {
+                                            formatter: `警戒线 ${warningRatio.value}:1`
+                                        },
+                                        data: [
+                                            { xAxis: warningRatio.value }
+                                        ]
+                                    }
+                                }
+                            ]
+                        };
+
+                        barChart.setOption(option);
+                        console.log('柱状图渲染完成');
+                    } catch (error) {
+                        console.error('柱状图渲染失败:', error);
+                    }
+                }
+
+                watch(warningRatio, () => {
+                    fetchData();
+                });
+
+                watch(sortBy, () => {
+                    renderBarChart();
+                });
+
+                resizeHandler = function() {
+                    if (bubbleChart) bubbleChart.resize();
+                    if (barChart) barChart.resize();
+                };
+
+                onMounted(() => {
+                    console.log('Vue组件已挂载');
+                    fetchData();
+                    window.addEventListener('resize', resizeHandler);
+                });
+
+                onUnmounted(() => {
+                    console.log('Vue组件卸载');
+                    if (bubbleChart) bubbleChart.dispose();
+                    if (barChart) barChart.dispose();
+                    if (resizeHandler) window.removeEventListener('resize', resizeHandler);
+                });
+
+                return {
+                    loading,
+                    statistics,
+                    cities,
+                    warningRatio,
+                    safeThreshold,
+                    sortBy,
+                    sortedCities,
+                    useMockData,
+                    toggleDataSource
+                };
+            }
+        });
+
+        app.config.errorHandler = function(err, vm, info) {
+            console.error('Vue全局错误:', err, info);
+        };
+
+        console.log('开始挂载Vue应用');
+        app.mount('#app');
+    </script>
+</body>
+</html>

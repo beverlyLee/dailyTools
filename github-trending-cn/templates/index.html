@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Trending 中文</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🚀 GitHub Trending 中文</h1>
+            <div class="header-info">
+                <span class="load-time">页面加载: {{ load_time }}ms</span>
+                {% if available_dates %}
+                <div class="date-selector">
+                    <label>历史归档:</label>
+                    <select onchange="if(this.value)">
+                        <option value="/">最新</option>
+                        {% for date in available_dates %}
+                        <option value="/history/{{ date }}" {% if selected_date == date %}selected{% endif %}>{{ date }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="repo-grid">
+                {% for repo in repos %}
+                <a href="{{ repo.url }}" target="_blank" class="repo-card">
+                    <div class="repo-header">
+                        <span class="repo-owner">{{ repo.owner }}</span>
+                        <span class="repo-divider">/</span>
+                        <span class="repo-name">{{ repo.repo_name }}</span>
+                    </div>
+                    
+                    <p class="repo-desc">{{ repo.translated_description }}</p>
+                    
+                    <div class="repo-meta">
+                        {% if repo.language %}
+                        <span class="meta-item">
+                            <span class="lang-dot" data-lang="{{ repo.language|lower }}"></span>
+                            {{ repo.language }}
+                        </span>
+                        {% endif %}
+                        <span class="meta-item">⭐ {{ repo.stars }}</span>
+                        <span class="meta-item">🍴 {{ repo.forks }}</span>
+                        {% if repo.today_stars %}
+                        <span class="meta-item today-stars">🔥 {{ repo.today_stars }} today</span>
+                        {% endif %}
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>数据来源: GitHub Trending | AI翻译: 火山引擎</p>
+        </footer>
+    </div>
+    <script>
+        document.querySelector('select').addEventListener('change', function(e) {
+            window.location.href = e.target.value;
+        });
+    </script>
+</body>
+</html>

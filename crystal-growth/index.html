@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crystal Growth Simulation</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        overflow: hidden;
+        background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a2a 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+      canvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+      #info {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+        pointer-events: none;
+        z-index: 100;
+        text-shadow: 0 0 10px rgba(100, 200, 255, 0.5);
+      }
+      #controls {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 12px;
+        pointer-events: none;
+        z-index: 100;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="info">
+      <h2>Crystal Growth Simulation</h2>
+      <p>晶体生长模拟</p>
+    </div>
+    <div id="controls">
+      <p>拖动鼠标旋转视角 | 滚轮缩放</p>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

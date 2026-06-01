@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="病毒入侵人体细胞的3D交互式模拟展示，直观展示病毒接近、附着、融合、吸收的全过程" />
+    <meta name="keywords" content="病毒,细胞,3D模拟,生物教学,科普,Three.js,React" />
+    <meta name="author" content="Virus Invasion Simulation" />
+    <meta property="og:title" content="病毒入侵细胞模拟 | Viral Invasion Simulation" />
+    <meta property="og:description" content="3D交互式模拟病毒入侵人体细胞的全过程，用于生物教学和科普教育" />
+    <meta property="og:type" content="website" />
+    <title>病毒入侵细胞模拟 | Viral Invasion 3D Simulation</title>
+    <script type="module">
+      if (import.meta.hot?.on) {
+        import.meta.hot.on('vite:error', (error) => {
+          if (error.err) {
+            console.error(
+              [error.err.message, error.err.frame].filter(Boolean).join('\n'),
+            )
+          }
+        })
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

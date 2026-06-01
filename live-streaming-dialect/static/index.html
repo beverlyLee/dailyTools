@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>直播方言流向分析系统</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 24px;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            color: #8892b0;
+            font-size: 13px;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-label {
+            color: #ccd6f6;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .btn {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #ccd6f6;
+        }
+        
+        .btn-outline:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .btn-outline.active {
+            background: rgba(0, 217, 255, 0.2);
+            border-color: #00d9ff;
+            color: #00d9ff;
+        }
+        
+        .btn-douyin {
+            background: linear-gradient(135deg, #fe2c55 0%, #ff6b8a 100%);
+            color: white;
+        }
+        
+        .view-toggle {
+            margin-left: auto;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 15px;
+        }
+        
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .chart-container {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            min-height: 600px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chart-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #8892b0;
+            z-index: 100;
+            background: rgba(15, 12, 41, 0.9);
+            padding: 40px;
+            border-radius: 12px;
+        }
+        
+        .spinner {
+            width: 35px;
+            height: 35px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #00d9ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        #chartContainer {
+            width: 100%;
+            height: 560px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #mapContainer {
+            width: 100%;
+            height: 560px;
+            display: none;
+            border-radius: 12px;
+            background: #1a1a2e;
+        }
+        
+        .leaflet-container {
+            background: #1a1a2e;
+            border-radius: 12px;
+        }
+        
+        .custom-marker {
+            background: rgba(15, 12, 41, 0.95);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+        
+        .flow-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 500;
+        }
+        
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 50;
+        }
+        
+        .zoom-btn {
+            width: 30px;
+            height: 30px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 5px;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .zoom-btn:hover {
+            background: rgba(0, 217, 255, 0.3);
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .panel h3 {
+            color: #00d9ff;
+            margin-bottom: 12px;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .stat-card {
+            background: rgba(0, 217, 255, 0.08);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00ff88;
+            margin-bottom: 3px;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #8892b0;
+        }
+        
+        .dialect-list {
+            max-height: 140px;
+            overflow-y: auto;
+        }
+        
+        .dialect-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            margin-bottom: 6px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .dialect-item:hover {
+            background: rgba(255,255,255,0.08);
+        }
+        
+        .dialect-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+        
+        .dialect-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .dialect-count {
+            color: #00ff88;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .flow-list {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        
+        .flow-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(0, 217, 255, 0.06);
+            border-radius: 8px;
+            border-left: 3px solid #00d9ff;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .flow-item:hover {
+            background: rgba(0, 217, 255, 0.12);
+            transform: translateX(3px);
+        }
+        
+        .flow-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        
+        .flow-anchor {
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .platform-tag {
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+        
+        .platform-douyin {
+            background: linear-gradient(135deg, #fe2c55 0%, #ff6b8a 100%);
+        }
+        
+        .flow-route {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+            font-size: 11px;
+        }
+        
+        .flow-source {
+            color: #ff6b6b;
+            font-weight: 500;
+        }
+        
+        .flow-arrow {
+            color: #8892b0;
+        }
+        
+        .flow-target {
+            color: #4ecdc4;
+            font-weight: 500;
+        }
+        
+        .flow-product {
+            color: #ffd93d;
+            font-size: 11px;
+        }
+        
+        .flow-sales {
+            color: #00ff88;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        svg {
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .node {
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+        
+        .node:active {
+            cursor: grabbing;
+        }
+        
+        .node:hover circle {
+            filter: brightness(1.3);
+            stroke-width: 3;
+        }
+        
+        .node circle {
+            stroke: #fff;
+            stroke-width: 1.5;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+            transition: all 0.2s ease;
+        }
+        
+        .node text {
+            fill: #fff;
+            font-size: 10px;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+            pointer-events: none;
+        }
+        
+        .link {
+            fill: none;
+            stroke-opacity: 0.4;
+            transition: all 0.3s ease;
+            pointer-events: stroke;
+            cursor: pointer;
+        }
+        
+        .link:hover {
+            stroke-opacity: 1;
+            stroke-width: 4px !important;
+        }
+        
+        .link-label {
+            font-size: 9px;
+            font-weight: 600;
+            fill: #fff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            pointer-events: none;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(15, 12, 41, 0.95);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            min-width: 180px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .tooltip-title {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+        
+        .tooltip-label {
+            color: #8892b0;
+        }
+        
+        .tooltip-value {
+            color: #00ff88;
+            font-weight: 500;
+        }
+        
+        .detail-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .detail-modal.active {
+            display: flex;
+        }
+        
+        .detail-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 16px;
+            padding: 25px;
+            max-width: 450px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .detail-title {
+            font-size: 20px;
+            font-weight: 600;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255,100,100,0.3);
+        }
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-item {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 10px;
+        }
+        
+        .detail-item-label {
+            font-size: 11px;
+            color: #8892b0;
+            margin-bottom: 4px;
+        }
+        
+        .detail-item-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #00ff88;
+        }
+        
+        .products-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #00d9ff;
+        }
+        
+        .product-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+        }
+        
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        
+        .product-name {
+            font-weight: 500;
+            font-size: 13px;
+        }
+        
+        .product-origin {
+            font-size: 11px;
+            color: #8892b0;
+        }
+        
+        .product-sales {
+            color: #00ff88;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        .subtitle-sample {
+            background: rgba(255,255,255,0.03);
+            padding: 12px;
+            border-radius: 8px;
+            font-style: italic;
+            color: #ccd6f6;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .legend-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .legend-text {
+            color: #ccd6f6;
+            font-size: 11px;
+        }
+        
+        .marker-content {
+            background: rgba(15, 12, 41, 0.95);
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        
+        .marker-title {
+            font-weight: 600;
+            color: #00d9ff;
+            margin-bottom: 4px;
+        }
+        
+        .marker-info {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎙️ 直播方言流向分析系统</h1>
+            <p class="subtitle">分析抖音、快手、视频号等平台主播的方言使用情况与商品原产地流向</p>
+        </header>
+        
+        <div class="controls">
+            <div class="control-group">
+                <span class="control-label">平台:</span>
+                <button class="btn btn-outline active" data-platform="all">全部</button>
+                <button class="btn btn-douyin" data-platform="douyin">抖音</button>
+                <button class="btn btn-outline" data-platform="kuaishou">快手</button>
+                <button class="btn btn-outline" data-platform="wechat">视频号</button>
+            </div>
+            
+            <div class="control-group">
+                <span class="control-label">排序:</span>
+                <button class="btn btn-outline active" data-sort="none">默认</button>
+                <button class="btn btn-outline" data-sort="sales">按销量</button>
+            </div>
+            
+            <div class="control-group">
+                <span class="control-label">数据:</span>
+                <button class="btn btn-outline active" data-mode="mock">模拟数据</button>
+                <button class="btn btn-outline" data-mode="real">真实数据</button>
+            </div>
+            
+            <div class="control-group view-toggle">
+                <span class="control-label">视图:</span>
+                <button class="btn btn-outline active" data-view="flow">流向图</button>
+                <button class="btn btn-outline" data-view="map">地图模式</button>
+            </div>
+        </div>
+        
+        <div class="dashboard">
+            <div class="chart-container">
+                <div class="chart-loading" id="chartLoading" style="display: none;">
+                    <div class="spinner"></div>
+                    <div>数据加载中...</div>
+                </div>
+                <div id="chartContainer">
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" onclick="zoomIn()">+</button>
+                        <button class="zoom-btn" onclick="zoomOut()">-</button>
+                        <button class="zoom-btn" onclick="resetZoom()">⟲</button>
+                    </div>
+                </div>
+                <div id="mapContainer"></div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="panel">
+                    <h3>📊 数据统计</h3>
+                    <div class="stat-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalAnchors">0</div>
+                            <div class="stat-label">主播数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalSales">0</div>
+                            <div class="stat-label">总销量</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <h3>🏷️ 方言分布</h3>
+                    <div class="dialect-list" id="dialectList"></div>
+                </div>
+                
+                <div class="panel">
+                    <h3>🌊 商品流向列表</h3>
+                    <div class="flow-list" id="flowList"></div>
+                </div>
+                
+                <div class="panel">
+                    <h3>🎨 图例说明</h3>
+                    <div class="legend-panel" id="legendPanel"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tooltip" id="tooltip"></div>
+    
+    <div class="detail-modal" id="detailModal">
+        <div class="detail-content">
+            <div class="detail-header">
+                <div class="detail-title" id="modalTitle">主播详情</div>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div class="detail-grid" id="modalGrid"></div>
+            <div class="products-title">带货商品</div>
+            <div class="product-list" id="productList"></div>
+            <div class="subtitle-sample" id="subtitleSample"></div>
+        </div>
+    </div>
+
+    <script>
+        const colorMap = {
+            "东北话": "#ff6b6b",
+            "晋语": "#ffa726",
+            "河南话": "#f38181",
+            "河北话": "#f8b500",
+            "北京话": "#e17055",
+            "天津话": "#fdcb6e",
+            "山东话": "#6c5ce7",
+            "吴语": "#00b894",
+            "安徽话": "#e84393",
+            "赣语": "#d63031",
+            "湖南话": "#ffd93d",
+            "湖北话": "#ff6b6b",
+            "四川话": "#4ecdc4",
+            "西南官话": "#81ecec",
+            "广东话": "#ffe66d",
+            "粤语": "#fdcb6e",
+            "闽南语": "#fd79a8",
+            "西北话": "#a29bfe",
+            "藏语": "#6c5ce7",
+            "普通话": "#8892b0"
+        };
+
+        let currentPlatform = 'all';
+        let currentSort = 'none';
+        let currentMode = 'mock';
+        let currentView = 'flow';
+        let allFlowData = [];
+        let anchorDetails = {};
+        let leafletMap = null;
+        let mapPolylines = [];
+        let mapMarkers = [];
+        let svg = null;
+        let zoom = null;
+        let simulation = null;
+
+        async function init() {
+            await loadData();
+            setupEventListeners();
+        }
+
+        async function loadData() {
+            document.getElementById('chartLoading').style.display = 'block';
+            
+            try {
+                const params = new URLSearchParams();
+                if (currentPlatform !== 'all') params.append('platform', currentPlatform);
+                if (currentSort === 'sales') params.append('sort_by', 'sales');
+                params.append('mode', currentMode);
+                
+                const [flowData, statsRes] = await Promise.all([
+                    fetch(`/api/flow-data?${params}`).then(r => r.json()),
+                    fetch(`/api/dialect-stats?platform=${currentPlatform === 'all' ? '' : currentPlatform}&mode=${currentMode}`).then(r => r.json())
+                ]);
+                
+                allFlowData = flowData;
+                
+                if (currentView === 'flow') {
+                    renderForceDirectedChart(flowData);
+                } else {
+                    renderMap(flowData);
+                }
+                
+                renderStats(statsRes);
+                renderFlowList(flowData);
+                renderLegend();
+                
+            } catch (error) {
+                console.error('加载数据失败:', error);
+            } finally {
+                document.getElementById('chartLoading').style.display = 'none';
+            }
+        }
+
+        function renderForceDirectedChart(flowData) {
+            const container = document.getElementById('chartContainer');
+            const width = container.clientWidth;
+            const height = 560;
+            
+            container.innerHTML = `
+                <div class="zoom-controls">
+                    <button class="zoom-btn" onclick="zoomIn()">+</button>
+                    <button class="zoom-btn" onclick="zoomOut()">-</button>
+                    <button class="zoom-btn" onclick="resetZoom()">⟲</button>
+                </div>
+            `;
+            
+            svg = d3.select('#chartContainer')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+            
+            zoom = d3.zoom()
+                .scaleExtent([0.3, 5])
+                .on('zoom', (event) => {
+                    g.attr('transform', event.transform);
+                });
+            
+            svg.call(zoom);
+            
+            const g = svg.append('g');
+            
+            const nodes = [];
+            const links = [];
+            const nodeSet = new Set();
+            const dialectCounts = {};
+            const cityCounts = {};
+            
+            flowData.forEach(flow => {
+                dialectCounts[flow.source.name] = (dialectCounts[flow.source.name] || 0) + flow.value;
+                cityCounts[flow.target.name] = (cityCounts[flow.target.name] || 0) + flow.value;
+            });
+            
+            const maxSales = Math.max(...Object.values(dialectCounts), ...Object.values(cityCounts));
+            const minSales = Math.min(...Object.values(dialectCounts), ...Object.values(cityCounts));
+            
+            const dialectGroups = {};
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            const dialectList = Object.keys(dialectCounts);
+            dialectList.forEach((dialect, index) => {
+                const angle = (index / dialectList.length) * 2 * Math.PI;
+                const radius = dialectList.length > 6 ? 180 : 140;
+                dialectGroups[dialect] = {
+                    x: centerX + Math.cos(angle) * radius,
+                    y: centerY + Math.sin(angle) * radius
+                };
+            });
+            
+            flowData.forEach((flow, index) => {
+                const sourceId = `source_${flow.source.name}`;
+                const targetId = `target_${flow.target.name}_${index}`;
+                
+                if (!nodeSet.has(sourceId)) {
+                    const totalValue = dialectCounts[flow.source.name];
+                    const nodeRadius = 18 + Math.sqrt(totalValue / maxSales) * 35;
+                    const groupPos = dialectGroups[flow.source.name] || { x: centerX, y: centerY };
+                    
+                    nodes.push({
+                        id: sourceId,
+                        name: flow.source.name,
+                        type: 'dialect',
+                        x: groupPos.x + (Math.random() - 0.5) * 20,
+                        y: groupPos.y + (Math.random() - 0.5) * 20,
+                        fx: groupPos.x,
+                        fy: groupPos.y,
+                        radius: nodeRadius,
+                        value: totalValue,
+                        color: colorMap[flow.source.name] || '#8892b0',
+                        isGroup: true
+                    });
+                    nodeSet.add(sourceId);
+                }
+                
+                const cityTotalValue = cityCounts[flow.target.name];
+                const nodeRadius = 6 + Math.sqrt(cityTotalValue / maxSales) * 18;
+                const sourceNode = nodes.find(n => n.id === sourceId);
+                const groupPos = sourceNode ? { x: sourceNode.x, y: sourceNode.y } : { x: centerX, y: centerY };
+                const angle = (Math.random() * 0.6 + 0.2) * Math.PI + (index % 8) * 0.25 * Math.PI;
+                const distance = (sourceNode ? sourceNode.radius : 50) + nodeRadius + 20 + Math.random() * 30;
+                
+                nodes.push({
+                    id: targetId,
+                    name: flow.target.name,
+                    type: 'city',
+                    x: groupPos.x + Math.cos(angle) * distance,
+                    y: groupPos.y + Math.sin(angle) * distance,
+                    radius: nodeRadius,
+                    value: flow.value,
+                    color: colorMap[flow.source.name] || colorMap[flow.target.province] || colorMap[flow.target.name] || '#a8e6cf',
+                    groupId: sourceId,
+                    groupX: groupPos.x,
+                    groupY: groupPos.y
+                });
+                nodeSet.add(targetId);
+                
+                links.push({
+                    source: sourceId,
+                    target: targetId,
+                    value: flow.value,
+                    anchor_name: flow.anchor_name,
+                    product_name: flow.product_name,
+                    platform: flow.platform,
+                    source_name: flow.source.name,
+                    target_name: flow.target.name
+                });
+            });
+            
+            const nodeMap = new Map(nodes.map(n => [n.id, n]));
+            
+            const linkElements = g.append('g')
+                .attr('class', 'links')
+                .selectAll('path')
+                .data(links)
+                .enter()
+                .append('path')
+                .attr('class', 'link')
+                .attr('stroke', d => {
+                    const sourceNode = nodeMap.get(d.source);
+                    return sourceNode ? sourceNode.color : '#00d9ff';
+                })
+                .attr('stroke-width', d => Math.max(0.5, 1 + Math.sqrt(d.value / maxSales) * 4))
+                .attr('stroke-opacity', 0)
+                .on('mouseover', function(event, d) {
+                    d3.select(this).attr('stroke-opacity', 1).attr('stroke-width', Math.max(3, 4 + Math.sqrt(d.value / maxSales) * 6));
+                    showTooltip(event, `
+                        <div class="tooltip-title">${d.anchor_name}</div>
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">方言区</span>
+                            <span class="tooltip-value">${d.source_name}</span>
+                        </div>
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">产地</span>
+                            <span class="tooltip-value">${d.target_name}</span>
+                        </div>
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">商品</span>
+                            <span class="tooltip-value">${d.product_name}</span>
+                        </div>
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">销量</span>
+                            <span class="tooltip-value">${formatNumber(d.value)}</span>
+                        </div>
+                    `);
+                })
+                .on('mouseout', function(event, d) {
+                    d3.select(this).attr('stroke-opacity', 0.35).attr('stroke-width', Math.max(0.5, 1 + Math.sqrt(d.value / maxSales) * 4));
+                    hideTooltip();
+                });
+            
+            linkElements.transition()
+                .duration(2000)
+                .delay((d, i) => i * 2)
+                .attr('stroke-opacity', 0.35);
+            
+            const nodeGroups = g.append('g')
+                .attr('class', 'nodes')
+                .selectAll('g')
+                .data(nodes)
+                .enter()
+                .append('g')
+                .attr('class', 'node')
+                .attr('transform', d => `translate(${d.x},${d.y})`)
+                .style('opacity', 0)
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended));
+            
+            nodeGroups.transition()
+                .duration(1800)
+                .delay((d, i) => d.isGroup ? 0 : i * 2)
+                .style('opacity', 1);
+            
+            nodeGroups.append('circle')
+                .attr('r', 0)
+                .attr('fill', d => d.color)
+                .attr('stroke', d => d.isGroup ? '#fff' : 'none')
+                .attr('stroke-width', d => d.isGroup ? 2 : 0)
+                .attr('opacity', d => d.isGroup ? 0.9 : 0.75)
+                .style('cursor', 'pointer')
+                .on('click', function(event, d) {
+                    event.stopPropagation();
+                    handleNodeClick(d);
+                })
+                .transition()
+                .duration(2000)
+                .attr('r', d => d.radius);
+            
+            nodeGroups.filter(d => d.isGroup).append('text')
+                .attr('dy', d => -d.radius - 8)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#fff')
+                .attr('font-weight', 'bold')
+                .attr('font-size', '12px')
+                .text(d => d.name)
+                .style('cursor', 'pointer')
+                .style('opacity', 0)
+                .on('click', function(event, d) {
+                    event.stopPropagation();
+                    handleNodeClick(d);
+                })
+                .transition()
+                .duration(2000)
+                .delay(1000)
+                .style('opacity', 1);
+            
+            nodeGroups.filter(d => d.isGroup).append('text')
+                .attr('dy', d => d.radius + 16)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#00ff88')
+                .attr('font-size', '10px')
+                .attr('font-weight', 'bold')
+                .text(d => formatNumber(d.value))
+                .style('cursor', 'pointer')
+                .style('opacity', 0)
+                .on('click', function(event, d) {
+                    event.stopPropagation();
+                    handleNodeClick(d);
+                })
+                .transition()
+                .duration(2000)
+                .delay(1200)
+                .style('opacity', 1);
+            
+            simulation = d3.forceSimulation(nodes)
+                .force('link', d3.forceLink(links).id(d => d.id).distance(d => {
+                    const sourceNode = nodeMap.get(d.source);
+                    const targetNode = nodeMap.get(d.target);
+                    if (sourceNode && targetNode) {
+                        return sourceNode.radius + targetNode.radius + 15;
+                    }
+                    return 60;
+                }).strength(0.6))
+                .force('charge', d3.forceManyBody().strength(d => d.isGroup ? -600 : -100))
+                .force('center', d3.forceCenter(centerX, centerY))
+                .force('collision', d3.forceCollide().radius(d => d.radius + 8).iterations(8))
+                .force('x', d3.forceX(d => d.isGroup ? d.fx : d.groupX).strength(d => d.isGroup ? 0.9 : 0.08))
+                .force('y', d3.forceY(d => d.isGroup ? d.fy : d.groupY).strength(d => d.isGroup ? 0.9 : 0.08))
+                .alphaDecay(0.015)
+                .velocityDecay(0.3)
+                .on('tick', ticked);
+            
+            let tickCount = 0;
+            function ticked() {
+                tickCount++;
+                linkElements.attr('d', d => {
+                    const sourceNode = nodeMap.get(d.source);
+                    const targetNode = nodeMap.get(d.target);
+                    if (!sourceNode || !targetNode) return '';
+                    
+                    const dx = targetNode.x - sourceNode.x;
+                    const dy = targetNode.y - sourceNode.y;
+                    const midX = (sourceNode.x + targetNode.x) / 2 + dy * 0.15;
+                    const midY = (sourceNode.y + targetNode.y) / 2 - dx * 0.15;
+                    
+                    return `M${sourceNode.x},${sourceNode.y}Q${midX},${midY} ${targetNode.x},${targetNode.y}`;
+                });
+                
+                nodeGroups.attr('transform', d => `translate(${d.x},${d.y})`);
+            }
+            
+            function dragstarted(event, d) {
+                if (!d.isGroup) {
+                    if (!event.active) simulation.alphaTarget(0.3).restart();
+                    d.fx = d.x;
+                    d.fy = d.y;
+                }
+            }
+            
+            function dragged(event, d) {
+                if (!d.isGroup) {
+                    d.fx = event.x;
+                    d.fy = event.y;
+                }
+            }
+            
+            function dragended(event, d) {
+                if (!d.isGroup) {
+                    if (!event.active) simulation.alphaTarget(0);
+                    d.fx = null;
+                    d.fy = null;
+                }
+            }
+        }
+
+        function zoomIn() {
+            if (svg && zoom) {
+                svg.transition().duration(300).call(zoom.scaleBy, 1.3);
+            }
+        }
+
+        function zoomOut() {
+            if (svg && zoom) {
+                svg.transition().duration(300).call(zoom.scaleBy, 0.7);
+            }
+        }
+
+        function resetZoom() {
+            if (svg && zoom) {
+                svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity);
+            }
+        }
+
+        function renderMap(flowData) {
+            const container = document.getElementById('mapContainer');
+            container.style.display = 'block';
+            
+            if (!leafletMap) {
+                leafletMap = L.map('mapContainer', {
+                    center: [35, 105],
+                    zoom: 4,
+                    zoomControl: true
+                });
+                
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 18
+                }).addTo(leafletMap);
+                
+                const flowSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                flowSvg.className = 'flow-svg';
+                container.appendChild(flowSvg);
+            }
+            
+            mapPolylines.forEach(line => line.remove());
+            mapMarkers.forEach(marker => marker.remove());
+            mapPolylines = [];
+            mapMarkers = [];
+            
+            const flowSvg = container.querySelector('.flow-svg');
+            if (flowSvg) {
+                flowSvg.innerHTML = '';
+            }
+            
+            const maxValue = Math.max(...flowData.map(d => d.value));
+            const displayedFlows = flowData.slice(0, 200);
+            
+            displayedFlows.forEach((flow, index) => {
+                const sourceLng = flow.source.lng || 116;
+                const sourceLat = flow.source.lat || 39;
+                const targetLng = flow.target.lng || sourceLng;
+                const targetLat = flow.target.lat || sourceLat;
+                
+                const lineWeight = Math.max(1, Math.min(5, 1 + (flow.value / maxValue) * 4));
+                const color = colorMap[flow.source.name] || '#00d9ff';
+                
+                const sourcePoint = leafletMap.latLngToContainerPoint([sourceLat, sourceLng]);
+                const targetPoint = leafletMap.latLngToContainerPoint([targetLat, targetLng]);
+                
+                const midX = (sourcePoint.x + targetPoint.x) / 2;
+                const midY = (sourcePoint.y + targetPoint.y) / 2 - Math.min(80, Math.abs(targetPoint.x - sourcePoint.x) * 0.3);
+                
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', `M${sourcePoint.x},${sourcePoint.y} Q${midX},${midY} ${targetPoint.x},${targetPoint.y}`);
+                path.setAttribute('stroke', color);
+                path.setAttribute('stroke-width', lineWeight);
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke-opacity', '0.6');
+                path.style.cursor = 'pointer';
+                path.style.pointerEvents = 'auto';
+                
+                path.addEventListener('click', () => {
+                    showAnchorDetail(flow.anchor_id);
+                });
+                
+                flowSvg.appendChild(path);
+                mapPolylines.push(path);
+                
+                const sourceIcon = L.divIcon({
+                    className: 'custom-marker-wrapper',
+                    html: `<div class="custom-marker" style="border-left: 3px solid ${color};">
+                        <div style="font-weight: 600; color: ${color};">${flow.source.name}</div>
+                        <div style="font-size: 10px; color: #8892b0;">方言区</div>
+                    </div>`,
+                    iconSize: [100, 40],
+                    iconAnchor: [50, 40]
+                });
+                
+                const sourceMarker = L.marker([sourceLat, sourceLng], { icon: sourceIcon }).addTo(leafletMap);
+                mapMarkers.push(sourceMarker);
+                
+                const targetIcon = L.divIcon({
+                    className: 'custom-marker-wrapper',
+                    html: `<div class="custom-marker" style="border-left: 3px solid #4ecdc4;">
+                        <div style="font-weight: 600; color: #4ecdc4;">${flow.target.name}</div>
+                        <div style="font-size: 10px; color: #8892b0;">${flow.product_name}</div>
+                    </div>`,
+                    iconSize: [100, 40],
+                    iconAnchor: [50, 40]
+                });
+                
+                const targetMarker = L.marker([targetLat, targetLng], { icon: targetIcon }).addTo(leafletMap);
+                mapMarkers.push(targetMarker);
+            });
+            
+            function updatePaths() {
+                if (!leafletMap || !flowSvg) return;
+                displayedFlows.forEach((flow, index) => {
+                    if (mapPolylines[index]) {
+                        const sourcePoint = leafletMap.latLngToContainerPoint([flow.source.lat, flow.source.lng]);
+                        const targetPoint = leafletMap.latLngToContainerPoint([flow.target.lat, flow.target.lng]);
+                        const midX = (sourcePoint.x + targetPoint.x) / 2;
+                        const midY = (sourcePoint.y + targetPoint.y) / 2 - Math.min(80, Math.abs(targetPoint.x - sourcePoint.x) * 0.3);
+                        mapPolylines[index].setAttribute('d', `M${sourcePoint.x},${sourcePoint.y} Q${midX},${midY} ${targetPoint.x},${targetPoint.y}`);
+                    }
+                });
+            }
+            
+            leafletMap.on('move', updatePaths);
+            leafletMap.on('zoom', updatePaths);
+        }
+
+        function renderStats(stats) {
+            document.getElementById('totalAnchors').textContent = stats.total_anchors;
+            document.getElementById('totalSales').textContent = formatNumber(stats.total_sales);
+            
+            const list = document.getElementById('dialectList');
+            list.innerHTML = '';
+            
+            Object.entries(stats.dialect_distribution)
+                .sort((a, b) => b[1] - a[1])
+                .forEach(([dialect, count]) => {
+                    const div = document.createElement('div');
+                    div.className = 'dialect-item';
+                    div.innerHTML = `
+                        <div class="dialect-name">
+                            <div class="dialect-dot" style="background: ${colorMap[dialect] || '#8892b0'}"></div>
+                            <span>${dialect}</span>
+                        </div>
+                        <span class="dialect-count">${count}人</span>
+                    `;
+                    list.appendChild(div);
+                });
+        }
+
+        function renderFlowList(flowData) {
+            const list = document.getElementById('flowList');
+            list.innerHTML = '';
+            
+            const displayData = flowData.slice(0, 20);
+            
+            displayData.forEach(flow => {
+                const div = document.createElement('div');
+                div.className = 'flow-item';
+                div.innerHTML = `
+                    <div class="flow-header">
+                        <span class="flow-anchor">${flow.anchor_name}</span>
+                        <span class="platform-tag platform-${flow.platform === '抖音' ? 'douyin' : 'other'}">${flow.platform}</span>
+                    </div>
+                    <div class="flow-route">
+                        <span class="flow-source">${flow.source.name}</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-target">${flow.target.name}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span class="flow-product">📦 ${flow.product_name}</span>
+                        <span class="flow-sales">${formatNumber(flow.value)}</span>
+                    </div>
+                `;
+                div.onclick = () => showAnchorDetail(flow.anchor_id);
+                list.appendChild(div);
+            });
+        }
+
+        function renderLegend() {
+            const panel = document.getElementById('legendPanel');
+            const dialects = Object.keys(colorMap).slice(0, 12);
+            
+            panel.innerHTML = dialects.map(d => `
+                <div class="legend-item">
+                    <div class="legend-color" style="background: ${colorMap[d]}"></div>
+                    <span class="legend-text">${d}</span>
+                </div>
+            `).join('');
+        }
+
+        async function handleNodeClick(node) {
+            const flows = allFlowData.filter(f => 
+                f.source.name === node.name || f.target.name === node.name
+            );
+            
+            if (flows.length > 0) {
+                await showAnchorDetail(flows[0].anchor_id);
+            } else if (node.isGroup) {
+                alert(`${node.name}方言区共有${allFlowData.filter(f => f.source.name === node.name).length}条流向数据`);
+            }
+        }
+
+        async function showAnchorDetail(anchorId) {
+            if (anchorDetails[anchorId]) {
+                renderModal(anchorDetails[anchorId]);
+                return;
+            }
+            
+            document.getElementById('chartLoading').style.display = 'block';
+            
+            try {
+                const res = await fetch(`/api/anchor-detail/${anchorId}?mode=${currentMode}`);
+                const data = await res.json();
+                anchorDetails[anchorId] = data;
+                renderModal(data);
+            } catch (e) {
+                console.error('获取主播详情失败:', e);
+            } finally {
+                document.getElementById('chartLoading').style.display = 'none';
+            }
+        }
+
+        function renderModal(data) {
+            document.getElementById('modalTitle').textContent = data.anchor_name;
+            
+            document.getElementById('modalGrid').innerHTML = `
+                <div class="detail-item">
+                    <div class="detail-item-label">平台</div>
+                    <div class="detail-item-value">${data.platform}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">籍贯</div>
+                    <div class="detail-item-value">${data.hometown}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">使用方言</div>
+                    <div class="detail-item-value" style="color: ${colorMap[data.dialect] || '#fff'}">${data.dialect}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">粉丝数</div>
+                    <div class="detail-item-value">${formatNumber(data.followers)}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">总销量</div>
+                    <div class="detail-item-value">${formatNumber(data.total_sales)}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">商品数</div>
+                    <div class="detail-item-value">${data.products_count}</div>
+                </div>
+            `;
+            
+            const productsHtml = (data.products || []).slice(0, 5).map(p => `
+                <div class="product-item">
+                    <div class="product-info">
+                        <div class="product-name">${p.product_name}</div>
+                        <div class="product-origin">产地: ${p.origin}</div>
+                    </div>
+                    <div class="product-sales">${formatNumber(p.sales_volume)}</div>
+                </div>
+            `).join('');
+            
+            document.getElementById('productList').innerHTML = productsHtml || '<div style="color: #8892b0; padding: 10px; text-align: center;">暂无商品数据</div>';
+            
+            document.getElementById('subtitleSample').innerHTML = `
+                <strong>🗣️ 方言样本:</strong><br>
+                "${data.subtitle_sample || '暂无'}"
+            `;
+            
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+
+        function showTooltip(event, html) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.innerHTML = html;
+            
+            let x = event.pageX + 15;
+            let y = event.pageY - 10;
+            
+            if (x + 220 > window.innerWidth) x = event.pageX - 220;
+            if (y + 150 > window.innerHeight) y = event.pageY - 160;
+            
+            tooltip.style.left = x + 'px';
+            tooltip.style.top = y + 'px';
+            tooltip.style.opacity = '1';
+        }
+
+        function hideTooltip() {
+            document.getElementById('tooltip').style.opacity = '0';
+        }
+
+        function formatNumber(num) {
+            if (num >= 10000000) {
+                return (num / 10000000).toFixed(1) + 'kw';
+            }
+            if (num >= 10000) {
+                return (num / 10000).toFixed(1) + 'w';
+            }
+            return num.toLocaleString();
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll('[data-platform]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('[data-platform]').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentPlatform = this.dataset.platform;
+                    loadData();
+                });
+            });
+            
+            document.querySelectorAll('[data-sort]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('[data-sort]').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentSort = this.dataset.sort;
+                    loadData();
+                });
+            });
+            
+            document.querySelectorAll('[data-mode]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentMode = this.dataset.mode;
+                    anchorDetails = {};
+                    loadData();
+                });
+            });
+            
+            document.querySelectorAll('[data-view]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentView = this.dataset.view;
+                    toggleView();
+                });
+            });
+            
+            document.getElementById('detailModal').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeModal();
+            });
+        }
+
+        function toggleView() {
+            const chartContainer = document.getElementById('chartContainer');
+            const mapContainer = document.getElementById('mapContainer');
+            
+            if (currentView === 'flow') {
+                chartContainer.style.display = 'block';
+                mapContainer.style.display = 'none';
+                renderForceDirectedChart(allFlowData);
+            } else {
+                chartContainer.style.display = 'none';
+                mapContainer.style.display = 'block';
+                renderMap(allFlowData);
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

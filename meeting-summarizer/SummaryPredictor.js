@@ -157,11 +157,13 @@ ${text}
         const scoredSentences = this.scoreSentences(sentences, text);
         const topSentences = scoredSentences
             .sort((a, b) => b.score - a.score)
-            .slice(0, Math.ceil(sentences.length * 0.3))
+            .slice(0, Math.ceil(sentences.length * 0.4))
             .sort((a, b) => a.index - b.index)
             .map(s => s.text);
 
         let summary = topSentences.join('。');
+        
+        summary = this.cleanupSummary(summary);
         
         if (summary.length > maxLength) {
             summary = summary.substring(0, maxLength - 3) + '...';
@@ -176,6 +178,18 @@ ${text}
         }
 
         return summary;
+    }
+
+    cleanupSummary(text) {
+        let cleaned = text;
+        
+        cleaned = cleaned.replace(/^[，,。.!?！？；;：:\s]+/, '');
+        cleaned = cleaned.replace(/\s+/g, ' ');
+        cleaned = cleaned.replace(/\s*[，,。.！!？?；;：:]\s*/g, match => match.trim());
+        cleaned = cleaned.replace(/[，,]+/g, '，');
+        cleaned = cleaned.replace(/[。.]+/g, '。');
+        
+        return cleaned.trim();
     }
 
     splitIntoSentences(text) {

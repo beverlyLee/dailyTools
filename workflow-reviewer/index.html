@@ -8,81 +8,241 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="title">验证工作流</h1>
-        <p class="subtitle">AI 产出物验收 · 归因诊断 · 下一轮 Prompt</p>
-
-        <!-- 输入区 -->
-        <div class="card" id="inputCard">
-            <h2 class="card-title">提交验收</h2>
-
-            <div class="form-group">
-                <label for="projectName">工程名称</label>
-                <input type="text" id="projectName" placeholder="如：braille-ocr" autocomplete="off">
+        <div class="header-row">
+            <div>
+                <h1 class="title">验证工作流</h1>
+                <p class="subtitle">AI 产出物验收 · 归因诊断 · 下一轮 Prompt</p>
             </div>
-
-            <div class="form-group">
-                <label for="requirement">核心需求</label>
-                <textarea id="requirement" rows="3" placeholder="新项目简述目标，续作写"需求同前""></textarea>
+            <div class="header-actions">
+                <button id="saveDataBtn" class="icon-btn" title="保存当前项目数据">💾</button>
+                <button id="clearDataBtn" class="icon-btn" title="清除所有存储数据">🗑️</button>
+                <button id="testModeBtn" class="icon-btn" title="切换浏览器点验模式">🔍</button>
+                <button id="configBtn" class="icon-btn" title="模型配置">⚙️</button>
             </div>
-
-            <div class="form-row">
-                <div class="form-group half">
-                    <label for="roundNum">当前轮次</label>
-                    <input type="number" id="roundNum" value="1" min="1" max="99">
-                </div>
-                <div class="form-group half">
-                    <label for="stage">阶段描述</label>
-                    <input type="text" id="stage" placeholder="如：物理碰撞检测" autocomplete="off">
-                </div>
+        </div>
+        
+        <div class="tabs-container">
+            <div class="tabs" id="tabsList">
             </div>
-
-            <div class="form-group">
-                <label>运行结果截图 <span class="hint">（拖拽或点击上传，支持多张）</span></label>
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-placeholder" id="uploadPlaceholder">
-                        <span class="upload-icon">+</span>
-                        <span>拖拽截图到此处，或点击选择文件</span>
-                    </div>
-                    <div class="preview-grid" id="previewGrid"></div>
-                    <input type="file" id="fileInput" multiple accept="image/*" hidden>
-                </div>
-                <div class="auto-screenshot">
-                    <input type="text" id="autoScreenshotUrl" placeholder="预留：输入项目运行地址自动截图" disabled>
-                    <button class="btn btn-ghost btn-sm" id="autoScreenshotBtn" disabled title="功能开发中">自动截图</button>
-                </div>
-            </div>
-
-            <button class="btn btn-primary" id="submitBtn" disabled>
-                <span class="btn-text">提交验收</span>
-                <span class="btn-loading" hidden>验收中...</span>
+            <button id="newTabBtn" class="new-tab-btn" title="新建项目">
+                <span class="plus">+</span>
             </button>
         </div>
-
-        <!-- 结果区 -->
-        <div class="card" id="resultCard" hidden>
-            <div class="result-header">
-                <h2 class="card-title">验收结果</h2>
-                <div class="result-meta" id="resultMeta"></div>
+        
+        <div class="test-mode-panel" id="testModePanel" style="display: none;">
+            <div class="panel-header">
+                <h3>🔍 浏览器点验模式</h3>
+                <button id="closeTestModeBtn" class="icon-btn">&times;</button>
             </div>
-            <div class="result-body" id="resultBody"></div>
-            <div class="result-actions">
-                <button class="btn btn-secondary" id="copyPromptBtn">复制下一轮 Prompt</button>
-                <button class="btn btn-ghost" id="newRoundBtn">开始新一轮</button>
+            
+            <div class="panel-content">
+                <div class="form-group">
+                    <label>生成的脚本命令</label>
+                    <textarea id="testScriptOutput" rows="8" readonly placeholder="请填写工程名称、需求和阶段描述..."></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button id="copyTestScriptBtn" class="btn btn-primary">📋 复制脚本</button>
+                    <button id="regenerateTestScriptBtn" class="btn btn-secondary">🔄 重新生成</button>
+                    <button id="executeTestScriptBtn" class="btn btn-success">▶️ 执行脚本</button>
+                </div>
             </div>
         </div>
 
-        <!-- 历史记录 -->
-        <div class="card" id="historyCard" hidden>
-            <div class="history-header">
-                <h2 class="card-title">历史记录</h2>
-                <button class="btn btn-ghost btn-sm" id="clearHistoryBtn">清空</button>
+        <div class="config-panel" id="configPanel" style="display: none;">
+            <div class="config-header">
+                <h3>系统配置</h3>
+                <button id="closeConfigBtn" class="icon-btn">&times;</button>
             </div>
-            <div id="historyList"></div>
+            
+            <div class="config-section">
+                <h4>🤖 火山引擎模型</h4>
+                <div class="form-group">
+                    <label>API Key <span class="required">*</span></label>
+                    <input type="password" id="volcApiKey" placeholder="请输入火山引擎 API Key">
+                    <small>从火山引擎控制台获取的 API Key</small>
+                </div>
+                <div class="form-group">
+                    <label>Base URL <span class="required">*</span></label>
+                    <input type="text" id="volcBaseUrl" value="https://ark.cn-beijing.volces.com/api/v3">
+                    <small>API 基础地址</small>
+                </div>
+                <div class="form-group">
+                    <label>模型名称 (Model) <span class="required">*</span></label>
+                    <input type="text" id="volcModel" placeholder="如：doubao-seed-2-0-code-preview-260215">
+                    <small>模型名称，例如：doubao-seed-2-0-code-preview-260215</small>
+                </div>
+                
+                <div class="form-actions test-section">
+                    <button id="testConfigBtn" class="test-connect-btn">
+                        <span>🔍 测试连接</span>
+                    </button>
+                </div>
+                <div class="test-result" id="testResult" style="display: none;"></div>
+            </div>
+            
+            <div class="config-section">
+                <h4>📝 系统提示词</h4>
+                <div class="form-group">
+                    <label>System Prompt</label>
+                    <textarea id="systemPrompt" rows="12" placeholder="系统提示词，定义大模型的角色和输出格式"></textarea>
+                    <small>定义验收角色、输出格式、验收标准等。修改后点击保存。</small>
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <h4>📋 用户提示词模板</h4>
+                <div class="form-group">
+                    <label>User Prompt Template</label>
+                    <textarea id="userPromptTemplate" rows="6" placeholder="用户提示词模板"></textarea>
+                    <small>可用变量：{project_name}、{requirement_text}、{round_num}、{stage_info}</small>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button id="resetPromptsBtn" class="btn btn-secondary">🔄 重置默认</button>
+                <button id="saveConfigBtn" class="btn btn-primary">💾 保存配置</button>
+            </div>
+        </div>
+
+        <div class="help-section">
+            <div class="help-title">📋 使用说明</div>
+            <div class="help-steps">
+                <strong>1. 配置模型</strong>：点击右上角 ⚙️ 按钮，填写火山引擎 API Key、Base URL 和模型名称，点击测试连接验证配置。<br>
+                <strong>2. 填写信息</strong>：输入工程名称、核心需求、当前轮次和阶段描述。<br>
+                <strong>3. 上传截图</strong>：拖拽或点击上传运行结果截图（支持多张）。<br>
+                <strong>4. 提交验收</strong>：当需求、截图和配置都完整时，「提交验收」按钮将自动启用。<br>
+                <br>
+                <strong>⚠️ 注意事项：</strong><br>
+                - 提交验收前请确保后端服务已启动（运行 <code>python server.py</code>）<br>
+                - API Key、Base URL 和模型名称必须完整配置<br>
+                - 至少上传一张截图才能提交验收
+            </div>
+        </div>
+        
+        <div id="workspace">
         </div>
     </div>
 
     <div class="toast" id="toast" hidden></div>
 
-    <script src="main.js"></script>
+    <template id="projectTemplate">
+        <div class="project-content" style="display: none;">
+            <div class="card">
+                <h2 class="card-title">提交验收</h2>
+
+                <div class="form-group">
+                    <label for="projectName">工程名称</label>
+                    <input type="text" class="field-projectName" placeholder="如：braille-ocr" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label for="requirement">核心需求</label>
+                    <textarea class="field-requirement" rows="3" placeholder="新项目简述目标，续作写"需求同前""></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="roundNum">当前轮次</label>
+                        <input type="number" class="field-roundNum" value="1" min="1" max="99">
+                    </div>
+                    <div class="form-group half">
+                        <label for="stage">阶段描述</label>
+                        <input type="text" class="field-stage" placeholder="如：物理碰撞检测" autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>运行结果截图 <span class="hint">（拖拽或点击上传，支持多张）</span></label>
+                    <div class="upload-area field-uploadArea">
+                        <div class="upload-placeholder field-uploadPlaceholder">
+                            <span class="upload-icon">+</span>
+                            <span>拖拽截图到此处，或点击选择文件</span>
+                        </div>
+                        <div class="preview-grid field-previewGrid"></div>
+                        <input type="file" class="field-fileInput" multiple accept="image/*" hidden>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>用户建议 <span class="hint">（可选，用于补充验收关注点）</span></label>
+                    <textarea class="field-userAdvice" rows="3" placeholder="如：重点关注移动端适配、性能是否流畅、按钮样式是否统一等"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>本轮过程 <span class="hint">（可选，记录本轮开发过程，用于测试验收）</span></label>
+                    <textarea class="field-currentProcess" rows="5" placeholder="记录本轮的开发过程，如：修改了哪些文件、实现了哪些功能、遇到的问题等..."></textarea>
+                </div>
+
+                <div class="card run-project-card">
+                    <h3 class="card-title">🚀 运行项目</h3>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>工程根路径</label>
+                            <input type="text" class="field-projectPath" placeholder="/Users/liboyang/trae/dailyTools" autocomplete="off">
+                            <small>默认值：当前 dailyTools 目录</small>
+                        </div>
+                        <div class="form-group half">
+                            <label>端口号</label>
+                            <input type="number" class="field-port" placeholder="8980" value="8980" min="1024" max="65535" autocomplete="off">
+                            <small>默认值：8980</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>启动脚本配置 <span class="hint">（可选，不填则自动检测）</span></label>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="text" class="field-startupScript" placeholder="整合脚本 (如: start.sh)" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <input type="text" class="field-backendScript" placeholder="后端脚本 (如: start-backend.sh)" autocomplete="off">
+                            </div>
+                            <div class="form-group half">
+                                <input type="text" class="field-frontendScript" placeholder="前端脚本 (如: start-frontend.sh)" autocomplete="off">
+                            </div>
+                        </div>
+                        <small>优先级：整合脚本 > 前后端脚本 > 自动检测 > dev.py > 静态服务</small>
+                    </div>
+                    <div class="form-row">
+                        <button class="btn btn-secondary field-runProjectBtn">▶️ 启动项目</button>
+                        <button class="btn btn-ghost field-stopProjectBtn" disabled>⏹️ 停止项目</button>
+                    </div>
+                    <div class="run-status" id="runStatus" hidden></div>
+                    <div class="run-output" id="runOutput" hidden></div>
+                </div>
+
+                <button class="btn btn-primary field-submitBtn" disabled>
+                    <span class="btn-text">提交验收</span>
+                    <span class="btn-loading" hidden>验收中...</span>
+                </button>
+            </div>
+
+            <div class="card field-resultCard" hidden>
+                <div class="result-header">
+                    <h2 class="card-title">验收结果</h2>
+                    <div class="result-meta field-resultMeta"></div>
+                </div>
+                <div class="result-body field-resultBody"></div>
+                <div class="result-actions">
+                    <button class="btn btn-secondary field-copyPromptBtn">复制下一轮 Prompt</button>
+                    <button class="btn btn-success field-syncFeishuBtn">📄 同步到飞书文档</button>
+                    <button class="btn btn-ghost field-newRoundBtn">开始新一轮</button>
+                </div>
+            </div>
+
+            <div class="card field-historyCard" hidden>
+                <div class="history-header">
+                    <h2 class="card-title">历史记录</h2>
+                    <button class="btn btn-ghost btn-sm field-clearHistoryBtn">清空</button>
+                </div>
+                <div class="field-historyList"></div>
+            </div>
+        </div>
+    </template>
+
+    <script src="main.js?v=20260527_3"></script>
+    <script src="test_functions.js"></script>
 </body>
 </html>

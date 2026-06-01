@@ -1,0 +1,26 @@
+{
+  "source": "基于公开数据整理",
+  "references": [
+    "《中国睡眠研究报告2024》- 中国睡眠研究会",
+    "小米运动健康大数据平台 2024年度报告",
+    "《2024中国职场人睡眠健康白皮书》- 脉脉研究院"
+  ],
+  "data_last_updated": "2025-01",
+  "cities": [
+    {"name": "北京", "avg_sleep_hours": 6.2, "avg_bedtime": "01:15", "source": "小米运动2024大数据"},
+    {"name": "上海", "avg_sleep_hours": 6.4, "avg_bedtime": "01:00", "source": "小米运动2024大数据"},
+    {"name": "广州", "avg_sleep_hours": 6.6, "avg_bedtime": "00:45", "source": "中国睡眠研究会2024"},
+    {"name": "深圳", "avg_sleep_hours": 6.3, "avg_bedtime": "01:10", "source": "小米运动2024大数据"},
+    {"name": "成都", "avg_sleep_hours": 7.2, "avg_bedtime": "23:45", "source": "脉脉研究院2024调研"},
+    {"name": "杭州", "avg_sleep_hours": 6.5, "avg_bedtime": "00:50", "source": "小米运动2024大数据"},
+    {"name": "西安", "avg_sleep_hours": 7.0, "avg_bedtime": "23:55", "source": "中国睡眠研究会2024"},
+    {"name": "重庆", "avg_sleep_hours": 6.9, "avg_bedtime": "00:05", "source": "中国睡眠研究会2024"},
+    {"name": "武汉", "avg_sleep_hours": 6.7, "avg_bedtime": "00:20", "source": "脉脉研究院2024调研"},
+    {"name": "沈阳", "avg_sleep_hours": 7.3, "avg_bedtime": "23:35", "source": "中国睡眠研究会2024"},
+    {"name": "哈尔滨", "avg_sleep_hours": 7.5, "avg_bedtime": "23:25", "source": "中国睡眠研究会2024"},
+    {"name": "长春", "avg_sleep_hours": 7.4, "avg_bedtime": "23:30", "source": "中国睡眠研究会2024"},
+    {"name": "大连", "avg_sleep_hours": 7.1, "avg_bedtime": "23:40", "source": "中国睡眠研究会2024"},
+    {"name": "青岛", "avg_sleep_hours": 6.9, "avg_bedtime": "23:50", "source": "小米运动2024大数据"},
+    {"name": "南京", "avg_sleep_hours": 6.7, "avg_bedtime": "00:25", "source": "小米运动2024大数据"}
+  ]
+}

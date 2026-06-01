@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>量子纠缠可视化</title>
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+    <div class="info-panel">
+      <h1>量子纠缠可视化</h1>
+      <p>点击左侧粒子 A 改变其自旋状态</p>
+      <p class="subtext">观察右侧粒子 B 如何瞬间同步为互补色</p>
+      <div class="status">
+        <span>粒子 A: <span id="status-a" class="color-dot"></span></span>
+        <span>粒子 B: <span id="status-b" class="color-dot"></span></span>
+      </div>
+      <p class="hint">"幽灵般的超距作用 —— 爱因斯坦</p>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
