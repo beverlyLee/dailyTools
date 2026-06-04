@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
+
+import mapboxgl from 'mapbox-gl'
 import axios from 'axios'
 
 function App() {
@@ -83,6 +85,7 @@ function App() {
     try {
       setLoadingText('正在加载露营地数据...')
       const response = await axios.get('/api/sites', { timeout: 10000 })
+
       if (response.data.success) {
         setSites(response.data.data)
         return response.data.data
@@ -91,12 +94,14 @@ function App() {
     } catch (error) {
       console.error('获取露营地数据失败:', error)
       throw new Error('加载露营地数据失败')
+
     }
   }, [])
 
   const fetchStats = useCallback(async () => {
     try {
       const response = await axios.get('/api/stats', { timeout: 5000 })
+
       if (response.data.success) {
         setStats(response.data.data)
       }
@@ -164,6 +169,7 @@ function App() {
     `
   }
 
+
   const addGaodeMarkers = useCallback((AMap, sitesData) => {
     if (!map.current) return
 
@@ -203,6 +209,7 @@ function App() {
   const addLeafletMarkers = useCallback((sitesData) => {
     if (!map.current || !window.L) return
 
+
     markersRef.current.forEach(marker => marker.remove())
     markersRef.current = []
 
@@ -223,6 +230,7 @@ function App() {
 
       marker.on('click', () => {
         setSelectedSite(site)
+
       })
 
       markersRef.current.push(marker)
@@ -437,6 +445,7 @@ function App() {
     window.location.reload()
   }
 
+
   const legendItems = [
     { color: '#22c55e', label: 'S/A 强烈推荐' },
     { color: '#84cc16', label: 'B 推荐' },
@@ -449,6 +458,7 @@ function App() {
       <div className="header">
         <h1>🏕️ 露营地舒适度评估系统</h1>
         <p>基于气象数据和社交媒体的露营地综合评分 {mapProvider === 'leaflet' && '（备用地图）'}</p>
+
       </div>
 
       <div ref={mapContainer} className="map-container" />
@@ -474,6 +484,7 @@ function App() {
       )}
 
       {!loading && !error && stats && (
+
         <div className="stats-panel">
           <p className="stats-title">📈 数据统计</p>
           <div className="stats-item">
@@ -511,6 +522,7 @@ function App() {
           </div>
         </div>
       )}
+
     </div>
   )
 }
