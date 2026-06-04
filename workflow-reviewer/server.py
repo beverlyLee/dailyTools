@@ -952,13 +952,16 @@ async def git_commit(request: GitCommitRequest):
             if match:
                 commit_id = match.group(1)
 
-            if result.returncode != 0 and not commit_id:
-                full_output = output
-                if error_output:
-                    full_output += "\n" + error_output
-                return {"error": "提交失败", "output": full_output, "commit_id": None, "status": 500}
+            if commit_id:
+                return {"success": True, "commit_id": commit_id, "output": output, "status": 200}
 
-            return {"success": True, "commit_id": commit_id, "output": output, "status": 200}
+            if "没有需要提交的更改" in output or "no changes added to commit" in output:
+                return {"success": True, "commit_id": None, "output": output, "status": 200}
+
+            full_output = output
+            if error_output:
+                full_output += "\n" + error_output
+            return {"error": "提交失败", "output": full_output, "commit_id": None, "status": 500}
 
         except subprocess.TimeoutExpired:
             return {"error": "提交超时（120秒）", "status": 500}
