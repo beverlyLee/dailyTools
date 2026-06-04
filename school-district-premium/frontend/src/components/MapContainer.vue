@@ -403,8 +403,10 @@ export default {
 
       if (typeof window !== 'undefined') {
         window.__schoolDistrictTestHooks = {
-          getPolygons: () => polygons.map(p => p.getExtData()),
-          getMarkers: () => circleMarkers.map(m => m.getExtData()),
+          getPolygons: () => polygons,
+          getPolygonData: () => polygons.map(p => p.getExtData()),
+          getMarkers: () => circleMarkers,
+          getMarkerData: () => circleMarkers.map(m => m.getExtData()),
           getCircleMarkers: () => circleMarkers,
           getTextMarkers: () => textMarkers,
           getMap: () => map,

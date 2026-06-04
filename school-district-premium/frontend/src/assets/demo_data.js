@@ -18,11 +18,11 @@ export function generateDemoData() {
       const dLng = (Math.random() - 0.5) * 0.008
       const dLat = (Math.random() - 0.5) * 0.006
       premiums.push({
-        community: `${s.name}周边小区${j + 1}`,
+        community: `${s.school_name}周边小区${j + 1}`,
         unit_price: s.avg_unit_price + Math.round((Math.random() - 0.5) * 16000),
         area_sqm: Math.round(50 + Math.random() * 70),
         age: Math.round(5 + Math.random() * 20),
-        school_name: s.name,
+        school_name: s.school_name,
         premium_pct: Math.round((s.avg_premium_pct + (Math.random() - 0.5) * 10) * 100) / 100,
         lng: Math.round((s.center[0] + dLng) * 1e6) / 1e6,
         lat: Math.round((s.center[1] + dLat) * 1e6) / 1e6,
