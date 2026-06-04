@@ -1,0 +1,200 @@
+[
+  {
+    "id": "S000A7BD6C",
+    "name": "人民广场",
+    "city": "上海",
+    "address": "黄浦区",
+    "longitude": 121.4737,
+    "latitude": 31.2304,
+    "entrances": ["1号口", "2号口", "3号口", "4号口", "5号口", "6号口", "7号口", "8号口"],
+    "lines": ["1号线", "2号线", "8号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "S000A83M61",
+    "name": "陆家嘴",
+    "city": "上海",
+    "address": "浦东新区",
+    "longitude": 121.5027,
+    "latitude": 31.2397,
+    "entrances": ["1号口", "2号口", "3号口", "4号口"],
+    "lines": ["2号线"],
+    "is_transfer": false
+  },
+  {
+    "id": "S000A84U7M",
+    "name": "徐家汇",
+    "city": "上海",
+    "address": "徐汇区",
+    "longitude": 121.4365,
+    "latitude": 31.1982,
+    "entrances": ["1号口", "2号口", "3号口", "4号口", "5号口", "6号口", "7号口", "8号口"],
+    "lines": ["1号线", "9号线", "11号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "S000A84U6V",
+    "name": "静安寺",
+    "city": "上海",
+    "address": "静安区",
+    "longitude": 121.4488,
+    "latitude": 31.2245,
+    "entrances": ["1号口", "2号口", "3号口", "4号口", "5号口"],
+    "lines": ["2号线", "7号线", "14号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "S000A84U9W",
+    "name": "世纪大道",
+    "city": "上海",
+    "address": "浦东新区",
+    "longitude": 121.5273,
+    "latitude": 31.2317,
+    "entrances": ["1号口", "2号口", "3号口", "4号口", "5号口", "6号口", "7号口", "8号口"],
+    "lines": ["2号线", "4号线", "6号线", "9号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "S000A83M5N",
+    "name": "中山公园",
+    "city": "上海",
+    "address": "长宁区",
+    "longitude": 121.4216,
+    "latitude": 31.2203,
+    "entrances": ["1号口", "2号口", "3号口", "4号口", "5号口", "6号口"],
+    "lines": ["2号线", "3号线", "4号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "S000A83L4K",
+    "name": "南京西路",
+    "city": "上海",
+    "address": "静安区",
+    "longitude": 121.4570,
+    "latitude": 31.2327,
+    "entrances": ["1号口", "2号口", "3号口", "4号口"],
+    "lines": ["2号线", "12号线", "13号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "S000A83L3J",
+    "name": "淮海中路",
+    "city": "上海",
+    "address": "黄浦区",
+    "longitude": 121.4681,
+    "latitude": 31.2266,
+    "entrances": ["1号口", "2号口", "3号口", "4号口"],
+    "lines": ["1号线"],
+    "is_transfer": false
+  },
+  {
+    "id": "S000A83M7N",
+    "name": "陕西南路",
+    "city": "上海",
+    "address": "黄浦区/徐汇区",
+    "longitude": 121.4550,
+    "latitude": 31.2185,
+    "entrances": ["1号口", "2号口", "3号口", "4号口"],
+    "lines": ["1号线", "10号线", "12号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "S000A84T2Y",
+    "name": "常熟路",
+    "city": "上海",
+    "address": "徐汇区",
+    "longitude": 121.4501,
+    "latitude": 31.2118,
+    "entrances": ["1号口", "2号口", "3号口", "4号口"],
+    "lines": ["1号线", "7号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "S000A9XYZ1",
+    "name": "莘庄",
+    "city": "上海",
+    "address": "闵行区",
+    "longitude": 121.3864,
+    "latitude": 31.1101,
+    "entrances": ["北出口", "南出口"],
+    "lines": ["1号线", "5号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "S000A9XYZ2",
+    "name": "美兰湖",
+    "city": "上海",
+    "address": "宝山区",
+    "longitude": 121.3521,
+    "latitude": 31.4069,
+    "entrances": ["1号口", "2号口"],
+    "lines": ["7号线"],
+    "is_transfer": false
+  },
+  {
+    "id": "S000A9XYZ3",
+    "name": "嘉定北",
+    "city": "上海",
+    "address": "嘉定区",
+    "longitude": 121.2365,
+    "latitude": 31.3912,
+    "entrances": ["1号口", "2号口"],
+    "lines": ["11号线"],
+    "is_transfer": false
+  },
+  {
+    "id": "S000A9XYZ4",
+    "name": "滴水湖",
+    "city": "上海",
+    "address": "浦东新区",
+    "longitude": 121.9272,
+    "latitude": 30.9098,
+    "entrances": ["1号口", "2号口"],
+    "lines": ["16号线"],
+    "is_transfer": false
+  },
+  {
+    "id": "S000A9XYZ5",
+    "name": "松江新城",
+    "city": "上海",
+    "address": "松江区",
+    "longitude": 121.2235,
+    "latitude": 31.0304,
+    "entrances": ["1号口", "2号口", "3号口", "4号口"],
+    "lines": ["9号线"],
+    "is_transfer": false
+  },
+  {
+    "id": "S000A84U5U",
+    "name": "衡山路",
+    "city": "上海",
+    "address": "徐汇区",
+    "longitude": 121.4436,
+    "latitude": 31.2050,
+    "entrances": ["1号口", "2号口", "3号口", "4号口"],
+    "lines": ["1号线"],
+    "is_transfer": false
+  },
+  {
+    "id": "S000A84U4T",
+    "name": "虹桥火车站",
+    "city": "上海",
+    "address": "闵行区",
+    "longitude": 121.3214,
+    "latitude": 31.1944,
+    "entrances": ["1号口", "2号口", "3号口", "4号口", "5号口", "6号口"],
+    "lines": ["2号线", "10号线", "17号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "S000A83M4M",
+    "name": "上海火车站",
+    "city": "上海",
+    "address": "静安区",
+    "longitude": 121.4511,
+    "latitude": 31.2513,
+    "entrances": ["1号口", "2号口", "3号口", "4号口", "5号口"],
+    "lines": ["1号线", "3号线", "4号线"],
+    "is_transfer": true
+  }
+]
