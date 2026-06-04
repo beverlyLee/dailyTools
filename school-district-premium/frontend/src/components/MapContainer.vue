@@ -1,7 +1,7 @@
 <template>
-  <div class="map-wrapper">
-    <div ref="mapContainer" class="map-container"></div>
-    <div v-if="loading" class="map-loading">
+  <div class="map-wrapper" data-testid="map-wrapper">
+    <div ref="mapContainer" class="map-container" data-testid="map-container"></div>
+    <div v-if="loading" class="map-loading" data-testid="map-loading">
       <div class="spinner"></div>
       <span>加载学区数据中...</span>
     </div>
@@ -12,6 +12,56 @@
 import { ref, onMounted, watch, nextTick } from 'vue'
 import AMapLoader from '@amap/amap-jsapi-loader'
 
+export const COLOR_RULES = {
+  TIER_1: { min: 30, color: 'rgba(211, 47, 47, 0.55)', stroke: '#d32f2f', label: '深红', desc: '高溢价 (>30%)' },
+  TIER_2: { min: 20, color: 'rgba(245, 124, 0, 0.45)', stroke: '#f57c00', label: '橙黄', desc: '中高溢价 (20-30%)' },
+  TIER_3: { min: 15, color: 'rgba(251, 192, 45, 0.40)', stroke: '#fbc02d', label: '浅黄', desc: '中溢价 (15-20%)' },
+  TIER_4: { min: 0, color: 'rgba(79, 195, 247, 0.35)', stroke: '#4fc3f7', label: '浅蓝', desc: '低溢价 (<15%)' },
+}
+
+export const MARKER_COLOR_RULES = {
+  TIER_1: { min: 25, color: '#e94560', desc: '高溢价 (>25%)' },
+  TIER_2: { min: 15, color: '#f57c00', desc: '中溢价 (15-25%)' },
+  TIER_3: { min: 0, color: '#4fc3f7', desc: '低溢价 (<15%)' },
+}
+
+export function getFillColorByPremium(premium) {
+  if (premium > 30) return COLOR_RULES.TIER_1.color
+  if (premium > 20) return COLOR_RULES.TIER_2.color
+  if (premium > 15) return COLOR_RULES.TIER_3.color
+  return COLOR_RULES.TIER_4.color
+}
+
+export function getStrokeColorByPremium(premium) {
+  if (premium > 30) return COLOR_RULES.TIER_1.stroke
+  if (premium > 20) return COLOR_RULES.TIER_2.stroke
+  if (premium > 15) return COLOR_RULES.TIER_3.stroke
+  return COLOR_RULES.TIER_4.stroke
+}
+
+export function getMarkerColorByPremium(premium) {
+  if (premium > 25) return MARKER_COLOR_RULES.TIER_1.color
+  if (premium > 15) return MARKER_COLOR_RULES.TIER_2.color
+  return MARKER_COLOR_RULES.TIER_3.color
+}
+
+export function calculateMarkerRadius(unitPrice) {
+  return Math.max(8, Math.min(20, unitPrice / 8000))
+}
+
+export function getColorTier(premium) {
+  if (premium > 30) return 'TIER_1'
+  if (premium > 20) return 'TIER_2'
+  if (premium > 15) return 'TIER_3'
+  return 'TIER_4'
+}
+
+export function getMarkerColorTier(premium) {
+  if (premium > 25) return 'TIER_1'
+  if (premium > 15) return 'TIER_2'
+  return 'TIER_3'
+}
+
 export default {
   name: 'MapContainer',
   props: {
@@ -19,38 +69,34 @@ export default {
     premiums: { type: Array, default: () => [] },
     loading: { type: Boolean, default: false },
   },
-  emits: ['district-click'],
+  emits: ['district-click', 'marker-click', 'info-window-opened'],
   setup(props, { emit }) {
     const mapContainer = ref(null)
     let map = null
     let AMap = null
     let polygons = []
     let markers = []
+    let infoWindows = []
     let useFallback = false
     let fallbackCanvas = null
 
     function getFillColor(premium) {
-      if (premium > 30) return 'rgba(211, 47, 47, 0.55)'
-      if (premium > 25) return 'rgba(230, 74, 25, 0.50)'
-      if (premium > 20) return 'rgba(245, 124, 0, 0.45)'
-      if (premium > 15) return 'rgba(251, 192, 45, 0.40)'
-      if (premium > 10) return 'rgba(79, 195, 247, 0.35)'
-      return 'rgba(129, 199, 132, 0.30)'
+      return getFillColorByPremium(premium)
     }
 
     function getStrokeColor(premium) {
-      if (premium > 25) return '#d32f2f'
-      if (premium > 15) return '#f57c00'
-      return '#4fc3f7'
+      return getStrokeColorByPremium(premium)
     }
 
     function clearOverlays() {
       if (map) {
         polygons.forEach(p => map.remove(p))
         markers.forEach(m => map.remove(m))
+        infoWindows.forEach(w => w.close())
       }
       polygons = []
       markers = []
+      infoWindows = []
     }
 
     function renderDistricts() {
@@ -71,8 +117,13 @@ export default {
           extData: d,
         })
 
-        polygon.on('click', () => {
-          emit('district-click', d)
+        polygon.on('click', (e) => {
+          const target = e.target
+          const data = target.getExtData()
+          emit('district-click', data)
+          if (typeof window !== 'undefined' && window.__districtClickSpy) {
+            window.__districtClickSpy(data)
+          }
           map.setZoomAndCenter(14, d.center || coords[0])
         })
 
@@ -81,6 +132,13 @@ export default {
         })
         polygon.on('mouseout', () => {
           polygon.setOptions({ fillOpacity: 0.6 })
+        })
+
+        polygon.setExtData({
+          ...d,
+          _colorTier: getColorTier(d.avg_premium_pct),
+          _fillColor: getFillColor(d.avg_premium_pct),
+          _strokeColor: getStrokeColor(d.avg_premium_pct),
         })
 
         polygons.push(polygon)
@@ -98,6 +156,7 @@ export default {
             'text-align': 'center',
             'white-space': 'pre',
           },
+          extData: { type: 'label', school_name: d.school_name },
         })
         markers.push(labelMarker)
       })
@@ -114,8 +173,8 @@ export default {
 
       props.premiums.forEach(p => {
         if (!p.lng || !p.lat) return
-        const size = Math.max(8, Math.min(20, p.unit_price / 8000))
-        const color = p.premium_pct > 25 ? '#e94560' : p.premium_pct > 15 ? '#f57c00' : '#4fc3f7'
+        const size = calculateMarkerRadius(p.unit_price)
+        const color = getMarkerColorByPremium(p.premium_pct)
 
         const circleMarker = new AMap.CircleMarker({
           center: [p.lng, p.lat],
@@ -128,9 +187,18 @@ export default {
           extData: p,
         })
 
-        circleMarker.on('click', () => {
+        circleMarker.on('click', (e) => {
+          const target = e.target
+          const data = target.getExtData()
+          emit('marker-click', data)
+          if (typeof window !== 'undefined' && window.__markerClickSpy) {
+            window.__markerClickSpy(data)
+          }
+
+          infoWindows.forEach(w => w.close())
+
           const info = new AMap.InfoWindow({
-            content: `<div style="padding:8px;font-size:13px;color:#333;">
+            content: `<div data-testid="info-window" style="padding:8px;font-size:13px;color:#333;">
               <b>${p.community}</b><br/>
               单价: ${Math.round(p.unit_price).toLocaleString()} 元/m²<br/>
               溢价率: <span style="color:${color};font-weight:600;">${p.premium_pct > 0 ? '+' : ''}${p.premium_pct}%</span><br/>
@@ -139,7 +207,20 @@ export default {
             </div>`,
             offset: new AMap.Pixel(0, -10),
           })
+
           info.open(map, [p.lng, p.lat])
+          infoWindows.push(info)
+          emit('info-window-opened', { data, infoWindow: info })
+          if (typeof window !== 'undefined' && window.__infoWindowSpy) {
+            window.__infoWindowSpy({ data, infoWindow: info })
+          }
+        })
+
+        circleMarker.setExtData({
+          ...p,
+          _colorTier: getMarkerColorTier(p.premium_pct),
+          _color: color,
+          _radius: size,
         })
 
         markers.push(circleMarker)
@@ -155,6 +236,7 @@ export default {
         fallbackCanvas = document.createElement('canvas')
         fallbackCanvas.style.width = '100%'
         fallbackCanvas.style.height = '100%'
+        fallbackCanvas.setAttribute('data-testid', 'fallback-canvas')
         mapContainer.value.innerHTML = ''
         mapContainer.value.appendChild(fallbackCanvas)
       }
@@ -179,6 +261,7 @@ export default {
       const toX = lng => ((lng - lngRange[0]) / (lngRange[1] - lngRange[0])) * canvasW
       const toY = lat => canvasH - ((lat - latRange[0]) / (latRange[1] - latRange[0])) * canvasH
 
+      const fallbackPolygons = []
       props.districts.forEach(d => {
         const coords = d.polygon || []
         if (coords.length < 3) return
@@ -190,14 +273,10 @@ export default {
         ctx.closePath()
 
         const premium = d.avg_premium_pct || 0
-        if (premium > 30) ctx.fillStyle = 'rgba(211, 47, 47, 0.55)'
-        else if (premium > 25) ctx.fillStyle = 'rgba(230, 74, 25, 0.50)'
-        else if (premium > 20) ctx.fillStyle = 'rgba(245, 124, 0, 0.45)'
-        else if (premium > 15) ctx.fillStyle = 'rgba(251, 192, 45, 0.40)'
-        else ctx.fillStyle = 'rgba(79, 195, 247, 0.35)'
+        ctx.fillStyle = getFillColor(premium)
         ctx.fill()
 
-        ctx.strokeStyle = premium > 25 ? '#d32f2f' : premium > 15 ? '#f57c00' : '#4fc3f7'
+        ctx.strokeStyle = getStrokeColor(premium)
         ctx.lineWidth = 2
         ctx.stroke()
 
@@ -210,17 +289,79 @@ export default {
         ctx.fillStyle = '#e94560'
         ctx.font = 'bold 12px sans-serif'
         ctx.fillText(`${premium}%`, cx, cy + 10)
+
+        fallbackPolygons.push({
+          data: d,
+          coords: coords.map(c => [toX(c[0]), toY(c[1])]),
+          center: [cx, cy],
+        })
       })
 
+      const fallbackMarkers = []
       props.premiums.forEach(p => {
         if (!p.lng || !p.lat) return
-        const r = Math.max(3, Math.min(8, p.unit_price / 15000))
-        const color = p.premium_pct > 25 ? '#e94560' : p.premium_pct > 15 ? '#f57c00' : '#4fc3f7'
+        const r = calculateMarkerRadius(p.unit_price)
+        const color = getMarkerColorByPremium(p.premium_pct)
+        const x = toX(p.lng)
+        const y = toY(p.lat)
         ctx.beginPath()
-        ctx.arc(toX(p.lng), toY(p.lat), r, 0, Math.PI * 2)
+        ctx.arc(x, y, r, 0, Math.PI * 2)
         ctx.fillStyle = color
         ctx.fill()
+
+        fallbackMarkers.push({
+          data: p,
+          center: [x, y],
+          radius: r,
+          color: color,
+        })
       })
+
+      fallbackCanvas.addEventListener('click', (e) => {
+        const rect = fallbackCanvas.getBoundingClientRect()
+        const x = e.clientX - rect.left
+        const y = e.clientY - rect.top
+
+        for (let i = fallbackMarkers.length - 1; i >= 0; i--) {
+          const m = fallbackMarkers[i]
+          const dx = x - m.center[0]
+          const dy = y - m.center[1]
+          if (dx * dx + dy * dy <= m.radius * m.radius) {
+            emit('marker-click', m.data)
+            if (typeof window !== 'undefined' && window.__markerClickSpy) {
+              window.__markerClickSpy(m.data)
+            }
+            return
+          }
+        }
+
+        for (let i = fallbackPolygons.length - 1; i >= 0; i--) {
+          const poly = fallbackPolygons[i]
+          if (isPointInPolygon(x, y, poly.coords)) {
+            emit('district-click', poly.data)
+            if (typeof window !== 'undefined' && window.__districtClickSpy) {
+              window.__districtClickSpy(poly.data)
+            }
+            return
+          }
+        }
+      })
+
+      if (typeof window !== 'undefined') {
+        window.__fallbackPolygons = fallbackPolygons
+        window.__fallbackMarkers = fallbackMarkers
+      }
+    }
+
+    function isPointInPolygon(x, y, coords) {
+      let inside = false
+      for (let i = 0, j = coords.length - 1; i < coords.length; j = i++) {
+        const xi = coords[i][0], yi = coords[i][1]
+        const xj = coords[j][0], yj = coords[j][1]
+        const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)
+        if (intersect) inside = !inside
+      }
+      return inside
     }
 
     async function initMap() {
@@ -255,6 +396,25 @@ export default {
         console.warn('AMap load failed, using canvas fallback:', e.message)
         useFallback = true
         renderFallbackMap()
+      }
+
+      if (typeof window !== 'undefined') {
+        window.__schoolDistrictTestHooks = {
+          getPolygons: () => polygons.map(p => p.getExtData()),
+          getMarkers: () => markers.filter(m => m.CLASS_NAME === 'AMap.CircleMarker').map(m => m.getExtData()),
+          getMap: () => map,
+          getAMap: () => AMap,
+          isFallback: () => useFallback,
+          COLOR_RULES,
+          MARKER_COLOR_RULES,
+          getFillColorByPremium,
+          getStrokeColorByPremium,
+          getMarkerColorByPremium,
+          calculateMarkerRadius,
+          getColorTier,
+          getMarkerColorTier,
+        }
+        window.dispatchEvent(new CustomEvent('map-ready', { detail: { ready: true, useFallback } }))
       }
     }
 
