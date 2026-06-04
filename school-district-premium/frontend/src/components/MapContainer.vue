@@ -26,6 +26,8 @@ export default {
     let AMap = null
     let polygons = []
     let markers = []
+    let useFallback = false
+    let fallbackCanvas = null
 
     function getFillColor(premium) {
       if (premium > 30) return 'rgba(211, 47, 47, 0.55)'
@@ -43,8 +45,10 @@ export default {
     }
 
     function clearOverlays() {
-      polygons.forEach(p => map.remove(p))
-      markers.forEach(m => map.remove(m))
+      if (map) {
+        polygons.forEach(p => map.remove(p))
+        markers.forEach(m => map.remove(m))
+      }
       polygons = []
       markers = []
     }
@@ -144,44 +148,36 @@ export default {
       map.add(markers.filter(m => m.CLASS_NAME === 'AMap.CircleMarker'))
     }
 
-    onMounted(async () => {
-      try {
-        AMap = await AMapLoader.load({
-          key: 'your_amap_key',
-          version: '2.0',
-          plugins: ['AMap.Polygon', 'AMap.Text', 'AMap.CircleMarker', 'AMap.InfoWindow'],
-        })
-
-        map = new AMap.Map(mapContainer.value, {
-          zoom: 12,
-          center: [116.3168, 39.9822],
-          mapStyle: 'amap://styles/dark',
-          viewMode: '2D',
-        })
-
-        renderDistricts()
-        renderPremiumMarkers()
-      } catch (e) {
-        console.error('AMap load failed, using fallback:', e)
-        renderFallbackMap()
-      }
-    })
-
     function renderFallbackMap() {
       if (!mapContainer.value) return
-      const canvas = document.createElement('canvas')
-      canvas.width = mapContainer.value.clientWidth || 800
-      canvas.height = mapContainer.value.clientHeight || 600
-      mapContainer.value.appendChild(canvas)
-      const ctx = canvas.getContext('2d')
+
+      if (!fallbackCanvas) {
+        fallbackCanvas = document.createElement('canvas')
+        fallbackCanvas.style.width = '100%'
+        fallbackCanvas.style.height = '100%'
+        mapContainer.value.innerHTML = ''
+        mapContainer.value.appendChild(fallbackCanvas)
+      }
+
+      const rect = mapContainer.value.getBoundingClientRect()
+      const dpr = window.devicePixelRatio || 1
+      fallbackCanvas.width = rect.width * dpr || 1200
+      fallbackCanvas.height = rect.height * dpr || 800
+      fallbackCanvas.style.width = rect.width + 'px'
+      fallbackCanvas.style.height = rect.height + 'px'
+
+      const ctx = fallbackCanvas.getContext('2d')
+      ctx.scale(dpr, dpr)
+      const canvasW = rect.width
+      const canvasH = rect.height
 
       ctx.fillStyle = '#1a1a2e'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.fillRect(0, 0, canvasW, canvasH)
 
       const lngRange = [116.29, 116.47]
       const latRange = [39.90, 40.01]
-      const toX = lng => ((lng - lngRange[0]) / (lngRange[1] - lngRange[0])) * canvas.width
-      const toY = lat => canvas.height - ((lat - latRange[0]) / (latRange[1] - latRange[0])) * canvas.height
+      const toX = lng => ((lng - lngRange[0]) / (lngRange[1] - lngRange[0])) * canvasW
+      const toY = lat => canvasH - ((lat - latRange[0]) / (latRange[1] - latRange[0])) * canvasH
 
       props.districts.forEach(d => {
         const coords = d.polygon || []
@@ -212,6 +208,7 @@ export default {
         ctx.textAlign = 'center'
         ctx.fillText(d.school_name, cx, cy - 6)
         ctx.fillStyle = '#e94560'
+        ctx.font = 'bold 12px sans-serif'
         ctx.fillText(`${premium}%`, cx, cy + 10)
       })
 
@@ -226,9 +223,50 @@ export default {
       })
     }
 
+    async function initMap() {
+      await nextTick()
+
+      if (!mapContainer.value) {
+        console.warn('mapContainer ref not available')
+        useFallback = true
+        renderFallbackMap()
+        return
+      }
+
+      try {
+        const amapKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GAODE_JS_API_KEY) || '9062eb1582a21d0abf3f69c47dd97c42'
+        AMap = await AMapLoader.load({
+          key: amapKey,
+          version: '2.0',
+          plugins: ['AMap.Polygon', 'AMap.Text', 'AMap.CircleMarker', 'AMap.InfoWindow'],
+        })
+
+        map = new AMap.Map(mapContainer.value, {
+          zoom: 12,
+          center: [116.3168, 39.9822],
+          mapStyle: 'amap://styles/dark',
+          viewMode: '2D',
+        })
+
+        useFallback = false
+        renderDistricts()
+        renderPremiumMarkers()
+      } catch (e) {
+        console.warn('AMap load failed, using canvas fallback:', e.message)
+        useFallback = true
+        renderFallbackMap()
+      }
+    }
+
+    onMounted(() => {
+      initMap()
+    })
+
     watch(() => [props.districts, props.premiums], () => {
       nextTick(() => {
-        if (map && AMap) {
+        if (useFallback) {
+          renderFallbackMap()
+        } else if (map && AMap) {
           renderDistricts()
           renderPremiumMarkers()
         }
