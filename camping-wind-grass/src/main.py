@@ -80,6 +80,17 @@ async def refresh_sites(request):
         }, status=500)
 
 
+@app.route("/api/config", methods=["GET"])
+async def get_config(request):
+    return json_response({
+        "success": True,
+        "data": {
+            "gaode_api_key": os.getenv("GAODE_API_KEY", ""),
+            "map_provider": "gaode",
+        },
+    })
+
+
 @app.route("/api/stats", methods=["GET"])
 async def get_stats(request):
     global processed_sites
