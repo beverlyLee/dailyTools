@@ -465,6 +465,9 @@ function renderWorkspace() {
             stopProjectBtn: content.querySelector('.field-stopProjectBtn'),
             gitCommitBtn: content.querySelector('.field-gitCommitBtn'),
             gitCommitMessage: content.querySelector('.field-gitCommitMessage'),
+            gitResult: content.querySelector('.field-gitResult'),
+            gitCommitId: content.querySelector('.field-gitCommitId'),
+            gitOutput: content.querySelector('.field-gitOutput'),
             resultCard: content.querySelector('.field-resultCard'),
             resultMeta: content.querySelector('.field-resultMeta'),
             resultBody: content.querySelector('.field-resultBody'),
@@ -1721,11 +1724,11 @@ async function stopProject(project, fields) {
 }
 
 async function gitCommit(project, fields) {
-    const projectPath = fields.projectPath?.value?.trim() || '';
+    const projectName = fields.projectName?.value?.trim() || '';
     const commitMessage = fields.gitCommitMessage?.value?.trim() || '';
     
-    if (!projectPath) {
-        showToast('请先填写工程根路径');
+    if (!projectName) {
+        showToast('请填写工程名称');
         return;
     }
     
@@ -1734,20 +1737,25 @@ async function gitCommit(project, fields) {
         return;
     }
     
-    const gitResultEl = document.getElementById('gitResult');
-    const gitCommitIdEl = document.getElementById('gitCommitId');
-    const gitOutputEl = document.getElementById('gitOutput');
+    const commands = [
+        `cd /Users/liboyang/trae/dailyTools/${projectName}`,
+        `git add .`,
+        `git commit -m "${commitMessage}"`
+    ];
     
+    fields.gitOutput.textContent = '$ ' + commands.join('\n$ ') + '\n\n执行中...\n';
+    fields.gitCommitId.textContent = '执行中...';
+    fields.gitCommitId.style.color = '#3b82f6';
+    fields.gitResult.hidden = false;
     fields.gitCommitBtn.disabled = true;
     fields.gitCommitBtn.textContent = '📝 提交中...';
-    gitResultEl.hidden = true;
     
     try {
         const response = await fetch('/api/git-commit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                project_path: projectPath,
+                project_name: projectName,
                 commit_message: commitMessage
             })
         });
@@ -1755,30 +1763,28 @@ async function gitCommit(project, fields) {
         const result = await response.json();
         
         if (!response.ok) {
-            throw new Error(result.error || '提交失败');
+            throw new Error(result.error || result.output || '提交失败');
         }
         
+        fields.gitOutput.textContent = '$ ' + commands.join('\n$ ') + '\n\n' + (result.output || '');
+        fields.gitOutput.scrollTop = fields.gitOutput.scrollHeight;
+        
         if (result.commit_id) {
-            gitCommitIdEl.textContent = result.commit_id;
-            gitCommitIdEl.style.color = '#22c55e';
+            fields.gitCommitId.textContent = result.commit_id;
+            fields.gitCommitId.style.color = '#22c55e';
             showToast('✅ 代码提交成功');
+            fields.gitCommitMessage.value = '';
         } else {
-            gitCommitIdEl.textContent = '无更改';
-            gitCommitIdEl.style.color = '#f59e0b';
+            fields.gitCommitId.textContent = '无更改';
+            fields.gitCommitId.style.color = '#f59e0b';
             showToast('ℹ️ 没有需要提交的更改');
         }
         
-        gitOutputEl.textContent = result.output;
-        gitResultEl.hidden = false;
-        
-        fields.gitCommitMessage.value = '';
-        
     } catch (error) {
         console.error('Git commit error:', error);
-        gitCommitIdEl.textContent = '提交失败';
-        gitCommitIdEl.style.color = '#ef4444';
-        gitOutputEl.textContent = error.message;
-        gitResultEl.hidden = false;
+        fields.gitCommitId.textContent = '提交失败';
+        fields.gitCommitId.style.color = '#ef4444';
+        fields.gitOutput.textContent += '\n❌ ' + error.message;
         showToast(`❌ 提交失败: ${error.message}`);
     } finally {
         fields.gitCommitBtn.disabled = false;
