@@ -1,0 +1,482 @@
+{
+  "119.02_29.61": {
+    "avg_wind_speed": 3.51,
+    "max_wind_speed": 6.26,
+    "wind_level": 3,
+    "wind_level_desc": "微风",
+    "rain_days": 112,
+    "rain_probability": 30.7,
+    "avg_temperature": 17.4,
+    "grass_coverage": 75,
+    "drainage_score": 65,
+    "wind_distribution": {
+      "0级": 0.0,
+      "1级": 1.1,
+      "2级": 46.6,
+      "3级": 50.7,
+      "4级": 1.6,
+      "5级": 0.0,
+      "6级": 0.0,
+      "7级": 0.0
+    },
+    "monthly_data": [
+      {
+        "month": 1,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 25.0
+      },
+      {
+        "month": 2,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 20.4
+      },
+      {
+        "month": 3,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 16.7
+      },
+      {
+        "month": 4,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 13.8
+      },
+      {
+        "month": 5,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 11.7
+      },
+      {
+        "month": 6,
+        "avg_wind": 3.0,
+        "rain_days": 13,
+        "avg_temp": 10.4
+      },
+      {
+        "month": 7,
+        "avg_wind": 3.0,
+        "rain_days": 13,
+        "avg_temp": 10.0
+      },
+      {
+        "month": 8,
+        "avg_wind": 3.0,
+        "rain_days": 13,
+        "avg_temp": 10.4
+      },
+      {
+        "month": 9,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 11.7
+      },
+      {
+        "month": 10,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 13.8
+      },
+      {
+        "month": 11,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 16.7
+      },
+      {
+        "month": 12,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 20.4
+      }
+    ],
+    "data_source": "mock"
+  },
+  "117.33_40.17": {
+    "avg_wind_speed": 3.57,
+    "max_wind_speed": 6.23,
+    "wind_level": 3,
+    "wind_level_desc": "微风",
+    "rain_days": 101,
+    "rain_probability": 27.7,
+    "avg_temperature": 17.6,
+    "grass_coverage": 75,
+    "drainage_score": 75,
+    "wind_distribution": {
+      "0级": 0.0,
+      "1级": 2.2,
+      "2级": 40.0,
+      "3级": 56.4,
+      "4级": 1.4,
+      "5级": 0.0,
+      "6级": 0.0,
+      "7级": 0.0
+    },
+    "monthly_data": [
+      {
+        "month": 1,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 25.0
+      },
+      {
+        "month": 2,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 20.4
+      },
+      {
+        "month": 3,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 16.7
+      },
+      {
+        "month": 4,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 13.8
+      },
+      {
+        "month": 5,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 11.7
+      },
+      {
+        "month": 6,
+        "avg_wind": 3.0,
+        "rain_days": 13,
+        "avg_temp": 10.4
+      },
+      {
+        "month": 7,
+        "avg_wind": 3.0,
+        "rain_days": 13,
+        "avg_temp": 10.0
+      },
+      {
+        "month": 8,
+        "avg_wind": 3.0,
+        "rain_days": 13,
+        "avg_temp": 10.4
+      },
+      {
+        "month": 9,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 11.7
+      },
+      {
+        "month": 10,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 13.8
+      },
+      {
+        "month": 11,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 16.7
+      },
+      {
+        "month": 12,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 20.4
+      }
+    ],
+    "data_source": "mock"
+  },
+  "114.71_41.15": {
+    "avg_wind_speed": 3.49,
+    "max_wind_speed": 5.85,
+    "wind_level": 3,
+    "wind_level_desc": "微风",
+    "rain_days": 110,
+    "rain_probability": 30.1,
+    "avg_temperature": 16.9,
+    "grass_coverage": 75,
+    "drainage_score": 65,
+    "wind_distribution": {
+      "0级": 0.0,
+      "1级": 2.5,
+      "2级": 45.8,
+      "3级": 49.9,
+      "4级": 1.9,
+      "5级": 0.0,
+      "6级": 0.0,
+      "7级": 0.0
+    },
+    "monthly_data": [
+      {
+        "month": 1,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 25.0
+      },
+      {
+        "month": 2,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 20.4
+      },
+      {
+        "month": 3,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 16.7
+      },
+      {
+        "month": 4,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 13.8
+      },
+      {
+        "month": 5,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 11.7
+      },
+      {
+        "month": 6,
+        "avg_wind": 3.0,
+        "rain_days": 13,
+        "avg_temp": 10.4
+      },
+      {
+        "month": 7,
+        "avg_wind": 3.0,
+        "rain_days": 13,
+        "avg_temp": 10.0
+      },
+      {
+        "month": 8,
+        "avg_wind": 3.0,
+        "rain_days": 13,
+        "avg_temp": 10.4
+      },
+      {
+        "month": 9,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 11.7
+      },
+      {
+        "month": 10,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 13.8
+      },
+      {
+        "month": 11,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 16.7
+      },
+      {
+        "month": 12,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 20.4
+      }
+    ],
+    "data_source": "mock"
+  },
+  "104.32_30.38": {
+    "avg_wind_speed": 3.52,
+    "max_wind_speed": 5.91,
+    "wind_level": 3,
+    "wind_level_desc": "微风",
+    "rain_days": 108,
+    "rain_probability": 29.6,
+    "avg_temperature": 16.9,
+    "grass_coverage": 75,
+    "drainage_score": 75,
+    "wind_distribution": {
+      "0级": 0.0,
+      "1级": 0.5,
+      "2级": 46.0,
+      "3级": 52.1,
+      "4级": 1.4,
+      "5级": 0.0,
+      "6级": 0.0,
+      "7级": 0.0
+    },
+    "monthly_data": [
+      {
+        "month": 1,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 25.0
+      },
+      {
+        "month": 2,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 20.4
+      },
+      {
+        "month": 3,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 16.7
+      },
+      {
+        "month": 4,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 13.8
+      },
+      {
+        "month": 5,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 11.7
+      },
+      {
+        "month": 6,
+        "avg_wind": 3.0,
+        "rain_days": 13,
+        "avg_temp": 10.4
+      },
+      {
+        "month": 7,
+        "avg_wind": 3.0,
+        "rain_days": 13,
+        "avg_temp": 10.0
+      },
+      {
+        "month": 8,
+        "avg_wind": 3.0,
+        "rain_days": 13,
+        "avg_temp": 10.4
+      },
+      {
+        "month": 9,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 11.7
+      },
+      {
+        "month": 10,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 13.8
+      },
+      {
+        "month": 11,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 16.7
+      },
+      {
+        "month": 12,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 20.4
+      }
+    ],
+    "data_source": "mock"
+  },
+  "113.77_23.76": {
+    "avg_wind_speed": 3.49,
+    "max_wind_speed": 6.02,
+    "wind_level": 3,
+    "wind_level_desc": "微风",
+    "rain_days": 102,
+    "rain_probability": 27.9,
+    "avg_temperature": 18.0,
+    "grass_coverage": 75,
+    "drainage_score": 75,
+    "wind_distribution": {
+      "0级": 0.0,
+      "1级": 2.2,
+      "2级": 44.7,
+      "3级": 51.8,
+      "4级": 1.4,
+      "5级": 0.0,
+      "6级": 0.0,
+      "7级": 0.0
+    },
+    "monthly_data": [
+      {
+        "month": 1,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 25.0
+      },
+      {
+        "month": 2,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 20.4
+      },
+      {
+        "month": 3,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 16.7
+      },
+      {
+        "month": 4,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 13.8
+      },
+      {
+        "month": 5,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 11.7
+      },
+      {
+        "month": 6,
+        "avg_wind": 3.0,
+        "rain_days": 13,
+        "avg_temp": 10.4
+      },
+      {
+        "month": 7,
+        "avg_wind": 3.0,
+        "rain_days": 13,
+        "avg_temp": 10.0
+      },
+      {
+        "month": 8,
+        "avg_wind": 3.0,
+        "rain_days": 13,
+        "avg_temp": 10.4
+      },
+      {
+        "month": 9,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 11.7
+      },
+      {
+        "month": 10,
+        "avg_wind": 3.0,
+        "rain_days": 7,
+        "avg_temp": 13.8
+      },
+      {
+        "month": 11,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 16.7
+      },
+      {
+        "month": 12,
+        "avg_wind": 3.5,
+        "rain_days": 7,
+        "avg_temp": 20.4
+      }
+    ],
+    "data_source": "mock"
+  }
+}
