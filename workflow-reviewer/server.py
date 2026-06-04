@@ -904,6 +904,155 @@ async def stop_project():
         )
 
 
+class GitCommitRequest(BaseModel):
+    project_path: str
+    commit_message: str
+
+
+@app.post("/api/git-commit")
+async def git_commit(request: GitCommitRequest):
+    """执行 git 提交代码"""
+    try:
+        project_path = request.project_path.strip()
+        commit_message = request.commit_message.strip()
+        
+        if not project_path:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "项目路径不能为空"}
+            )
+        
+        if not commit_message:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "提交信息不能为空"}
+            )
+        
+        if not os.path.exists(project_path):
+            return JSONResponse(
+                status_code=400,
+                content={"error": f"项目路径不存在: {project_path}"}
+            )
+        
+        outputs = []
+        
+        # 1. 检查是否是 git 仓库
+        try:
+            result = subprocess.run(
+                ["git", "rev-parse", "--is-inside-work-tree"],
+                cwd=project_path,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            if result.returncode != 0:
+                return JSONResponse(
+                    status_code=400,
+                    content={"error": "当前目录不是 git 仓库"}
+                )
+        except Exception as e:
+            return JSONResponse(
+                status_code=400,
+                content={"error": f"检查 git 仓库失败: {str(e)}"}
+            )
+        
+        outputs.append("✓ 确认是 git 仓库")
+        
+        # 2. 获取 git 状态
+        try:
+            result = subprocess.run(
+                ["git", "status", "--porcelain"],
+                cwd=project_path,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            if not result.stdout.strip():
+                return {
+                    "success": True,
+                    "commit_id": None,
+                    "output": "没有需要提交的更改"
+                }
+            outputs.append(f"✓ 检测到 {len(result.stdout.strip().split(chr(10)))} 个文件有更改")
+        except Exception as e:
+            return JSONResponse(
+                status_code=500,
+                content={"error": f"获取 git 状态失败: {str(e)}"}
+            )
+        
+        # 3. 添加所有文件
+        try:
+            result = subprocess.run(
+                ["git", "add", "-A"],
+                cwd=project_path,
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+            if result.returncode != 0:
+                return JSONResponse(
+                    status_code=500,
+                    content={"error": f"git add 失败: {result.stderr}"}
+                )
+            outputs.append("✓ 已添加所有文件到暂存区")
+        except Exception as e:
+            return JSONResponse(
+                status_code=500,
+                content={"error": f"git add 失败: {str(e)}"}
+            )
+        
+        # 4. 提交代码
+        try:
+            result = subprocess.run(
+                ["git", "commit", "-m", commit_message],
+                cwd=project_path,
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+            if result.returncode != 0:
+                return JSONResponse(
+                    status_code=500,
+                    content={"error": f"git commit 失败: {result.stderr}"}
+                )
+            outputs.append("✓ 代码提交成功")
+        except Exception as e:
+            return JSONResponse(
+                status_code=500,
+                content={"error": f"git commit 失败: {str(e)}"}
+            )
+        
+        # 5. 获取 commit id
+        try:
+            result = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=project_path,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            commit_id = result.stdout.strip()
+            outputs.append(f"✓ Commit ID: {commit_id}")
+        except Exception as e:
+            return JSONResponse(
+                status_code=500,
+                content={"error": f"获取 commit id 失败: {str(e)}"}
+            )
+        
+        return {
+            "success": True,
+            "commit_id": commit_id,
+            "output": "\n".join(outputs)
+        }
+        
+    except Exception as e:
+        import traceback
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e), "detail": traceback.format_exc()}
+        )
+
+
 class ExecuteTestPromptRequest(BaseModel):
     project_name: str
     first_round: str

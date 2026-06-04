@@ -213,6 +213,24 @@
                     <div class="run-output" id="runOutput" hidden></div>
                 </div>
 
+                <div class="card git-commit-card">
+                    <h3 class="card-title">📦 Git 提交代码</h3>
+                    <div class="form-group">
+                        <label>提交信息</label>
+                        <input type="text" class="field-gitCommitMessage" placeholder="输入提交信息，如: feat: 新增用户登录功能" autocomplete="off">
+                    </div>
+                    <div class="form-row">
+                        <button class="btn btn-secondary field-gitCommitBtn">📝 提交代码</button>
+                    </div>
+                    <div class="git-result" id="gitResult" hidden>
+                        <div class="git-commit-id">
+                            <strong>Commit ID:</strong>
+                            <span id="gitCommitId"></span>
+                        </div>
+                        <div class="git-output" id="gitOutput"></div>
+                    </div>
+                </div>
+
                 <button class="btn btn-primary field-submitBtn" disabled>
                     <span class="btn-text">提交验收</span>
                     <span class="btn-loading" hidden>验收中...</span>

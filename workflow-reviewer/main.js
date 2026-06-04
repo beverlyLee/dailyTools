@@ -463,6 +463,8 @@ function renderWorkspace() {
             submitBtn: content.querySelector('.field-submitBtn'),
             runProjectBtn: content.querySelector('.field-runProjectBtn'),
             stopProjectBtn: content.querySelector('.field-stopProjectBtn'),
+            gitCommitBtn: content.querySelector('.field-gitCommitBtn'),
+            gitCommitMessage: content.querySelector('.field-gitCommitMessage'),
             resultCard: content.querySelector('.field-resultCard'),
             resultMeta: content.querySelector('.field-resultMeta'),
             resultBody: content.querySelector('.field-resultBody'),
@@ -585,6 +587,7 @@ function renderWorkspace() {
         fields.submitBtn.addEventListener('click', () => submitVerify(project, fields));
         fields.runProjectBtn.addEventListener('click', () => runProject(project, fields));
         fields.stopProjectBtn.addEventListener('click', () => stopProject(project, fields));
+        fields.gitCommitBtn.addEventListener('click', () => gitCommit(project, fields));
         fields.copyPromptBtn.addEventListener('click', () => copyPrompt(project, fields));
         fields.syncFeishuBtn.addEventListener('click', () => syncToFeishu(project, fields));
         fields.newRoundBtn.addEventListener('click', () => newRound(project, fields));
@@ -1715,6 +1718,72 @@ async function stopProject(project, fields) {
     runningProcess = null;
     fields.runProjectBtn.disabled = false;
     fields.stopProjectBtn.disabled = true;
+}
+
+async function gitCommit(project, fields) {
+    const projectPath = fields.projectPath?.value?.trim() || '';
+    const commitMessage = fields.gitCommitMessage?.value?.trim() || '';
+    
+    if (!projectPath) {
+        showToast('请先填写工程根路径');
+        return;
+    }
+    
+    if (!commitMessage) {
+        showToast('请填写提交信息');
+        return;
+    }
+    
+    const gitResultEl = document.getElementById('gitResult');
+    const gitCommitIdEl = document.getElementById('gitCommitId');
+    const gitOutputEl = document.getElementById('gitOutput');
+    
+    fields.gitCommitBtn.disabled = true;
+    fields.gitCommitBtn.textContent = '📝 提交中...';
+    gitResultEl.hidden = true;
+    
+    try {
+        const response = await fetch('/api/git-commit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                project_path: projectPath,
+                commit_message: commitMessage
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(result.error || '提交失败');
+        }
+        
+        if (result.commit_id) {
+            gitCommitIdEl.textContent = result.commit_id;
+            gitCommitIdEl.style.color = '#22c55e';
+            showToast('✅ 代码提交成功');
+        } else {
+            gitCommitIdEl.textContent = '无更改';
+            gitCommitIdEl.style.color = '#f59e0b';
+            showToast('ℹ️ 没有需要提交的更改');
+        }
+        
+        gitOutputEl.textContent = result.output;
+        gitResultEl.hidden = false;
+        
+        fields.gitCommitMessage.value = '';
+        
+    } catch (error) {
+        console.error('Git commit error:', error);
+        gitCommitIdEl.textContent = '提交失败';
+        gitCommitIdEl.style.color = '#ef4444';
+        gitOutputEl.textContent = error.message;
+        gitResultEl.hidden = false;
+        showToast(`❌ 提交失败: ${error.message}`);
+    } finally {
+        fields.gitCommitBtn.disabled = false;
+        fields.gitCommitBtn.textContent = '📝 提交代码';
+    }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
