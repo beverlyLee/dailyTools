@@ -1,0 +1,200 @@
+[
+  {
+    "id": "B000A7BD6C",
+    "name": "西二旗",
+    "city": "北京",
+    "address": "海淀区",
+    "longitude": 116.3056,
+    "latitude": 40.0503,
+    "entrances": ["A口", "B口", "C口", "D口"],
+    "lines": ["13号线", "昌平线"],
+    "is_transfer": true
+  },
+  {
+    "id": "B000A83M61",
+    "name": "国贸",
+    "city": "北京",
+    "address": "朝阳区",
+    "longitude": 116.4603,
+    "latitude": 39.9087,
+    "entrances": ["A口", "B口", "C口", "D口", "E口"],
+    "lines": ["1号线", "10号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "B000A84U7M",
+    "name": "中关村",
+    "city": "北京",
+    "address": "海淀区",
+    "longitude": 116.3176,
+    "latitude": 39.9832,
+    "entrances": ["A口", "B口", "C口", "D口"],
+    "lines": ["4号线"],
+    "is_transfer": false
+  },
+  {
+    "id": "B000A84U6V",
+    "name": "五道口",
+    "city": "北京",
+    "address": "海淀区",
+    "longitude": 116.3436,
+    "latitude": 39.9929,
+    "entrances": ["A口", "B口"],
+    "lines": ["13号线"],
+    "is_transfer": false
+  },
+  {
+    "id": "B000A84U9W",
+    "name": "知春路",
+    "city": "北京",
+    "address": "海淀区",
+    "longitude": 116.3485,
+    "latitude": 39.9746,
+    "entrances": ["A口", "B口", "C口", "D口", "E口", "F口"],
+    "lines": ["10号线", "13号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "B000A83M5N",
+    "name": "望京",
+    "city": "北京",
+    "address": "朝阳区",
+    "longitude": 116.4810,
+    "latitude": 40.0020,
+    "entrances": ["A口", "B口", "C口", "D口"],
+    "lines": ["14号线", "15号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "B000A83L4K",
+    "name": "西直门",
+    "city": "北京",
+    "address": "西城区",
+    "longitude": 116.3553,
+    "latitude": 39.9405,
+    "entrances": ["A口", "B口", "C口", "D口", "E口"],
+    "lines": ["2号线", "4号线", "13号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "B000A83L3J",
+    "name": "东直门",
+    "city": "北京",
+    "address": "东城区",
+    "longitude": 116.4346,
+    "latitude": 39.9414,
+    "entrances": ["A口", "B口", "C口", "D口", "E口"],
+    "lines": ["2号线", "13号线", "机场线"],
+    "is_transfer": true
+  },
+  {
+    "id": "B000A83M7N",
+    "name": "复兴门",
+    "city": "北京",
+    "address": "西城区",
+    "longitude": 116.3670,
+    "latitude": 39.9123,
+    "entrances": ["A口", "B口", "C口", "D口"],
+    "lines": ["1号线", "2号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "B000A84T2Y",
+    "name": "宋家庄",
+    "city": "北京",
+    "address": "丰台区",
+    "longitude": 116.4495,
+    "latitude": 39.8256,
+    "entrances": ["A口", "B口", "C口", "D口", "E口"],
+    "lines": ["5号线", "10号线", "亦庄线"],
+    "is_transfer": true
+  },
+  {
+    "id": "B000A9XYZ1",
+    "name": "天通苑北",
+    "city": "北京",
+    "address": "昌平区",
+    "longitude": 116.4135,
+    "latitude": 40.1090,
+    "entrances": ["A口", "B口"],
+    "lines": ["5号线"],
+    "is_transfer": false
+  },
+  {
+    "id": "B000A9XYZ2",
+    "name": "苹果园",
+    "city": "北京",
+    "address": "石景山区",
+    "longitude": 116.1773,
+    "latitude": 39.9255,
+    "entrances": ["A口", "B口", "C口", "D口"],
+    "lines": ["1号线", "6号线", "S1线"],
+    "is_transfer": true
+  },
+  {
+    "id": "B000A9XYZ3",
+    "name": "亦庄火车站",
+    "city": "北京",
+    "address": "大兴区",
+    "longitude": 116.5254,
+    "latitude": 39.7782,
+    "entrances": ["A口", "B口"],
+    "lines": ["亦庄线"],
+    "is_transfer": false
+  },
+  {
+    "id": "B000A9XYZ4",
+    "name": "俸伯",
+    "city": "北京",
+    "address": "顺义区",
+    "longitude": 116.6826,
+    "latitude": 40.1374,
+    "entrances": ["A口", "B口", "C口"],
+    "lines": ["15号线"],
+    "is_transfer": false
+  },
+  {
+    "id": "B000A9XYZ5",
+    "name": "南邵",
+    "city": "北京",
+    "address": "昌平区",
+    "longitude": 116.2852,
+    "latitude": 40.2223,
+    "entrances": ["A口", "B口", "C口"],
+    "lines": ["昌平线"],
+    "is_transfer": false
+  },
+  {
+    "id": "B000A84U5U",
+    "name": "西单",
+    "city": "北京",
+    "address": "西城区",
+    "longitude": 116.3729,
+    "latitude": 39.9134,
+    "entrances": ["A口", "B口", "C口", "D口", "E口", "F口"],
+    "lines": ["1号线", "4号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "B000A84U4T",
+    "name": "东单",
+    "city": "北京",
+    "address": "东城区",
+    "longitude": 116.4184,
+    "latitude": 39.9146,
+    "entrances": ["A口", "B口", "C口", "D口"],
+    "lines": ["1号线", "5号线"],
+    "is_transfer": true
+  },
+  {
+    "id": "B000A83M4M",
+    "name": "三元桥",
+    "city": "北京",
+    "address": "朝阳区",
+    "longitude": 116.4539,
+    "latitude": 39.9511,
+    "entrances": ["A口", "B口", "C口", "D口"],
+    "lines": ["10号线", "机场线"],
+    "is_transfer": true
+  }
+]
