@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D 涂鸦墙 - Graffiti Spray Wall</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      overflow: hidden;
+      background: #1a1a2e;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      cursor: crosshair;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    .info-panel {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(26, 26, 46, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px 20px;
+      color: #fff;
+      z-index: 100;
+      max-width: 300px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      cursor: default;
+    }
+
+    .info-panel h1 {
+      font-size: 18px;
+      margin-bottom: 12px;
+      color: #f8b500;
+      font-weight: 600;
+    }
+
+    .info-panel p {
+      font-size: 13px;
+      line-height: 1.6;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+
+    .color-picker {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .color-picker label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 8px;
+      opacity: 0.8;
+    }
+
+    .color-options {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .color-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .color-btn:hover {
+      transform: scale(1.15);
+    }
+
+    .color-btn.active {
+      border-color: #fff;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+    }
+
+    .brush-size {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .brush-size label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 8px;
+      opacity: 0.8;
+    }
+
+    .brush-size .size-preview-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .brush-size .size-preview {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 70%, transparent 100%);
+      transition: all 0.2s ease;
+    }
+
+    .brush-size input {
+      width: 100%;
+      cursor: pointer;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.2);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .brush-size input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #f8b500;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .brush-size input::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #f8b500;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .lock-view-btn {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .lock-view-btn button {
+      width: 100%;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s ease;
+    }
+
+    .lock-view-btn button:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .lock-view-btn button.active {
+      background: rgba(248, 181, 0, 0.3);
+      border-color: #f8b500;
+    }
+
+    .clear-btn {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .clear-btn button {
+      width: 100%;
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    }
+
+    .clear-btn button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(231, 76, 60, 0.4);
+    }
+
+    .controls-hint {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(26, 26, 46, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 12px 28px;
+      color: #fff;
+      font-size: 13px;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      cursor: default;
+    }
+
+    .controls-hint kbd {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin: 0 4px;
+      font-family: monospace;
+      font-size: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="info-panel">
+    <h1>🎨 3D 涂鸦墙</h1>
+    <p>使用鼠标像喷漆罐一样在3D墙面上创作涂鸦艺术！</p>
+    
+    <div class="color-picker">
+      <label>喷漆颜色：</label>
+      <div class="color-options">
+        <button class="color-btn active" style="background: #ff6b6b;" data-color="#ff6b6b"></button>
+        <button class="color-btn" style="background: #4ecdc4;" data-color="#4ecdc4"></button>
+        <button class="color-btn" style="background: #ffe66d;" data-color="#ffe66d"></button>
+        <button class="color-btn" style="background: #95e1d3;" data-color="#95e1d3"></button>
+        <button class="color-btn" style="background: #f38181;" data-color="#f38181"></button>
+        <button class="color-btn" style="background: #aa96da;" data-color="#aa96da"></button>
+        <button class="color-btn" style="background: #ffffff;" data-color="#ffffff"></button>
+        <button class="color-btn" style="background: #000000;" data-color="#000000"></button>
+      </div>
+    </div>
+
+    <div class="brush-size">
+      <label>喷漆大小：<span id="size-value">30</span></label>
+      <div class="size-preview-container">
+        <div class="size-preview" id="size-preview" style="width: 24px; height: 24px;"></div>
+      </div>
+      <input type="range" id="brush-size" min="10" max="80" value="30">
+    </div>
+
+    <div class="lock-view-btn">
+      <button id="lock-view-btn">🔒 锁定视角</button>
+    </div>
+
+    <div class="clear-btn">
+      <button id="clear-btn">🗑️ 清空画布</button>
+    </div>
+  </div>
+
+  <div class="controls-hint">
+    <kbd>鼠标左键</kbd> 喷漆 | <kbd>鼠标移动</kbd> 控制位置 | <kbd>滚轮</kbd> 缩放视角
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

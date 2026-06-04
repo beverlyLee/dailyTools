@@ -1,0 +1,326 @@
+[
+  {
+    "id": "bj001",
+    "name": "迷局推理馆(朝阳大悦城店)",
+    "city": "北京",
+    "district": "朝阳区",
+    "address": "朝阳区朝阳北路101号朝阳大悦城B1",
+    "lat": 39.9218,
+    "lng": 116.4737,
+    "rating": 4.9,
+    "review_count": 467,
+    "avg_price": 138,
+    "tags": [
+      "硬核推理",
+      "沉浸剧场",
+      "本格推理"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "bj002",
+    "name": "暗影密室(三里屯店)",
+    "city": "北京",
+    "district": "朝阳区",
+    "address": "朝阳区三里屯路19号院2号楼",
+    "lat": 39.9337,
+    "lng": 116.4545,
+    "rating": 4.7,
+    "review_count": 356,
+    "avg_price": 128,
+    "tags": [
+      "硬核推理",
+      "恐怖惊悚",
+      "密室逃脱"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "bj003",
+    "name": "戏梦沉浸剧场(CBD店)",
+    "city": "北京",
+    "district": "朝阳区",
+    "address": "朝阳区建国路89号华贸中心",
+    "lat": 39.9087,
+    "lng": 116.4603,
+    "rating": 4.8,
+    "review_count": 412,
+    "avg_price": 158,
+    "tags": [
+      "沉浸剧场",
+      "硬核推理",
+      "情感本"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "bj004",
+    "name": "逻辑猎人推理社",
+    "city": "北京",
+    "district": "朝阳区",
+    "address": "朝阳区望京SOHO T1-2108",
+    "lat": 39.9893,
+    "lng": 116.4782,
+    "rating": 4.6,
+    "review_count": 289,
+    "avg_price": 118,
+    "tags": [
+      "硬核推理",
+      "本格推理",
+      "变格推理"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "bj005",
+    "name": "诡夜惊魂密室",
+    "city": "北京",
+    "district": "朝阳区",
+    "address": "朝阳区劲松南路1号",
+    "lat": 39.8765,
+    "lng": 116.4632,
+    "rating": 4.5,
+    "review_count": 234,
+    "avg_price": 108,
+    "tags": [
+      "恐怖惊悚",
+      "密室逃脱",
+      "沉浸式"
+    ],
+    "cluster_id": 1
+  },
+  {
+    "id": "bj006",
+    "name": "京城剧本馆(国贸店)",
+    "city": "北京",
+    "district": "朝阳区",
+    "address": "朝阳区国贸建外SOHO西区12号楼",
+    "lat": 39.9095,
+    "lng": 116.4587,
+    "rating": 4.7,
+    "review_count": 378,
+    "avg_price": 148,
+    "tags": [
+      "沉浸剧场",
+      "硬核推理",
+      "欢乐机制"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "bj007",
+    "name": "悬疑档案馆",
+    "city": "北京",
+    "district": "海淀区",
+    "address": "海淀区中关村大街15号",
+    "lat": 39.9812,
+    "lng": 116.3107,
+    "rating": 4.8,
+    "review_count": 401,
+    "avg_price": 128,
+    "tags": [
+      "硬核推理",
+      "本格推理",
+      "密室逃脱"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "bj008",
+    "name": "幻境密室(五道口店)",
+    "city": "北京",
+    "district": "海淀区",
+    "address": "海淀区成府路28号五道口购物中心",
+    "lat": 39.9928,
+    "lng": 116.3377,
+    "rating": 4.4,
+    "review_count": 178,
+    "avg_price": 98,
+    "tags": [
+      "恐怖惊悚",
+      "沉浸式",
+      "密室逃脱"
+    ],
+    "cluster_id": 1
+  },
+  {
+    "id": "bj009",
+    "name": "推理工坊(西直门店)",
+    "city": "北京",
+    "district": "西城区",
+    "address": "西城区西直门外大街1号嘉茂中心",
+    "lat": 39.9421,
+    "lng": 116.3487,
+    "rating": 4.6,
+    "review_count": 245,
+    "avg_price": 108,
+    "tags": [
+      "硬核推理",
+      "阵营对抗",
+      "变格推理"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "bj010",
+    "name": "欢乐研究所",
+    "city": "北京",
+    "district": "朝阳区",
+    "address": "朝阳区双井富力广场3层",
+    "lat": 39.8953,
+    "lng": 116.4612,
+    "rating": 4.5,
+    "review_count": 198,
+    "avg_price": 88,
+    "tags": [
+      "欢乐机制",
+      "派对游戏",
+      "轻松休闲"
+    ],
+    "cluster_id": 2
+  },
+  {
+    "id": "bj011",
+    "name": "红尘客栈剧本社",
+    "city": "北京",
+    "district": "东城区",
+    "address": "东城区王府井大街301号",
+    "lat": 39.9142,
+    "lng": 116.4107,
+    "rating": 4.7,
+    "review_count": 312,
+    "avg_price": 138,
+    "tags": [
+      "情感沉浸",
+      "古风本",
+      "沉浸剧场"
+    ],
+    "cluster_id": 3
+  },
+  {
+    "id": "bj012",
+    "name": "鬼门关密室体验馆",
+    "city": "北京",
+    "district": "朝阳区",
+    "address": "朝阳区百子湾路33号院",
+    "lat": 39.8978,
+    "lng": 116.4765,
+    "rating": 4.3,
+    "review_count": 167,
+    "avg_price": 118,
+    "tags": [
+      "恐怖惊悚",
+      "沉浸式",
+      "NPC互动"
+    ],
+    "cluster_id": 1
+  },
+  {
+    "id": "bj013",
+    "name": "真探局(望京店)",
+    "city": "北京",
+    "district": "朝阳区",
+    "address": "朝阳区望京西路50号",
+    "lat": 39.9912,
+    "lng": 116.4723,
+    "rating": 4.8,
+    "review_count": 356,
+    "avg_price": 148,
+    "tags": [
+      "硬核推理",
+      "沉浸剧场",
+      "本格推理"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "bj014",
+    "name": "乱世枭雄剧本杀",
+    "city": "北京",
+    "district": "丰台区",
+    "address": "丰台区丰台路75号",
+    "lat": 39.8582,
+    "lng": 116.2867,
+    "rating": 4.4,
+    "review_count": 156,
+    "avg_price": 98,
+    "tags": [
+      "阵营对抗",
+      "欢乐机制",
+      "机制本"
+    ],
+    "cluster_id": 4
+  },
+  {
+    "id": "bj015",
+    "name": "密室大逃脱(通州店)",
+    "city": "北京",
+    "district": "通州区",
+    "address": "通州区新华西街58号",
+    "lat": 39.9087,
+    "lng": 116.6623,
+    "rating": 4.3,
+    "review_count": 134,
+    "avg_price": 78,
+    "tags": [
+      "密室逃脱",
+      "恐怖惊悚",
+      "解谜"
+    ],
+    "cluster_id": 1
+  },
+  {
+    "id": "bj016",
+    "name": "云梦泽情感剧场",
+    "city": "北京",
+    "district": "朝阳区",
+    "address": "朝阳区建国路93号万达广场",
+    "lat": 39.9082,
+    "lng": 116.4653,
+    "rating": 4.9,
+    "review_count": 489,
+    "avg_price": 168,
+    "tags": [
+      "情感沉浸",
+      "沉浸剧场",
+      "古风本"
+    ],
+    "cluster_id": 3
+  },
+  {
+    "id": "bj017",
+    "name": "京城诡事录",
+    "city": "北京",
+    "district": "东城区",
+    "address": "东城区安定门内大街25号",
+    "lat": 39.9478,
+    "lng": 116.4023,
+    "rating": 4.6,
+    "review_count": 278,
+    "avg_price": 128,
+    "tags": [
+      "硬核推理",
+      "恐怖惊悚",
+      "变格推理"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "bj018",
+    "name": "嘻哈欢乐局",
+    "city": "北京",
+    "district": "海淀区",
+    "address": "海淀区学院路15号",
+    "lat": 39.9832,
+    "lng": 116.3487,
+    "rating": 4.4,
+    "review_count": 189,
+    "avg_price": 78,
+    "tags": [
+      "欢乐机制",
+      "派对游戏",
+      "轻松休闲"
+    ],
+    "cluster_id": 2
+  }
+]

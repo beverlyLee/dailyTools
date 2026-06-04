@@ -1,0 +1,272 @@
+[
+  {
+    "id": "sh001",
+    "name": "魔都推理局(南京路店)",
+    "city": "上海",
+    "district": "黄浦区",
+    "address": "黄浦区南京东路353号",
+    "lat": 31.2345,
+    "lng": 121.4782,
+    "rating": 4.8,
+    "review_count": 423,
+    "avg_price": 148,
+    "tags": [
+      "硬核推理",
+      "沉浸剧场",
+      "本格推理"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "sh002",
+    "name": "沪上鬼屋(静安店)",
+    "city": "上海",
+    "district": "静安区",
+    "address": "静安区南京西路1266号",
+    "lat": 31.2267,
+    "lng": 121.4487,
+    "rating": 4.6,
+    "review_count": 287,
+    "avg_price": 128,
+    "tags": [
+      "恐怖惊悚",
+      "密室逃脱",
+      "NPC互动"
+    ],
+    "cluster_id": 1
+  },
+  {
+    "id": "sh003",
+    "name": "笑果推理社",
+    "city": "上海",
+    "district": "徐汇区",
+    "address": "徐汇区漕溪北路398号",
+    "lat": 31.1878,
+    "lng": 121.4382,
+    "rating": 4.5,
+    "review_count": 234,
+    "avg_price": 108,
+    "tags": [
+      "欢乐机制",
+      "派对游戏",
+      "轻松休闲"
+    ],
+    "cluster_id": 2
+  },
+  {
+    "id": "sh004",
+    "name": "海上繁花情感剧场",
+    "city": "上海",
+    "district": "黄浦区",
+    "address": "黄浦区淮海中路282号",
+    "lat": 31.2234,
+    "lng": 121.4712,
+    "rating": 4.9,
+    "review_count": 501,
+    "avg_price": 168,
+    "tags": [
+      "情感沉浸",
+      "沉浸剧场",
+      "古风本"
+    ],
+    "cluster_id": 3
+  },
+  {
+    "id": "sh005",
+    "name": "阵营之战(浦东店)",
+    "city": "上海",
+    "district": "浦东新区",
+    "address": "浦东新区陆家嘴环路1000号",
+    "lat": 31.2398,
+    "lng": 121.5012,
+    "rating": 4.7,
+    "review_count": 345,
+    "avg_price": 138,
+    "tags": [
+      "阵营对抗",
+      "欢乐机制",
+      "机制本"
+    ],
+    "cluster_id": 4
+  },
+  {
+    "id": "sh006",
+    "name": "暗黑密室(长宁店)",
+    "city": "上海",
+    "district": "长宁区",
+    "address": "长宁区中山公园附近",
+    "lat": 31.2187,
+    "lng": 121.4123,
+    "rating": 4.4,
+    "review_count": 178,
+    "avg_price": 108,
+    "tags": [
+      "恐怖惊悚",
+      "密室逃脱",
+      "沉浸式"
+    ],
+    "cluster_id": 1
+  },
+  {
+    "id": "sh007",
+    "name": "魔方推理馆(虹口店)",
+    "city": "上海",
+    "district": "虹口区",
+    "address": "虹口区四川北路1800号",
+    "lat": 31.2567,
+    "lng": 121.4823,
+    "rating": 4.6,
+    "review_count": 267,
+    "avg_price": 118,
+    "tags": [
+      "硬核推理",
+      "本格推理",
+      "密室逃脱"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "sh008",
+    "name": "梦境沉浸剧场",
+    "city": "上海",
+    "district": "静安区",
+    "address": "静安区北京西路968号",
+    "lat": 31.2312,
+    "lng": 121.4423,
+    "rating": 4.8,
+    "review_count": 389,
+    "avg_price": 158,
+    "tags": [
+      "沉浸剧场",
+      "情感沉浸",
+      "硬核推理"
+    ],
+    "cluster_id": 3
+  },
+  {
+    "id": "sh009",
+    "name": "欢乐多多剧本社",
+    "city": "上海",
+    "district": "浦东新区",
+    "address": "浦东新区张杨路500号",
+    "lat": 31.2287,
+    "lng": 121.5212,
+    "rating": 4.3,
+    "review_count": 156,
+    "avg_price": 88,
+    "tags": [
+      "欢乐机制",
+      "派对游戏",
+      "轻松休闲"
+    ],
+    "cluster_id": 2
+  },
+  {
+    "id": "sh010",
+    "name": "诡案调查局",
+    "city": "上海",
+    "district": "徐汇区",
+    "address": "徐汇区宜山路455号",
+    "lat": 31.1782,
+    "lng": 121.4232,
+    "rating": 4.7,
+    "review_count": 312,
+    "avg_price": 128,
+    "tags": [
+      "硬核推理",
+      "恐怖惊悚",
+      "变格推理"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "sh011",
+    "name": "热血阵营杀",
+    "city": "上海",
+    "district": "黄浦区",
+    "address": "黄浦区人民广场附近",
+    "lat": 31.2312,
+    "lng": 121.4712,
+    "rating": 4.5,
+    "review_count": 201,
+    "avg_price": 108,
+    "tags": [
+      "阵营对抗",
+      "欢乐机制",
+      "机制本"
+    ],
+    "cluster_id": 4
+  },
+  {
+    "id": "sh012",
+    "name": "鬼魅之夜密室",
+    "city": "上海",
+    "district": "浦东新区",
+    "address": "浦东新区世纪大道1198号",
+    "lat": 31.2212,
+    "lng": 121.5312,
+    "rating": 4.3,
+    "review_count": 145,
+    "avg_price": 98,
+    "tags": [
+      "恐怖惊悚",
+      "密室逃脱",
+      "NPC互动"
+    ],
+    "cluster_id": 1
+  },
+  {
+    "id": "sh013",
+    "name": "上海滩推理社",
+    "city": "上海",
+    "district": "黄浦区",
+    "address": "黄浦区外滩附近",
+    "lat": 31.2401,
+    "lng": 121.4901,
+    "rating": 4.8,
+    "review_count": 398,
+    "avg_price": 148,
+    "tags": [
+      "硬核推理",
+      "沉浸剧场",
+      "本格推理"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "sh014",
+    "name": "锦瑟年华情感本",
+    "city": "上海",
+    "district": "静安区",
+    "address": "静安区曹家渡附近",
+    "lat": 31.2387,
+    "lng": 121.4312,
+    "rating": 4.6,
+    "review_count": 267,
+    "avg_price": 138,
+    "tags": [
+      "情感沉浸",
+      "古风本",
+      "沉浸剧场"
+    ],
+    "cluster_id": 3
+  },
+  {
+    "id": "sh015",
+    "name": "笑声工厂剧本杀",
+    "city": "上海",
+    "district": "虹口区",
+    "address": "虹口区鲁迅公园附近",
+    "lat": 31.2612,
+    "lng": 121.4712,
+    "rating": 4.4,
+    "review_count": 178,
+    "avg_price": 88,
+    "tags": [
+      "欢乐机制",
+      "派对游戏",
+      "轻松休闲"
+    ],
+    "cluster_id": 2
+  }
+]

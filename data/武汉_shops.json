@@ -1,0 +1,263 @@
+[
+  {
+    "id": "wh001",
+    "name": "迷雾剧本杀推理社(光谷店)",
+    "city": "武汉",
+    "district": "洪山区",
+    "address": "洪山区光谷步行街西班牙风情街D栋5单元",
+    "lat": 30.508,
+    "lng": 114.385,
+    "rating": 4.8,
+    "review_count": 328,
+    "avg_price": 88,
+    "tags": [
+      "硬核推理",
+      "情感沉浸",
+      "恐怖惊悚"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "wh002",
+    "name": "剧满楼沉浸式剧本杀",
+    "city": "武汉",
+    "district": "洪山区",
+    "address": "洪山区光谷世界城广场1栋",
+    "lat": 30.51,
+    "lng": 114.382,
+    "rating": 4.7,
+    "review_count": 256,
+    "avg_price": 108,
+    "tags": [
+      "情感沉浸",
+      "欢乐机制"
+    ],
+    "cluster_id": 3
+  },
+  {
+    "id": "wh003",
+    "name": "天黑请闭眼剧本杀俱乐部",
+    "city": "武汉",
+    "district": "洪山区",
+    "address": "洪山区鲁巷广场购物中心旁",
+    "lat": 30.512,
+    "lng": 114.379,
+    "rating": 4.6,
+    "review_count": 198,
+    "avg_price": 78,
+    "tags": [
+      "硬核推理",
+      "阵营对抗"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "wh004",
+    "name": "秘境剧本杀体验馆",
+    "city": "武汉",
+    "district": "洪山区",
+    "address": "洪山区光谷SBI创业街10栋",
+    "lat": 30.515,
+    "lng": 114.388,
+    "rating": 4.5,
+    "review_count": 156,
+    "avg_price": 98,
+    "tags": [
+      "情感沉浸",
+      "欢乐机制"
+    ],
+    "cluster_id": 3
+  },
+  {
+    "id": "wh005",
+    "name": "剧本杀研究院",
+    "city": "武汉",
+    "district": "洪山区",
+    "address": "洪山区珞喻路726号",
+    "lat": 30.509,
+    "lng": 114.375,
+    "rating": 4.9,
+    "review_count": 412,
+    "avg_price": 128,
+    "tags": [
+      "硬核推理",
+      "情感沉浸",
+      "恐怖惊悚"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "wh006",
+    "name": "戏精学院剧本杀",
+    "city": "武汉",
+    "district": "洪山区",
+    "address": "洪山区光谷天地F1区",
+    "lat": 30.485,
+    "lng": 114.395,
+    "rating": 4.4,
+    "review_count": 134,
+    "avg_price": 68,
+    "tags": [
+      "欢乐机制",
+      "阵营对抗"
+    ],
+    "cluster_id": 2
+  },
+  {
+    "id": "wh007",
+    "name": "推理大师剧本杀",
+    "city": "武汉",
+    "district": "武昌区",
+    "address": "武昌区中南路7号中商广场",
+    "lat": 30.545,
+    "lng": 114.335,
+    "rating": 4.7,
+    "review_count": 287,
+    "avg_price": 98,
+    "tags": [
+      "硬核推理",
+      "阵营对抗"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "wh008",
+    "name": "梦境剧本杀体验馆",
+    "city": "武汉",
+    "district": "洪山区",
+    "address": "洪山区民族大道158号",
+    "lat": 30.495,
+    "lng": 114.368,
+    "rating": 4.6,
+    "review_count": 178,
+    "avg_price": 85,
+    "tags": [
+      "情感沉浸",
+      "恐怖惊悚"
+    ],
+    "cluster_id": 3
+  },
+  {
+    "id": "wh009",
+    "name": "百变大侦探剧本杀",
+    "city": "武汉",
+    "district": "洪山区",
+    "address": "洪山区关山大道光谷软件园A1栋",
+    "lat": 30.488,
+    "lng": 114.398,
+    "rating": 4.5,
+    "review_count": 145,
+    "avg_price": 75,
+    "tags": [
+      "硬核推理",
+      "欢乐机制"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "wh010",
+    "name": "桌游俱乐部剧本杀",
+    "city": "武汉",
+    "district": "洪山区",
+    "address": "洪山区珞狮路147号未来城C座",
+    "lat": 30.528,
+    "lng": 114.355,
+    "rating": 4.3,
+    "review_count": 98,
+    "avg_price": 58,
+    "tags": [
+      "阵营对抗",
+      "欢乐机制"
+    ],
+    "cluster_id": 4
+  },
+  {
+    "id": "wh011",
+    "name": "沉浸式剧场剧本杀",
+    "city": "武汉",
+    "district": "洪山区",
+    "address": "洪山区光谷步行街意大利风情街5号楼",
+    "lat": 30.507,
+    "lng": 114.38,
+    "rating": 4.8,
+    "review_count": 367,
+    "avg_price": 138,
+    "tags": [
+      "情感沉浸",
+      "硬核推理",
+      "欢乐机制"
+    ],
+    "cluster_id": 3
+  },
+  {
+    "id": "wh012",
+    "name": "暗夜侦探社",
+    "city": "武汉",
+    "district": "洪山区",
+    "address": "洪山区关山大道218号",
+    "lat": 30.492,
+    "lng": 114.402,
+    "rating": 4.6,
+    "review_count": 203,
+    "avg_price": 95,
+    "tags": [
+      "恐怖惊悚",
+      "硬核推理"
+    ],
+    "cluster_id": 1
+  },
+  {
+    "id": "wh013",
+    "name": "汉口诡事录",
+    "city": "武汉",
+    "district": "江汉区",
+    "address": "江汉区解放大道688号",
+    "lat": 30.5812,
+    "lng": 114.2712,
+    "rating": 4.7,
+    "review_count": 312,
+    "avg_price": 118,
+    "tags": [
+      "硬核推理",
+      "恐怖惊悚",
+      "沉浸剧场"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "wh014",
+    "name": "欢乐武汉剧本馆",
+    "city": "武汉",
+    "district": "江岸区",
+    "address": "江岸区中山大道818号",
+    "lat": 30.5912,
+    "lng": 114.3012,
+    "rating": 4.4,
+    "review_count": 167,
+    "avg_price": 78,
+    "tags": [
+      "欢乐机制",
+      "派对游戏",
+      "轻松休闲"
+    ],
+    "cluster_id": 2
+  },
+  {
+    "id": "wh015",
+    "name": "江城密室大逃脱",
+    "city": "武汉",
+    "district": "武昌区",
+    "address": "武昌区解放路398号",
+    "lat": 30.5512,
+    "lng": 114.3212,
+    "rating": 4.5,
+    "review_count": 198,
+    "avg_price": 108,
+    "tags": [
+      "恐怖惊悚",
+      "密室逃脱",
+      "沉浸式"
+    ],
+    "cluster_id": 1
+  }
+]

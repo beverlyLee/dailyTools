@@ -1,0 +1,502 @@
+[
+  {
+    "community": "中关村第一小学周边小区1",
+    "unit_price": 99579.0,
+    "area_sqm": 60.9,
+    "age": 8,
+    "school_name": "中关村第一小学",
+    "premium_pct": 37.32,
+    "lng": 116.315796,
+    "lat": 39.984904
+  },
+  {
+    "community": "中关村第一小学周边小区2",
+    "unit_price": 101329.0,
+    "area_sqm": 51.4,
+    "age": 24,
+    "school_name": "中关村第一小学",
+    "premium_pct": 36.01,
+    "lng": 116.313265,
+    "lat": 39.984397
+  },
+  {
+    "community": "中关村第一小学周边小区3",
+    "unit_price": 92934.0,
+    "area_sqm": 71.3,
+    "age": 15,
+    "school_name": "中关村第一小学",
+    "premium_pct": 31.82,
+    "lng": 116.31946,
+    "lat": 39.980474
+  },
+  {
+    "community": "中关村第一小学周边小区4",
+    "unit_price": 92232.0,
+    "area_sqm": 70.5,
+    "age": 12,
+    "school_name": "中关村第一小学",
+    "premium_pct": 36.12,
+    "lng": 116.316256,
+    "lat": 39.980947
+  },
+  {
+    "community": "中关村第一小学周边小区5",
+    "unit_price": 98228.0,
+    "area_sqm": 91.5,
+    "age": 5,
+    "school_name": "中关村第一小学",
+    "premium_pct": 32.0,
+    "lng": 116.316449,
+    "lat": 39.983911
+  },
+  {
+    "community": "中关村第二小学周边小区1",
+    "unit_price": 99182.0,
+    "area_sqm": 117.6,
+    "age": 21,
+    "school_name": "中关村第二小学",
+    "premium_pct": 23.65,
+    "lng": 116.31936,
+    "lat": 39.974023
+  },
+  {
+    "community": "中关村第二小学周边小区2",
+    "unit_price": 91042.0,
+    "area_sqm": 58.5,
+    "age": 14,
+    "school_name": "中关村第二小学",
+    "premium_pct": 29.84,
+    "lng": 116.316937,
+    "lat": 39.973586
+  },
+  {
+    "community": "中关村第二小学周边小区3",
+    "unit_price": 94600.0,
+    "area_sqm": 71.8,
+    "age": 15,
+    "school_name": "中关村第二小学",
+    "premium_pct": 25.59,
+    "lng": 116.314775,
+    "lat": 39.978456
+  },
+  {
+    "community": "中关村第二小学周边小区4",
+    "unit_price": 96402.0,
+    "area_sqm": 115.8,
+    "age": 22,
+    "school_name": "中关村第二小学",
+    "premium_pct": 32.7,
+    "lng": 116.318874,
+    "lat": 39.974109
+  },
+  {
+    "community": "中关村第二小学周边小区5",
+    "unit_price": 87136.0,
+    "area_sqm": 53.2,
+    "age": 11,
+    "school_name": "中关村第二小学",
+    "premium_pct": 23.88,
+    "lng": 116.319283,
+    "lat": 39.978531
+  },
+  {
+    "community": "中关村第三小学周边小区1",
+    "unit_price": 82708.0,
+    "area_sqm": 69.7,
+    "age": 15,
+    "school_name": "中关村第三小学",
+    "premium_pct": 25.29,
+    "lng": 116.309109,
+    "lat": 39.970628
+  },
+  {
+    "community": "中关村第三小学周边小区2",
+    "unit_price": 92790.0,
+    "area_sqm": 104.1,
+    "age": 8,
+    "school_name": "中关村第三小学",
+    "premium_pct": 17.75,
+    "lng": 116.307127,
+    "lat": 39.973813
+  },
+  {
+    "community": "中关村第三小学周边小区3",
+    "unit_price": 88664.0,
+    "area_sqm": 104.0,
+    "age": 6,
+    "school_name": "中关村第三小学",
+    "premium_pct": 24.07,
+    "lng": 116.306044,
+    "lat": 39.973893
+  },
+  {
+    "community": "中关村第三小学周边小区4",
+    "unit_price": 86973.0,
+    "area_sqm": 73.2,
+    "age": 6,
+    "school_name": "中关村第三小学",
+    "premium_pct": 25.63,
+    "lng": 116.308868,
+    "lat": 39.969695
+  },
+  {
+    "community": "中关村第三小学周边小区5",
+    "unit_price": 87201.0,
+    "area_sqm": 112.1,
+    "age": 14,
+    "school_name": "中关村第三小学",
+    "premium_pct": 24.3,
+    "lng": 116.308488,
+    "lat": 39.970951
+  },
+  {
+    "community": "人大附中周边小区1",
+    "unit_price": 105980.0,
+    "area_sqm": 104.0,
+    "age": 14,
+    "school_name": "人大附中",
+    "premium_pct": 40.61,
+    "lng": 116.318957,
+    "lat": 39.969279
+  },
+  {
+    "community": "人大附中周边小区2",
+    "unit_price": 98726.0,
+    "area_sqm": 52.2,
+    "age": 17,
+    "school_name": "人大附中",
+    "premium_pct": 33.25,
+    "lng": 116.322182,
+    "lat": 39.967565
+  },
+  {
+    "community": "人大附中周边小区3",
+    "unit_price": 100989.0,
+    "area_sqm": 78.7,
+    "age": 20,
+    "school_name": "人大附中",
+    "premium_pct": 42.08,
+    "lng": 116.320515,
+    "lat": 39.968051
+  },
+  {
+    "community": "人大附中周边小区4",
+    "unit_price": 99580.0,
+    "area_sqm": 115.1,
+    "age": 21,
+    "school_name": "人大附中",
+    "premium_pct": 35.9,
+    "lng": 116.31983,
+    "lat": 39.965462
+  },
+  {
+    "community": "人大附中周边小区5",
+    "unit_price": 99985.0,
+    "area_sqm": 112.5,
+    "age": 15,
+    "school_name": "人大附中",
+    "premium_pct": 41.04,
+    "lng": 116.323067,
+    "lat": 39.970229
+  },
+  {
+    "community": "北大附小周边小区1",
+    "unit_price": 88761.0,
+    "area_sqm": 66.0,
+    "age": 13,
+    "school_name": "北大附小",
+    "premium_pct": 28.18,
+    "lng": 116.30846,
+    "lat": 39.994377
+  },
+  {
+    "community": "北大附小周边小区2",
+    "unit_price": 95172.0,
+    "area_sqm": 79.2,
+    "age": 9,
+    "school_name": "北大附小",
+    "premium_pct": 25.07,
+    "lng": 116.308544,
+    "lat": 39.994164
+  },
+  {
+    "community": "北大附小周边小区3",
+    "unit_price": 92171.0,
+    "area_sqm": 86.3,
+    "age": 19,
+    "school_name": "北大附小",
+    "premium_pct": 34.43,
+    "lng": 116.302959,
+    "lat": 39.991026
+  },
+  {
+    "community": "北大附小周边小区4",
+    "unit_price": 91029.0,
+    "area_sqm": 84.8,
+    "age": 11,
+    "school_name": "北大附小",
+    "premium_pct": 34.62,
+    "lng": 116.304909,
+    "lat": 39.994831
+  },
+  {
+    "community": "北大附小周边小区5",
+    "unit_price": 95043.0,
+    "area_sqm": 53.6,
+    "age": 10,
+    "school_name": "北大附小",
+    "premium_pct": 31.1,
+    "lng": 116.304279,
+    "lat": 39.989221
+  },
+  {
+    "community": "清华大学附属小学周边小区1",
+    "unit_price": 87831.0,
+    "area_sqm": 119.0,
+    "age": 9,
+    "school_name": "清华大学附属小学",
+    "premium_pct": 21.45,
+    "lng": 116.329266,
+    "lat": 39.997437
+  },
+  {
+    "community": "清华大学附属小学周边小区2",
+    "unit_price": 91651.0,
+    "area_sqm": 75.7,
+    "age": 17,
+    "school_name": "清华大学附属小学",
+    "premium_pct": 22.38,
+    "lng": 116.327377,
+    "lat": 40.00057
+  },
+  {
+    "community": "清华大学附属小学周边小区3",
+    "unit_price": 93365.0,
+    "area_sqm": 72.5,
+    "age": 8,
+    "school_name": "清华大学附属小学",
+    "premium_pct": 20.9,
+    "lng": 116.327068,
+    "lat": 39.999215
+  },
+  {
+    "community": "清华大学附属小学周边小区4",
+    "unit_price": 80265.0,
+    "area_sqm": 85.8,
+    "age": 9,
+    "school_name": "清华大学附属小学",
+    "premium_pct": 26.78,
+    "lng": 116.322326,
+    "lat": 39.999545
+  },
+  {
+    "community": "清华大学附属小学周边小区5",
+    "unit_price": 86188.0,
+    "area_sqm": 115.6,
+    "age": 7,
+    "school_name": "清华大学附属小学",
+    "premium_pct": 26.91,
+    "lng": 116.327161,
+    "lat": 39.997046
+  },
+  {
+    "community": "史家胡同小学周边小区1",
+    "unit_price": 102037.0,
+    "area_sqm": 68.1,
+    "age": 18,
+    "school_name": "史家胡同小学",
+    "premium_pct": 36.25,
+    "lng": 116.416729,
+    "lat": 39.925681
+  },
+  {
+    "community": "史家胡同小学周边小区2",
+    "unit_price": 91870.0,
+    "area_sqm": 56.5,
+    "age": 22,
+    "school_name": "史家胡同小学",
+    "premium_pct": 32.3,
+    "lng": 116.420538,
+    "lat": 39.928331
+  },
+  {
+    "community": "史家胡同小学周边小区3",
+    "unit_price": 93587.0,
+    "area_sqm": 100.8,
+    "age": 22,
+    "school_name": "史家胡同小学",
+    "premium_pct": 30.39,
+    "lng": 116.421203,
+    "lat": 39.928799
+  },
+  {
+    "community": "史家胡同小学周边小区4",
+    "unit_price": 89346.0,
+    "area_sqm": 61.3,
+    "age": 22,
+    "school_name": "史家胡同小学",
+    "premium_pct": 33.42,
+    "lng": 116.421097,
+    "lat": 39.929679
+  },
+  {
+    "community": "史家胡同小学周边小区5",
+    "unit_price": 98616.0,
+    "area_sqm": 50.4,
+    "age": 8,
+    "school_name": "史家胡同小学",
+    "premium_pct": 28.01,
+    "lng": 116.418851,
+    "lat": 39.925055
+  },
+  {
+    "community": "北京小学周边小区1",
+    "unit_price": 77588.0,
+    "area_sqm": 99.9,
+    "age": 9,
+    "school_name": "北京小学",
+    "premium_pct": 21.52,
+    "lng": 116.35439,
+    "lat": 39.905151
+  },
+  {
+    "community": "北京小学周边小区2",
+    "unit_price": 87588.0,
+    "area_sqm": 96.0,
+    "age": 16,
+    "school_name": "北京小学",
+    "premium_pct": 21.5,
+    "lng": 116.352603,
+    "lat": 39.905479
+  },
+  {
+    "community": "北京小学周边小区3",
+    "unit_price": 77904.0,
+    "area_sqm": 118.1,
+    "age": 12,
+    "school_name": "北京小学",
+    "premium_pct": 17.65,
+    "lng": 116.350749,
+    "lat": 39.903206
+  },
+  {
+    "community": "北京小学周边小区4",
+    "unit_price": 82042.0,
+    "area_sqm": 90.4,
+    "age": 14,
+    "school_name": "北京小学",
+    "premium_pct": 22.95,
+    "lng": 116.357136,
+    "lat": 39.904787
+  },
+  {
+    "community": "北京小学周边小区5",
+    "unit_price": 74389.0,
+    "area_sqm": 95.2,
+    "age": 8,
+    "school_name": "北京小学",
+    "premium_pct": 17.81,
+    "lng": 116.351562,
+    "lat": 39.905335
+  },
+  {
+    "community": "景山学校周边小区1",
+    "unit_price": 86923.0,
+    "area_sqm": 51.1,
+    "age": 23,
+    "school_name": "景山学校",
+    "premium_pct": 30.15,
+    "lng": 116.413524,
+    "lat": 39.926724
+  },
+  {
+    "community": "景山学校周边小区2",
+    "unit_price": 94648.0,
+    "area_sqm": 70.6,
+    "age": 12,
+    "school_name": "景山学校",
+    "premium_pct": 30.64,
+    "lng": 116.409425,
+    "lat": 39.9268
+  },
+  {
+    "community": "景山学校周边小区3",
+    "unit_price": 89909.0,
+    "area_sqm": 115.5,
+    "age": 18,
+    "school_name": "景山学校",
+    "premium_pct": 22.69,
+    "lng": 116.412809,
+    "lat": 39.922902
+  },
+  {
+    "community": "景山学校周边小区4",
+    "unit_price": 96841.0,
+    "area_sqm": 59.8,
+    "age": 15,
+    "school_name": "景山学校",
+    "premium_pct": 27.15,
+    "lng": 116.41056,
+    "lat": 39.921583
+  },
+  {
+    "community": "景山学校周边小区5",
+    "unit_price": 92240.0,
+    "area_sqm": 75.2,
+    "age": 10,
+    "school_name": "景山学校",
+    "premium_pct": 27.97,
+    "lng": 116.413019,
+    "lat": 39.925445
+  },
+  {
+    "community": "芳草地小学周边小区1",
+    "unit_price": 78612.0,
+    "area_sqm": 85.8,
+    "age": 15,
+    "school_name": "芳草地小学",
+    "premium_pct": 18.67,
+    "lng": 116.464475,
+    "lat": 39.922861
+  },
+  {
+    "community": "芳草地小学周边小区2",
+    "unit_price": 76733.0,
+    "area_sqm": 112.3,
+    "age": 11,
+    "school_name": "芳草地小学",
+    "premium_pct": 17.02,
+    "lng": 116.464386,
+    "lat": 39.9219
+  },
+  {
+    "community": "芳草地小学周边小区3",
+    "unit_price": 64575.0,
+    "area_sqm": 82.6,
+    "age": 15,
+    "school_name": "芳草地小学",
+    "premium_pct": 15.78,
+    "lng": 116.461005,
+    "lat": 39.918564
+  },
+  {
+    "community": "芳草地小学周边小区4",
+    "unit_price": 64598.0,
+    "area_sqm": 107.6,
+    "age": 12,
+    "school_name": "芳草地小学",
+    "premium_pct": 10.31,
+    "lng": 116.460292,
+    "lat": 39.921545
+  },
+  {
+    "community": "芳草地小学周边小区5",
+    "unit_price": 67453.0,
+    "area_sqm": 93.6,
+    "age": 6,
+    "school_name": "芳草地小学",
+    "premium_pct": 17.7,
+    "lng": 116.459016,
+    "lat": 39.921133
+  }
+]

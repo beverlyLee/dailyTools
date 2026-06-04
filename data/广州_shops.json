@@ -1,0 +1,236 @@
+[
+  {
+    "id": "gz001",
+    "name": "穗城推理社(天河店)",
+    "city": "广州",
+    "district": "天河区",
+    "address": "天河区天河路385号太古汇",
+    "lat": 23.1367,
+    "lng": 113.3212,
+    "rating": 4.8,
+    "review_count": 398,
+    "avg_price": 128,
+    "tags": [
+      "硬核推理",
+      "沉浸剧场",
+      "本格推理"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "gz002",
+    "name": "岭南鬼屋(越秀店)",
+    "city": "广州",
+    "district": "越秀区",
+    "address": "越秀区北京路168号",
+    "lat": 23.1212,
+    "lng": 113.2612,
+    "rating": 4.5,
+    "review_count": 234,
+    "avg_price": 108,
+    "tags": [
+      "恐怖惊悚",
+      "密室逃脱",
+      "NPC互动"
+    ],
+    "cluster_id": 1
+  },
+  {
+    "id": "gz003",
+    "name": "粤欢乐剧场(天河城店)",
+    "city": "广州",
+    "district": "天河区",
+    "address": "天河区天河路208号天河城",
+    "lat": 23.1312,
+    "lng": 113.3245,
+    "rating": 4.7,
+    "review_count": 345,
+    "avg_price": 98,
+    "tags": [
+      "欢乐机制",
+      "派对游戏",
+      "轻松休闲"
+    ],
+    "cluster_id": 2
+  },
+  {
+    "id": "gz004",
+    "name": "花城情感剧场",
+    "city": "广州",
+    "district": "海珠区",
+    "address": "海珠区江南大道中180号",
+    "lat": 23.0912,
+    "lng": 113.2712,
+    "rating": 4.6,
+    "review_count": 267,
+    "avg_price": 138,
+    "tags": [
+      "情感沉浸",
+      "古风本",
+      "沉浸剧场"
+    ],
+    "cluster_id": 3
+  },
+  {
+    "id": "gz005",
+    "name": "岭南阵营战(番禺店)",
+    "city": "广州",
+    "district": "番禺区",
+    "address": "番禺区市桥街道大北路112号",
+    "lat": 22.9412,
+    "lng": 113.3612,
+    "rating": 4.4,
+    "review_count": 178,
+    "avg_price": 88,
+    "tags": [
+      "阵营对抗",
+      "欢乐机制",
+      "机制本"
+    ],
+    "cluster_id": 4
+  },
+  {
+    "id": "gz006",
+    "name": "珠江诡事录",
+    "city": "广州",
+    "district": "荔湾区",
+    "address": "荔湾区上下九路68号",
+    "lat": 23.1112,
+    "lng": 113.2412,
+    "rating": 4.6,
+    "review_count": 256,
+    "avg_price": 118,
+    "tags": [
+      "硬核推理",
+      "恐怖惊悚",
+      "变格推理"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "gz007",
+    "name": "广府欢乐局",
+    "city": "广州",
+    "district": "天河区",
+    "address": "天河区体育西路191号",
+    "lat": 23.1345,
+    "lng": 113.3178,
+    "rating": 4.5,
+    "review_count": 201,
+    "avg_price": 88,
+    "tags": [
+      "欢乐机制",
+      "派对游戏",
+      "轻松休闲"
+    ],
+    "cluster_id": 2
+  },
+  {
+    "id": "gz008",
+    "name": "南国密室(越秀二店)",
+    "city": "广州",
+    "district": "越秀区",
+    "address": "越秀区环市东路339号",
+    "lat": 23.1412,
+    "lng": 113.2789,
+    "rating": 4.3,
+    "review_count": 145,
+    "avg_price": 98,
+    "tags": [
+      "恐怖惊悚",
+      "密室逃脱",
+      "沉浸式"
+    ],
+    "cluster_id": 1
+  },
+  {
+    "id": "gz009",
+    "name": "羊城推理馆",
+    "city": "广州",
+    "district": "天河区",
+    "address": "天河区天河北路233号",
+    "lat": 23.1389,
+    "lng": 113.3312,
+    "rating": 4.7,
+    "review_count": 312,
+    "avg_price": 138,
+    "tags": [
+      "硬核推理",
+      "沉浸剧场",
+      "本格推理"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "gz010",
+    "name": "广州大阵营",
+    "city": "广州",
+    "district": "天河区",
+    "address": "天河区龙口西路138号",
+    "lat": 23.1412,
+    "lng": 113.3412,
+    "rating": 4.5,
+    "review_count": 223,
+    "avg_price": 108,
+    "tags": [
+      "阵营对抗",
+      "欢乐机制",
+      "机制本"
+    ],
+    "cluster_id": 4
+  },
+  {
+    "id": "gz011",
+    "name": "粤夜惊魂密室",
+    "city": "广州",
+    "district": "海珠区",
+    "address": "海珠区昌岗中路128号",
+    "lat": 23.0812,
+    "lng": 113.2812,
+    "rating": 4.4,
+    "review_count": 167,
+    "avg_price": 108,
+    "tags": [
+      "恐怖惊悚",
+      "密室逃脱",
+      "NPC互动"
+    ],
+    "cluster_id": 1
+  },
+  {
+    "id": "gz012",
+    "name": "西关情感剧场",
+    "city": "广州",
+    "district": "荔湾区",
+    "address": "荔湾区恩宁路99号",
+    "lat": 23.1012,
+    "lng": 113.2312,
+    "rating": 4.8,
+    "review_count": 378,
+    "avg_price": 148,
+    "tags": [
+      "情感沉浸",
+      "古风本",
+      "沉浸剧场"
+    ],
+    "cluster_id": 3
+  },
+  {
+    "id": "gz013",
+    "name": "天河欢乐世界剧本杀",
+    "city": "广州",
+    "district": "天河区",
+    "address": "天河区五山路381号",
+    "lat": 23.1512,
+    "lng": 113.3512,
+    "rating": 4.6,
+    "review_count": 289,
+    "avg_price": 88,
+    "tags": [
+      "欢乐机制",
+      "轻松休闲",
+      "派对游戏"
+    ],
+    "cluster_id": 2
+  }
+]

@@ -1,0 +1,290 @@
+[
+  {
+    "id": "cd001",
+    "name": "蜀欢乐剧场(春熙路店)",
+    "city": "成都",
+    "district": "锦江区",
+    "address": "锦江区春熙路26号",
+    "lat": 30.6578,
+    "lng": 104.0812,
+    "rating": 4.8,
+    "review_count": 456,
+    "avg_price": 98,
+    "tags": [
+      "欢乐机制",
+      "派对游戏",
+      "轻松休闲"
+    ],
+    "cluster_id": 2
+  },
+  {
+    "id": "cd002",
+    "name": "锦城欢乐派",
+    "city": "成都",
+    "district": "锦江区",
+    "address": "锦江区红星路三段1号",
+    "lat": 30.6612,
+    "lng": 104.0823,
+    "rating": 4.7,
+    "review_count": 389,
+    "avg_price": 88,
+    "tags": [
+      "欢乐机制",
+      "派对游戏",
+      "阵营对抗"
+    ],
+    "cluster_id": 2
+  },
+  {
+    "id": "cd003",
+    "name": "巴蜀谜局",
+    "city": "成都",
+    "district": "锦江区",
+    "address": "锦江区东大街紫东楼段35号",
+    "lat": 30.6523,
+    "lng": 104.0834,
+    "rating": 4.6,
+    "review_count": 312,
+    "avg_price": 108,
+    "tags": [
+      "硬核推理",
+      "本格推理",
+      "变格推理"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "cd004",
+    "name": "火锅欢乐杀(春熙路店)",
+    "city": "成都",
+    "district": "锦江区",
+    "address": "锦江区春熙路68号",
+    "lat": 30.6589,
+    "lng": 104.0798,
+    "rating": 4.9,
+    "review_count": 523,
+    "avg_price": 78,
+    "tags": [
+      "欢乐机制",
+      "阵营对抗",
+      "派对游戏"
+    ],
+    "cluster_id": 2
+  },
+  {
+    "id": "cd005",
+    "name": "川蜀鬼话密室",
+    "city": "成都",
+    "district": "青羊区",
+    "address": "青羊区人民中路一段28号",
+    "lat": 30.6712,
+    "lng": 104.0623,
+    "rating": 4.5,
+    "review_count": 234,
+    "avg_price": 108,
+    "tags": [
+      "恐怖惊悚",
+      "密室逃脱",
+      "NPC互动"
+    ],
+    "cluster_id": 1
+  },
+  {
+    "id": "cd006",
+    "name": "蓉城推理社",
+    "city": "成都",
+    "district": "武侯区",
+    "address": "武侯区科华北路62号",
+    "lat": 30.6312,
+    "lng": 104.0712,
+    "rating": 4.7,
+    "review_count": 345,
+    "avg_price": 118,
+    "tags": [
+      "硬核推理",
+      "沉浸剧场",
+      "本格推理"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "cd007",
+    "name": "锦里情感剧场",
+    "city": "成都",
+    "district": "武侯区",
+    "address": "武侯区锦里古街旁",
+    "lat": 30.6456,
+    "lng": 104.0478,
+    "rating": 4.8,
+    "review_count": 401,
+    "avg_price": 128,
+    "tags": [
+      "情感沉浸",
+      "古风本",
+      "沉浸剧场"
+    ],
+    "cluster_id": 3
+  },
+  {
+    "id": "cd008",
+    "name": "嘻哈剧本馆(太古里店)",
+    "city": "成都",
+    "district": "锦江区",
+    "address": "锦江区中纱帽街8号",
+    "lat": 30.6545,
+    "lng": 104.0856,
+    "rating": 4.6,
+    "review_count": 287,
+    "avg_price": 88,
+    "tags": [
+      "欢乐机制",
+      "轻松休闲",
+      "派对游戏"
+    ],
+    "cluster_id": 2
+  },
+  {
+    "id": "cd009",
+    "name": "蜀山诡事录",
+    "city": "成都",
+    "district": "金牛区",
+    "address": "金牛区蜀汉路89号",
+    "lat": 30.6912,
+    "lng": 104.0412,
+    "rating": 4.4,
+    "review_count": 178,
+    "avg_price": 98,
+    "tags": [
+      "恐怖惊悚",
+      "硬核推理",
+      "变格推理"
+    ],
+    "cluster_id": 1
+  },
+  {
+    "id": "cd010",
+    "name": "群雄逐鹿阵营杀",
+    "city": "成都",
+    "district": "成华区",
+    "address": "成华区建设路26号",
+    "lat": 30.6612,
+    "lng": 104.1012,
+    "rating": 4.5,
+    "review_count": 201,
+    "avg_price": 108,
+    "tags": [
+      "阵营对抗",
+      "欢乐机制",
+      "机制本"
+    ],
+    "cluster_id": 4
+  },
+  {
+    "id": "cd011",
+    "name": "蜀乐坊(春熙路二店)",
+    "city": "成都",
+    "district": "锦江区",
+    "address": "锦江区联升巷18号",
+    "lat": 30.6598,
+    "lng": 104.0801,
+    "rating": 4.7,
+    "review_count": 367,
+    "avg_price": 88,
+    "tags": [
+      "欢乐机制",
+      "派对游戏",
+      "轻松休闲"
+    ],
+    "cluster_id": 2
+  },
+  {
+    "id": "cd012",
+    "name": "梦回唐朝沉浸馆",
+    "city": "成都",
+    "district": "锦江区",
+    "address": "锦江区东御街18号",
+    "lat": 30.6534,
+    "lng": 104.0756,
+    "rating": 4.9,
+    "review_count": 478,
+    "avg_price": 148,
+    "tags": [
+      "情感沉浸",
+      "沉浸剧场",
+      "古风本"
+    ],
+    "cluster_id": 3
+  },
+  {
+    "id": "cd013",
+    "name": "天府推理局",
+    "city": "成都",
+    "district": "武侯区",
+    "address": "武侯区天府大道北段1700号",
+    "lat": 30.6212,
+    "lng": 104.0612,
+    "rating": 4.8,
+    "review_count": 398,
+    "avg_price": 128,
+    "tags": [
+      "硬核推理",
+      "本格推理",
+      "沉浸剧场"
+    ],
+    "cluster_id": 0
+  },
+  {
+    "id": "cd014",
+    "name": "欢乐大乱斗",
+    "city": "成都",
+    "district": "锦江区",
+    "address": "锦江区大慈寺路23号",
+    "lat": 30.6567,
+    "lng": 104.0834,
+    "rating": 4.5,
+    "review_count": 234,
+    "avg_price": 78,
+    "tags": [
+      "欢乐机制",
+      "阵营对抗",
+      "派对游戏"
+    ],
+    "cluster_id": 2
+  },
+  {
+    "id": "cd015",
+    "name": "青城诡事密室",
+    "city": "成都",
+    "district": "青羊区",
+    "address": "青羊区光华村街45号",
+    "lat": 30.6812,
+    "lng": 104.0312,
+    "rating": 4.3,
+    "review_count": 156,
+    "avg_price": 98,
+    "tags": [
+      "恐怖惊悚",
+      "密室逃脱",
+      "沉浸式"
+    ],
+    "cluster_id": 1
+  },
+  {
+    "id": "cd016",
+    "name": "熊喵欢乐杀",
+    "city": "成都",
+    "district": "锦江区",
+    "address": "锦江区东大街下东大街段68号",
+    "lat": 30.6545,
+    "lng": 104.0778,
+    "rating": 4.6,
+    "review_count": 289,
+    "avg_price": 68,
+    "tags": [
+      "欢乐机制",
+      "轻松休闲",
+      "派对游戏"
+    ],
+    "cluster_id": 2
+  }
+]
