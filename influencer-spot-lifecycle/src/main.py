@@ -62,14 +62,61 @@ def is_valid_keyword(keyword: str) -> tuple[bool, str]:
         return False, "关键词包含无效字符，请输入有效的中文、英文或数字"
 
     chinese_chars = len(re.findall(r"[\u4e00-\u9fa5]", kw))
-    ascii_chars = len(re.findall(r"[a-zA-Z0-9]", kw))
-    if chinese_chars == 0 and ascii_chars < 2:
-        return False, "关键词无效，请输入有意义的地点名称"
+    ascii_letters = len(re.findall(r"[a-zA-Z]", kw))
+    digits = len(re.findall(r"[0-9]", kw))
+
+    if chinese_chars > 0:
+        return True, "valid"
+
+    if ascii_letters == 0 and digits >= 4:
+        return True, "valid"
+
+    if ascii_letters > 0:
+        if _looks_like_gibberish(kw):
+            return False, "关键词无效，请输入真实的地点名称"
+
+        if " " in kw.strip():
+            return True, "valid"
+
+        if kw[0].isupper() and not kw.isupper():
+            return True, "valid"
+
+        if len(kw) <= 8:
+            return True, "valid"
+
+        if any(c in kw for c in ["-", "_", "."]):
+            return True, "valid"
 
     if kw.isdigit() and len(kw) < 4:
         return False, "纯数字关键词过短，请输入地点名称"
 
-    return True, "valid"
+    return False, "关键词无效，请输入有意义的地点名称"
+
+
+def _looks_like_gibberish(text: str) -> bool:
+    text = text.lower().strip()
+
+    keyboard_rows = [
+        "qwertyuiop", "asdfghjkl", "zxcvbnm",
+        "йцукенгшщзхъ", "фывапролджэ", "ячсмитьбю",
+    ]
+    for row in keyboard_rows:
+        for i in range(len(row) - 3):
+            seq = row[i:i+4]
+            if seq in text:
+                return True
+
+    if len(set(text)) / max(len(text), 1) < 0.3:
+        return True
+
+    vowels = set("aeiou")
+    text_letters = [c for c in text if c.isalpha()]
+    if len(text_letters) >= 5:
+        vowel_count = sum(1 for c in text_letters if c in vowels)
+        if vowel_count / len(text_letters) < 0.15:
+            return True
+
+    return False
 
 
 class CrawlRequest(BaseModel):
