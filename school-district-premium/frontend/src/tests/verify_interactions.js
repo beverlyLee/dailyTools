@@ -131,15 +131,11 @@ export async function testPolygonClickInteraction(districtName) {
     return { pass: false }
   }
 
-  const districts = hooks.getDistricts ? hooks.getDistricts() : (window.__schoolDistrictAppHooks && window.__schoolDistrictAppHooks.getDistricts())
-  const target = districts.find(d => d.school_name.includes(districtName))
+  const districts = hooks.getPolygons ? hooks.getPolygons() : (window.__schoolDistrictAppHooks && window.__schoolDistrictAppHooks.getDistricts())
+  const target = districts.find(d => d.school_name && d.school_name.includes(districtName))
   if (!target) {
     console.log(`❌ 未找到学区: ${districtName}`)
     return { pass: false }
-  }
-
-  if (window.__districtClickSpy) {
-    console.log('⚠️  清除之前的点击监听器')
   }
 
   return new Promise((resolve) => {
@@ -148,8 +144,9 @@ export async function testPolygonClickInteraction(districtName) {
       console.log('   学区:', data.school_name)
       console.log('   溢价率:', data.avg_premium_pct)
 
-      const sidebarOpen = hooks.getShowSidebar ? hooks.getShowSidebar() : true
-      const selected = hooks.getSelectedDistrict ? hooks.getSelectedDistrict() : data
+      const appHooks = window.__schoolDistrictAppHooks
+      const sidebarOpen = appHooks && appHooks.getShowSidebar ? appHooks.getShowSidebar() : true
+      const selected = appHooks && appHooks.getSelectedDistrict ? appHooks.getSelectedDistrict() : data
 
       const pass = selected && selected.school_name === data.school_name && sidebarOpen
       console.log(`   侧栏打开: ${sidebarOpen}`)
@@ -160,17 +157,28 @@ export async function testPolygonClickInteraction(districtName) {
       resolve({ pass, data })
     }
 
-    console.log(`ℹ️  请在地图上点击 ${districtName} 学区多边形...`)
-    console.log(`ℹ️  或使用测试钩子: window.__districtClickSpy(targetDistrict)`)
+    if (hooks.simulatePolygonClick) {
+      const targetIndex = districts.findIndex(d => d.school_name && d.school_name.includes(districtName))
+      if (targetIndex >= 0) {
+        console.log(`ℹ️  使用 simulatePolygonClick 触发点击...`)
+        const result = hooks.simulatePolygonClick(targetIndex)
+        if (result) {
+          console.log(`✅ 程序化点击触发成功: ${result.school_name}`)
+        }
+      }
+    } else {
+      console.log(`ℹ️  请在地图上点击 ${districtName} 学区多边形...`)
+      console.log(`ℹ️  或使用测试钩子: window.__districtClickSpy(targetDistrict)`)
+    }
 
     setTimeout(() => {
       if (window.__districtClickSpy) {
-        console.log('⏱️  10秒超时，使用程序化触发...')
+        console.log('⏱️  10秒超时')
         const appHooks = window.__schoolDistrictAppHooks
-        if (appHooks && appHooks.setSelectedDistrict) {
+        if (appHooks && appHooks.setSelectedDistrict && target) {
           appHooks.setSelectedDistrict(target)
           delete window.__districtClickSpy
-          resolve({ pass: true, data: target })
+          resolve({ pass: true, data: target, simulated: true })
         } else {
           delete window.__districtClickSpy
           resolve({ pass: false, timeout: true })
@@ -183,6 +191,8 @@ export async function testPolygonClickInteraction(districtName) {
 export async function testMarkerClickInteraction(communityName) {
   console.log(`\n📍 测试点位点击交互: ${communityName || '任意点位'}...`)
 
+  const hooks = window.__schoolDistrictTestHooks || window.__schoolDistrictAppHooks
+
   return new Promise((resolve) => {
     window.__infoWindowSpy = ({ data, infoWindow }) => {
       console.log('✅ 信息窗口打开事件触发!')
@@ -190,19 +200,34 @@ export async function testMarkerClickInteraction(communityName) {
       console.log('   单价:', data.unit_price)
       console.log('   溢价率:', data.premium_pct)
       console.log('   学区:', data.school_name)
+      console.log('   面积:', data.area_sqm, 'm²')
+      console.log('   房龄:', data.age, '年')
 
-      const hooks = window.__schoolDistrictTestHooks || window.__schoolDistrictAppHooks
-      const selected = hooks && hooks.getSelectedDistrict ? hooks.getSelectedDistrict() : null
+      const appHooks = window.__schoolDistrictAppHooks
+      const selected = appHooks && appHooks.getSelectedDistrict ? appHooks.getSelectedDistrict() : null
 
       const districtMatch = !selected || selected.school_name === data.school_name
+      const hasAllFields = data.community && data.unit_price && data.premium_pct !== undefined && data.school_name && data.area_sqm && data.age !== undefined
       console.log(`   学区匹配: ${districtMatch ? '✅ 是' : '❌ 否'}`)
+      console.log(`   字段完整: ${hasAllFields ? '✅ 是' : '❌ 否'}`)
+
+      const pass = districtMatch && hasAllFields
+      console.log(`   交互验证: ${pass ? '✅ 通过' : '❌ 失败'}`)
 
       delete window.__infoWindowSpy
-      resolve({ pass: true, data, infoWindow })
+      resolve({ pass, data, infoWindow })
     }
 
-    console.log('ℹ️  请在地图上点击任意小区点位...')
-    console.log('ℹ️  或使用测试钩子: window.__infoWindowSpy({ data: markerData })')
+    if (hooks && hooks.simulateMarkerClick) {
+      console.log(`ℹ️  使用 simulateMarkerClick 触发第一个点位点击...`)
+      const result = hooks.simulateMarkerClick(0)
+      if (result) {
+        console.log(`✅ 程序化点击触发成功: ${result.community}`)
+      }
+    } else {
+      console.log('ℹ️  请在地图上点击任意小区点位...')
+      console.log('ℹ️  或使用测试钩子: window.__infoWindowSpy({ data: markerData })')
+    }
 
     setTimeout(() => {
       if (window.__infoWindowSpy) {

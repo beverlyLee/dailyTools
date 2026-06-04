@@ -75,7 +75,8 @@ export default {
     let map = null
     let AMap = null
     let polygons = []
-    let markers = []
+    let circleMarkers = []
+    let textMarkers = []
     let infoWindows = []
     let useFallback = false
     let fallbackCanvas = null
@@ -91,11 +92,13 @@ export default {
     function clearOverlays() {
       if (map) {
         polygons.forEach(p => map.remove(p))
-        markers.forEach(m => map.remove(m))
+        circleMarkers.forEach(m => map.remove(m))
+        textMarkers.forEach(m => map.remove(m))
         infoWindows.forEach(w => w.close())
       }
       polygons = []
-      markers = []
+      circleMarkers = []
+      textMarkers = []
       infoWindows = []
     }
 
@@ -158,10 +161,10 @@ export default {
           },
           extData: { type: 'label', school_name: d.school_name },
         })
-        markers.push(labelMarker)
+        textMarkers.push(labelMarker)
       })
 
-      map.add([...polygons, ...markers])
+      map.add([...polygons, ...textMarkers])
 
       if (polygons.length > 0) {
         map.setFitView(polygons)
@@ -223,10 +226,10 @@ export default {
           _radius: size,
         })
 
-        markers.push(circleMarker)
+        circleMarkers.push(circleMarker)
       })
 
-      map.add(markers.filter(m => m.CLASS_NAME === 'AMap.CircleMarker'))
+      map.add(circleMarkers)
     }
 
     function renderFallbackMap() {
@@ -401,7 +404,9 @@ export default {
       if (typeof window !== 'undefined') {
         window.__schoolDistrictTestHooks = {
           getPolygons: () => polygons.map(p => p.getExtData()),
-          getMarkers: () => markers.filter(m => m.CLASS_NAME === 'AMap.CircleMarker').map(m => m.getExtData()),
+          getMarkers: () => circleMarkers.map(m => m.getExtData()),
+          getCircleMarkers: () => circleMarkers,
+          getTextMarkers: () => textMarkers,
           getMap: () => map,
           getAMap: () => AMap,
           isFallback: () => useFallback,
@@ -413,6 +418,21 @@ export default {
           calculateMarkerRadius,
           getColorTier,
           getMarkerColorTier,
+          simulateMarkerClick: (index) => {
+            if (index >= 0 && index < circleMarkers.length) {
+              circleMarkers[index].emit('click')
+              return circleMarkers[index].getExtData()
+            }
+            return null
+          },
+          simulatePolygonClick: (index) => {
+            if (index >= 0 && index < polygons.length) {
+              polygons[index].emit('click')
+              return polygons[index].getExtData()
+            }
+            return null
+          },
+          getInfoWindows: () => infoWindows,
         }
         window.dispatchEvent(new CustomEvent('map-ready', { detail: { ready: true, useFallback } }))
       }
