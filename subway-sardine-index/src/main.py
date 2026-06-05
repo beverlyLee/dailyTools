@@ -1,12 +1,14 @@
 import os
 import json
 import logging
+import traceback
 from typing import List, Dict, Optional
 from datetime import datetime
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
@@ -16,10 +18,15 @@ from src.poi.subway_poi_spider import SubwayPOISpider
 from src.traffic.congestion_inference import CongestionInferenceEngine
 from src.analysis.crowd_level import CrowdLevelAnalyzer, CrowdData
 
+os.makedirs("logs", exist_ok=True)
+
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler("logs/api.log"), logging.StreamHandler()],
+    handlers=[
+        logging.FileHandler("logs/api.log"),
+        logging.StreamHandler(),
+    ],
 )
 logger = logging.getLogger(__name__)
 
@@ -27,6 +34,7 @@ app = FastAPI(
     title="Subway Sardine Index API",
     description="地铁拥挤度指数API - 基于周边路况反推地铁站人流密度",
     version="1.0.0",
+    debug=True,
 )
 
 app.add_middleware(
@@ -36,6 +44,37 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = datetime.now()
+    client_ip = request.client.host if request.client else "unknown"
+
+    logger.debug(
+        f"Request started: {request.method} {request.url.path} "
+        f"from {client_ip}"
+    )
+
+    try:
+        response = await call_next(request)
+        process_time = (datetime.now() - start_time).total_seconds()
+        logger.debug(
+            f"Request completed: {request.method} {request.url.path} "
+            f"status={response.status_code} time={process_time:.3f}s"
+        )
+        return response
+    except Exception as e:
+        process_time = (datetime.now() - start_time).total_seconds()
+        logger.error(
+            f"Request failed: {request.method} {request.url.path} "
+            f"error={str(e)} time={process_time:.3f}s"
+        )
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Internal server error: {str(e)}"},
+        )
 
 
 class StationRequest(BaseModel):
