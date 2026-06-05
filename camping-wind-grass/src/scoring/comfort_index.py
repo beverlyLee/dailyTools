@@ -81,33 +81,44 @@ class ComfortIndex:
 
     def _calculate_wind_score(self, weather_data: Dict) -> float:
         wind_level = weather_data.get("wind_level", 3)
-        if wind_level <= 2:
-            return 100
+        if wind_level <= 1:
+            return 95
+        elif wind_level == 2:
+            return 85
         elif wind_level == 3:
-            return 80
+            return 65
         elif wind_level == 4:
-            return 50
+            return 40
         elif wind_level == 5:
-            return 30
-        else:
+            return 25
+        elif wind_level == 6:
             return 10
+        else:
+            return 5
 
     def _calculate_grass_score(self, weather_data: Dict) -> float:
         coverage = weather_data.get("grass_coverage", 75)
-        if coverage >= 80:
-            return 100
+        if coverage >= 90:
+            return 95
+        elif coverage >= 80:
+            return 80 + (coverage - 80) * 0.75
+        elif coverage >= 70:
+            return 65 + (coverage - 70) * 0.75
         elif coverage >= 60:
-            return 70 + (coverage - 60) * 1.5
-        elif coverage >= 40:
-            return 50 + (coverage - 40)
+            return 50 + (coverage - 60) * 0.75
+        elif coverage >= 45:
+            return 30 + (coverage - 45) * 0.5
+        elif coverage >= 30:
+            return 15 + (coverage - 30) * 0.5
         else:
-            return coverage
+            return coverage * 0.5
 
     def _calculate_drainage_score(self, weather_data: Dict) -> float:
-        return weather_data.get("drainage_score", 50)
+        score = weather_data.get("drainage_score", 50)
+        return max(0, min(100, score - 10))
 
     def _calculate_keyword_score(self, keywords: List[str]) -> float:
-        score = 50
+        score = 40
         for kw in keywords:
             if kw in self.positive_keywords:
                 score += self.positive_keywords[kw]
@@ -116,37 +127,37 @@ class ComfortIndex:
         return max(0, min(100, score))
 
     def _get_grade(self, score: float) -> str:
-        if score >= 85:
+        if score >= 75:
             return "S"
-        elif score >= 75:
+        elif score >= 68:
             return "A"
-        elif score >= 60:
+        elif score >= 58:
             return "B"
-        elif score >= 45:
+        elif score >= 48:
             return "C"
         else:
             return "D"
 
     def _get_color(self, score: float) -> str:
-        if score >= 85:
+        if score >= 75:
             return "#22c55e"
-        elif score >= 70:
+        elif score >= 68:
             return "#84cc16"
-        elif score >= 55:
+        elif score >= 58:
             return "#eab308"
-        elif score >= 40:
+        elif score >= 48:
             return "#f97316"
         else:
             return "#ef4444"
 
     def _get_recommendation(self, score: float) -> str:
-        if score >= 85:
+        if score >= 75:
             return "强烈推荐，绝佳露营地！"
-        elif score >= 70:
+        elif score >= 68:
             return "推荐，舒适度较高"
-        elif score >= 55:
+        elif score >= 58:
             return "一般，可根据天气选择"
-        elif score >= 40:
+        elif score >= 48:
             return "不推荐，条件较差"
         else:
             return "不建议前往"

@@ -139,8 +139,8 @@ async def process_camping_sites(use_cache: bool = True):
     for idx, site in enumerate(raw_sites):
         site_id = f"site_{idx + 1}"
 
-        if "_generated_coords" in site:
-            coords = site["_generated_coords"]
+        if "_fixed_coords" in site:
+            coords = site["_fixed_coords"]
             lng, lat = coords["lng"], coords["lat"]
         else:
             lng, lat = await geo_coder.geocode(site["location"])
@@ -159,6 +159,24 @@ async def process_camping_sites(use_cache: bool = True):
         comfort_data = comfort_scorer.calculate_score(
             weather_data, site.get("keywords", [])
         )
+
+        if "_force_grade" in site:
+            comfort_data["grade"] = site["_force_grade"]
+            if site["_force_grade"] == "S":
+                comfort_data["color"] = "#22c55e"
+                comfort_data["recommendation"] = "强烈推荐，绝佳露营地！"
+            elif site["_force_grade"] == "A":
+                comfort_data["color"] = "#84cc16"
+                comfort_data["recommendation"] = "推荐，舒适度较高"
+            elif site["_force_grade"] == "B":
+                comfort_data["color"] = "#eab308"
+                comfort_data["recommendation"] = "一般，可根据天气选择"
+            elif site["_force_grade"] == "C":
+                comfort_data["color"] = "#f97316"
+                comfort_data["recommendation"] = "不推荐，条件较差"
+            else:
+                comfort_data["color"] = "#ef4444"
+                comfort_data["recommendation"] = "不建议前往"
 
         processed_site = {
             "id": site_id,
@@ -192,6 +210,7 @@ async def process_camping_sites(use_cache: bool = True):
                 "monthly_data": weather_data.get("monthly_data"),
             },
             "comfort": comfort_data,
+            "reviews": site.get("reviews", []),
         }
 
         processed.append(processed_site)

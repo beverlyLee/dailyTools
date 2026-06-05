@@ -321,6 +321,22 @@ function App() {
             </div>
           </div>
         </div>
+
+        <div class="popup-reviews">
+          <p class="reviews-title">💬 用户评论</p>
+          <div class="reviews-list">
+            ${(site.reviews || []).map((review, idx) => `
+              <div class="review-item">
+                <div class="review-header">
+                  <span class="review-user">${review.user || '匿名用户'}</span>
+                  <span class="review-rating">${'⭐'.repeat(review.rating || 0)}${'☆'.repeat(5 - (review.rating || 0))}</span>
+                </div>
+                <p class="review-content">${review.content}</p>
+                <p class="review-date">${review.date || ''}</p>
+              </div>
+            `).join('')}
+          </div>
+        </div>
       </div>
     `
   }
@@ -450,8 +466,9 @@ function App() {
           zoom: 4,
           center: [110, 35],
           zooms: [3, 15],
-          mapStyle: 'amap://styles/light',
+          mapStyle: 'amap://styles/normal',
           viewMode: '2D',
+          features: ['bg', 'road', 'building', 'point'],
         })
 
         map.current.on('error', (error) => {
@@ -501,9 +518,10 @@ function App() {
           zoomControl: true,
         }).setView([35, 110], 4)
 
-        window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 18,
-          attribution: '© OpenStreetMap contributors',
+        window.L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+          maxZoom: 19,
+          attribution: '©OpenStreetMap, ©CartoDB',
+          subdomains: 'abcd',
         }).addTo(map.current)
 
         window.L.control.scale({
