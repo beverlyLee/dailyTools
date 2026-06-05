@@ -298,6 +298,8 @@ class SubwayPOISpider:
             entrances = []
             lines = []
 
+            name = name.rstrip("()").strip()
+
             if "出入口" in name:
                 parts = name.split("(")
                 if len(parts) > 1:
@@ -305,8 +307,23 @@ class SubwayPOISpider:
                     entrances.append(entrance)
                     name = parts[0].strip()
 
+            address = poi.get("address", "")
+
+            if "号线" in address:
+                for line_part in address.split(";"):
+                    line_part = line_part.strip()
+                    if "号线" in line_part:
+                        if "/" in line_part:
+                            for sub_line in line_part.split("/"):
+                                if "号线" in sub_line:
+                                    lines.append(sub_line.strip())
+                        else:
+                            lines.append(line_part)
+
+            lines = list(dict.fromkeys(lines))
+
             poi_type = poi.get("type", "")
-            if "地铁" in poi_type:
+            if "地铁" in poi_type and not lines:
                 for line in [
                     "1号线",
                     "2号线",
@@ -318,11 +335,19 @@ class SubwayPOISpider:
                     "8号线",
                     "9号线",
                     "10号线",
+                    "11号线",
+                    "12号线",
+                    "13号线",
+                    "14号线",
+                    "15号线",
+                    "16号线",
+                    "17号线",
+                    "18号线",
+                    "19号线",
                 ]:
                     if line in poi_type:
                         lines.append(line)
 
-            address = poi.get("address", "")
             is_transfer = "换乘" in name or len(lines) > 1
 
             return SubwayStation(

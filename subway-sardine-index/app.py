@@ -90,11 +90,14 @@ def analyze_congestion(
         return crowd_data, demo_mode, demo_reason
 
 
-def create_map_dataframe(crowd_data: List[CrowdData]) -> pd.DataFrame:
+def create_map_dataframe(crowd_data: List[CrowdData], stations: List[Dict]) -> pd.DataFrame:
+    station_lines = {s["name"]: s.get("lines", []) for s in stations}
+
     data = []
     for item in crowd_data:
         base_size = 15
         size = base_size * item.size_multiplier
+        lines = station_lines.get(item.station_name, [])
 
         data.append(
             {
@@ -106,6 +109,7 @@ def create_map_dataframe(crowd_data: List[CrowdData]) -> pd.DataFrame:
                 "status": item.status,
                 "speed": item.speed,
                 "is_transfer": item.is_transfer,
+                "lines": "、".join(lines) if lines else "-",
                 "color": LEVEL_COLORS.get(item.crowd_level, "#888888"),
                 "size": size,
                 "emoji": LEVEL_EMOJIS.get(item.crowd_level, "❓"),
@@ -186,7 +190,7 @@ def main():
             if min_congestion > 0:
                 crowd_data = [d for d in crowd_data if d.congestion_index >= min_congestion]
 
-            df = create_map_dataframe(crowd_data)
+            df = create_map_dataframe(crowd_data, stations)
 
             col1, col2, col3 = st.columns([2, 1, 1])
 
@@ -295,6 +299,64 @@ def main():
 
             st.divider()
 
+            st.subheader("📍 站点详情")
+
+            station_names = sorted(df["station_name"].unique().tolist())
+            selected_station = st.selectbox(
+                "🔍 搜索或选择站点查看详情",
+                options=station_names,
+                help="选择一个站点查看详细信息",
+            )
+
+            if selected_station:
+                station_info = df[df["station_name"] == selected_station].iloc[0]
+
+                col_a, col_b, col_c, col_d = st.columns(4)
+
+                with col_a:
+                    is_transfer = station_info["is_transfer"]
+                    st.metric(
+                        "站点类型",
+                        "🔄 换乘站" if is_transfer else "⚪ 普通站",
+                        help="是否为换乘站",
+                    )
+
+                with col_b:
+                    st.metric(
+                        "拥挤等级",
+                        f"{station_info['emoji']} {station_info['crowd_level']}",
+                        help="站点拥挤程度",
+                    )
+
+                with col_c:
+                    st.metric(
+                        "拥堵指数",
+                        f"{station_info['congestion_index']:.3f}",
+                        help="0-1，越高越拥堵",
+                    )
+
+                with col_d:
+                    st.metric(
+                        "周边车速",
+                        f"{station_info['speed']:.1f} km/h",
+                        help="周边道路平均车速",
+                    )
+
+                st.markdown("---")
+
+                col_e, col_f = st.columns(2)
+
+                with col_e:
+                    st.markdown("#### 🚇 途经线路")
+                    lines = station_info["lines"] if station_info["lines"] != "-" else "暂无数据"
+                    st.info(f"**{lines}**")
+
+                with col_f:
+                    st.markdown("#### 🛣️ 道路状态")
+                    st.success(f"**{station_info['status']}**")
+
+            st.divider()
+
             st.subheader("📋 详细数据")
 
             display_df = df[
@@ -305,6 +367,7 @@ def main():
                     "status",
                     "speed",
                     "is_transfer",
+                    "lines",
                     "emoji",
                 ]
             ].rename(
@@ -315,6 +378,7 @@ def main():
                     "status": "道路状态",
                     "speed": "平均车速(km/h)",
                     "is_transfer": "换乘站",
+                    "lines": "途经线路",
                     "emoji": "状态",
                 }
             )
