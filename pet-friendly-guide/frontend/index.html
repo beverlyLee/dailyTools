@@ -74,7 +74,7 @@
       position: absolute;
       top: 80px;
       right: 20px;
-      width: 360px;
+      width: 380px;
       max-height: calc(100vh - 120px);
       background: white;
       border-radius: 12px;
@@ -207,7 +207,36 @@
       color: #616161;
     }
 
+    .location-info {
+      background: #f5f7ff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin: 12px 0;
+      border-left: 3px solid #667eea;
+    }
+
+    .location-info p {
+      margin: 0;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .attitude-info {
+      background: #fff8e1;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin: 12px 0;
+      border-left: 3px solid #ffc107;
+    }
+
+    .attitude-info p {
+      margin: 0;
+      color: #f57f17;
+      font-weight: 500;
+    }
+
     .facilities,
+    .services,
     .evidence {
       margin-top: 16px;
       padding-top: 16px;
@@ -215,6 +244,7 @@
     }
 
     .facilities h4,
+    .services h4,
     .evidence h4 {
       margin: 0 0 12px 0;
       font-size: 14px;
@@ -222,13 +252,15 @@
       font-weight: 600;
     }
 
-    .facility-list {
+    .facility-list,
+    .service-list {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
     }
 
-    .facility-item {
+    .facility-item,
+    .service-item {
       background: #f5f5f5;
       padding: 4px 12px;
       border-radius: 12px;
@@ -251,6 +283,16 @@
       color: #555;
       line-height: 1.5;
       border-left: 3px solid #667eea;
+    }
+
+    .no-info-tip {
+      padding: 10px 12px;
+      background: #fafafa;
+      border-radius: 8px;
+      border-left: 3px solid #9e9e9e;
+      font-size: 13px;
+      color: #888;
+      line-height: 1.5;
     }
 
     .loading {
@@ -281,6 +323,23 @@
       color: #666;
       margin: 0;
     }
+
+    .stats-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 90;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .stats-bar strong {
+      color: #333;
+    }
   </style>
 </head>
 <body>
@@ -291,7 +350,7 @@
         <div class="legend">
           <span class="legend-item">
             <span class="marker friendly">❤️</span>
-            <span>允许进入</span>
+            <span>宠物友好</span>
           </span>
           <span class="legend-item">
             <span class="marker outdoor">🌳</span>
@@ -299,7 +358,11 @@
           </span>
           <span class="legend-item">
             <span class="marker forbidden">🚫</span>
-            <span>禁止进入</span>
+            <span>禁止宠物</span>
+          </span>
+          <span class="legend-item">
+            <span class="marker unknown">❓</span>
+            <span>未知</span>
           </span>
         </div>
       </div>
@@ -318,11 +381,24 @@
         <p class="rating" id="poi-rating">⭐ 评分</p>
         <p class="price" id="poi-price">💰 价格</p>
         
-        <div id="poi-policy" class="policy-badge">宠物政策</div>
+        <div id="policy-badge" class="policy-badge">宠物政策</div>
+        
+        <div id="location-info" class="location-info">
+          <p id="location-text">📍 室内外均可</p>
+        </div>
+        
+        <div id="attitude-info" class="attitude-info">
+          <p id="attitude-text">😊 店员态度非常好</p>
+        </div>
         
         <div class="facilities" id="poi-facilities">
-          <h4>宠物设施：</h4>
+          <h4>🏠 宠物设施：</h4>
           <div class="facility-list" id="facility-list"></div>
+        </div>
+        
+        <div class="services" id="poi-services">
+          <h4>🛎️ 宠物服务：</h4>
+          <div class="service-list" id="service-list"></div>
         </div>
         
         <div class="evidence" id="poi-evidence">
@@ -330,6 +406,13 @@
           <ul class="evidence-list" id="evidence-list"></ul>
         </div>
       </div>
+    </div>
+    
+    <div class="stats-bar" id="stats-bar">
+      已加载 <strong id="total-count">0</strong> 个商户 | 
+      ✅ 友好 <strong id="friendly-count">0</strong> | 
+      🌳 户外 <strong id="outdoor-count">0</strong> | 
+      🚫 禁止 <strong id="forbidden-count">0</strong>
     </div>
     
     <div class="loading" id="loading">
@@ -344,100 +427,27 @@
     let markers = [];
     let pois = [];
 
-    const mockPOIs = [
-      {
-        id: "POI001",
-        name: "Paw Coffee 爪爪咖啡馆",
-        address: "上海市静安区南京西路1688号",
-        longitude: 121.4493,
-        latitude: 31.2304,
-        category: "咖啡餐饮",
-        phone: "021-12345678",
-        rating: 4.8,
-        price: "¥50/人",
-        pet_policy: "friendly",
-        pet_facility: { has_water_bowl: true, has_pee_pad: false, has_pet_snack: true, has_pet_cart: false, has_pet_area: false },
-        pet_evidence: ["可以带狗狗进去，店员还给准备了宠物专用水碗", "店员态度超好，还给了小零食，完全不排斥宠物"]
-      },
-      {
-        id: "POI002",
-        name: "毛孩子乐园餐厅",
-        address: "上海市徐汇区淮海中路1200号",
-        longitude: 121.4550,
-        latitude: 31.2150,
-        category: "餐饮美食",
-        phone: "021-87654321",
-        rating: 4.6,
-        price: "¥120/人",
-        pet_policy: "friendly",
-        pet_facility: { has_water_bowl: true, has_pee_pad: true, has_pet_snack: true, has_pet_cart: false, has_pet_area: true },
-        pet_evidence: ["户外区和室内都可以带狗狗，有免费尿垫提供"]
-      },
-      {
-        id: "POI003",
-        name: "传统美食餐厅",
-        address: "上海市黄浦区南京东路300号",
-        longitude: 121.4830,
-        latitude: 31.2360,
-        category: "中式餐饮",
-        phone: "021-55667788",
-        rating: 4.2,
-        price: "¥80/人",
-        pet_policy: "forbidden",
-        pet_facility: { has_water_bowl: false, has_pee_pad: false, has_pet_snack: false, has_pet_cart: false, has_pet_area: false },
-        pet_evidence: ["明确禁止宠物入内，只能放在门口的笼子里"]
-      },
-      {
-        id: "POI004",
-        name: "阳光购物中心",
-        address: "上海市浦东新区陆家嘴环路1000号",
-        longitude: 121.5030,
-        latitude: 31.2380,
-        category: "购物商场",
-        phone: "021-99887766",
-        rating: 4.5,
-        pet_policy: "friendly",
-        pet_facility: { has_water_bowl: false, has_pee_pad: false, has_pet_snack: false, has_pet_cart: true, has_pet_area: false },
-        pet_evidence: ["大部分店铺都允许进入，还提供宠物推车租赁"]
-      },
-      {
-        id: "POI005",
-        name: "露台花园餐厅",
-        address: "上海市长宁区虹桥路1450号",
-        longitude: 121.4120,
-        latitude: 31.2000,
-        category: "西餐",
-        phone: "021-33445566",
-        rating: 4.4,
-        price: "¥150/人",
-        pet_policy: "outdoor_only",
-        pet_facility: { has_water_bowl: true, has_pee_pad: false, has_pet_snack: false, has_pet_cart: false, has_pet_area: false },
-        pet_evidence: ["室外露台允许带狗狗，但是室内不行"]
-      },
-      {
-        id: "POI006",
-        name: "猫咪主题咖啡馆",
-        address: "上海市杨浦区大学路200号",
-        longitude: 121.5100,
-        latitude: 31.3000,
-        category: "咖啡餐饮",
-        phone: "021-11223344",
-        rating: 4.7,
-        price: "¥60/人",
-        pet_policy: "friendly",
-        pet_facility: { has_water_bowl: true, has_pee_pad: true, has_pet_snack: true, has_pet_cart: false, has_pet_area: true },
-        pet_evidence: []
+    function getPolicyDisplay(poi) {
+      if (poi.is_pet_friendly === false) {
+        return 'forbidden';
       }
-    ];
+      if (poi.is_pet_friendly === true) {
+        if (poi.location_restriction === 'outdoor') {
+          return 'outdoor_only';
+        }
+        return 'friendly';
+      }
+      return 'unknown';
+    }
 
     function getPolicyText(policy) {
       const mapping = {
-        friendly: '✅ 允许宠物进入',
-        outdoor_only: '🌳 仅限户外区',
-        forbidden: '🚫 禁止宠物进入',
-        unknown: '❓ 暂无宠物友好信息'
+        friendly: '✅ 宠物友好',
+        outdoor_only: '🌳 仅限户外',
+        forbidden: '🚫 禁止宠物',
+        unknown: '❓ 暂无信息'
       };
-      return mapping[policy] || '❓ 暂无宠物友好信息';
+      return mapping[policy] || '❓ 暂无信息';
     }
 
     function getMarkerIcon(policy) {
@@ -450,11 +460,8 @@
       return mapping[policy] || '❓';
     }
 
-    function normalizePolicy(policy) {
-      if (!policy || policy === null) {
-        return 'unknown';
-      }
-      return policy;
+    function normalizePolicy(poi) {
+      return getPolicyDisplay(poi);
     }
 
     function loadGaodeScript() {
@@ -480,12 +487,31 @@
         if (result.success) {
           pois = result.data;
         } else {
-          pois = mockPOIs;
+          pois = [];
         }
       } catch (error) {
         console.error('获取POI数据失败:', error);
-        pois = mockPOIs;
+        pois = [];
       }
+      updateStats();
+    }
+
+    function updateStats() {
+      let friendlyCount = 0;
+      let outdoorCount = 0;
+      let forbiddenCount = 0;
+      
+      pois.forEach(poi => {
+        const policy = getPolicyDisplay(poi);
+        if (policy === 'friendly') friendlyCount++;
+        else if (policy === 'outdoor_only') outdoorCount++;
+        else if (policy === 'forbidden') forbiddenCount++;
+      });
+      
+      document.getElementById('total-count').textContent = pois.length;
+      document.getElementById('friendly-count').textContent = friendlyCount;
+      document.getElementById('outdoor-count').textContent = outdoorCount;
+      document.getElementById('forbidden-count').textContent = forbiddenCount;
     }
 
     function addMarkers(AMap) {
@@ -493,11 +519,11 @@
       markers = [];
       
       pois.forEach(poi => {
-        const normalizedPolicy = normalizePolicy(poi.pet_policy);
+        const policy = normalizePolicy(poi);
         const marker = new AMap.Marker({
           position: [poi.longitude, poi.latitude],
           title: poi.name,
-          content: `<div style="font-size: 24px; cursor: pointer; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">${getMarkerIcon(normalizedPolicy)}</div>`,
+          content: `<div style="font-size: 24px; cursor: pointer; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">${getMarkerIcon(policy)}</div>`,
           offset: new AMap.Pixel(-12, -12)
         });
         
@@ -513,7 +539,7 @@
 
     function showInfoWindow(poi) {
       const infoWindow = document.getElementById('info-window');
-      const normalizedPolicy = normalizePolicy(poi.pet_policy);
+      const policy = normalizePolicy(poi);
       
       document.getElementById('poi-name').textContent = poi.name;
       document.getElementById('poi-address').textContent = '📍 ' + poi.address;
@@ -535,9 +561,28 @@
         priceEl.style.display = 'none';
       }
       
-      const policyEl = document.getElementById('poi-policy');
-      policyEl.textContent = getPolicyText(normalizedPolicy);
-      policyEl.className = 'policy-badge ' + normalizedPolicy;
+      const policyEl = document.getElementById('policy-badge');
+      policyEl.textContent = getPolicyText(policy);
+      policyEl.className = 'policy-badge ' + policy;
+      
+      const locationInfoEl = document.getElementById('location-info');
+      const locationTextEl = document.getElementById('location-text');
+      if (poi.is_pet_friendly && poi.location_text) {
+        locationTextEl.textContent = '📍 ' + poi.location_text;
+        locationInfoEl.style.display = 'block';
+      } else {
+        locationInfoEl.style.display = 'none';
+      }
+      
+      const attitudeInfoEl = document.getElementById('attitude-info');
+      const attitudeTextEl = document.getElementById('attitude-text');
+      if (poi.attitude && poi.attitude !== 'unknown') {
+        const attitudeEmoji = poi.attitude === 'excellent' ? '😊' : poi.attitude === 'good' ? '🙂' : '😐';
+        attitudeTextEl.textContent = attitudeEmoji + ' ' + (poi.attitude_text || '店员态度未知');
+        attitudeInfoEl.style.display = 'block';
+      } else {
+        attitudeInfoEl.style.display = 'none';
+      }
       
       const facilitiesEl = document.getElementById('poi-facilities');
       const facilityListEl = document.getElementById('facility-list');
@@ -549,7 +594,7 @@
         if (poi.pet_facility.has_pee_pad) facilities.push('<span class="facility-item">🧻 尿垫</span>');
         if (poi.pet_facility.has_pet_snack) facilities.push('<span class="facility-item">🦴 零食</span>');
         if (poi.pet_facility.has_pet_cart) facilities.push('<span class="facility-item">🛒 推车</span>');
-        if (poi.pet_facility.has_pet_area) facilities.push('<span class="facility-item">🏠 专门区域</span>');
+        if (poi.pet_facility.has_pet_area) facilities.push('<span class="facility-item">🏠 活动区</span>');
         
         if (facilities.length > 0) {
           facilityListEl.innerHTML = facilities.join('');
@@ -561,11 +606,31 @@
         facilitiesEl.style.display = 'none';
       }
       
+      const servicesEl = document.getElementById('poi-services');
+      const serviceListEl = document.getElementById('service-list');
+      serviceListEl.innerHTML = '';
+      
+      if (poi.pet_service) {
+        const services = [];
+        if (poi.pet_service.has_pet_sitting) services.push('<span class="service-item">🏨 寄养</span>');
+        if (poi.pet_service.has_pet_grooming) services.push('<span class="service-item">✂️ 美容</span>');
+        if (poi.pet_service.has_pet_toys) services.push('<span class="service-item">🧸 玩具</span>');
+        
+        if (services.length > 0) {
+          serviceListEl.innerHTML = services.join('');
+          servicesEl.style.display = 'block';
+        } else {
+          servicesEl.style.display = 'none';
+        }
+      } else {
+        servicesEl.style.display = 'none';
+      }
+      
       const evidenceEl = document.getElementById('poi-evidence');
       const evidenceListEl = document.getElementById('evidence-list');
       evidenceListEl.innerHTML = '';
       
-      const isUnknown = !poi.pet_policy || poi.pet_policy === 'unknown' || poi.pet_policy === null;
+      const isUnknown = policy === 'unknown';
       
       if (poi.pet_evidence && poi.pet_evidence.length > 0) {
         poi.pet_evidence.slice(0, 3).forEach(item => {
@@ -576,18 +641,17 @@
         evidenceEl.style.display = 'block';
         evidenceEl.querySelector('h4').textContent = '💬 网友探店攻略：';
       } else if (isUnknown) {
-        const li = document.createElement('li');
-        li.textContent = '欢迎网友补充探店攻略，帮助其他铲屎官找到更多宠物友好场所！';
-        li.style.borderLeftColor = '#9e9e9e';
-        li.style.color = '#888';
-        evidenceListEl.appendChild(li);
+        const div = document.createElement('div');
+        div.className = 'no-info-tip';
+        div.textContent = '暂无宠物友好信息，欢迎网友补充探店攻略，帮助其他铲屎官找到更多宠物友好场所！';
+        evidenceEl.appendChild(div);
         evidenceEl.style.display = 'block';
         evidenceEl.querySelector('h4').textContent = '📝 参与共建：';
       } else {
         evidenceEl.style.display = 'none';
       }
       
-      infoWindow.className = 'info-window show ' + normalizedPolicy;
+      infoWindow.className = 'info-window show ' + policy;
     }
 
     function closeInfoWindow() {

@@ -18,8 +18,8 @@
       "has_pet_area": false
     },
     "pet_evidence": [
-      "周末带猫主子来探店，店员态度超好，还给了小零食，完全不排斥宠物",
-      "可以带狗狗进去，店员还给准备了宠物专用水碗，太贴心了"
+      "可以带狗狗进去，店员还给准备了宠物专用水碗，太贴心了",
+      "周末带猫主子来探店，店员态度超好，还给了小零食，完全不排斥宠物"
     ]
   },
   {
@@ -32,15 +32,16 @@
     "phone": "021-87654321",
     "rating": 4.6,
     "price": "¥120/人",
-    "pet_policy": "friendly",
+    "pet_policy": "outdoor_only",
     "pet_facility": {
-      "has_water_bowl": false,
+      "has_water_bowl": true,
       "has_pee_pad": true,
-      "has_pet_snack": false,
+      "has_pet_snack": true,
       "has_pet_cart": false,
       "has_pet_area": false
     },
     "pet_evidence": [
+      "带金毛来吃饭，店员主动给了水碗和零食，还专门收拾了一块区域，服务满分",
       "宠物友好认证",
       "户外区和室内都可以带狗狗，有免费尿垫提供，强烈推荐"
     ]
@@ -64,6 +65,7 @@
       "has_pet_area": false
     },
     "pet_evidence": [
+      "打电话咨询过了，店家说不允许带宠物，建议放在门口的临时寄存处",
       "这家餐厅明确禁止宠物入内，只能放在门口的笼子里，不太方便"
     ]
   },
@@ -86,7 +88,8 @@
       "has_pet_area": false
     },
     "pet_evidence": [
-      "商场的宠物政策很友好，大部分店铺都允许进入，还提供宠物推车租赁"
+      "商场的宠物政策很友好，大部分店铺都允许进入，还提供宠物推车租赁",
+      "周末带柯基逛商场，服务台免费借了宠物推车，逛了一下午都没问题"
     ]
   },
   {
@@ -99,7 +102,7 @@
     "phone": "021-33445566",
     "rating": 4.4,
     "price": "¥150/人",
-    "pet_policy": "friendly",
+    "pet_policy": "outdoor_only",
     "pet_facility": {
       "has_water_bowl": false,
       "has_pee_pad": false,
@@ -108,6 +111,7 @@
       "has_pet_area": false
     },
     "pet_evidence": [
+      "仅限户外区可以带宠物，室内用餐区禁止宠物进入，需要注意",
       "室外露台允许带狗狗，但是室内不行，天气好的时候来坐坐还不错"
     ]
   },
@@ -121,8 +125,17 @@
     "phone": "021-11223344",
     "rating": 4.7,
     "price": "¥60/人",
-    "pet_policy": null,
-    "pet_facility": null,
-    "pet_evidence": null
+    "pet_policy": "friendly",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": true,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": true
+    },
+    "pet_evidence": [
+      "店里有好多可爱的猫咪，也可以带自己的猫来玩，有专门的宠物区和尿垫",
+      "带自家布偶来打卡，店员很热情，给了猫咪零食和水碗，还有专门的猫咪玩耍区域"
+    ]
   }
 ]

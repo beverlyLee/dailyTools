@@ -5,10 +5,10 @@ from dataclasses import dataclass
 from enum import Enum
 
 
-class PetPolicy(Enum):
-    FRIENDLY = "friendly"
-    OUTDOOR_ONLY = "outdoor_only"
-    FORBIDDEN = "forbidden"
+class LocationRestriction(Enum):
+    INDOOR = "indoor"
+    OUTDOOR = "outdoor"
+    BOTH = "both"
     UNKNOWN = "unknown"
 
 
@@ -22,9 +22,19 @@ class PetFacility:
 
 
 @dataclass
+class PetService:
+    has_pet_sitting: bool = False
+    has_pet_grooming: bool = False
+    has_pet_toys: bool = False
+
+
+@dataclass
 class PetAnalysisResult:
-    policy: PetPolicy
+    is_pet_friendly: bool
+    location_restriction: LocationRestriction
     facility: PetFacility
+    service: PetService
+    attitude: str
     confidence: float
     evidence: List[str]
     shop_name: str = ""
@@ -39,31 +49,49 @@ class PolicyDetector:
         self.friendly_keywords = [
             "可以带", "允许带", "宠物友好", "欢迎宠物", "可以进", "允许进",
             "不排斥", "接受宠物", "欢迎狗狗", "欢迎猫咪", "带宠物", "带狗狗", "带猫",
-            "室内可以", "室内允许"
+            "没问题", "赞", "贴心", "好评", "推荐", "太棒了", "超棒"
         ]
         
         self.forbidden_keywords = [
             "禁止", "不允许", "不让进", "不能带", "不准带", "谢绝宠物",
-            "禁止入内", "不可以带", "勿带", "禁带"
+            "禁止入内", "不可以带", "勿带", "禁带", "不行", "不友好", "差评"
         ]
         
-        self.outdoor_keywords = [
-            "户外", "露台", "室外", "露天", "户外区", "露台区", "室外区",
-            "户外可以", "露台可以", "室外可以"
+        self.indoor_allow_keywords = [
+            "室内可以", "室内允许", "室内也可以", "室内没问题",
+            "全场", "全馆", "整个店", "整家店", "店内可以", "店里可以"
         ]
         
         self.outdoor_restrict_keywords = [
             "仅限户外", "仅限室外", "只限露台", "只能在户外", "只能在露台", "只能在室外",
             "只允许户外", "只允许露台", "只允许室外", "但是室内不行", "但室内不行",
-            "室内不可以", "室内不让", "室内不能带", "室内禁止"
+            "室内不可以", "室内不让", "室内不能带", "室内禁止", "室内不行"
         ]
         
+        self.outdoor_allow_keywords = [
+            "户外", "露台", "室外", "露天", "户外区", "露台区", "室外区",
+            "户外可以", "露台可以", "室外可以", "露台允许", "花园"
+        ]
+        
+        self.attitude_keywords = {
+            "excellent": ["热情", "超赞", "贴心", "主动", "耐心", "友好", "亲切"],
+            "good": ["不错", "可以", "还好", "一般", "普通"],
+            "poor": ["冷漠", "不耐烦", "不好", "差", "恶劣"]
+        }
+        
         self.facility_keywords = {
-            "has_water_bowl": ["水碗", "水盆", "饮水", "喝水"],
-            "has_pee_pad": ["尿垫", "尿不湿", "厕所", "便便"],
-            "has_pet_snack": ["零食", "小零食", " treats"],
-            "has_pet_cart": ["推车", "宠物车", "租赁"],
-            "has_pet_area": ["宠物区", "狗狗区", "猫咪区", "专门区域"]
+            "has_water_bowl": ["水碗", "水盆", "饮水", "喝水", "提供水"],
+            "has_pee_pad": ["尿垫", "尿不湿", "厕所", "便便", "垃圾袋", "拾便袋"],
+            "has_pet_snack": ["零食", "小零食", "小零食", " treats", "给了零食", "提供零食"],
+            "has_pet_cart": ["推车", "宠物车", "租赁", "借推车"],
+            "has_pet_area": ["宠物区", "狗狗区", "猫咪区", "专门区域", "收拾了一块区域",
+                            "玩耍区域", "活动区", "专门的地方", "猫咪玩耍"]
+        }
+        
+        self.service_keywords = {
+            "has_pet_sitting": ["寄养", "托管", "照看", "看顾"],
+            "has_pet_grooming": ["美容", "洗澡", "造型", "修毛"],
+            "has_pet_toys": ["玩具", "逗猫棒", "球"]
         }
 
     def _tokenize(self, text: str) -> List[str]:
@@ -89,6 +117,26 @@ class PolicyDetector:
         
         return facility
 
+    def _check_services(self, text: str) -> PetService:
+        service = PetService()
+        text_lower = text.lower()
+        
+        for attr, keywords in self.service_keywords.items():
+            for kw in keywords:
+                if kw in text_lower:
+                    setattr(service, attr, True)
+                    break
+        
+        return service
+
+    def _check_attitude(self, text: str) -> str:
+        text_lower = text.lower()
+        for attitude, keywords in self.attitude_keywords.items():
+            for kw in keywords:
+                if kw in text_lower:
+                    return attitude
+        return "unknown"
+
     def _collect_evidence(self, text: str, keywords: List[str]) -> List[str]:
         evidence = []
         sentences = re.split(r'[。！？；.!?;]', text)
@@ -105,38 +153,54 @@ class PolicyDetector:
         
         friendly_count = self._count_keyword_matches(text, self.friendly_keywords)
         forbidden_count = self._count_keyword_matches(text, self.forbidden_keywords)
-        outdoor_count = self._count_keyword_matches(text, self.outdoor_keywords)
+        indoor_allow_count = self._count_keyword_matches(text, self.indoor_allow_keywords)
+        outdoor_allow_count = self._count_keyword_matches(text, self.outdoor_allow_keywords)
         outdoor_restrict_count = self._count_keyword_matches(text, self.outdoor_restrict_keywords)
         
-        forbidden_weight = 2.0
-        outdoor_restrict_weight = 1.5
-        forbidden_weighted = forbidden_count * forbidden_weight
-        outdoor_restrict_weighted = outdoor_restrict_count * outdoor_restrict_weight
-        
-        all_keywords = (self.friendly_keywords + self.forbidden_keywords + 
-                       self.outdoor_keywords + self.outdoor_restrict_keywords +
-                       [k for ks in self.facility_keywords.values() for k in ks])
+        all_keywords = (
+            self.friendly_keywords + self.forbidden_keywords + 
+            self.indoor_allow_keywords + self.outdoor_allow_keywords +
+            self.outdoor_restrict_keywords +
+            [k for ks in self.facility_keywords.values() for k in ks] +
+            [k for ks in self.service_keywords.values() for k in ks]
+        )
         evidence = self._collect_evidence(text, all_keywords)
         
         facility = self._check_facilities(text)
+        service = self._check_services(text)
+        attitude = self._check_attitude(text)
         
-        total_matches = friendly_count + forbidden_count + outdoor_count + outdoor_restrict_count
+        total_matches = friendly_count + forbidden_count + indoor_allow_count + outdoor_allow_count + outdoor_restrict_count
         confidence = min(1.0, total_matches * 0.2 + 0.3) if total_matches > 0 else 0.3
         
-        if outdoor_restrict_weighted > 0:
-            policy = PetPolicy.OUTDOOR_ONLY
-        elif forbidden_weighted > 0 and forbidden_weighted >= friendly_count:
-            policy = PetPolicy.FORBIDDEN
-        elif outdoor_count > 0 and "室内可以" not in text and "室内允许" not in text:
-            policy = PetPolicy.OUTDOOR_ONLY
-        elif friendly_count > 0:
-            policy = PetPolicy.FRIENDLY
+        forbidden_weight = 2.0
+        forbidden_weighted = forbidden_count * forbidden_weight
+        
+        is_pet_friendly = True
+        if forbidden_weighted > 0 and forbidden_weighted >= friendly_count:
+            is_pet_friendly = False
+        
+        if is_pet_friendly:
+            if outdoor_restrict_count > 0:
+                location_restriction = LocationRestriction.OUTDOOR
+            elif indoor_allow_count > 0:
+                if outdoor_allow_count > 0:
+                    location_restriction = LocationRestriction.BOTH
+                else:
+                    location_restriction = LocationRestriction.INDOOR
+            elif outdoor_allow_count > 0:
+                location_restriction = LocationRestriction.OUTDOOR
+            else:
+                location_restriction = LocationRestriction.BOTH
         else:
-            policy = PetPolicy.UNKNOWN
+            location_restriction = LocationRestriction.UNKNOWN
         
         return PetAnalysisResult(
-            policy=policy,
+            is_pet_friendly=is_pet_friendly,
+            location_restriction=location_restriction,
             facility=facility,
+            service=service,
+            attitude=attitude,
             confidence=confidence,
             evidence=evidence,
             shop_name=shop_name
@@ -163,24 +227,41 @@ class PolicyDetector:
             results = data["results"]
             evidence = list(set(data["evidence"]))
             
-            policy_votes = {p: 0 for p in PetPolicy}
+            friendly_votes = sum(1 for r in results if r.is_pet_friendly)
+            is_pet_friendly = friendly_votes >= len(results) / 2
+            
+            location_votes = {lr: 0 for lr in LocationRestriction}
             combined_facility = PetFacility()
+            combined_service = PetService()
+            attitude_counts = {"excellent": 0, "good": 0, "poor": 0, "unknown": 0}
             total_confidence = 0.0
             
             for r in results:
-                policy_votes[r.policy] += r.confidence
+                if r.is_pet_friendly:
+                    location_votes[r.location_restriction] += r.confidence
                 total_confidence += r.confidence
                 
                 for attr in self.facility_keywords.keys():
                     if getattr(r.facility, attr):
                         setattr(combined_facility, attr, True)
+                
+                for attr in self.service_keywords.keys():
+                    if getattr(r.service, attr):
+                        setattr(combined_service, attr, True)
+                
+                if r.attitude in attitude_counts:
+                    attitude_counts[r.attitude] += 1
             
-            best_policy = max(policy_votes, key=policy_votes.get)
+            best_location = max(location_votes, key=location_votes.get) if is_pet_friendly else LocationRestriction.UNKNOWN
             avg_confidence = total_confidence / len(results) if results else 0.0
+            best_attitude = max(attitude_counts, key=attitude_counts.get) if attitude_counts else "unknown"
             
             final_results[shop_name] = PetAnalysisResult(
-                policy=best_policy,
+                is_pet_friendly=is_pet_friendly,
+                location_restriction=best_location,
                 facility=combined_facility,
+                service=combined_service,
+                attitude=best_attitude,
                 confidence=avg_confidence,
                 evidence=evidence,
                 shop_name=shop_name
@@ -191,8 +272,11 @@ class PolicyDetector:
     def result_to_dict(self, result: PetAnalysisResult) -> Dict:
         return {
             "shop_name": result.shop_name,
-            "policy": result.policy.value,
-            "policy_text": self._policy_to_text(result.policy),
+            "is_pet_friendly": result.is_pet_friendly,
+            "location_restriction": result.location_restriction.value,
+            "location_text": self._location_to_text(result.location_restriction),
+            "attitude": result.attitude,
+            "attitude_text": self._attitude_to_text(result.attitude),
             "confidence": round(result.confidence, 2),
             "facility": {
                 "has_water_bowl": result.facility.has_water_bowl,
@@ -201,17 +285,38 @@ class PolicyDetector:
                 "has_pet_cart": result.facility.has_pet_cart,
                 "has_pet_area": result.facility.has_pet_area
             },
+            "service": {
+                "has_pet_sitting": result.service.has_pet_sitting,
+                "has_pet_grooming": result.service.has_pet_grooming,
+                "has_pet_toys": result.service.has_pet_toys
+            },
             "evidence": result.evidence
         }
 
-    def _policy_to_text(self, policy: PetPolicy) -> str:
+    def _location_to_text(self, location: LocationRestriction) -> str:
         mapping = {
-            PetPolicy.FRIENDLY: "允许宠物进入",
-            PetPolicy.OUTDOOR_ONLY: "仅限户外区",
-            PetPolicy.FORBIDDEN: "禁止宠物进入",
-            PetPolicy.UNKNOWN: "政策未知"
+            LocationRestriction.INDOOR: "室内允许",
+            LocationRestriction.OUTDOOR: "仅限户外",
+            LocationRestriction.BOTH: "室内外均可",
+            LocationRestriction.UNKNOWN: "位置限制未知"
         }
-        return mapping.get(policy, "未知")
+        return mapping.get(location, "未知")
+
+    def _attitude_to_text(self, attitude: str) -> str:
+        mapping = {
+            "excellent": "店员态度非常好",
+            "good": "店员态度不错",
+            "poor": "店员态度较差",
+            "unknown": "店员态度未知"
+        }
+        return mapping.get(attitude, "未知")
+
+    def get_policy_display(self, result: PetAnalysisResult) -> str:
+        if not result.is_pet_friendly:
+            return "forbidden"
+        if result.location_restriction == LocationRestriction.OUTDOOR:
+            return "outdoor_only"
+        return "friendly"
 
 
 if __name__ == "__main__":
@@ -226,6 +331,11 @@ if __name__ == "__main__":
         {
             "content": "这家餐厅明确禁止宠物入内，只能放在门口的笼子里。",
             "shop_name": "传统美食餐厅",
+            "source": "xiaohongshu"
+        },
+        {
+            "content": "室外露台允许带狗狗，但是室内不行，天气好的时候来坐坐还不错。",
+            "shop_name": "露台花园餐厅",
             "source": "xiaohongshu"
         }
     ]

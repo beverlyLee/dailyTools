@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import requests
 from typing import List, Dict, Optional
 from dataclasses import dataclass, asdict
@@ -16,8 +17,13 @@ class POI:
     phone: Optional[str] = None
     rating: Optional[float] = None
     price: Optional[str] = None
-    pet_policy: Optional[str] = None
+    is_pet_friendly: Optional[bool] = None
+    location_restriction: Optional[str] = None
+    location_text: Optional[str] = None
+    attitude: Optional[str] = None
+    attitude_text: Optional[str] = None
     pet_facility: Optional[Dict] = None
+    pet_service: Optional[Dict] = None
     pet_evidence: Optional[List[str]] = None
 
 
@@ -70,80 +76,105 @@ class PetPOIAggregator:
             return self.get_mock_pois(keyword)
 
     def get_mock_pois(self, keyword: str = "") -> List[POI]:
-        mock_data = [
-            {
-                "id": "POI001",
-                "name": "Paw Coffee 爪爪咖啡馆",
-                "address": "上海市静安区南京西路1688号",
-                "longitude": 121.4493,
-                "latitude": 31.2304,
-                "category": "咖啡餐饮",
-                "phone": "021-12345678",
-                "rating": 4.8,
-                "price": "¥50/人"
-            },
-            {
-                "id": "POI002",
-                "name": "毛孩子乐园餐厅",
-                "address": "上海市徐汇区淮海中路1200号",
-                "longitude": 121.4550,
-                "latitude": 31.2150,
-                "category": "餐饮美食",
-                "phone": "021-87654321",
-                "rating": 4.6,
-                "price": "¥120/人"
-            },
-            {
-                "id": "POI003",
-                "name": "传统美食餐厅",
-                "address": "上海市黄浦区南京东路300号",
-                "longitude": 121.4830,
-                "latitude": 31.2360,
-                "category": "中式餐饮",
-                "phone": "021-55667788",
-                "rating": 4.2,
-                "price": "¥80/人"
-            },
-            {
-                "id": "POI004",
-                "name": "阳光购物中心",
-                "address": "上海市浦东新区陆家嘴环路1000号",
-                "longitude": 121.5030,
-                "latitude": 31.2380,
-                "category": "购物商场",
-                "phone": "021-99887766",
-                "rating": 4.5,
-                "price": None
-            },
-            {
-                "id": "POI005",
-                "name": "露台花园餐厅",
-                "address": "上海市长宁区虹桥路1450号",
-                "longitude": 121.4120,
-                "latitude": 31.2000,
-                "category": "西餐",
-                "phone": "021-33445566",
-                "rating": 4.4,
-                "price": "¥150/人"
-            },
-            {
-                "id": "POI006",
-                "name": "猫咪主题咖啡馆",
-                "address": "上海市杨浦区大学路200号",
-                "longitude": 121.5100,
-                "latitude": 31.3000,
-                "category": "咖啡餐饮",
-                "phone": "021-11223344",
-                "rating": 4.7,
-                "price": "¥60/人"
-            }
-        ]
+        mock_data = self._generate_100_pois()
         
         pois = []
         for item in mock_data:
             if keyword and keyword not in item["name"] and keyword not in item["category"]:
                 continue
             pois.append(POI(**item))
+        
+        return pois
+
+    def _generate_100_pois(self) -> List[Dict]:
+        districts = [
+            "黄浦区", "徐汇区", "长宁区", "静安区", "普陀区",
+            "虹口区", "杨浦区", "闵行区", "宝山区", "嘉定区",
+            "浦东新区", "松江区", "青浦区", "奉贤区", "金山区"
+        ]
+        
+        streets = [
+            "南京西路", "淮海中路", "南京东路", "陆家嘴环路", "虹桥路",
+            "四川北路", "西藏中路", "河南中路", "福州路", "汉口路",
+            "九江路", "北京西路", "常德路", "陕西北路", "茂名南路",
+            "复兴中路", "衡山路", "华山路", "延安西路", "愚园路"
+        ]
+        
+        shop_names = [
+            "Paw Coffee 爪爪咖啡馆", "毛孩子乐园餐厅", "传统美食餐厅", "阳光购物中心",
+            "露台花园餐厅", "猫咪主题咖啡馆", "萌宠咖啡屋", "汪汪西餐厅",
+            "喵喵火锅", "爱宠日料", "宠物乐园商场", "爪爪烧烤",
+            "萌爪宠物用品店", "宠爱购物中心", "毛茸茸咖啡馆", "汪汪公园",
+            "喵星人餐厅", "宠物生活馆", "萌宠天地", "爱宠咖啡店",
+            "爪爪西餐厅", "喵喵咖啡馆", "宠物友好餐厅", "毛孩子乐园",
+            "宠爱餐厅", "萌宠烧烤", "汪汪咖啡店", "猫咪乐园",
+            "宠物购物中心", "爱宠餐厅", "爪爪火锅", "毛茸茸西餐厅",
+            "萌爪日料", "宠爱咖啡店", "汪汪公园餐厅", "喵星人咖啡店",
+            "宠物友好商场", "毛孩子咖啡馆", "爪爪购物中心", "萌宠餐厅",
+            "爱宠烧烤", "猫咪咖啡屋", "宠物乐园餐厅", "汪汪购物中心",
+            "喵喵餐厅", "毛茸茸咖啡店", "萌爪火锅", "宠爱日料",
+            "毛孩子烧烤", "宠物友好咖啡店", "爪爪餐厅", "萌宠购物中心",
+            "爱宠咖啡店", "猫咪西餐厅", "汪汪火锅", "宠物公园",
+            "喵喵购物中心", "毛茸茸餐厅", "萌爪咖啡店", "宠爱烧烤",
+            "毛孩子日料", "宠物友好公园", "爪爪咖啡店", "萌宠火锅",
+            "爱宠购物中心", "猫咪餐厅", "汪汪日料", "宠物咖啡店",
+            "喵喵烧烤", "毛茸茸购物中心", "萌爪餐厅", "宠爱火锅",
+            "毛孩子咖啡店", "宠物友好烧烤", "爪爪日料", "萌宠咖啡店",
+            "爱宠火锅", "汪汪餐厅", "猫咪购物中心", "宠物友好日料",
+            "喵喵咖啡店", "毛茸茸火锅", "萌爪购物中心", "宠爱咖啡店",
+            "狗狗咖啡馆", "猫咪餐厅", "萌宠咖啡", "爱宠乐园",
+            "毛孩子烧烤店", "爪爪火锅城", "毛茸茸西餐厅", "宠爱咖啡馆"
+        ]
+        
+        categories = [
+            ("咖啡餐饮", "¥30-80/人"),
+            ("咖啡餐饮", "¥50-100/人"),
+            ("餐饮美食", "¥100-300/人"),
+            ("餐饮美食", "¥60-200/人"),
+            ("餐饮美食", "¥80-150/人"),
+            ("餐饮美食", "¥150-400/人"),
+            ("餐饮美食", "¥70-150/人"),
+            ("购物商场", None),
+            ("购物商场", None),
+            ("休闲娱乐", "¥100-200/人"),
+            ("休闲娱乐", None),
+            ("生活服务", None),
+            ("生活服务", None)
+        ]
+        
+        pois = []
+        base_lon, base_lat = 121.4737, 31.2304
+        
+        for i in range(100):
+            category, price_range = random.choice(categories)
+            
+            district = random.choice(districts)
+            street = random.choice(streets)
+            street_num = random.randint(1, 2000)
+            
+            name = shop_names[i % len(shop_names)]
+            if i >= len(shop_names):
+                name = f"{name}(分店{i - len(shop_names) + 1})"
+            
+            lon = base_lon + random.uniform(-0.15, 0.15)
+            lat = base_lat + random.uniform(-0.12, 0.12)
+            
+            rating = round(random.uniform(3.5, 5.0), 1)
+            price = price_range if price_range else None
+            
+            poi = {
+                "id": f"POI{i+1:03d}",
+                "name": name,
+                "address": f"上海市{district}{street}{street_num}号",
+                "longitude": round(lon, 4),
+                "latitude": round(lat, 4),
+                "category": category,
+                "phone": f"021-{random.randint(10000000, 99999999)}",
+                "rating": rating,
+                "price": price
+            }
+            
+            pois.append(poi)
         
         return pois
 
@@ -156,10 +187,20 @@ class PetPOIAggregator:
             "has_pet_area": False
         }
         
+        default_service = {
+            "has_pet_sitting": False,
+            "has_pet_grooming": False,
+            "has_pet_toys": False
+        }
+        
         for poi in pois:
             if poi.name in pet_analysis:
                 result = pet_analysis[poi.name]
-                poi.pet_policy = result.policy.value
+                poi.is_pet_friendly = result.is_pet_friendly
+                poi.location_restriction = result.location_restriction.value
+                poi.location_text = self._get_location_text(result.location_restriction.value)
+                poi.attitude = result.attitude
+                poi.attitude_text = self._get_attitude_text(result.attitude)
                 poi.pet_facility = {
                     "has_water_bowl": result.facility.has_water_bowl,
                     "has_pee_pad": result.facility.has_pee_pad,
@@ -167,13 +208,41 @@ class PetPOIAggregator:
                     "has_pet_cart": result.facility.has_pet_cart,
                     "has_pet_area": result.facility.has_pet_area
                 }
+                poi.pet_service = {
+                    "has_pet_sitting": result.service.has_pet_sitting,
+                    "has_pet_grooming": result.service.has_pet_grooming,
+                    "has_pet_toys": result.service.has_pet_toys
+                }
                 poi.pet_evidence = result.evidence
             else:
-                poi.pet_policy = "unknown"
+                poi.is_pet_friendly = None
+                poi.location_restriction = "unknown"
+                poi.location_text = "暂无宠物友好信息"
+                poi.attitude = "unknown"
+                poi.attitude_text = "店员态度未知"
                 poi.pet_facility = default_facility.copy()
+                poi.pet_service = default_service.copy()
                 poi.pet_evidence = []
         
         return pois
+
+    def _get_location_text(self, location: str) -> str:
+        mapping = {
+            "indoor": "室内允许",
+            "outdoor": "仅限户外",
+            "both": "室内外均可",
+            "unknown": "位置限制未知"
+        }
+        return mapping.get(location, "未知")
+
+    def _get_attitude_text(self, attitude: str) -> str:
+        mapping = {
+            "excellent": "店员态度非常好",
+            "good": "店员态度不错",
+            "poor": "店员态度较差",
+            "unknown": "店员态度未知"
+        }
+        return mapping.get(attitude, "未知")
 
     def get_pet_friendly_pois(self, city: str = "上海", 
                                keyword: str = "咖啡馆 餐厅") -> List[Dict]:
@@ -202,8 +271,13 @@ class PetPOIAggregator:
             "phone": poi.phone,
             "rating": poi.rating,
             "price": poi.price,
-            "pet_policy": poi.pet_policy,
+            "is_pet_friendly": poi.is_pet_friendly,
+            "location_restriction": poi.location_restriction,
+            "location_text": poi.location_text,
+            "attitude": poi.attitude,
+            "attitude_text": poi.attitude_text,
             "pet_facility": poi.pet_facility,
+            "pet_service": poi.pet_service,
             "pet_evidence": poi.pet_evidence
         }
 
@@ -225,5 +299,5 @@ if __name__ == "__main__":
     aggregator = PetPOIAggregator()
     pois = aggregator.get_pet_friendly_pois()
     print(f"获取到 {len(pois)} 个POI")
-    for p in pois[:3]:
-        print(f"- {p['name']}: {p['pet_policy']}")
+    for p in pois[:5]:
+        print(f"- {p['name']}: friendly={p['is_pet_friendly']}, location={p['location_restriction']}")
