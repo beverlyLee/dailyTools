@@ -54,37 +54,41 @@ LEVEL_EMOJIS = {
 }
 
 
-def load_stations(city: str, refresh: bool = False) -> List[Dict]:
+def load_stations(city: str, refresh: bool = False) -> tuple[List[Dict], bool, str]:
     data_dir = Path("data")
     data_file = data_dir / f"{city}_subway_stations.json"
 
     if data_file.exists() and not refresh:
         with open(data_file, "r", encoding="utf-8") as f:
-            return json.load(f)
+            return json.load(f), False, ""
     else:
         with st.spinner(f"正在爬取 {city} 地铁站点数据..."):
             spider = SubwayPOISpider()
             stations = spider.search_subway_stations(city)
-            return [s.to_dict() for s in stations]
+            return [s.to_dict() for s in stations], spider.demo_mode, spider.demo_reason
 
 
 def analyze_congestion(
     city: str, stations: List[Dict], use_simulation: bool = True
-) -> List[CrowdData]:
+) -> tuple[List[CrowdData], bool, str]:
     with st.spinner("正在分析拥堵数据..."):
         engine = CongestionInferenceEngine()
 
         if use_simulation:
             congestion_data = engine.simulate_morning_peak(stations)
+            demo_mode = True
+            demo_reason = "用户选择模拟模式"
         else:
             congestion_data = engine.bulk_get_congestion(stations)
+            demo_mode = engine.demo_mode
+            demo_reason = engine.demo_reason
 
         congestion_dicts = [c.to_dict() for c in congestion_data]
 
         analyzer = CrowdLevelAnalyzer()
         crowd_data = analyzer.analyze(congestion_dicts, stations)
 
-        return crowd_data
+        return crowd_data, demo_mode, demo_reason
 
 
 def create_map_dataframe(crowd_data: List[CrowdData]) -> pd.DataFrame:
@@ -166,10 +170,18 @@ def main():
 
     if analyze_button:
         try:
-            stations = load_stations(city, refresh_stations)
+            stations, poi_demo_mode, poi_demo_reason = load_stations(city, refresh_stations)
             st.success(f"✅ 已加载 {len(stations)} 个地铁站点")
 
-            crowd_data = analyze_congestion(city, stations, use_simulation)
+            crowd_data, demo_mode, demo_reason = analyze_congestion(city, stations, use_simulation)
+
+            if demo_mode or poi_demo_mode:
+                reason = demo_reason or poi_demo_reason or "演示模式"
+                st.warning(
+                    f"⚠️ 当前使用演示模式数据\n\n"
+                    f"原因: {reason}\n\n"
+                    f"如需真实数据，请在 .env 文件中配置有效的高德地图Web服务API Key"
+                )
 
             if show_transfer_only:
                 crowd_data = [d for d in crowd_data if d.is_transfer]

@@ -17,9 +17,23 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-GAODE_KEY = os.getenv("GAODE_TRAFFIC_KEY", "")
+API_KEYS = [
+    os.getenv("GAODE_TRAFFIC_KEY", ""),
+    os.getenv("GAODE_GEOCODE_KEY", ""),
+    os.getenv("GAODE_JS_API_KEY", ""),
+]
+API_KEYS = [k for k in API_KEYS if k]
+
 POI_SEARCH_URL = "https://restapi.amap.com/v3/place/text"
 POI_AROUND_URL = "https://restapi.amap.com/v3/place/around"
+
+RETRYABLE_ERRORS = [
+    "USERKEY_PLAT_NOMATCH",
+    "INSUFFICIENT_PRIVILEGES",
+    "INVALID_USER_KEY",
+    "USER_DAILY_QUERY_OVER_LIMIT",
+    "SERVICE_NOT_AVAILABLE",
+]
 
 CITY_CODES = {
     "北京": "110000",
@@ -51,29 +65,82 @@ class SubwayStation:
         return asdict(self)
 
 
+class APIFallbackError(Exception):
+    def __init__(self, message="All API keys failed, switching to demo mode"):
+        self.message = message
+        super().__init__(self.message)
+
+
 class SubwayPOISpider:
     def __init__(self, key: Optional[str] = None):
-        self.key = key or GAODE_KEY
-        self.demo_mode = not self.key
+        self.api_keys = [key] if key else API_KEYS
+        self.current_key_index = 0
+        self.demo_mode = not self.api_keys
+        self.demo_reason = "No API keys configured"
+        self.api_error_details = []
+
         if self.demo_mode:
-            logger.warning("GAODE_TRAFFIC_KEY is not set. Running in DEMO mode with sample data.")
+            logger.warning("No API keys found. Running in DEMO mode with sample data.")
+
         self.session = requests.Session()
         self.session.headers.update({"User-Agent": "SubwaySardineIndex/1.0"})
 
-    def _request(self, url: str, params: Dict, max_retries: int = 3) -> Dict:
-        for attempt in range(max_retries):
-            try:
-                params["key"] = self.key
-                response = self.session.get(url, params=params, timeout=10)
-                response.raise_for_status()
-                data = response.json()
-                if data.get("status") == "1":
-                    return data
-                logger.warning(f"API returned error: {data.get('info')}")
-            except Exception as e:
-                logger.warning(f"Request failed (attempt {attempt + 1}): {e}")
-            time.sleep(1 * (attempt + 1))
-        raise RuntimeError(f"Failed to fetch data after {max_retries} retries")
+    def _try_next_key(self) -> bool:
+        if self.current_key_index < len(self.api_keys) - 1:
+            self.current_key_index += 1
+            logger.info(
+                f"Switching to next API key (index: {self.current_key_index})"
+            )
+            return True
+        return False
+
+    def _request(self, url: str, params: Dict, max_retries: int = 2) -> Dict:
+        for retry in range(max_retries):
+            while self.current_key_index < len(self.api_keys):
+                try:
+                    params["key"] = self.api_keys[self.current_key_index]
+                    response = self.session.get(url, params=params, timeout=10)
+                    response.raise_for_status()
+                    data = response.json()
+
+                    if data.get("status") == "1":
+                        return data
+
+                    error_info = data.get("info", "Unknown error")
+                    error_code = data.get("infocode", "N/A")
+
+                    if any(err in error_info for err in RETRYABLE_ERRORS) or int(
+                        error_code
+                    ) >= 10000:
+                        error_detail = (
+                            f"Key {self.current_key_index}: {error_info} (code: {error_code})"
+                        )
+                        logger.warning(f"API error: {error_detail}")
+                        self.api_error_details.append(error_detail)
+
+                        if not self._try_next_key():
+                            raise APIFallbackError()
+                        continue
+
+                    logger.warning(f"API returned error: {error_info}")
+                    time.sleep(1 * (retry + 1))
+
+                except APIFallbackError:
+                    raise
+                except requests.exceptions.Timeout:
+                    logger.warning("Request timeout")
+                    time.sleep(1 * (retry + 1))
+                except requests.exceptions.RequestException as e:
+                    logger.warning(f"Request failed: {e}")
+                    time.sleep(1 * (retry + 1))
+                except Exception as e:
+                    logger.warning(f"Unexpected error: {e}")
+                    time.sleep(1 * (retry + 1))
+
+            if not self._try_next_key():
+                break
+
+        raise APIFallbackError()
 
     def search_subway_stations(
         self, city: str, keyword: str = "地铁站", output_dir: str = "data"
@@ -84,51 +151,61 @@ class SubwayPOISpider:
             logger.info(f"Demo mode: Loading sample data for {city}")
             return self._load_sample_data(city, output_dir)
 
-        city_code = CITY_CODES.get(city, city)
+        try:
+            city_code = CITY_CODES.get(city, city)
+            all_stations = []
+            page = 1
+            page_size = 25
 
-        all_stations = []
-        page = 1
-        page_size = 25
+            while True:
+                params = {
+                    "keywords": keyword,
+                    "types": "150500",
+                    "city": city_code,
+                    "citylimit": "true",
+                    "offset": page_size,
+                    "page": page,
+                    "extensions": "all",
+                }
 
-        while True:
-            params = {
-                "keywords": keyword,
-                "types": "150500",
-                "city": city_code,
-                "citylimit": "true",
-                "offset": page_size,
-                "page": page,
-                "extensions": "all",
-            }
+                data = self._request(POI_SEARCH_URL, params)
+                pois = data.get("pois", [])
 
-            data = self._request(POI_SEARCH_URL, params)
-            pois = data.get("pois", [])
+                if not pois:
+                    break
 
-            if not pois:
-                break
+                for poi in pois:
+                    station = self._parse_poi(poi, city)
+                    if station:
+                        all_stations.append(station)
 
-            for poi in pois:
-                station = self._parse_poi(poi, city)
-                if station:
-                    all_stations.append(station)
+                logger.info(f"Fetched page {page}, {len(pois)} stations")
 
-            logger.info(f"Fetched page {page}, {len(pois)} stations")
+                if len(pois) < page_size:
+                    break
 
-            if len(pois) < page_size:
-                break
+                page += 1
+                time.sleep(0.3)
 
-            page += 1
-            time.sleep(0.5)
+            logger.info(f"Total stations found in {city}: {len(all_stations)}")
 
-        logger.info(f"Total stations found in {city}: {len(all_stations)}")
+            os.makedirs(output_dir, exist_ok=True)
+            output_file = os.path.join(output_dir, f"{city}_subway_stations.json")
+            with open(output_file, "w", encoding="utf-8") as f:
+                json.dump(
+                    [s.to_dict() for s in all_stations], f, ensure_ascii=False, indent=2
+                )
+            logger.info(f"Saved stations to {output_file}")
 
-        os.makedirs(output_dir, exist_ok=True)
-        output_file = os.path.join(output_dir, f"{city}_subway_stations.json")
-        with open(output_file, "w", encoding="utf-8") as f:
-            json.dump([s.to_dict() for s in all_stations], f, ensure_ascii=False, indent=2)
-        logger.info(f"Saved stations to {output_file}")
+            return all_stations
 
-        return all_stations
+        except APIFallbackError:
+            logger.warning(
+                f"API failed for {city}. Falling back to demo mode with sample data."
+            )
+            self.demo_mode = True
+            self.demo_reason = "; ".join(self.api_error_details)
+            return self._load_sample_data(city, output_dir)
 
     def _load_sample_data(self, city: str, output_dir: str) -> List[SubwayStation]:
         sample_file = os.path.join(output_dir, f"{city}_subway_stations_sample.json")
@@ -142,7 +219,9 @@ class SubwayPOISpider:
             os.makedirs(output_dir, exist_ok=True)
             output_file = os.path.join(output_dir, f"{city}_subway_stations.json")
             with open(output_file, "w", encoding="utf-8") as f:
-                json.dump([s.to_dict() for s in stations], f, ensure_ascii=False, indent=2)
+                json.dump(
+                    [s.to_dict() for s in stations], f, ensure_ascii=False, indent=2
+                )
             logger.info(f"Loaded {len(stations)} sample stations for {city}")
             return stations
         else:
@@ -166,10 +245,18 @@ class SubwayPOISpider:
         center_lng, center_lat = center_coords.get(city, (116.4074, 39.9042))
 
         mock_names = [
-            ("中心站", True), ("商贸城", True), ("科技园", False),
-            ("大学路", False), ("体育中心", True), ("公园", False),
-            ("火车站", True), ("机场", False), ("新区", False),
-            ("老城", False), ("金融街", True), ("软件园", False),
+            ("中心站", True),
+            ("商贸城", True),
+            ("科技园", False),
+            ("大学路", False),
+            ("体育中心", True),
+            ("公园", False),
+            ("火车站", True),
+            ("机场", False),
+            ("新区", False),
+            ("老城", False),
+            ("金融街", True),
+            ("软件园", False),
         ]
 
         stations = []
@@ -193,7 +280,9 @@ class SubwayPOISpider:
         os.makedirs(output_dir, exist_ok=True)
         output_file = os.path.join(output_dir, f"{city}_subway_stations.json")
         with open(output_file, "w", encoding="utf-8") as f:
-            json.dump([s.to_dict() for s in stations], f, ensure_ascii=False, indent=2)
+            json.dump(
+                [s.to_dict() for s in stations], f, ensure_ascii=False, indent=2
+            )
         logger.info(f"Generated {len(stations)} mock stations for {city}")
         return stations
 
@@ -218,7 +307,18 @@ class SubwayPOISpider:
 
             poi_type = poi.get("type", "")
             if "地铁" in poi_type:
-                for line in ["1号线", "2号线", "3号线", "4号线", "5号线", "6号线", "7号线", "8号线", "9号线", "10号线"]:
+                for line in [
+                    "1号线",
+                    "2号线",
+                    "3号线",
+                    "4号线",
+                    "5号线",
+                    "6号线",
+                    "7号线",
+                    "8号线",
+                    "9号线",
+                    "10号线",
+                ]:
                     if line in poi_type:
                         lines.append(line)
 

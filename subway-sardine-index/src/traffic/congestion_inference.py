@@ -19,8 +19,22 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-GAODE_KEY = os.getenv("GAODE_TRAFFIC_KEY", "")
+API_KEYS = [
+    os.getenv("GAODE_TRAFFIC_KEY", ""),
+    os.getenv("GAODE_GEOCODE_KEY", ""),
+    os.getenv("GAODE_JS_API_KEY", ""),
+]
+API_KEYS = [k for k in API_KEYS if k]
+
 TRAFFIC_STATUS_URL = "https://restapi.amap.com/v3/traffic/status/circle"
+
+RETRYABLE_ERRORS = [
+    "USERKEY_PLAT_NOMATCH",
+    "INSUFFICIENT_PRIVILEGES",
+    "INVALID_USER_KEY",
+    "USER_DAILY_QUERY_OVER_LIMIT",
+    "SERVICE_NOT_AVAILABLE",
+]
 
 MORNING_PEAK_START = dt_time(8, 0)
 MORNING_PEAK_END = dt_time(9, 0)
@@ -44,35 +58,90 @@ class TrafficStatus:
         return asdict(self)
 
 
+class APIFallbackError(Exception):
+    def __init__(self, message="All API keys failed, switching to demo mode"):
+        self.message = message
+        super().__init__(self.message)
+
+
 class CongestionInferenceEngine:
     def __init__(self, key: Optional[str] = None):
-        self.key = key or GAODE_KEY
-        self.demo_mode = not self.key
+        self.api_keys = [key] if key else API_KEYS
+        self.current_key_index = 0
+        self.demo_mode = not self.api_keys
+        self.demo_reason = "No API keys configured"
+        self.api_error_details = []
+
         if self.demo_mode:
-            logger.warning("GAODE_TRAFFIC_KEY is not set. Running in DEMO mode with simulated data.")
+            logger.warning(
+                "No API keys found. Running in DEMO mode with simulated data."
+            )
+
         self.session = requests.Session()
         self.session.headers.update({"User-Agent": "SubwaySardineIndex/1.0"})
+
+    def _try_next_key(self) -> bool:
+        if self.current_key_index < len(self.api_keys) - 1:
+            self.current_key_index += 1
+            logger.info(
+                f"Switching to next API key (index: {self.current_key_index})"
+            )
+            return True
+        return False
+
+    def _request(self, url: str, params: Dict, max_retries: int = 2) -> Dict:
+        for retry in range(max_retries):
+            while self.current_key_index < len(self.api_keys):
+                try:
+                    params["key"] = self.api_keys[self.current_key_index]
+                    response = self.session.get(url, params=params, timeout=10)
+                    response.raise_for_status()
+                    data = response.json()
+
+                    if data.get("status") == "1":
+                        return data
+
+                    error_info = data.get("info", "Unknown error")
+                    error_code = data.get("infocode", "N/A")
+
+                    if any(err in error_info for err in RETRYABLE_ERRORS) or int(
+                        error_code
+                    ) >= 10000:
+                        error_detail = (
+                            f"Key {self.current_key_index}: {error_info} (code: {error_code})"
+                        )
+                        logger.warning(f"API error: {error_detail}")
+                        self.api_error_details.append(error_detail)
+
+                        if not self._try_next_key():
+                            raise APIFallbackError()
+                        continue
+
+                    logger.warning(f"API returned error: {error_info}")
+                    time.sleep(1 * (retry + 1))
+
+                except APIFallbackError:
+                    raise
+                except requests.exceptions.Timeout:
+                    logger.warning("Request timeout")
+                    time.sleep(1 * (retry + 1))
+                except requests.exceptions.RequestException as e:
+                    logger.warning(f"Request failed: {e}")
+                    time.sleep(1 * (retry + 1))
+                except Exception as e:
+                    logger.warning(f"Unexpected error: {e}")
+                    time.sleep(1 * (retry + 1))
+
+            if not self._try_next_key():
+                break
+
+        raise APIFallbackError()
 
     @staticmethod
     def is_morning_peak(now: Optional[datetime] = None) -> bool:
         now = now or datetime.now()
         current_time = now.time()
         return MORNING_PEAK_START <= current_time <= MORNING_PEAK_END
-
-    def _request(self, url: str, params: Dict, max_retries: int = 3) -> Dict:
-        for attempt in range(max_retries):
-            try:
-                params["key"] = self.key
-                response = self.session.get(url, params=params, timeout=10)
-                response.raise_for_status()
-                data = response.json()
-                if data.get("status") == "1":
-                    return data
-                logger.warning(f"API returned error: {data.get('info')}")
-            except Exception as e:
-                logger.warning(f"Request failed (attempt {attempt + 1}): {e}")
-            time.sleep(1 * (attempt + 1))
-        raise RuntimeError(f"Failed to fetch data after {max_retries} retries")
 
     def get_congestion_for_station(
         self,
@@ -85,13 +154,17 @@ class CongestionInferenceEngine:
     ) -> Optional[TrafficStatus]:
         try:
             if self.demo_mode:
-                simulated = self.simulate_morning_peak([{
-                    "id": station_id,
-                    "name": station_name,
-                    "city": city,
-                    "longitude": longitude,
-                    "latitude": latitude,
-                }])
+                simulated = self.simulate_morning_peak(
+                    [
+                        {
+                            "id": station_id,
+                            "name": station_name,
+                            "city": city,
+                            "longitude": longitude,
+                            "latitude": latitude,
+                        }
+                    ]
+                )
                 return simulated[0] if simulated else None
 
             params = {
@@ -121,6 +194,24 @@ class CongestionInferenceEngine:
                 speed=avg_speed,
                 status=status,
             )
+        except APIFallbackError:
+            logger.warning(
+                f"API failed for {station_name}. Falling back to simulation."
+            )
+            self.demo_mode = True
+            self.demo_reason = "; ".join(self.api_error_details)
+            simulated = self.simulate_morning_peak(
+                [
+                    {
+                        "id": station_id,
+                        "name": station_name,
+                        "city": city,
+                        "longitude": longitude,
+                        "latitude": latitude,
+                    }
+                ]
+            )
+            return simulated[0] if simulated else None
         except Exception as e:
             logger.error(f"Error fetching congestion for {station_name}: {e}")
             return None
@@ -228,23 +319,32 @@ class CongestionInferenceEngine:
 
         all_results = []
 
-        for i in range(0, len(stations), batch_size):
-            batch = stations[i : i + batch_size]
-            logger.info(f"Processing batch {i // batch_size + 1}, stations {i}-{i + len(batch)}")
-
-            for station in batch:
-                result = self.get_congestion_for_station(
-                    station_id=station.get("id", ""),
-                    station_name=station.get("name", ""),
-                    city=station.get("city", ""),
-                    longitude=station.get("longitude", 0),
-                    latitude=station.get("latitude", 0),
+        try:
+            for i in range(0, len(stations), batch_size):
+                batch = stations[i : i + batch_size]
+                logger.info(
+                    f"Processing batch {i // batch_size + 1}, stations {i}-{i + len(batch)}"
                 )
-                if result:
-                    all_results.append(result)
-                time.sleep(0.2)
 
-            time.sleep(1)
+                for station in batch:
+                    result = self.get_congestion_for_station(
+                        station_id=station.get("id", ""),
+                        station_name=station.get("name", ""),
+                        city=station.get("city", ""),
+                        longitude=station.get("longitude", 0),
+                        latitude=station.get("latitude", 0),
+                    )
+                    if result:
+                        all_results.append(result)
+                    time.sleep(0.1)
+
+                time.sleep(0.5)
+
+        except APIFallbackError:
+            logger.warning("API failed. Falling back to demo mode for all stations.")
+            self.demo_mode = True
+            self.demo_reason = "; ".join(self.api_error_details)
+            return self.simulate_morning_peak(stations)
 
         os.makedirs(output_dir, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -319,27 +419,73 @@ class CongestionInferenceEngine:
 
     def _is_central_station(self, name: str) -> bool:
         central_keywords = [
-            "西二旗", "人民广场", "国贸", "陆家嘴", "徐家汇", "静安寺",
-            "中关村", "望京", "三元桥", "东直门", "西直门", "复兴门",
-            "南京西路", "淮海中路", "体育西路", "珠江新城", "福田",
-            "车公庙", "高新园", "深大", "五道口", "知春路", "宋家庄",
-            "世纪大道", "中山公园", "陕西南路", "常熟路", "衡山路",
-            "西单", "东单", "虹桥火车站", "上海火车站",
+            "西二旗",
+            "人民广场",
+            "国贸",
+            "陆家嘴",
+            "徐家汇",
+            "静安寺",
+            "中关村",
+            "望京",
+            "三元桥",
+            "东直门",
+            "西直门",
+            "复兴门",
+            "南京西路",
+            "淮海中路",
+            "体育西路",
+            "珠江新城",
+            "福田",
+            "车公庙",
+            "高新园",
+            "深大",
+            "五道口",
+            "知春路",
+            "宋家庄",
+            "世纪大道",
+            "中山公园",
+            "陕西南路",
+            "常熟路",
+            "衡山路",
+            "西单",
+            "东单",
+            "虹桥火车站",
+            "上海火车站",
         ]
         return any(kw in name for kw in central_keywords)
 
     def _is_suburban_terminal(self, name: str) -> bool:
         suburban_terminals = [
-            "俸伯", "南邵", "美兰湖", "嘉定北", "滴水湖", "松江新城",
-            "亦庄火车站", "苹果园", "朱辛庄", "安河桥北", "西苑",
-            "巴沟", "劲松", "四惠东", "土桥", "临河里",
+            "俸伯",
+            "南邵",
+            "美兰湖",
+            "嘉定北",
+            "滴水湖",
+            "松江新城",
+            "亦庄火车站",
+            "苹果园",
+            "朱辛庄",
+            "安河桥北",
+            "西苑",
+            "巴沟",
+            "劲松",
+            "四惠东",
+            "土桥",
+            "临河里",
         ]
         return any(kw in name for kw in suburban_terminals)
 
     def _is_suburban_hub(self, name: str) -> bool:
         suburban_hubs = [
-            "天通苑北", "回龙观", "霍营", "立水桥", "北苑",
-            "莘庄", "共富新村", "彭浦新村", "通河新村",
+            "天通苑北",
+            "回龙观",
+            "霍营",
+            "立水桥",
+            "北苑",
+            "莘庄",
+            "共富新村",
+            "彭浦新村",
+            "通河新村",
         ]
         return any(kw in name for kw in suburban_hubs)
 
