@@ -6,7 +6,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from property.building_crawler import BuildingData
-from 3d.building_generator import Building3D, BuildingGenerator
+from building_3d.building_generator import Building3D, BuildingGenerator
 
 
 @dataclass

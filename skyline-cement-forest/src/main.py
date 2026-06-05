@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 sys.path.insert(0, os.path.dirname(__file__))
 from property.building_crawler import BuildingCrawler, BuildingData
-from 3d.building_generator import BuildingGenerator, Building3D
+from building_3d.building_generator import BuildingGenerator, Building3D
 from timeline.timeline_controller import TimelineController, TimelineStats
 
 app = FastAPI(
@@ -218,7 +218,7 @@ def _cache_buildings(buildings: List[Building3D]):
 
 
 def _generate_default_buildings() -> List[Building3D]:
-    from 3d.building_generator import generate_sample_buildings
+    from building_3d.building_generator import generate_sample_buildings
     buildings = generate_sample_buildings(300)
     timeline.set_buildings(buildings)
     
