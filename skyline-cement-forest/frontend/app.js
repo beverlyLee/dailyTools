@@ -1,7 +1,6 @@
-import { DeckGL } from '@deck.gl/core';
-import { GeoJsonLayer, TextLayer } from '@deck.gl/layers';
-import { MapboxLayer } from '@deck.gl/geo-layers';
 import maplibregl from 'maplibre-gl';
+import { MapboxOverlay } from '@deck.gl/mapbox';
+import { GeoJsonLayer, TextLayer } from '@deck.gl/layers';
 
 const INITIAL_VIEW_STATE = {
   longitude: 113.93,
@@ -13,26 +12,90 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-const MAP_STYLE = {
-  version: 8,
-  sources: {
-    'osm-tiles': {
-      type: 'raster',
-      tiles: [
-        'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-      ],
-      tileSize: 256
+const MAP_PROVIDERS = {
+  osm: {
+    name: 'OpenStreetMap',
+    style: {
+      version: 8,
+      sources: {
+        'osm-tiles': {
+          type: 'raster',
+          tiles: [
+            'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+          ],
+          tileSize: 256,
+          attribution: '© OpenStreetMap contributors'
+        }
+      },
+      layers: [
+        {
+          id: 'osm-tiles',
+          type: 'raster',
+          source: 'osm-tiles',
+          minzoom: 0,
+          maxzoom: 19
+        }
+      ]
     }
   },
-  layers: [
-    {
-      id: 'osm-tiles',
-      type: 'raster',
-      source: 'osm-tiles',
-      minzoom: 0,
-      maxzoom: 19
+  gaode: {
+    name: '高德地图',
+    style: {
+      version: 8,
+      sources: {
+        'gaode-tiles': {
+          type: 'raster',
+          tiles: [
+            'https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
+            'https://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
+            'https://webrd03.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
+            'https://webrd04.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}'
+          ],
+          tileSize: 256,
+          attribution: '© 高德地图'
+        }
+      },
+      layers: [
+        {
+          id: 'gaode-tiles',
+          type: 'raster',
+          source: 'gaode-tiles',
+          minzoom: 0,
+          maxzoom: 18
+        }
+      ]
     }
-  ]
+  },
+  gaode_satellite: {
+    name: '高德卫星',
+    style: {
+      version: 8,
+      sources: {
+        'gaode-satellite': {
+          type: 'raster',
+          tiles: [
+            'https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}',
+            'https://webst02.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}',
+            'https://webst03.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}',
+            'https://webst04.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}'
+          ],
+          tileSize: 256,
+          attribution: '© 高德地图'
+        }
+      },
+      layers: [
+        {
+          id: 'gaode-satellite',
+          type: 'raster',
+          source: 'gaode-satellite',
+          minzoom: 0,
+          maxzoom: 18
+        }
+      ]
+    }
+  }
 };
 
 class BuildingVisualization {
@@ -45,21 +108,62 @@ class BuildingVisualization {
     this.playSpeed = 1000;
     this.showLabels = true;
     this.colorByYear = false;
-    this.stats = {};
+    this.currentMapProvider = 'gaode';
+    this.map = null;
+    this.deckOverlay = null;
     
-    this.initDeckGL();
+    this.initMap();
     this.bindEvents();
     this.loadData();
   }
 
-  initDeckGL() {
-    this.deckgl = new DeckGL({
-      container: 'map-container',
-      initialViewState: INITIAL_VIEW_STATE,
-      controller: true,
-      mapStyle: MAP_STYLE,
-      maplibregl,
+  initMap() {
+    const container = document.getElementById('map-container');
+    const mapStyle = MAP_PROVIDERS[this.currentMapProvider].style;
+    
+    this.map = new maplibregl.Map({
+      container: container,
+      style: mapStyle,
+      center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
+      zoom: INITIAL_VIEW_STATE.zoom,
+      minZoom: INITIAL_VIEW_STATE.minZoom,
+      maxZoom: INITIAL_VIEW_STATE.maxZoom,
+      pitch: INITIAL_VIEW_STATE.pitch,
+      bearing: INITIAL_VIEW_STATE.bearing,
+      antialias: true
+    });
+
+    this.map.addControl(new maplibregl.NavigationControl(), 'top-right');
+    this.map.addControl(new maplibregl.ScaleControl(), 'bottom-left');
+
+    this.deckOverlay = new MapboxOverlay({
+      interleaved: true,
       layers: []
+    });
+
+    this.map.addControl(this.deckOverlay);
+
+    this.map.on('load', () => {
+      console.log('Map loaded');
+      this.updateVisualization();
+    });
+
+    this.map.on('mousemove', (e) => {
+      const features = this.deckOverlay._deck ? 
+        this.deckOverlay._deck.pickObject({ x: e.point.x, y: e.point.y }) : null;
+      this.handleHover(features, e.point);
+    });
+  }
+
+  switchMapProvider(provider) {
+    if (!MAP_PROVIDERS[provider]) return;
+    
+    this.currentMapProvider = provider;
+    const mapStyle = MAP_PROVIDERS[provider].style;
+    this.map.setStyle(mapStyle);
+    
+    this.map.once('styledata', () => {
+      this.updateVisualization();
     });
   }
 
@@ -69,9 +173,10 @@ class BuildingVisualization {
       const data = await response.json();
       this.allBuildings = data.buildings || [];
       this.stats = data.stats || {};
+      console.log(`Loaded ${this.allBuildings.length} buildings from API`);
       this.updateVisualization();
     } catch (error) {
-      console.error('Failed to load data:', error);
+      console.warn('Failed to load data from API, using mock data:', error);
       this.loadMockData();
     }
   }
@@ -141,6 +246,7 @@ class BuildingVisualization {
       });
     }
     
+    console.log(`Generated ${this.allBuildings.length} mock buildings`);
     this.updateVisualization();
   }
 
@@ -177,6 +283,8 @@ class BuildingVisualization {
   }
 
   updateVisualization() {
+    if (!this.deckOverlay) return;
+    
     this.currentBuildings = this.allBuildings.filter(
       b => b.buildYear <= this.currentYear
     );
@@ -199,9 +307,10 @@ class BuildingVisualization {
   }
 
   renderLayers() {
+    if (!this.deckOverlay || !this.map) return;
+
     const buildingData = this.currentBuildings.map(b => ({
       ...b,
-      polygon: [b.polygon],
       color: this.colorByYear ? this.getColorByYear(b.buildYear) : b.color
     }));
 
@@ -216,7 +325,7 @@ class BuildingVisualization {
           properties: b,
           geometry: {
             type: 'Polygon',
-            coordinates: b.polygon
+            coordinates: [b.polygon]
           }
         }))
       },
@@ -227,8 +336,7 @@ class BuildingVisualization {
       getFillColor: f => [...f.properties.color, 200],
       getLineColor: [255, 255, 255, 50],
       lineWidthMinPixels: 1,
-      pickable: true,
-      onHover: this.handleHover.bind(this)
+      pickable: true
     });
     
     layers.push(buildingLayer);
@@ -257,14 +365,14 @@ class BuildingVisualization {
       layers.push(textLayer);
     }
 
-    this.deckgl.setProps({ layers });
+    this.deckOverlay.setProps({ layers });
   }
 
-  handleHover(info) {
+  handleHover(feature, point) {
     const tooltip = document.getElementById('tooltip');
     
-    if (info.object) {
-      const props = info.object.properties;
+    if (feature && feature.object) {
+      const props = feature.object.properties;
       tooltip.innerHTML = `
         <h4>${props.name}</h4>
         <p><strong>高度:</strong> ${Math.round(props.height)} 米</p>
@@ -272,8 +380,8 @@ class BuildingVisualization {
         <p><strong>类型:</strong> ${props.type}</p>
         <p><strong>建成年份:</strong> ${props.buildYear}</p>
       `;
-      tooltip.style.left = `${info.x + 15}px`;
-      tooltip.style.top = `${info.y + 15}px`;
+      tooltip.style.left = `${point.x + 15}px`;
+      tooltip.style.top = `${point.y + 15}px`;
       tooltip.classList.add('visible');
     } else {
       tooltip.classList.remove('visible');
@@ -364,9 +472,16 @@ class BuildingVisualization {
     document.getElementById('color-by-year').addEventListener('change', (e) => {
       this.toggleColorByYear(e.target.checked);
     });
+
+    const mapSelect = document.getElementById('map-provider');
+    if (mapSelect) {
+      mapSelect.addEventListener('change', (e) => {
+        this.switchMapProvider(e.target.value);
+      });
+    }
   }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  new BuildingVisualization();
+  window.app = new BuildingVisualization();
 });
