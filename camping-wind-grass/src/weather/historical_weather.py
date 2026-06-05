@@ -70,11 +70,11 @@ class HistoricalWeather:
         temp_avg = 0
 
         site_types = {
-            "千岛湖": {"wind_base": 2.0, "rain_prob": 0.3, "grass": 85},
-            "金海湖": {"wind_base": 2.5, "rain_prob": 0.25, "grass": 80},
-            "张北": {"wind_base": 5.0, "rain_prob": 0.2, "grass": 70},
-            "三岔湖": {"wind_base": 1.8, "rain_prob": 0.35, "grass": 88},
-            "溪头村": {"wind_base": 1.5, "rain_prob": 0.4, "grass": 90},
+            "千岛湖": {"wind_base": 2.0, "rain_prob": 0.3, "grass": 85, "lng": 119.017, "lat": 29.608},
+            "金海湖": {"wind_base": 2.5, "rain_prob": 0.25, "grass": 80, "lng": 117.327, "lat": 40.167},
+            "张北": {"wind_base": 7.5, "rain_prob": 0.55, "grass": 35, "lng": 114.711, "lat": 41.151},
+            "三岔湖": {"wind_base": 1.8, "rain_prob": 0.35, "grass": 88, "lng": 104.316, "lat": 30.381},
+            "溪头村": {"wind_base": 1.5, "rain_prob": 0.4, "grass": 90, "lng": 113.767, "lat": 23.763},
         }
 
         wind_base = 3.0
@@ -82,11 +82,16 @@ class HistoricalWeather:
         grass_coverage = 75
 
         for key in site_types:
-            if abs(lng - site_types[key].get("lng", 0)) < 1 or key in str(lng):
-                wind_base = site_types[key]["wind_base"]
-                rain_prob = site_types[key]["rain_prob"]
-                grass_coverage = site_types[key]["grass"]
-                break
+            site_info = site_types[key]
+            site_lng = site_info.get("lng", 0)
+            site_lat = site_info.get("lat", 0)
+            if site_lng > 0 and site_lat > 0:
+                distance = ((lng - site_lng) ** 2 + (lat - site_lat) ** 2) ** 0.5
+                if distance < 1.0:
+                    wind_base = site_info["wind_base"]
+                    rain_prob = site_info["rain_prob"]
+                    grass_coverage = site_info["grass"]
+                    break
 
         for _ in range(days):
             wind_speed = wind_base + random.uniform(-1, 2) + random.gauss(0, 0.5)

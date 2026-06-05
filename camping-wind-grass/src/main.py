@@ -85,7 +85,8 @@ async def get_config(request):
     return json_response({
         "success": True,
         "data": {
-            "gaode_api_key": os.getenv("GAODE_API_KEY", ""),
+            "gaode_js_api_key": os.getenv("GAODE_JS_API_KEY", ""),
+            "gaode_geocode_key": os.getenv("GAODE_GEOCODE_KEY", ""),
             "map_provider": "gaode",
         },
     })

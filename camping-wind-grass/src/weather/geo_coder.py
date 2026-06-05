@@ -12,7 +12,7 @@ load_dotenv()
 class GeoCoder:
     def __init__(self):
         self.ua = UserAgent()
-        self.api_key = os.getenv("GAODE_API_KEY", "")
+        self.api_key = os.getenv("GAODE_GEOCODE_KEY", "")
         self.base_url = "https://restapi.amap.com/v3/geocode/geo"
         self.cache_file = "/Users/liboyang/trae/dailyTools/camping-wind-grass/data/geo_cache.json"
         self.cache = self._load_cache()
