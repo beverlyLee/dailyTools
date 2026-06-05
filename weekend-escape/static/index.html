@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>周末出行指南 - Weekend Escape</title>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0a0a1a;
+            color: #fff;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1;
+            background: rgba(10, 10, 30, 0.9);
+            padding: 20px 30px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #00d4ff, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .header .subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .header .time-info {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .header .flow-indicator {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .flow-outbound {
+            background: linear-gradient(135deg, #f97316, #ef4444);
+        }
+
+        .flow-inbound {
+            background: linear-gradient(135deg, #22c55e, #06b6d4);
+        }
+
+        .sidebar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 320px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            z-index: 1;
+            background: rgba(10, 10, 30, 0.9);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .direction-list {
+            padding: 10px 0;
+        }
+
+        .direction-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .direction-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .direction-item.active {
+            background: rgba(124, 58, 237, 0.2);
+            border-left: 3px solid #7c3aed;
+        }
+
+        .direction-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .direction-name {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .direction-arrow {
+            font-size: 20px;
+        }
+
+        .direction-volume {
+            font-size: 12px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            background: rgba(124, 58, 237, 0.3);
+            color: #a78bfa;
+        }
+
+        .direction-destination {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .destination-name {
+            color: #00d4ff;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #7c3aed);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .congestion-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .congestion-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1;
+            background: rgba(10, 10, 30, 0.9);
+            padding: 15px 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .legend h3 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #94a3b8;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .legend-line {
+            width: 30px;
+            height: 3px;
+            border-radius: 2px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .refresh-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #7c3aed, #00d4ff);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+        }
+
+        .refresh-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            text-align: center;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #7c3aed;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .mapboxgl-popup {
+            max-width: 280px;
+        }
+
+        .mapboxgl-popup-content {
+            background: rgba(10, 10, 30, 0.95);
+            color: #fff;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+        }
+
+        .mapboxgl-popup-close-button {
+            color: #fff;
+            font-size: 20px;
+        }
+
+        .popup-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #00d4ff;
+        }
+
+        .popup-item {
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #94a3b8;
+        }
+
+        .popup-item span {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <div class="header">
+        <h1>🚗 周末出行指南</h1>
+        <div class="subtitle">实时出城车流分析与热门目的地推荐</div>
+        <div class="time-info">
+            <span id="current-time">加载中...</span>
+            <span id="flow-indicator" class="flow-indicator flow-outbound">出城方向</span>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>热门出行方向</h2>
+            <p>基于实时交通拥堵数据分析</p>
+        </div>
+        <div id="direction-list" class="direction-list">
+        </div>
+    </div>
+
+    <div class="legend">
+        <h3>图例</h3>
+        <div class="legend-item">
+            <div class="legend-line" style="background: linear-gradient(90deg, #00d4ff, #7c3aed); width: 60px; height: 8px;"></div>
+            <span>车流量大</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-line" style="background: linear-gradient(90deg, #00d4ff, #7c3aed); width: 30px; height: 4px;"></div>
+            <span>车流量小</span>
+        </div>
+        <div style="height: 10px;"></div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: #22c55e;"></div>
+            <span>畅通</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: #eab308;"></div>
+            <span>缓行</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: #f97316;"></div>
+            <span>拥堵</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background: #ef4444;"></div>
+            <span>严重拥堵</span>
+        </div>
+    </div>
+
+    <button id="refresh-btn" class="refresh-btn" onclick="refreshData()">
+        🔄 刷新数据
+    </button>
+
+    <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在分析交通数据...</div>
+    </div>
+
+    <script>
+        let map;
+        let currentData = null;
+
+        const directionArrows = {
+            '北': '↑',
+            '东北': '↗',
+            '东': '→',
+            '东南': '↘',
+            '南': '↓',
+            '西南': '↙',
+            '西': '←',
+            '西北': '↖'
+        };
+
+        function getDirectionArrow(direction) {
+            return directionArrows[direction] || '●';
+        }
+
+        function getCongestionColor(level) {
+            if (level <= 1) return '#22c55e';
+            if (level <= 2) return '#eab308';
+            if (level <= 3) return '#f97316';
+            return '#ef4444';
+        }
+
+        function getCongestionText(level) {
+            if (level <= 1) return '畅通';
+            if (level <= 2) return '缓行';
+            if (level <= 3) return '拥堵';
+            return '严重拥堵';
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('current-time').textContent = timeStr;
+        }
+
+        async function initMap() {
+            try {
+                const configResponse = await fetch('/api/config');
+                const config = await configResponse.json();
+
+                mapboxgl.accessToken = config.mapbox_token || 'pk.eyJ1IjoiZXhhbXBsZXVzZXIiLCJhIjoiY2w5eWVhMTB0MDJ6dzN1cGZ4M2s4OWRwayJ9.6n5qQ';
+
+                map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/dark-v11',
+                    center: config.city_center,
+                    zoom: 9,
+                    pitch: 40
+                });
+
+                map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+                map.on('load', () => {
+                    fetchTrafficData();
+                });
+
+            } catch (error) {
+                console.error('Failed to initialize map:', error);
+            }
+        }
+
+        async function fetchTrafficData() {
+            showLoading(true);
+            try {
+                const response = await fetch('/api/traffic/flow?use_mock=true');
+                currentData = await response.json();
+                updateUI(currentData);
+                renderMapLayers(currentData);
+            } catch (error) {
+                console.error('Failed to fetch traffic data:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function updateUI(data) {
+            const flowIndicator = document.getElementById('flow-indicator');
+            if (data.flow_direction === 'outbound') {
+                flowIndicator.textContent = '出城方向';
+                flowIndicator.className = 'flow-indicator flow-outbound';
+            } else {
+                flowIndicator.textContent = '进城方向';
+                flowIndicator.className = 'flow-indicator flow-inbound';
+            }
+
+            const directionList = document.getElementById('direction-list');
+            directionList.innerHTML = '';
+
+            data.radial_lines.forEach((line, index) => {
+                const item = document.createElement('div');
+                item.className = 'direction-item' + (index === 0 ? ' active' : '');
+                item.onclick = () => focusOnDirection(line);
+
+                item.innerHTML = `
+                    <div class="direction-top">
+                        <div class="direction-name">
+                            <span class="direction-arrow">${getDirectionArrow(line.direction)}</span>
+                            ${line.direction}方向
+                        </div>
+                        <div class="direction-volume">${line.flow_volume} 段</div>
+                    </div>
+                    <div class="direction-destination">
+                        热门目的地: <span class="destination-name">${line.destination || '待分析'}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${line.flow_percentage}%"></div>
+                    </div>
+                    <div class="congestion-indicator">
+                        <div class="congestion-dot" style="background: ${getCongestionColor(line.avg_congestion)}"></div>
+                        ${getCongestionText(line.avg_congestion)} · ${line.flow_percentage.toFixed(1)}% 车流占比
+                    </div>
+                `;
+
+                directionList.appendChild(item);
+            });
+        }
+
+        function renderMapLayers(data) {
+            const sources = map.getStyle().sources;
+            Object.keys(sources).forEach(id => {
+                if (id.startsWith('radial-') || id.startsWith('destination-')) {
+                    if (map.getLayer(id + '-line')) map.removeLayer(id + '-line');
+                    if (map.getLayer(id + '-glow')) map.removeLayer(id + '-glow');
+                    if (map.getLayer(id + '-marker')) map.removeLayer(id + '-marker');
+                    map.removeSource(id);
+                }
+            });
+
+            data.radial_lines.forEach((line, index) => {
+                const sourceId = `radial-${index}`;
+                
+                map.addSource(sourceId, {
+                    type: 'geojson',
+                    data: {
+                        type: 'Feature',
+                        properties: {
+                            direction: line.direction,
+                            destination: line.destination,
+                            flow_volume: line.flow_volume,
+                            flow_percentage: line.flow_percentage,
+                            congestion: line.avg_congestion
+                        },
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: [line.start, line.end]
+                        }
+                    }
+                });
+
+                map.addLayer({
+                    id: sourceId + '-glow',
+                    type: 'line',
+                    source: sourceId,
+                    layout: {
+                        'line-cap': 'round',
+                        'line-join': 'round'
+                    },
+                    paint: {
+                        'line-color': [
+                            'interpolate',
+                            ['linear'],
+                            ['get', 'congestion'],
+                            1, '#22c55e',
+                            2, '#eab308',
+                            3, '#f97316',
+                            4, '#ef4444'
+                        ],
+                        'line-width': line.line_width * 3,
+                        'line-opacity': 0.2
+                    }
+                });
+
+                map.addLayer({
+                    id: sourceId + '-line',
+                    type: 'line',
+                    source: sourceId,
+                    layout: {
+                        'line-cap': 'round',
+                        'line-join': 'round'
+                    },
+                    paint: {
+                        'line-color': [
+                            'interpolate',
+                            ['linear'],
+                            ['get', 'congestion'],
+                            1, '#22c55e',
+                            2, '#eab308',
+                            3, '#f97316',
+                            4, '#ef4444'
+                        ],
+                        'line-width': line.line_width,
+                        'line-gradient': [
+                            'interpolate',
+                            ['linear'],
+                            ['line-progress'],
+                            0, '#00d4ff',
+                            1, '#7c3aed'
+                        ]
+                    }
+                }, sourceId + '-glow');
+
+                if (line.destination) {
+                    const destSourceId = `destination-${index}`;
+                    map.addSource(destSourceId, {
+                        type: 'geojson',
+                        data: {
+                            type: 'Feature',
+                            properties: {
+                                name: line.destination,
+                                level: line.destination_level || ''
+                            },
+                            geometry: {
+                                type: 'Point',
+                                coordinates: line.end
+                            }
+                        }
+                    });
+
+                    map.addLayer({
+                        id: destSourceId + '-marker',
+                        type: 'circle',
+                        source: destSourceId,
+                        paint: {
+                            'circle-radius': 10,
+                            'circle-color': '#7c3aed',
+                            'circle-stroke-width': 3,
+                            'circle-stroke-color': '#fff',
+                            'circle-opacity': 0.9
+                        }
+                    });
+
+                    map.on('click', destSourceId + '-marker', (e) => {
+                        const props = e.features[0].properties;
+                        new mapboxgl.Popup()
+                            .setLngLat(e.lngLat)
+                            .setHTML(`
+                                <div class="popup-title">🏛️ ${props.name}</div>
+                                <div class="popup-item">等级: <span>${props.level}</span></div>
+                            `)
+                            .addTo(map);
+                    });
+
+                    map.on('mouseenter', destSourceId + '-marker', () => {
+                        map.getCanvas().style.cursor = 'pointer';
+                    });
+
+                    map.on('mouseleave', destSourceId + '-marker', () => {
+                        map.getCanvas().style.cursor = '';
+                    });
+                }
+
+                map.on('click', sourceId + '-line', (e) => {
+                    const props = e.features[0].properties;
+                    new mapboxgl.Popup()
+                        .setLngLat(e.lngLat)
+                        .setHTML(`
+                            <div class="popup-title">${props.direction}方向</div>
+                            <div class="popup-item">目的地: <span>${props.destination || '分析中'}</span></div>
+                            <div class="popup-item">车流量: <span>${props.flow_volume} 段</span></div>
+                            <div class="popup-item">车流占比: <span>${props.flow_percentage.toFixed(1)}%</span></div>
+                            <div class="popup-item">拥堵状况: <span>${getCongestionText(props.congestion)}</span></div>
+                        `)
+                        .addTo(map);
+                });
+            });
+        }
+
+        function focusOnDirection(line) {
+            map.flyTo({
+                center: line.end,
+                zoom: 11,
+                duration: 1000
+            });
+
+            document.querySelectorAll('.direction-item').forEach((item, i) => {
+                item.classList.toggle('active', currentData.radial_lines[i] === line);
+            });
+        }
+
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const btn = document.getElementById('refresh-btn');
+            loading.classList.toggle('show', show);
+            btn.disabled = show;
+        }
+
+        function refreshData() {
+            fetchTrafficData();
+        }
+
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        initMap();
+    </script>
+</body>
+</html>
