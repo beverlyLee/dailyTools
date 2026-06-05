@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>城市建筑密度增长模拟 - 深圳南山区</title>
+  <link href="https://unpkg.com/maplibre-gl@3.5.2/dist/maplibre-gl.css" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <div id="map-container"></div>
+    
+    <div class="control-panel">
+      <h1>城市建筑密度增长模拟</h1>
+      <h2>深圳南山区 2000-2020</h2>
+      
+      <div class="stats-panel">
+        <div class="stat-item">
+          <span class="stat-label">年份</span>
+          <span class="stat-value" id="current-year">2000</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">建筑数量</span>
+          <span class="stat-value" id="building-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">总高度</span>
+          <span class="stat-value" id="total-height">0</span>
+          <span class="stat-unit">m</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">最高建筑</span>
+          <span class="stat-value" id="max-height">0</span>
+          <span class="stat-unit">m</span>
+        </div>
+      </div>
+      
+      <div class="timeline-control">
+        <div class="timeline-labels">
+          <span>2000</span>
+          <span>2010</span>
+          <span>2020</span>
+        </div>
+        <input 
+          type="range" 
+          id="year-slider" 
+          min="2000" 
+          max="2020" 
+          value="2000"
+          step="1"
+        >
+      </div>
+      
+      <div class="playback-controls">
+        <button id="play-btn" class="btn btn-primary">
+          <span id="play-icon">▶</span> 播放
+        </button>
+        <button id="reset-btn" class="btn">重置</button>
+        <select id="speed-select" class="speed-select">
+          <option value="2000">慢速</option>
+          <option value="1000" selected>正常</option>
+          <option value="500">快速</option>
+          <option value="200">极速</option>
+        </select>
+      </div>
+      
+      <div class="layer-controls">
+        <label class="checkbox-label">
+          <input type="checkbox" id="show-labels" checked>
+          显示建筑名称
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="color-by-year">
+          按年份着色
+        </label>
+      </div>
+      
+      <div class="legend">
+        <h3>图例</h3>
+        <div class="legend-items">
+          <div class="legend-item">
+            <span class="legend-color" style="background: rgb(70, 130, 180)"></span>
+            <span>住宅</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: rgb(100, 149, 237)"></span>
+            <span>公寓</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: rgb(105, 105, 105)"></span>
+            <span>写字楼</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: rgb(205, 92, 92)"></span>
+            <span>商业综合体</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: rgb(147, 112, 219)"></span>
+            <span>商住楼</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="tooltip" class="tooltip"></div>
+  </div>
+  
+  <script type="module" src="app.js"></script>
+</body>
+</html>
