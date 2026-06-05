@@ -148,6 +148,14 @@ class PetPOIAggregator:
         return pois
 
     def attach_pet_info(self, pois: List[POI], pet_analysis: Dict) -> List[POI]:
+        default_facility = {
+            "has_water_bowl": False,
+            "has_pee_pad": False,
+            "has_pet_snack": False,
+            "has_pet_cart": False,
+            "has_pet_area": False
+        }
+        
         for poi in pois:
             if poi.name in pet_analysis:
                 result = pet_analysis[poi.name]
@@ -160,6 +168,10 @@ class PetPOIAggregator:
                     "has_pet_area": result.facility.has_pet_area
                 }
                 poi.pet_evidence = result.evidence
+            else:
+                poi.pet_policy = "unknown"
+                poi.pet_facility = default_facility.copy()
+                poi.pet_evidence = []
         
         return pois
 

@@ -86,34 +86,66 @@ class PetCommentSpider:
             {
                 "content": "这家咖啡馆真的太棒了！可以带狗狗进去，店员还给准备了宠物专用水碗，太贴心了！",
                 "source": "dianping",
-                "shop_name": shop_name or "Paw Coffee 爪爪咖啡馆"
+                "shop_name": "Paw Coffee 爪爪咖啡馆"
             },
             {
                 "content": "周末带猫主子来探店，店员态度超好，还给了小零食，完全不排斥宠物！",
                 "source": "xiaohongshu",
-                "shop_name": shop_name or "Paw Coffee 爪爪咖啡馆"
+                "shop_name": "Paw Coffee 爪爪咖啡馆"
             },
             {
                 "content": "宠物友好认证！户外区和室内都可以带狗狗，有免费尿垫提供，强烈推荐！",
                 "source": "dianping",
-                "shop_name": shop_name or "毛孩子乐园餐厅"
+                "shop_name": "毛孩子乐园餐厅"
+            },
+            {
+                "content": "带金毛来吃饭，店员主动给了水碗和零食，还专门收拾了一块区域，服务满分！",
+                "source": "xiaohongshu",
+                "shop_name": "毛孩子乐园餐厅"
             },
             {
                 "content": "这家餐厅明确禁止宠物入内，只能放在门口的笼子里，不太方便。",
                 "source": "xiaohongshu",
-                "shop_name": shop_name or "传统美食餐厅"
+                "shop_name": "传统美食餐厅"
+            },
+            {
+                "content": "打电话咨询过了，店家说不允许带宠物，建议放在门口的临时寄存处。",
+                "source": "dianping",
+                "shop_name": "传统美食餐厅"
             },
             {
                 "content": "商场的宠物政策很友好，大部分店铺都允许进入，还提供宠物推车租赁。",
                 "source": "dianping",
-                "shop_name": shop_name or "阳光购物中心"
+                "shop_name": "阳光购物中心"
+            },
+            {
+                "content": "周末带柯基逛商场，服务台免费借了宠物推车，逛了一下午都没问题！",
+                "source": "xiaohongshu",
+                "shop_name": "阳光购物中心"
             },
             {
                 "content": "室外露台允许带狗狗，但是室内不行，天气好的时候来坐坐还不错。",
                 "source": "xiaohongshu",
-                "shop_name": shop_name or "露台花园餐厅"
+                "shop_name": "露台花园餐厅"
+            },
+            {
+                "content": "仅限户外区可以带宠物，室内用餐区禁止宠物进入，需要注意。",
+                "source": "dianping",
+                "shop_name": "露台花园餐厅"
+            },
+            {
+                "content": "猫咪主题咖啡馆太赞了！店里有好多可爱的猫咪，也可以带自己的猫来玩，有专门的宠物区和尿垫。",
+                "source": "xiaohongshu",
+                "shop_name": "猫咪主题咖啡馆"
+            },
+            {
+                "content": "带自家布偶来打卡，店员很热情，给了猫咪零食和水碗，还有专门的猫咪玩耍区域！",
+                "source": "dianping",
+                "shop_name": "猫咪主题咖啡馆"
             }
         ]
+        if shop_name:
+            return [r for r in mock_data if r["shop_name"] == shop_name]
         return mock_data
 
     def save_reviews(self, reviews: List[Dict], filename: str = "reviews.json"):

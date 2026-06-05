@@ -113,6 +113,10 @@
       border-top: 4px solid #f44336;
     }
 
+    .info-window.unknown {
+      border-top: 4px solid #9e9e9e;
+    }
+
     .info-header {
       display: flex;
       justify-content: space-between;
@@ -196,6 +200,11 @@
     .policy-badge.forbidden {
       background: #ffebee;
       color: #c62828;
+    }
+
+    .policy-badge.unknown {
+      background: #f5f5f5;
+      color: #616161;
     }
 
     .facilities,
@@ -426,9 +435,9 @@
         friendly: '✅ 允许宠物进入',
         outdoor_only: '🌳 仅限户外区',
         forbidden: '🚫 禁止宠物进入',
-        unknown: '❓ 政策未知'
+        unknown: '❓ 暂无宠物友好信息'
       };
-      return mapping[policy] || '未知';
+      return mapping[policy] || '❓ 暂无宠物友好信息';
     }
 
     function getMarkerIcon(policy) {
@@ -439,6 +448,13 @@
         unknown: '❓'
       };
       return mapping[policy] || '❓';
+    }
+
+    function normalizePolicy(policy) {
+      if (!policy || policy === null) {
+        return 'unknown';
+      }
+      return policy;
     }
 
     function loadGaodeScript() {
@@ -477,10 +493,11 @@
       markers = [];
       
       pois.forEach(poi => {
+        const normalizedPolicy = normalizePolicy(poi.pet_policy);
         const marker = new AMap.Marker({
           position: [poi.longitude, poi.latitude],
           title: poi.name,
-          content: `<div style="font-size: 24px; cursor: pointer; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">${getMarkerIcon(poi.pet_policy)}</div>`,
+          content: `<div style="font-size: 24px; cursor: pointer; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">${getMarkerIcon(normalizedPolicy)}</div>`,
           offset: new AMap.Pixel(-12, -12)
         });
         
@@ -496,6 +513,7 @@
 
     function showInfoWindow(poi) {
       const infoWindow = document.getElementById('info-window');
+      const normalizedPolicy = normalizePolicy(poi.pet_policy);
       
       document.getElementById('poi-name').textContent = poi.name;
       document.getElementById('poi-address').textContent = '📍 ' + poi.address;
@@ -518,8 +536,8 @@
       }
       
       const policyEl = document.getElementById('poi-policy');
-      policyEl.textContent = getPolicyText(poi.pet_policy);
-      policyEl.className = 'policy-badge ' + poi.pet_policy;
+      policyEl.textContent = getPolicyText(normalizedPolicy);
+      policyEl.className = 'policy-badge ' + normalizedPolicy;
       
       const facilitiesEl = document.getElementById('poi-facilities');
       const facilityListEl = document.getElementById('facility-list');
@@ -547,6 +565,8 @@
       const evidenceListEl = document.getElementById('evidence-list');
       evidenceListEl.innerHTML = '';
       
+      const isUnknown = !poi.pet_policy || poi.pet_policy === 'unknown' || poi.pet_policy === null;
+      
       if (poi.pet_evidence && poi.pet_evidence.length > 0) {
         poi.pet_evidence.slice(0, 3).forEach(item => {
           const li = document.createElement('li');
@@ -554,11 +574,20 @@
           evidenceListEl.appendChild(li);
         });
         evidenceEl.style.display = 'block';
+        evidenceEl.querySelector('h4').textContent = '💬 网友探店攻略：';
+      } else if (isUnknown) {
+        const li = document.createElement('li');
+        li.textContent = '欢迎网友补充探店攻略，帮助其他铲屎官找到更多宠物友好场所！';
+        li.style.borderLeftColor = '#9e9e9e';
+        li.style.color = '#888';
+        evidenceListEl.appendChild(li);
+        evidenceEl.style.display = 'block';
+        evidenceEl.querySelector('h4').textContent = '📝 参与共建：';
       } else {
         evidenceEl.style.display = 'none';
       }
       
-      infoWindow.className = 'info-window show ' + poi.pet_policy;
+      infoWindow.className = 'info-window show ' + normalizedPolicy;
     }
 
     function closeInfoWindow() {

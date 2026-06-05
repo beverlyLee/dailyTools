@@ -38,7 +38,8 @@ class PolicyDetector:
     def _init_keywords(self):
         self.friendly_keywords = [
             "可以带", "允许带", "宠物友好", "欢迎宠物", "可以进", "允许进",
-            "不排斥", "接受宠物", "欢迎狗狗", "欢迎猫咪", "带宠物", "带狗狗", "带猫"
+            "不排斥", "接受宠物", "欢迎狗狗", "欢迎猫咪", "带宠物", "带狗狗", "带猫",
+            "室内可以", "室内允许"
         ]
         
         self.forbidden_keywords = [
@@ -48,7 +49,13 @@ class PolicyDetector:
         
         self.outdoor_keywords = [
             "户外", "露台", "室外", "露天", "户外区", "露台区", "室外区",
-            "户外可以", "露台可以", "室外可以", "仅限户外", "仅限室外", "只限露台"
+            "户外可以", "露台可以", "室外可以"
+        ]
+        
+        self.outdoor_restrict_keywords = [
+            "仅限户外", "仅限室外", "只限露台", "只能在户外", "只能在露台", "只能在室外",
+            "只允许户外", "只允许露台", "只允许室外", "但是室内不行", "但室内不行",
+            "室内不可以", "室内不让", "室内不能带", "室内禁止"
         ]
         
         self.facility_keywords = {
@@ -99,19 +106,28 @@ class PolicyDetector:
         friendly_count = self._count_keyword_matches(text, self.friendly_keywords)
         forbidden_count = self._count_keyword_matches(text, self.forbidden_keywords)
         outdoor_count = self._count_keyword_matches(text, self.outdoor_keywords)
+        outdoor_restrict_count = self._count_keyword_matches(text, self.outdoor_restrict_keywords)
+        
+        forbidden_weight = 2.0
+        outdoor_restrict_weight = 1.5
+        forbidden_weighted = forbidden_count * forbidden_weight
+        outdoor_restrict_weighted = outdoor_restrict_count * outdoor_restrict_weight
         
         all_keywords = (self.friendly_keywords + self.forbidden_keywords + 
-                       self.outdoor_keywords + [k for ks in self.facility_keywords.values() for k in ks])
+                       self.outdoor_keywords + self.outdoor_restrict_keywords +
+                       [k for ks in self.facility_keywords.values() for k in ks])
         evidence = self._collect_evidence(text, all_keywords)
         
         facility = self._check_facilities(text)
         
-        total_matches = friendly_count + forbidden_count + outdoor_count
+        total_matches = friendly_count + forbidden_count + outdoor_count + outdoor_restrict_count
         confidence = min(1.0, total_matches * 0.2 + 0.3) if total_matches > 0 else 0.3
         
-        if forbidden_count > 0 and forbidden_count >= friendly_count:
+        if outdoor_restrict_weighted > 0:
+            policy = PetPolicy.OUTDOOR_ONLY
+        elif forbidden_weighted > 0 and forbidden_weighted >= friendly_count:
             policy = PetPolicy.FORBIDDEN
-        elif outdoor_count > 0 and friendly_count == 0:
+        elif outdoor_count > 0 and "室内可以" not in text and "室内允许" not in text:
             policy = PetPolicy.OUTDOOR_ONLY
         elif friendly_count > 0:
             policy = PetPolicy.FRIENDLY
