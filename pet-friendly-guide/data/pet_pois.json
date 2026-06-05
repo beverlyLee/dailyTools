@@ -2,107 +2,278 @@
   {
     "id": "POI001",
     "name": "Paw Coffee 爪爪咖啡馆",
-    "address": "上海市静安区南京西路1688号",
-    "longitude": 121.4493,
-    "latitude": 31.2304,
-    "category": "咖啡餐饮",
-    "phone": "021-12345678",
-    "rating": 4.8,
-    "price": "¥50/人",
-    "pet_policy": "friendly",
-    "pet_facility": {
-      "has_water_bowl": true,
-      "has_pee_pad": false,
-      "has_pet_snack": true,
-      "has_pet_cart": false,
-      "has_pet_area": false
-    },
-    "pet_evidence": [
-      "可以带狗狗进去，店员还给准备了宠物专用水碗，太贴心了",
-      "周末带猫主子来探店，店员态度超好，还给了小零食，完全不排斥宠物"
-    ]
-  },
-  {
-    "id": "POI002",
-    "name": "毛孩子乐园餐厅",
-    "address": "上海市徐汇区淮海中路1200号",
-    "longitude": 121.455,
-    "latitude": 31.215,
-    "category": "餐饮美食",
-    "phone": "021-87654321",
-    "rating": 4.6,
-    "price": "¥120/人",
-    "pet_policy": "outdoor_only",
-    "pet_facility": {
-      "has_water_bowl": true,
-      "has_pee_pad": true,
-      "has_pet_snack": true,
-      "has_pet_cart": false,
-      "has_pet_area": false
-    },
-    "pet_evidence": [
-      "带金毛来吃饭，店员主动给了水碗和零食，还专门收拾了一块区域，服务满分",
-      "宠物友好认证",
-      "户外区和室内都可以带狗狗，有免费尿垫提供，强烈推荐"
-    ]
-  },
-  {
-    "id": "POI003",
-    "name": "传统美食餐厅",
-    "address": "上海市黄浦区南京东路300号",
-    "longitude": 121.483,
-    "latitude": 31.236,
-    "category": "中式餐饮",
-    "phone": "021-55667788",
-    "rating": 4.2,
-    "price": "¥80/人",
-    "pet_policy": "forbidden",
-    "pet_facility": {
-      "has_water_bowl": false,
-      "has_pee_pad": false,
-      "has_pet_snack": false,
-      "has_pet_cart": false,
-      "has_pet_area": false
-    },
-    "pet_evidence": [
-      "打电话咨询过了，店家说不允许带宠物，建议放在门口的临时寄存处",
-      "这家餐厅明确禁止宠物入内，只能放在门口的笼子里，不太方便"
-    ]
-  },
-  {
-    "id": "POI004",
-    "name": "阳光购物中心",
-    "address": "上海市浦东新区陆家嘴环路1000号",
-    "longitude": 121.503,
-    "latitude": 31.238,
+    "address": "上海市徐汇区福州路789号",
+    "longitude": 121.4175,
+    "latitude": 31.2725,
     "category": "购物商场",
-    "phone": "021-99887766",
-    "rating": 4.5,
+    "phone": "021-76487532",
+    "rating": 3.9,
     "price": null,
-    "pet_policy": "friendly",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
     "pet_facility": {
       "has_water_bowl": false,
       "has_pee_pad": false,
       "has_pet_snack": false,
       "has_pet_cart": true,
-      "has_pet_area": false
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
     },
     "pet_evidence": [
-      "商场的宠物政策很友好，大部分店铺都允许进入，还提供宠物推车租赁",
-      "周末带柯基逛商场，服务台免费借了宠物推车，逛了一下午都没问题"
+      "室内外都可以带狗狗，还有专门的宠物活动区",
+      "Paw Coffee 爪爪咖啡馆宠物友好",
+      "Paw Coffee 爪爪咖啡馆全场都欢迎宠物，室内有宠物活动区，室外也可以，还提供推车租赁"
+    ]
+  },
+  {
+    "id": "POI002",
+    "name": "毛孩子乐园餐厅",
+    "address": "上海市黄浦区愚园路657号",
+    "longitude": 121.5636,
+    "latitude": 31.1374,
+    "category": "餐饮美食",
+    "phone": "021-21380886",
+    "rating": 3.6,
+    "price": "¥80-150/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": true,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "室内外都可以带宠物，提供水碗和零食，店员超热情",
+      "超赞的毛孩子乐园餐厅",
+      "毛孩子乐园餐厅全场都欢迎宠物，室内有宠物活动区，室外也可以，还提供推车租赁"
+    ]
+  },
+  {
+    "id": "POI003",
+    "name": "传统美食餐厅",
+    "address": "上海市奉贤区淮海中路1643号",
+    "longitude": 121.5664,
+    "latitude": 31.2377,
+    "category": "餐饮美食",
+    "phone": "021-77346171",
+    "rating": 3.7,
+    "price": "¥100-300/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": true
+    },
+    "pet_evidence": [
+      "室内外都可以带宠物，提供水碗和零食，店员超热情",
+      "超赞的传统美食餐厅",
+      "室内外都可以进，还有宠物玩具提供"
+    ]
+  },
+  {
+    "id": "POI004",
+    "name": "阳光购物中心",
+    "address": "上海市浦东新区华山路1223号",
+    "longitude": 121.5594,
+    "latitude": 31.1773,
+    "category": "购物商场",
+    "phone": "021-23986530",
+    "rating": 3.7,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": true,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": true
+    },
+    "pet_evidence": [
+      "推荐阳光购物中心，室内外都允许宠物进入，还有免费尿垫和零食可以选择",
+      "室内外都可以进，还有宠物玩具提供"
     ]
   },
   {
     "id": "POI005",
     "name": "露台花园餐厅",
-    "address": "上海市长宁区虹桥路1450号",
-    "longitude": 121.412,
-    "latitude": 31.2,
-    "category": "西餐",
-    "phone": "021-33445566",
-    "rating": 4.4,
-    "price": "¥150/人",
-    "pet_policy": "outdoor_only",
+    "address": "上海市青浦区陕西北路1603号",
+    "longitude": 121.56,
+    "latitude": 31.1754,
+    "category": "餐饮美食",
+    "phone": "021-70106906",
+    "rating": 4.1,
+    "price": "¥150-400/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": true,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "露台花园餐厅宠物友好",
+      "室内外都可以带狗狗，还有专门的宠物活动区",
+      "推荐露台花园餐厅，室内外都允许宠物进入，还有免费尿垫和零食可以选择"
+    ]
+  },
+  {
+    "id": "POI006",
+    "name": "猫咪主题咖啡馆",
+    "address": "上海市普陀区愚园路1074号",
+    "longitude": 121.4039,
+    "latitude": 31.1326,
+    "category": "休闲娱乐",
+    "phone": "021-58100163",
+    "rating": 4.1,
+    "price": "¥100-200/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": true,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "猫咪主题咖啡馆全场都欢迎宠物，室内有宠物活动区，室外也可以，还提供推车租赁",
+      "室内外都可以带狗狗，还有专门的宠物活动区",
+      "猫咪主题咖啡馆宠物友好"
+    ]
+  },
+  {
+    "id": "POI007",
+    "name": "萌宠咖啡屋",
+    "address": "上海市浦东新区九江路1631号",
+    "longitude": 121.6227,
+    "latitude": 31.3248,
+    "category": "咖啡餐饮",
+    "phone": "021-21989623",
+    "rating": 4.8,
+    "price": "¥30-80/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": true,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "萌宠咖啡屋全场都欢迎宠物，室内有宠物活动区，室外也可以，还提供推车租赁"
+    ]
+  },
+  {
+    "id": "POI008",
+    "name": "汪汪西餐厅",
+    "address": "上海市闵行区南京西路1390号",
+    "longitude": 121.4118,
+    "latitude": 31.2585,
+    "category": "购物商场",
+    "phone": "021-51921172",
+    "rating": 3.6,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "室内外都可以带宠物，提供水碗和零食，店员超热情",
+      "超赞的汪汪西餐厅"
+    ]
+  },
+  {
+    "id": "POI009",
+    "name": "喵喵火锅",
+    "address": "上海市静安区南京西路318号",
+    "longitude": 121.5677,
+    "latitude": 31.1301,
+    "category": "咖啡餐饮",
+    "phone": "021-31202786",
+    "rating": 4.5,
+    "price": "¥50-100/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
     "pet_facility": {
       "has_water_bowl": false,
       "has_pee_pad": false,
@@ -110,32 +281,2832 @@
       "has_pet_cart": false,
       "has_pet_area": false
     },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": true
+    },
     "pet_evidence": [
-      "仅限户外区可以带宠物，室内用餐区禁止宠物进入，需要注意",
-      "室外露台允许带狗狗，但是室内不行，天气好的时候来坐坐还不错"
+      "室内外都可以进，还有宠物玩具提供"
     ]
   },
   {
-    "id": "POI006",
-    "name": "猫咪主题咖啡馆",
-    "address": "上海市杨浦区大学路200号",
-    "longitude": 121.51,
-    "latitude": 31.3,
+    "id": "POI010",
+    "name": "爱宠日料",
+    "address": "上海市静安区九江路1341号",
+    "longitude": 121.5786,
+    "latitude": 31.2052,
+    "category": "生活服务",
+    "phone": "021-32783766",
+    "rating": 3.9,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": true,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "推荐爱宠日料，室内外都允许宠物进入，还有免费尿垫和零食可以选择"
+    ]
+  },
+  {
+    "id": "POI011",
+    "name": "宠物乐园商场",
+    "address": "上海市普陀区南京东路844号",
+    "longitude": 121.4769,
+    "latitude": 31.1969,
+    "category": "餐饮美食",
+    "phone": "021-31759860",
+    "rating": 3.6,
+    "price": "¥70-150/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "室内外都可以带狗狗，还有专门的宠物活动区",
+      "宠物乐园商场宠物友好"
+    ]
+  },
+  {
+    "id": "POI012",
+    "name": "爪爪烧烤",
+    "address": "上海市浦东新区复兴中路491号",
+    "longitude": 121.4008,
+    "latitude": 31.2626,
+    "category": "餐饮美食",
+    "phone": "021-68059093",
+    "rating": 3.9,
+    "price": "¥70-150/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": true,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "爪爪烧烤全场都欢迎宠物，室内有宠物活动区，室外也可以，还提供推车租赁"
+    ]
+  },
+  {
+    "id": "POI013",
+    "name": "萌爪宠物用品店",
+    "address": "上海市宝山区常德路1035号",
+    "longitude": 121.4516,
+    "latitude": 31.2407,
+    "category": "休闲娱乐",
+    "phone": "021-18115305",
+    "rating": 3.9,
+    "price": "¥100-200/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "室内外都可以带宠物，提供水碗和零食，店员超热情",
+      "超赞的萌爪宠物用品店"
+    ]
+  },
+  {
+    "id": "POI014",
+    "name": "宠爱购物中心",
+    "address": "上海市宝山区四川北路323号",
+    "longitude": 121.6123,
+    "latitude": 31.2116,
+    "category": "餐饮美食",
+    "phone": "021-75466479",
+    "rating": 3.9,
+    "price": "¥100-300/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": true
+    },
+    "pet_evidence": [
+      "室内外都可以进，还有宠物玩具提供"
+    ]
+  },
+  {
+    "id": "POI015",
+    "name": "毛茸茸咖啡馆",
+    "address": "上海市普陀区陕西北路13号",
+    "longitude": 121.567,
+    "latitude": 31.2517,
+    "category": "休闲娱乐",
+    "phone": "021-48215266",
+    "rating": 4.4,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": true,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "推荐毛茸茸咖啡馆，室内外都允许宠物进入，还有免费尿垫和零食可以选择"
+    ]
+  },
+  {
+    "id": "POI016",
+    "name": "汪汪公园",
+    "address": "上海市徐汇区衡山路1109号",
+    "longitude": 121.574,
+    "latitude": 31.1445,
     "category": "咖啡餐饮",
-    "phone": "021-11223344",
-    "rating": 4.7,
-    "price": "¥60/人",
-    "pet_policy": "friendly",
+    "phone": "021-70756944",
+    "rating": 4.0,
+    "price": "¥50-100/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "室内外都可以带狗狗，还有专门的宠物活动区",
+      "汪汪公园宠物友好"
+    ]
+  },
+  {
+    "id": "POI017",
+    "name": "喵星人餐厅",
+    "address": "上海市奉贤区西藏中路885号",
+    "longitude": 121.3577,
+    "latitude": 31.1913,
+    "category": "餐饮美食",
+    "phone": "021-25939078",
+    "rating": 4.5,
+    "price": "¥100-300/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": true,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "喵星人餐厅全场都欢迎宠物，室内有宠物活动区，室外也可以，还提供推车租赁"
+    ]
+  },
+  {
+    "id": "POI018",
+    "name": "宠物生活馆",
+    "address": "上海市松江区衡山路263号",
+    "longitude": 121.5483,
+    "latitude": 31.1804,
+    "category": "生活服务",
+    "phone": "021-71245036",
+    "rating": 3.8,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "室内外都可以带宠物，提供水碗和零食，店员超热情",
+      "超赞的宠物生活馆"
+    ]
+  },
+  {
+    "id": "POI019",
+    "name": "萌宠天地",
+    "address": "上海市宝山区西藏中路449号",
+    "longitude": 121.3542,
+    "latitude": 31.1235,
+    "category": "生活服务",
+    "phone": "021-96692119",
+    "rating": 4.6,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": true
+    },
+    "pet_evidence": [
+      "室内外都可以进，还有宠物玩具提供"
+    ]
+  },
+  {
+    "id": "POI020",
+    "name": "爱宠咖啡店",
+    "address": "上海市黄浦区淮海中路1972号",
+    "longitude": 121.4872,
+    "latitude": 31.3158,
+    "category": "购物商场",
+    "phone": "021-42533041",
+    "rating": 4.4,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
     "pet_facility": {
       "has_water_bowl": true,
       "has_pee_pad": true,
       "has_pet_snack": true,
       "has_pet_cart": false,
-      "has_pet_area": true
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
     },
     "pet_evidence": [
-      "店里有好多可爱的猫咪，也可以带自己的猫来玩，有专门的宠物区和尿垫",
-      "带自家布偶来打卡，店员很热情，给了猫咪零食和水碗，还有专门的猫咪玩耍区域"
+      "推荐爱宠咖啡店，室内外都允许宠物进入，还有免费尿垫和零食可以选择",
+      "爱宠咖啡店只能在露台带狗狗，室内不让进，不过露台风景挺好的，还有水碗提供"
     ]
+  },
+  {
+    "id": "POI021",
+    "name": "爪爪西餐厅",
+    "address": "上海市徐汇区复兴中路328号",
+    "longitude": 121.623,
+    "latitude": 31.2297,
+    "category": "休闲娱乐",
+    "phone": "021-80035556",
+    "rating": 4.6,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "爪爪西餐厅宠物友好",
+      "室内外都可以带狗狗，还有专门的宠物活动区"
+    ]
+  },
+  {
+    "id": "POI022",
+    "name": "喵喵咖啡馆",
+    "address": "上海市嘉定区常德路1066号",
+    "longitude": 121.4984,
+    "latitude": 31.1878,
+    "category": "购物商场",
+    "phone": "021-90457339",
+    "rating": 4.5,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": true,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "喵喵咖啡馆全场都欢迎宠物，室内有宠物活动区，室外也可以，还提供推车租赁"
+    ]
+  },
+  {
+    "id": "POI023",
+    "name": "宠物友好餐厅",
+    "address": "上海市奉贤区复兴中路1698号",
+    "longitude": 121.3242,
+    "latitude": 31.2126,
+    "category": "生活服务",
+    "phone": "021-85903413",
+    "rating": 4.0,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "室内外都可以带宠物，提供水碗和零食，店员超热情",
+      "超赞的宠物友好餐厅"
+    ]
+  },
+  {
+    "id": "POI024",
+    "name": "毛孩子乐园",
+    "address": "上海市奉贤区南京西路860号",
+    "longitude": 121.3905,
+    "latitude": 31.3261,
+    "category": "餐饮美食",
+    "phone": "021-78754896",
+    "rating": 4.9,
+    "price": "¥100-300/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": true
+    },
+    "pet_evidence": [
+      "室内外都可以进，还有宠物玩具提供"
+    ]
+  },
+  {
+    "id": "POI025",
+    "name": "宠爱餐厅",
+    "address": "上海市徐汇区西藏中路316号",
+    "longitude": 121.3713,
+    "latitude": 31.349,
+    "category": "休闲娱乐",
+    "phone": "021-57488907",
+    "rating": 3.7,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": true,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "推荐宠爱餐厅，室内外都允许宠物进入，还有免费尿垫和零食可以选择"
+    ]
+  },
+  {
+    "id": "POI026",
+    "name": "萌宠烧烤",
+    "address": "上海市黄浦区西藏中路1246号",
+    "longitude": 121.4813,
+    "latitude": 31.2757,
+    "category": "咖啡餐饮",
+    "phone": "021-85624601",
+    "rating": 4.1,
+    "price": "¥50-100/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "萌宠烧烤真的太棒了",
+      "全场都可以带狗狗进去，店员还给准备了宠物专用水碗，太贴心了"
+    ]
+  },
+  {
+    "id": "POI027",
+    "name": "汪汪咖啡店",
+    "address": "上海市徐汇区福州路818号",
+    "longitude": 121.4302,
+    "latitude": 31.136,
+    "category": "咖啡餐饮",
+    "phone": "021-15903766",
+    "rating": 4.7,
+    "price": "¥30-80/人",
+    "is_pet_friendly": true,
+    "location_restriction": "indoor",
+    "location_text": "室内允许",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "周末带猫主子来汪汪咖啡店探店，店员态度超好，还给了小零食，完全不排斥宠物",
+      "室内也可以进哦"
+    ]
+  },
+  {
+    "id": "POI028",
+    "name": "猫咪乐园",
+    "address": "上海市杨浦区四川北路735号",
+    "longitude": 121.4134,
+    "latitude": 31.2277,
+    "category": "餐饮美食",
+    "phone": "021-13788091",
+    "rating": 4.0,
+    "price": "¥80-150/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": true,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "室内都可以带狗狗，有免费尿垫提供，强烈推荐",
+      "猫咪乐园宠物友好认证"
+    ]
+  },
+  {
+    "id": "POI029",
+    "name": "宠物购物中心",
+    "address": "上海市长宁区虹桥路902号",
+    "longitude": 121.3278,
+    "latitude": 31.1836,
+    "category": "购物商场",
+    "phone": "021-90806571",
+    "rating": 3.8,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "带金毛来宠物购物中心吃饭，店员主动给了水碗和零食，还专门收拾了一块区域，服务满分"
+    ]
+  },
+  {
+    "id": "POI030",
+    "name": "爱宠餐厅",
+    "address": "上海市闵行区四川北路924号",
+    "longitude": 121.6127,
+    "latitude": 31.2122,
+    "category": "生活服务",
+    "phone": "021-53996399",
+    "rating": 3.9,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "爱宠餐厅这家店超赞，带狗狗来完全没问题，室内室外都欢迎，还有猫咪玩耍区域"
+    ]
+  },
+  {
+    "id": "POI031",
+    "name": "爪爪火锅",
+    "address": "上海市闵行区南京西路1427号",
+    "longitude": 121.564,
+    "latitude": 31.2838,
+    "category": "餐饮美食",
+    "phone": "021-43612377",
+    "rating": 4.9,
+    "price": "¥150-400/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "爪爪火锅真的太棒了",
+      "全场都可以带狗狗进去，店员还给准备了宠物专用水碗，太贴心了"
+    ]
+  },
+  {
+    "id": "POI032",
+    "name": "毛茸茸西餐厅",
+    "address": "上海市虹口区衡山路1034号",
+    "longitude": 121.4842,
+    "latitude": 31.2952,
+    "category": "生活服务",
+    "phone": "021-81888415",
+    "rating": 4.6,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "indoor",
+    "location_text": "室内允许",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "室内也可以进哦",
+      "周末带猫主子来毛茸茸西餐厅探店，店员态度超好，还给了小零食，完全不排斥宠物"
+    ]
+  },
+  {
+    "id": "POI033",
+    "name": "萌爪日料",
+    "address": "上海市长宁区常德路871号",
+    "longitude": 121.4736,
+    "latitude": 31.3452,
+    "category": "咖啡餐饮",
+    "phone": "021-15871656",
+    "rating": 3.6,
+    "price": "¥50-100/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": true,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "室内都可以带狗狗，有免费尿垫提供，强烈推荐",
+      "萌爪日料宠物友好认证"
+    ]
+  },
+  {
+    "id": "POI034",
+    "name": "宠爱咖啡店",
+    "address": "上海市闵行区复兴中路1517号",
+    "longitude": 121.3626,
+    "latitude": 31.3147,
+    "category": "休闲娱乐",
+    "phone": "021-72905968",
+    "rating": 4.7,
+    "price": "¥100-200/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "带金毛来宠爱咖啡店吃饭，店员主动给了水碗和零食，还专门收拾了一块区域，服务满分",
+      "宠爱咖啡店谢绝宠物入内，门口有寄存笼，但是感觉不太安全"
+    ]
+  },
+  {
+    "id": "POI035",
+    "name": "汪汪公园餐厅",
+    "address": "上海市金山区茂名南路1630号",
+    "longitude": 121.3401,
+    "latitude": 31.3481,
+    "category": "咖啡餐饮",
+    "phone": "021-21330914",
+    "rating": 3.7,
+    "price": "¥50-100/人",
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "汪汪公园餐厅这家店超赞，带狗狗来完全没问题，室内室外都欢迎，还有猫咪玩耍区域"
+    ]
+  },
+  {
+    "id": "POI036",
+    "name": "喵星人咖啡店",
+    "address": "上海市黄浦区福州路127号",
+    "longitude": 121.4518,
+    "latitude": 31.2669,
+    "category": "生活服务",
+    "phone": "021-79641105",
+    "rating": 3.5,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "喵星人咖啡店真的太棒了",
+      "全场都可以带狗狗进去，店员还给准备了宠物专用水碗，太贴心了"
+    ]
+  },
+  {
+    "id": "POI037",
+    "name": "宠物友好商场",
+    "address": "上海市静安区虹桥路973号",
+    "longitude": 121.447,
+    "latitude": 31.1205,
+    "category": "购物商场",
+    "phone": "021-47369490",
+    "rating": 4.7,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "indoor",
+    "location_text": "室内允许",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "周末带猫主子来宠物友好商场探店，店员态度超好，还给了小零食，完全不排斥宠物",
+      "室内也可以进哦"
+    ]
+  },
+  {
+    "id": "POI038",
+    "name": "毛孩子咖啡馆",
+    "address": "上海市青浦区北京西路146号",
+    "longitude": 121.4332,
+    "latitude": 31.3015,
+    "category": "购物商场",
+    "phone": "021-33897975",
+    "rating": 4.7,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": true,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "室内都可以带狗狗，有免费尿垫提供，强烈推荐",
+      "毛孩子咖啡馆宠物友好认证"
+    ]
+  },
+  {
+    "id": "POI039",
+    "name": "爪爪购物中心",
+    "address": "上海市长宁区茂名南路1602号",
+    "longitude": 121.4831,
+    "latitude": 31.2393,
+    "category": "生活服务",
+    "phone": "021-79325548",
+    "rating": 4.7,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "带金毛来爪爪购物中心吃饭，店员主动给了水碗和零食，还专门收拾了一块区域，服务满分"
+    ]
+  },
+  {
+    "id": "POI040",
+    "name": "萌宠餐厅",
+    "address": "上海市杨浦区陆家嘴环路228号",
+    "longitude": 121.4431,
+    "latitude": 31.114,
+    "category": "购物商场",
+    "phone": "021-43145760",
+    "rating": 4.9,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "萌宠餐厅这家店超赞，带狗狗来完全没问题，室内室外都欢迎，还有猫咪玩耍区域"
+    ]
+  },
+  {
+    "id": "POI041",
+    "name": "爱宠烧烤",
+    "address": "上海市嘉定区西藏中路1728号",
+    "longitude": 121.4556,
+    "latitude": 31.3383,
+    "category": "餐饮美食",
+    "phone": "021-64799961",
+    "rating": 3.7,
+    "price": "¥150-400/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "爱宠烧烤真的太棒了",
+      "全场都可以带狗狗进去，店员还给准备了宠物专用水碗，太贴心了"
+    ]
+  },
+  {
+    "id": "POI042",
+    "name": "猫咪咖啡屋",
+    "address": "上海市徐汇区九江路472号",
+    "longitude": 121.4602,
+    "latitude": 31.2091,
+    "category": "餐饮美食",
+    "phone": "021-61559753",
+    "rating": 4.3,
+    "price": "¥70-150/人",
+    "is_pet_friendly": true,
+    "location_restriction": "indoor",
+    "location_text": "室内允许",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "室内也可以进哦",
+      "周末带猫主子来猫咪咖啡屋探店，店员态度超好，还给了小零食，完全不排斥宠物"
+    ]
+  },
+  {
+    "id": "POI043",
+    "name": "宠物乐园餐厅",
+    "address": "上海市虹口区西藏中路350号",
+    "longitude": 121.3879,
+    "latitude": 31.1727,
+    "category": "生活服务",
+    "phone": "021-11100416",
+    "rating": 4.0,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": true,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "室内都可以带狗狗，有免费尿垫提供，强烈推荐",
+      "宠物乐园餐厅宠物友好认证"
+    ]
+  },
+  {
+    "id": "POI044",
+    "name": "汪汪购物中心",
+    "address": "上海市虹口区南京东路1454号",
+    "longitude": 121.336,
+    "latitude": 31.1538,
+    "category": "咖啡餐饮",
+    "phone": "021-81652315",
+    "rating": 4.5,
+    "price": "¥50-100/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "带金毛来汪汪购物中心吃饭，店员主动给了水碗和零食，还专门收拾了一块区域，服务满分"
+    ]
+  },
+  {
+    "id": "POI045",
+    "name": "喵喵餐厅",
+    "address": "上海市闵行区延安西路1393号",
+    "longitude": 121.43,
+    "latitude": 31.3183,
+    "category": "购物商场",
+    "phone": "021-67968439",
+    "rating": 4.8,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "喵喵餐厅这家店超赞，带狗狗来完全没问题，室内室外都欢迎，还有猫咪玩耍区域"
+    ]
+  },
+  {
+    "id": "POI046",
+    "name": "毛茸茸咖啡店",
+    "address": "上海市青浦区汉口路1833号",
+    "longitude": 121.4665,
+    "latitude": 31.3424,
+    "category": "休闲娱乐",
+    "phone": "021-74003996",
+    "rating": 4.5,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "毛茸茸咖啡店真的太棒了",
+      "全场都可以带狗狗进去，店员还给准备了宠物专用水碗，太贴心了"
+    ]
+  },
+  {
+    "id": "POI047",
+    "name": "萌爪火锅",
+    "address": "上海市奉贤区淮海中路1178号",
+    "longitude": 121.6203,
+    "latitude": 31.1189,
+    "category": "餐饮美食",
+    "phone": "021-24215635",
+    "rating": 4.9,
+    "price": "¥70-150/人",
+    "is_pet_friendly": true,
+    "location_restriction": "indoor",
+    "location_text": "室内允许",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "室内也可以进哦",
+      "周末带猫主子来萌爪火锅探店，店员态度超好，还给了小零食，完全不排斥宠物"
+    ]
+  },
+  {
+    "id": "POI048",
+    "name": "宠爱日料",
+    "address": "上海市长宁区常德路81号",
+    "longitude": 121.4399,
+    "latitude": 31.1942,
+    "category": "餐饮美食",
+    "phone": "021-57924543",
+    "rating": 4.3,
+    "price": "¥150-400/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": true,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "室内都可以带狗狗，有免费尿垫提供，强烈推荐",
+      "宠爱日料宠物友好认证"
+    ]
+  },
+  {
+    "id": "POI049",
+    "name": "毛孩子烧烤",
+    "address": "上海市长宁区虹桥路1234号",
+    "longitude": 121.5592,
+    "latitude": 31.1286,
+    "category": "休闲娱乐",
+    "phone": "021-83062660",
+    "rating": 4.6,
+    "price": "¥100-200/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "带金毛来毛孩子烧烤吃饭，店员主动给了水碗和零食，还专门收拾了一块区域，服务满分"
+    ]
+  },
+  {
+    "id": "POI050",
+    "name": "宠物友好咖啡店",
+    "address": "上海市徐汇区衡山路1619号",
+    "longitude": 121.5768,
+    "latitude": 31.1599,
+    "category": "咖啡餐饮",
+    "phone": "021-96506817",
+    "rating": 4.9,
+    "price": "¥50-100/人",
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "宠物友好咖啡店这家店超赞，带狗狗来完全没问题，室内室外都欢迎，还有猫咪玩耍区域"
+    ]
+  },
+  {
+    "id": "POI051",
+    "name": "爪爪餐厅",
+    "address": "上海市虹口区常德路1081号",
+    "longitude": 121.3996,
+    "latitude": 31.1919,
+    "category": "咖啡餐饮",
+    "phone": "021-22929835",
+    "rating": 4.8,
+    "price": "¥50-100/人",
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "爪爪餐厅的室外露台允许带狗狗，但是室内不行，天气好的时候来坐坐还不错"
+    ]
+  },
+  {
+    "id": "POI052",
+    "name": "萌宠购物中心",
+    "address": "上海市虹口区陕西北路1696号",
+    "longitude": 121.3869,
+    "latitude": 31.119,
+    "category": "休闲娱乐",
+    "phone": "021-37810752",
+    "rating": 3.9,
+    "price": "¥100-200/人",
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "仅限户外区可以带宠物，萌宠购物中心的室内用餐区禁止宠物进入，需要注意"
+    ]
+  },
+  {
+    "id": "POI053",
+    "name": "爱宠咖啡店",
+    "address": "上海市长宁区九江路119号",
+    "longitude": 121.4201,
+    "latitude": 31.1723,
+    "category": "餐饮美食",
+    "phone": "021-63701774",
+    "rating": 3.7,
+    "price": "¥70-150/人",
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": true,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "推荐爱宠咖啡店，室内外都允许宠物进入，还有免费尿垫和零食可以选择",
+      "爱宠咖啡店只能在露台带狗狗，室内不让进，不过露台风景挺好的，还有水碗提供"
+    ]
+  },
+  {
+    "id": "POI054",
+    "name": "猫咪西餐厅",
+    "address": "上海市长宁区常德路1556号",
+    "longitude": 121.5002,
+    "latitude": 31.1857,
+    "category": "购物商场",
+    "phone": "021-91197728",
+    "rating": 3.7,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "猫咪西餐厅的花园可以带宠物，但是室内不行，有点遗憾，不过服务员态度还是挺好的"
+    ]
+  },
+  {
+    "id": "POI055",
+    "name": "汪汪火锅",
+    "address": "上海市静安区西藏中路1500号",
+    "longitude": 121.5856,
+    "latitude": 31.2093,
+    "category": "生活服务",
+    "phone": "021-46560467",
+    "rating": 3.9,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "去汪汪火锅的话只能在户外区域带宠物，室内是不允许的，这点要注意"
+    ]
+  },
+  {
+    "id": "POI056",
+    "name": "宠物公园",
+    "address": "上海市宝山区北京西路601号",
+    "longitude": 121.5383,
+    "latitude": 31.3407,
+    "category": "餐饮美食",
+    "phone": "021-64155492",
+    "rating": 4.7,
+    "price": "¥70-150/人",
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "宠物公园的室外露台允许带狗狗，但是室内不行，天气好的时候来坐坐还不错"
+    ]
+  },
+  {
+    "id": "POI057",
+    "name": "喵喵购物中心",
+    "address": "上海市长宁区衡山路1282号",
+    "longitude": 121.3461,
+    "latitude": 31.3463,
+    "category": "购物商场",
+    "phone": "021-91976257",
+    "rating": 3.6,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "仅限户外区可以带宠物，喵喵购物中心的室内用餐区禁止宠物进入，需要注意"
+    ]
+  },
+  {
+    "id": "POI058",
+    "name": "毛茸茸餐厅",
+    "address": "上海市金山区陆家嘴环路536号",
+    "longitude": 121.3798,
+    "latitude": 31.3237,
+    "category": "生活服务",
+    "phone": "021-74818625",
+    "rating": 4.0,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "毛茸茸餐厅只能在露台带狗狗，室内不让进，不过露台风景挺好的，还有水碗提供"
+    ]
+  },
+  {
+    "id": "POI059",
+    "name": "萌爪咖啡店",
+    "address": "上海市徐汇区九江路862号",
+    "longitude": 121.3716,
+    "latitude": 31.1602,
+    "category": "购物商场",
+    "phone": "021-21074476",
+    "rating": 3.8,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "萌爪咖啡店的花园可以带宠物，但是室内不行，有点遗憾，不过服务员态度还是挺好的"
+    ]
+  },
+  {
+    "id": "POI060",
+    "name": "宠爱烧烤",
+    "address": "上海市静安区西藏中路1425号",
+    "longitude": 121.3443,
+    "latitude": 31.2305,
+    "category": "餐饮美食",
+    "phone": "021-34322738",
+    "rating": 3.9,
+    "price": "¥150-400/人",
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "去宠爱烧烤的话只能在户外区域带宠物，室内是不允许的，这点要注意"
+    ]
+  },
+  {
+    "id": "POI061",
+    "name": "毛孩子日料",
+    "address": "上海市宝山区愚园路1437号",
+    "longitude": 121.6142,
+    "latitude": 31.1254,
+    "category": "购物商场",
+    "phone": "021-61054304",
+    "rating": 3.6,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "毛孩子日料的室外露台允许带狗狗，但是室内不行，天气好的时候来坐坐还不错"
+    ]
+  },
+  {
+    "id": "POI062",
+    "name": "宠物友好公园",
+    "address": "上海市虹口区衡山路1351号",
+    "longitude": 121.5132,
+    "latitude": 31.2995,
+    "category": "餐饮美食",
+    "phone": "021-40087626",
+    "rating": 3.7,
+    "price": "¥150-400/人",
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "仅限户外区可以带宠物，宠物友好公园的室内用餐区禁止宠物进入，需要注意"
+    ]
+  },
+  {
+    "id": "POI063",
+    "name": "爪爪咖啡店",
+    "address": "上海市宝山区常德路1034号",
+    "longitude": 121.383,
+    "latitude": 31.1145,
+    "category": "咖啡餐饮",
+    "phone": "021-77273751",
+    "rating": 4.6,
+    "price": "¥30-80/人",
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "爪爪咖啡店只能在露台带狗狗，室内不让进，不过露台风景挺好的，还有水碗提供"
+    ]
+  },
+  {
+    "id": "POI064",
+    "name": "萌宠火锅",
+    "address": "上海市宝山区常德路680号",
+    "longitude": 121.5391,
+    "latitude": 31.1709,
+    "category": "咖啡餐饮",
+    "phone": "021-48086135",
+    "rating": 4.6,
+    "price": "¥50-100/人",
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "萌宠火锅的花园可以带宠物，但是室内不行，有点遗憾，不过服务员态度还是挺好的"
+    ]
+  },
+  {
+    "id": "POI065",
+    "name": "爱宠购物中心",
+    "address": "上海市闵行区河南中路942号",
+    "longitude": 121.576,
+    "latitude": 31.249,
+    "category": "购物商场",
+    "phone": "021-37303922",
+    "rating": 3.7,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "去爱宠购物中心的话只能在户外区域带宠物，室内是不允许的，这点要注意"
+    ]
+  },
+  {
+    "id": "POI066",
+    "name": "猫咪餐厅",
+    "address": "上海市杨浦区河南中路699号",
+    "longitude": 121.35,
+    "latitude": 31.1327,
+    "category": "餐饮美食",
+    "phone": "021-53374145",
+    "rating": 4.9,
+    "price": "¥100-300/人",
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "猫咪餐厅的室外露台允许带狗狗，但是室内不行，天气好的时候来坐坐还不错"
+    ]
+  },
+  {
+    "id": "POI067",
+    "name": "汪汪日料",
+    "address": "上海市浦东新区衡山路824号",
+    "longitude": 121.5582,
+    "latitude": 31.343,
+    "category": "咖啡餐饮",
+    "phone": "021-73441350",
+    "rating": 4.8,
+    "price": "¥50-100/人",
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "仅限户外区可以带宠物，汪汪日料的室内用餐区禁止宠物进入，需要注意"
+    ]
+  },
+  {
+    "id": "POI068",
+    "name": "宠物咖啡店",
+    "address": "上海市奉贤区四川北路63号",
+    "longitude": 121.3504,
+    "latitude": 31.1129,
+    "category": "购物商场",
+    "phone": "021-41483074",
+    "rating": 4.8,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "宠物咖啡店只能在露台带狗狗，室内不让进，不过露台风景挺好的，还有水碗提供"
+    ]
+  },
+  {
+    "id": "POI069",
+    "name": "喵喵烧烤",
+    "address": "上海市虹口区延安西路454号",
+    "longitude": 121.3442,
+    "latitude": 31.2749,
+    "category": "生活服务",
+    "phone": "021-70754130",
+    "rating": 3.5,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "喵喵烧烤的花园可以带宠物，但是室内不行，有点遗憾，不过服务员态度还是挺好的"
+    ]
+  },
+  {
+    "id": "POI070",
+    "name": "毛茸茸购物中心",
+    "address": "上海市杨浦区九江路594号",
+    "longitude": 121.4803,
+    "latitude": 31.2912,
+    "category": "生活服务",
+    "phone": "021-75319898",
+    "rating": 3.7,
+    "price": null,
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "去毛茸茸购物中心的话只能在户外区域带宠物，室内是不允许的，这点要注意"
+    ]
+  },
+  {
+    "id": "POI071",
+    "name": "萌爪餐厅",
+    "address": "上海市闵行区福州路1984号",
+    "longitude": 121.578,
+    "latitude": 31.3102,
+    "category": "餐饮美食",
+    "phone": "021-18816435",
+    "rating": 3.5,
+    "price": "¥70-150/人",
+    "is_pet_friendly": false,
+    "location_restriction": "unknown",
+    "location_text": "位置限制未知",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "萌爪餐厅明确禁止宠物入内，只能放在门口的笼子里，不太方便"
+    ]
+  },
+  {
+    "id": "POI072",
+    "name": "宠爱火锅",
+    "address": "上海市奉贤区西藏中路319号",
+    "longitude": 121.348,
+    "latitude": 31.3054,
+    "category": "餐饮美食",
+    "phone": "021-13305791",
+    "rating": 5.0,
+    "price": "¥100-300/人",
+    "is_pet_friendly": false,
+    "location_restriction": "unknown",
+    "location_text": "位置限制未知",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "打电话咨询过了，宠爱火锅说不允许带宠物，建议放在门口的临时寄存处"
+    ]
+  },
+  {
+    "id": "POI073",
+    "name": "毛孩子咖啡店",
+    "address": "上海市虹口区河南中路1870号",
+    "longitude": 121.3612,
+    "latitude": 31.1564,
+    "category": "咖啡餐饮",
+    "phone": "021-76476065",
+    "rating": 3.7,
+    "price": "¥50-100/人",
+    "is_pet_friendly": false,
+    "location_restriction": "unknown",
+    "location_text": "位置限制未知",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "毛孩子咖啡店不让带宠物进去，态度也不是很好，不太推荐"
+    ]
+  },
+  {
+    "id": "POI074",
+    "name": "宠物友好烧烤",
+    "address": "上海市虹口区淮海中路380号",
+    "longitude": 121.5297,
+    "latitude": 31.2425,
+    "category": "餐饮美食",
+    "phone": "021-27053228",
+    "rating": 4.7,
+    "price": "¥70-150/人",
+    "is_pet_friendly": false,
+    "location_restriction": "unknown",
+    "location_text": "位置限制未知",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "宠物友好烧烤谢绝宠物入内，门口有寄存笼，但是感觉不太安全"
+    ]
+  },
+  {
+    "id": "POI075",
+    "name": "爪爪日料",
+    "address": "上海市嘉定区西藏中路229号",
+    "longitude": 121.4204,
+    "latitude": 31.1308,
+    "category": "购物商场",
+    "phone": "021-60817873",
+    "rating": 4.0,
+    "price": null,
+    "is_pet_friendly": false,
+    "location_restriction": "unknown",
+    "location_text": "位置限制未知",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "爪爪日料不可以带宠物，店员态度冷漠，不太适合铲屎官"
+    ]
+  },
+  {
+    "id": "POI076",
+    "name": "萌宠咖啡店",
+    "address": "上海市嘉定区延安西路1836号",
+    "longitude": 121.4315,
+    "latitude": 31.2793,
+    "category": "购物商场",
+    "phone": "021-95536974",
+    "rating": 3.6,
+    "price": null,
+    "is_pet_friendly": false,
+    "location_restriction": "unknown",
+    "location_text": "位置限制未知",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "萌宠咖啡店明确禁止宠物入内，只能放在门口的笼子里，不太方便"
+    ]
+  },
+  {
+    "id": "POI077",
+    "name": "爱宠火锅",
+    "address": "上海市普陀区陕西北路1846号",
+    "longitude": 121.4375,
+    "latitude": 31.2537,
+    "category": "休闲娱乐",
+    "phone": "021-97694049",
+    "rating": 4.6,
+    "price": null,
+    "is_pet_friendly": false,
+    "location_restriction": "unknown",
+    "location_text": "位置限制未知",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "打电话咨询过了，爱宠火锅说不允许带宠物，建议放在门口的临时寄存处"
+    ]
+  },
+  {
+    "id": "POI078",
+    "name": "汪汪餐厅",
+    "address": "上海市浦东新区淮海中路688号",
+    "longitude": 121.327,
+    "latitude": 31.179,
+    "category": "购物商场",
+    "phone": "021-15963888",
+    "rating": 4.1,
+    "price": null,
+    "is_pet_friendly": false,
+    "location_restriction": "unknown",
+    "location_text": "位置限制未知",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "汪汪餐厅不让带宠物进去，态度也不是很好，不太推荐"
+    ]
+  },
+  {
+    "id": "POI079",
+    "name": "猫咪购物中心",
+    "address": "上海市嘉定区福州路1052号",
+    "longitude": 121.3299,
+    "latitude": 31.1602,
+    "category": "生活服务",
+    "phone": "021-38093440",
+    "rating": 3.5,
+    "price": null,
+    "is_pet_friendly": false,
+    "location_restriction": "unknown",
+    "location_text": "位置限制未知",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "猫咪购物中心谢绝宠物入内，门口有寄存笼，但是感觉不太安全"
+    ]
+  },
+  {
+    "id": "POI080",
+    "name": "宠物友好日料",
+    "address": "上海市长宁区陆家嘴环路917号",
+    "longitude": 121.415,
+    "latitude": 31.1146,
+    "category": "餐饮美食",
+    "phone": "021-56428828",
+    "rating": 4.9,
+    "price": "¥150-400/人",
+    "is_pet_friendly": false,
+    "location_restriction": "unknown",
+    "location_text": "位置限制未知",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "宠物友好日料不可以带宠物，店员态度冷漠，不太适合铲屎官"
+    ]
+  },
+  {
+    "id": "POI081",
+    "name": "喵喵咖啡店",
+    "address": "上海市青浦区复兴中路876号",
+    "longitude": 121.5204,
+    "latitude": 31.2107,
+    "category": "餐饮美食",
+    "phone": "021-41205733",
+    "rating": 4.5,
+    "price": "¥60-200/人",
+    "is_pet_friendly": false,
+    "location_restriction": "unknown",
+    "location_text": "位置限制未知",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "喵喵咖啡店明确禁止宠物入内，只能放在门口的笼子里，不太方便"
+    ]
+  },
+  {
+    "id": "POI082",
+    "name": "毛茸茸火锅",
+    "address": "上海市长宁区茂名南路396号",
+    "longitude": 121.5953,
+    "latitude": 31.2688,
+    "category": "生活服务",
+    "phone": "021-69020256",
+    "rating": 3.8,
+    "price": null,
+    "is_pet_friendly": false,
+    "location_restriction": "unknown",
+    "location_text": "位置限制未知",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "打电话咨询过了，毛茸茸火锅说不允许带宠物，建议放在门口的临时寄存处"
+    ]
+  },
+  {
+    "id": "POI083",
+    "name": "萌爪购物中心",
+    "address": "上海市宝山区九江路627号",
+    "longitude": 121.4072,
+    "latitude": 31.2055,
+    "category": "生活服务",
+    "phone": "021-65542809",
+    "rating": 4.8,
+    "price": null,
+    "is_pet_friendly": false,
+    "location_restriction": "unknown",
+    "location_text": "位置限制未知",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "萌爪购物中心不让带宠物进去，态度也不是很好，不太推荐"
+    ]
+  },
+  {
+    "id": "POI084",
+    "name": "宠爱咖啡店",
+    "address": "上海市普陀区河南中路718号",
+    "longitude": 121.3323,
+    "latitude": 31.1767,
+    "category": "休闲娱乐",
+    "phone": "021-87636731",
+    "rating": 3.8,
+    "price": "¥100-200/人",
+    "is_pet_friendly": true,
+    "location_restriction": "both",
+    "location_text": "室内外均可",
+    "attitude": "excellent",
+    "attitude_text": "店员态度非常好",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": true
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "带金毛来宠爱咖啡店吃饭，店员主动给了水碗和零食，还专门收拾了一块区域，服务满分",
+      "宠爱咖啡店谢绝宠物入内，门口有寄存笼，但是感觉不太安全"
+    ]
+  },
+  {
+    "id": "POI085",
+    "name": "狗狗咖啡馆",
+    "address": "上海市浦东新区南京西路1100号",
+    "longitude": 121.3685,
+    "latitude": 31.2898,
+    "category": "餐饮美食",
+    "phone": "021-38610866",
+    "rating": 4.7,
+    "price": "¥100-300/人",
+    "is_pet_friendly": null,
+    "location_restriction": "unknown",
+    "location_text": "暂无宠物友好信息",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": []
+  },
+  {
+    "id": "POI086",
+    "name": "猫咪餐厅",
+    "address": "上海市黄浦区陕西北路366号",
+    "longitude": 121.4152,
+    "latitude": 31.1847,
+    "category": "餐饮美食",
+    "phone": "021-36065640",
+    "rating": 4.3,
+    "price": "¥60-200/人",
+    "is_pet_friendly": true,
+    "location_restriction": "outdoor",
+    "location_text": "仅限户外",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "猫咪餐厅的室外露台允许带狗狗，但是室内不行，天气好的时候来坐坐还不错"
+    ]
+  },
+  {
+    "id": "POI087",
+    "name": "萌宠咖啡",
+    "address": "上海市静安区南京东路608号",
+    "longitude": 121.4791,
+    "latitude": 31.1289,
+    "category": "餐饮美食",
+    "phone": "021-70763105",
+    "rating": 4.4,
+    "price": "¥150-400/人",
+    "is_pet_friendly": null,
+    "location_restriction": "unknown",
+    "location_text": "暂无宠物友好信息",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": []
+  },
+  {
+    "id": "POI088",
+    "name": "爱宠乐园",
+    "address": "上海市徐汇区九江路1353号",
+    "longitude": 121.3418,
+    "latitude": 31.2315,
+    "category": "生活服务",
+    "phone": "021-16496080",
+    "rating": 3.5,
+    "price": null,
+    "is_pet_friendly": null,
+    "location_restriction": "unknown",
+    "location_text": "暂无宠物友好信息",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": []
+  },
+  {
+    "id": "POI089",
+    "name": "毛孩子烧烤店",
+    "address": "上海市黄浦区延安西路192号",
+    "longitude": 121.4019,
+    "latitude": 31.1563,
+    "category": "餐饮美食",
+    "phone": "021-59560716",
+    "rating": 4.6,
+    "price": "¥80-150/人",
+    "is_pet_friendly": null,
+    "location_restriction": "unknown",
+    "location_text": "暂无宠物友好信息",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": []
+  },
+  {
+    "id": "POI090",
+    "name": "爪爪火锅城",
+    "address": "上海市奉贤区陆家嘴环路638号",
+    "longitude": 121.4522,
+    "latitude": 31.2465,
+    "category": "生活服务",
+    "phone": "021-76500618",
+    "rating": 3.8,
+    "price": null,
+    "is_pet_friendly": null,
+    "location_restriction": "unknown",
+    "location_text": "暂无宠物友好信息",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": []
+  },
+  {
+    "id": "POI091",
+    "name": "毛茸茸西餐厅",
+    "address": "上海市浦东新区西藏中路1747号",
+    "longitude": 121.4863,
+    "latitude": 31.1231,
+    "category": "咖啡餐饮",
+    "phone": "021-30741803",
+    "rating": 4.1,
+    "price": "¥50-100/人",
+    "is_pet_friendly": true,
+    "location_restriction": "indoor",
+    "location_text": "室内允许",
+    "attitude": "good",
+    "attitude_text": "店员态度不错",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": [
+      "室内也可以进哦",
+      "周末带猫主子来毛茸茸西餐厅探店，店员态度超好，还给了小零食，完全不排斥宠物"
+    ]
+  },
+  {
+    "id": "POI092",
+    "name": "宠爱咖啡馆",
+    "address": "上海市闵行区陕西北路1127号",
+    "longitude": 121.532,
+    "latitude": 31.263,
+    "category": "咖啡餐饮",
+    "phone": "021-30447073",
+    "rating": 4.5,
+    "price": "¥30-80/人",
+    "is_pet_friendly": null,
+    "location_restriction": "unknown",
+    "location_text": "暂无宠物友好信息",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": []
+  },
+  {
+    "id": "POI093",
+    "name": "Paw Coffee 爪爪咖啡馆(分店1)",
+    "address": "上海市松江区延安西路1434号",
+    "longitude": 121.4089,
+    "latitude": 31.2385,
+    "category": "咖啡餐饮",
+    "phone": "021-50483044",
+    "rating": 4.1,
+    "price": "¥30-80/人",
+    "is_pet_friendly": null,
+    "location_restriction": "unknown",
+    "location_text": "暂无宠物友好信息",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": []
+  },
+  {
+    "id": "POI094",
+    "name": "毛孩子乐园餐厅(分店2)",
+    "address": "上海市金山区虹桥路312号",
+    "longitude": 121.3277,
+    "latitude": 31.1891,
+    "category": "生活服务",
+    "phone": "021-38231769",
+    "rating": 4.3,
+    "price": null,
+    "is_pet_friendly": null,
+    "location_restriction": "unknown",
+    "location_text": "暂无宠物友好信息",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": []
+  },
+  {
+    "id": "POI095",
+    "name": "传统美食餐厅(分店3)",
+    "address": "上海市浦东新区延安西路1145号",
+    "longitude": 121.3512,
+    "latitude": 31.1174,
+    "category": "餐饮美食",
+    "phone": "021-72494911",
+    "rating": 4.8,
+    "price": "¥150-400/人",
+    "is_pet_friendly": null,
+    "location_restriction": "unknown",
+    "location_text": "暂无宠物友好信息",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": []
+  },
+  {
+    "id": "POI096",
+    "name": "阳光购物中心(分店4)",
+    "address": "上海市青浦区常德路1302号",
+    "longitude": 121.5312,
+    "latitude": 31.2977,
+    "category": "餐饮美食",
+    "phone": "021-70155654",
+    "rating": 3.7,
+    "price": "¥100-300/人",
+    "is_pet_friendly": null,
+    "location_restriction": "unknown",
+    "location_text": "暂无宠物友好信息",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": []
+  },
+  {
+    "id": "POI097",
+    "name": "露台花园餐厅(分店5)",
+    "address": "上海市长宁区愚园路1375号",
+    "longitude": 121.451,
+    "latitude": 31.2693,
+    "category": "咖啡餐饮",
+    "phone": "021-67222313",
+    "rating": 4.2,
+    "price": "¥30-80/人",
+    "is_pet_friendly": null,
+    "location_restriction": "unknown",
+    "location_text": "暂无宠物友好信息",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": []
+  },
+  {
+    "id": "POI098",
+    "name": "猫咪主题咖啡馆(分店6)",
+    "address": "上海市浦东新区汉口路22号",
+    "longitude": 121.5449,
+    "latitude": 31.1524,
+    "category": "餐饮美食",
+    "phone": "021-65480049",
+    "rating": 4.3,
+    "price": "¥70-150/人",
+    "is_pet_friendly": null,
+    "location_restriction": "unknown",
+    "location_text": "暂无宠物友好信息",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": []
+  },
+  {
+    "id": "POI099",
+    "name": "萌宠咖啡屋(分店7)",
+    "address": "上海市青浦区北京西路1045号",
+    "longitude": 121.6218,
+    "latitude": 31.3245,
+    "category": "餐饮美食",
+    "phone": "021-83214562",
+    "rating": 3.5,
+    "price": "¥70-150/人",
+    "is_pet_friendly": null,
+    "location_restriction": "unknown",
+    "location_text": "暂无宠物友好信息",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": []
+  },
+  {
+    "id": "POI100",
+    "name": "汪汪西餐厅(分店8)",
+    "address": "上海市徐汇区汉口路1093号",
+    "longitude": 121.5481,
+    "latitude": 31.1491,
+    "category": "餐饮美食",
+    "phone": "021-81335406",
+    "rating": 4.4,
+    "price": "¥70-150/人",
+    "is_pet_friendly": null,
+    "location_restriction": "unknown",
+    "location_text": "暂无宠物友好信息",
+    "attitude": "unknown",
+    "attitude_text": "店员态度未知",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_service": {
+      "has_pet_sitting": false,
+      "has_pet_grooming": false,
+      "has_pet_toys": false
+    },
+    "pet_evidence": []
   }
 ]

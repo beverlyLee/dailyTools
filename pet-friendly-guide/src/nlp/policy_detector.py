@@ -59,7 +59,12 @@ class PolicyDetector:
         
         self.indoor_allow_keywords = [
             "室内可以", "室内允许", "室内也可以", "室内没问题",
-            "全场", "全馆", "整个店", "整家店", "店内可以", "店里可以"
+            "店内可以", "店里可以"
+        ]
+        
+        self.both_allow_keywords = [
+            "全场", "全馆", "整个店", "整家店", "室内外都可以", "室内外都允许",
+            "室内外都能带", "室内外都可以带"
         ]
         
         self.outdoor_restrict_keywords = [
@@ -156,11 +161,12 @@ class PolicyDetector:
         indoor_allow_count = self._count_keyword_matches(text, self.indoor_allow_keywords)
         outdoor_allow_count = self._count_keyword_matches(text, self.outdoor_allow_keywords)
         outdoor_restrict_count = self._count_keyword_matches(text, self.outdoor_restrict_keywords)
+        both_allow_count = self._count_keyword_matches(text, self.both_allow_keywords)
         
         all_keywords = (
             self.friendly_keywords + self.forbidden_keywords + 
             self.indoor_allow_keywords + self.outdoor_allow_keywords +
-            self.outdoor_restrict_keywords +
+            self.outdoor_restrict_keywords + self.both_allow_keywords +
             [k for ks in self.facility_keywords.values() for k in ks] +
             [k for ks in self.service_keywords.values() for k in ks]
         )
@@ -170,24 +176,37 @@ class PolicyDetector:
         service = self._check_services(text)
         attitude = self._check_attitude(text)
         
-        total_matches = friendly_count + forbidden_count + indoor_allow_count + outdoor_allow_count + outdoor_restrict_count
+        total_matches = friendly_count + forbidden_count + indoor_allow_count + outdoor_allow_count + outdoor_restrict_count + both_allow_count
         confidence = min(1.0, total_matches * 0.2 + 0.3) if total_matches > 0 else 0.3
         
-        forbidden_weight = 2.0
-        forbidden_weighted = forbidden_count * forbidden_weight
+        has_facility_or_service = (facility.has_water_bowl or facility.has_pee_pad or 
+                               facility.has_pet_snack or facility.has_pet_area or
+                               service.has_pet_sitting or service.has_pet_grooming or service.has_pet_toys)
         
-        is_pet_friendly = True
-        if forbidden_weighted > 0 and forbidden_weighted >= friendly_count:
+        is_any_allow = (friendly_count > 0 or indoor_allow_count > 0 or 
+                       outdoor_allow_count > 0 or outdoor_restrict_count > 0 or
+                       both_allow_count > 0 or has_facility_or_service)
+        
+        is_strictly_forbidden = self._is_strictly_forbidden(text)
+        
+        if is_strictly_forbidden:
             is_pet_friendly = False
+        elif is_any_allow:
+            is_pet_friendly = True
+        elif forbidden_count > 0:
+            is_pet_friendly = False
+        else:
+            is_pet_friendly = None
         
         if is_pet_friendly:
             if outdoor_restrict_count > 0:
                 location_restriction = LocationRestriction.OUTDOOR
+            elif both_allow_count > 0:
+                location_restriction = LocationRestriction.BOTH
+            elif indoor_allow_count > 0 and outdoor_allow_count > 0:
+                location_restriction = LocationRestriction.BOTH
             elif indoor_allow_count > 0:
-                if outdoor_allow_count > 0:
-                    location_restriction = LocationRestriction.BOTH
-                else:
-                    location_restriction = LocationRestriction.INDOOR
+                location_restriction = LocationRestriction.INDOOR
             elif outdoor_allow_count > 0:
                 location_restriction = LocationRestriction.OUTDOOR
             else:
@@ -205,6 +224,32 @@ class PolicyDetector:
             evidence=evidence,
             shop_name=shop_name
         )
+
+    def _is_strictly_forbidden(self, text: str) -> bool:
+        strictly_forbidden_patterns = [
+            "完全禁止", "全程不允许", "禁止入内", "谢绝入内",
+            "不可以带", "不能带", "不让带", "不准带", "禁带",
+            "不允许带宠物", "禁止带宠物", "谢绝宠物",
+            "宠物禁止入内", "宠物不能进", "宠物不让进",
+            "不允许带", "不让带宠物", "不准带宠物",
+            "说不允许带", "说不让带", "说不能带"
+        ]
+        
+        positive_allow_patterns = [
+            "但是可以带", "不过可以带", "但是允许带", "不过允许带",
+            "但是可以进", "不过可以进", "但可以带", "但允许带"
+        ]
+        
+        for pattern in strictly_forbidden_patterns:
+            if pattern in text:
+                pat_idx = text.find(pattern)
+                for allow_kw in positive_allow_patterns:
+                    allow_idx = text.find(allow_kw)
+                    if allow_idx != -1 and abs(allow_idx - pat_idx) < 30:
+                        return False
+                return True
+        
+        return False
 
     def aggregate_analysis(self, reviews: List[Dict]) -> Dict[str, PetAnalysisResult]:
         shop_results = {}
@@ -227,8 +272,16 @@ class PolicyDetector:
             results = data["results"]
             evidence = list(set(data["evidence"]))
             
-            friendly_votes = sum(1 for r in results if r.is_pet_friendly)
-            is_pet_friendly = friendly_votes >= len(results) / 2
+            friendly_votes = sum(1 for r in results if r.is_pet_friendly is True)
+            forbidden_votes = sum(1 for r in results if r.is_pet_friendly is False)
+            unknown_votes = sum(1 for r in results if r.is_pet_friendly is None)
+            
+            if friendly_votes > forbidden_votes:
+                is_pet_friendly = True
+            elif forbidden_votes > friendly_votes:
+                is_pet_friendly = False
+            else:
+                is_pet_friendly = None if unknown_votes > 0 else (friendly_votes > 0)
             
             location_votes = {lr: 0 for lr in LocationRestriction}
             combined_facility = PetFacility()
@@ -252,7 +305,11 @@ class PolicyDetector:
                 if r.attitude in attitude_counts:
                     attitude_counts[r.attitude] += 1
             
-            best_location = max(location_votes, key=location_votes.get) if is_pet_friendly else LocationRestriction.UNKNOWN
+            if is_pet_friendly:
+                best_location = max(location_votes, key=location_votes.get)
+            else:
+                best_location = LocationRestriction.UNKNOWN
+            
             avg_confidence = total_confidence / len(results) if results else 0.0
             best_attitude = max(attitude_counts, key=attitude_counts.get) if attitude_counts else "unknown"
             
