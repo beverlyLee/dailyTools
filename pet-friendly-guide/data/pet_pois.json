@@ -1,0 +1,128 @@
+[
+  {
+    "id": "POI001",
+    "name": "Paw Coffee 爪爪咖啡馆",
+    "address": "上海市静安区南京西路1688号",
+    "longitude": 121.4493,
+    "latitude": 31.2304,
+    "category": "咖啡餐饮",
+    "phone": "021-12345678",
+    "rating": 4.8,
+    "price": "¥50/人",
+    "pet_policy": "friendly",
+    "pet_facility": {
+      "has_water_bowl": true,
+      "has_pee_pad": false,
+      "has_pet_snack": true,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_evidence": [
+      "周末带猫主子来探店，店员态度超好，还给了小零食，完全不排斥宠物",
+      "可以带狗狗进去，店员还给准备了宠物专用水碗，太贴心了"
+    ]
+  },
+  {
+    "id": "POI002",
+    "name": "毛孩子乐园餐厅",
+    "address": "上海市徐汇区淮海中路1200号",
+    "longitude": 121.455,
+    "latitude": 31.215,
+    "category": "餐饮美食",
+    "phone": "021-87654321",
+    "rating": 4.6,
+    "price": "¥120/人",
+    "pet_policy": "friendly",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": true,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_evidence": [
+      "宠物友好认证",
+      "户外区和室内都可以带狗狗，有免费尿垫提供，强烈推荐"
+    ]
+  },
+  {
+    "id": "POI003",
+    "name": "传统美食餐厅",
+    "address": "上海市黄浦区南京东路300号",
+    "longitude": 121.483,
+    "latitude": 31.236,
+    "category": "中式餐饮",
+    "phone": "021-55667788",
+    "rating": 4.2,
+    "price": "¥80/人",
+    "pet_policy": "forbidden",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_evidence": [
+      "这家餐厅明确禁止宠物入内，只能放在门口的笼子里，不太方便"
+    ]
+  },
+  {
+    "id": "POI004",
+    "name": "阳光购物中心",
+    "address": "上海市浦东新区陆家嘴环路1000号",
+    "longitude": 121.503,
+    "latitude": 31.238,
+    "category": "购物商场",
+    "phone": "021-99887766",
+    "rating": 4.5,
+    "price": null,
+    "pet_policy": "friendly",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": true,
+      "has_pet_area": false
+    },
+    "pet_evidence": [
+      "商场的宠物政策很友好，大部分店铺都允许进入，还提供宠物推车租赁"
+    ]
+  },
+  {
+    "id": "POI005",
+    "name": "露台花园餐厅",
+    "address": "上海市长宁区虹桥路1450号",
+    "longitude": 121.412,
+    "latitude": 31.2,
+    "category": "西餐",
+    "phone": "021-33445566",
+    "rating": 4.4,
+    "price": "¥150/人",
+    "pet_policy": "friendly",
+    "pet_facility": {
+      "has_water_bowl": false,
+      "has_pee_pad": false,
+      "has_pet_snack": false,
+      "has_pet_cart": false,
+      "has_pet_area": false
+    },
+    "pet_evidence": [
+      "室外露台允许带狗狗，但是室内不行，天气好的时候来坐坐还不错"
+    ]
+  },
+  {
+    "id": "POI006",
+    "name": "猫咪主题咖啡馆",
+    "address": "上海市杨浦区大学路200号",
+    "longitude": 121.51,
+    "latitude": 31.3,
+    "category": "咖啡餐饮",
+    "phone": "021-11223344",
+    "rating": 4.7,
+    "price": "¥60/人",
+    "pet_policy": null,
+    "pet_facility": null,
+    "pet_evidence": null
+  }
+]
