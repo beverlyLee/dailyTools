@@ -26,6 +26,19 @@
             width: 100%;
         }
 
+        #gaode-map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            display: none;
+        }
+
+        #gaode-map .amap-logo,
+        #gaode-map .amap-copyright {
+            display: none !important;
+        }
+
         .map-fallback {
             position: absolute;
             top: 0;
@@ -88,6 +101,7 @@
             padding: 15px;
             text-align: center;
             transition: all 0.3s;
+            cursor: pointer;
         }
 
         .fallback-direction-card:hover {
@@ -433,6 +447,7 @@
             display: flex;
             gap: 10px;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .error-btn {
@@ -600,6 +615,14 @@
             font-size: 20px;
         }
 
+        .amap-info-content {
+            background: rgba(10, 10, 30, 0.95) !important;
+            color: #fff !important;
+            border-radius: 10px !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            padding: 15px !important;
+        }
+
         .popup-title {
             font-size: 16px;
             font-weight: 600;
@@ -638,10 +661,21 @@
         .hidden {
             display: none !important;
         }
+
+        .gaode-marker-label {
+            background: rgba(124, 58, 237, 0.9);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
     </style>
 </head>
 <body>
     <div id="map"></div>
+    <div id="gaode-map"></div>
     
     <div id="map-fallback" class="map-fallback hidden">
         <svg viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -659,8 +693,8 @@
         </svg>
         <div class="map-fallback-content">
             <div class="map-fallback-icon">🗺️</div>
-            <div class="map-fallback-title">地图加载模式</div>
-            <div class="map-fallback-subtitle">当前使用备用可视化方案</div>
+            <div class="map-fallback-title">备用可视化模式</div>
+            <div class="map-fallback-subtitle">地图服务不可用，以下为简化展示</div>
             <div id="fallback-directions" class="fallback-directions-grid"></div>
         </div>
     </div>
@@ -697,14 +731,15 @@
             <h4>🔧 解决方法：</h4>
             <ol>
                 <li>检查网络连接是否正常</li>
-                <li>在 <code>.env</code> 文件中配置有效的 <code>MAPBOX_TOKEN</code></li>
+                <li>在 <code>.env</code> 中配置 <code>MAPBOX_TOKEN</code> 使用 Mapbox 地图</li>
                 <li>或配置 <code>GAODE_TRAFFIC_KEY</code> 使用高德地图</li>
-                <li>点击「继续使用备用方案」查看简化版可视化</li>
+                <li>点击「使用备用方案」查看简化版可视化</li>
             </ol>
         </div>
         <div class="error-actions">
             <button class="error-btn error-btn-primary" onclick="retryMapLoad()">🔄 重试加载</button>
-            <button class="error-btn error-btn-secondary" onclick="useFallbackMap()">📊 使用备用方案</button>
+            <button class="error-btn error-btn-secondary" onclick="tryGaodeMap()">📍 尝试高德地图</button>
+            <button class="error-btn error-btn-secondary" onclick="useFallbackMap()">📊 备用方案</button>
         </div>
     </div>
 
@@ -748,11 +783,17 @@
 
     <script>
         let map;
+        let gaodeMap;
+        let gaodePolylines = [];
+        let gaodeMarkers = [];
         let currentData = null;
         let mapLoadTimeout = null;
         let isUsingFallback = false;
+        let currentMapProvider = null;
         let mapLoadAttempts = 0;
-        const MAX_LOAD_ATTEMPTS = 3;
+        let appConfig = null;
+        let isMapInitialized = false;
+        const MAX_LOAD_ATTEMPTS = 2;
 
         const directionArrows = {
             '北': '↑',
@@ -796,12 +837,33 @@
                 if (!switchBtn) {
                     switchBtn = document.createElement('button');
                     switchBtn.className = 'map-switch-btn';
-                    switchBtn.onclick = toggleMapMode;
+                    switchBtn.onclick = cycleMapMode;
                     statusEl.appendChild(switchBtn);
                 }
-                switchBtn.textContent = isUsingFallback ? '切换到地图' : '切换到备用';
+                switchBtn.textContent = getNextModeLabel();
             } else if (switchBtn) {
                 switchBtn.remove();
+            }
+        }
+
+        function getNextModeLabel() {
+            if (currentMapProvider === 'mapbox') return '切换到高德';
+            if (currentMapProvider === 'gaode') return '切换到备用';
+            if (appConfig && isValidGaodeKey(appConfig.gaode_key)) return '切换到高德';
+            return '切换到地图';
+        }
+
+        function cycleMapMode() {
+            if (currentMapProvider === 'mapbox') {
+                switchToGaodeMap();
+            } else if (currentMapProvider === 'gaode') {
+                useFallbackMap();
+            } else {
+                if (appConfig && isValidGaodeKey(appConfig.gaode_key)) {
+                    switchToGaodeMap();
+                } else {
+                    initMap();
+                }
             }
         }
 
@@ -816,28 +878,34 @@
             document.getElementById('error-panel').classList.remove('show');
         }
 
+        function hideAllMaps() {
+            document.getElementById('map-fallback').classList.add('hidden');
+            document.getElementById('gaode-map').style.display = 'none';
+            if (map) {
+                map.remove();
+                map = null;
+            }
+            if (gaodeMap) {
+                gaodeMap.destroy();
+                gaodeMap = null;
+            }
+            gaodePolylines = [];
+            gaodeMarkers = [];
+            currentMapProvider = null;
+            isUsingFallback = false;
+            isMapInitialized = false;
+        }
+
         function useFallbackMap() {
             closeErrorPanel();
+            hideAllMaps();
             isUsingFallback = true;
+            currentMapProvider = 'fallback';
             document.getElementById('map-fallback').classList.remove('hidden');
-            updateMapStatus('fallback', '使用备用可视化方案', true);
+            updateMapStatus('fallback', '备用可视化模式', true);
             
             if (currentData) {
                 renderFallbackDirections(currentData);
-            }
-        }
-
-        function toggleMapMode() {
-            if (isUsingFallback) {
-                document.getElementById('map-fallback').classList.add('hidden');
-                isUsingFallback = false;
-                if (map) {
-                    updateMapStatus('success', '地图加载成功', true);
-                } else {
-                    initMap();
-                }
-            } else {
-                useFallbackMap();
             }
         }
 
@@ -845,9 +913,14 @@
             const container = document.getElementById('fallback-directions');
             container.innerHTML = '';
             
-            data.radial_lines.slice(0, 6).forEach(line => {
+            data.radial_lines.slice(0, 6).forEach((line, idx) => {
                 const card = document.createElement('div');
                 card.className = 'fallback-direction-card';
+                card.onclick = () => {
+                    document.querySelectorAll('.direction-item').forEach((item, i) => {
+                        item.classList.toggle('active', i === idx);
+                    });
+                };
                 card.innerHTML = `
                     <div class="fallback-direction-arrow">${getDirectionArrow(line.direction)}</div>
                     <div class="fallback-direction-name">${line.direction}</div>
@@ -863,14 +936,19 @@
             
             if (mapLoadAttempts >= MAX_LOAD_ATTEMPTS) {
                 showErrorPanel(
-                    '多次重试失败',
-                    `已尝试加载 ${MAX_LOAD_ATTEMPTS} 次，建议检查 Mapbox Token 配置或使用备用方案。`
+                    'Mapbox 加载失败',
+                    `已尝试加载 ${MAX_LOAD_ATTEMPTS} 次，可以尝试使用高德地图或备用方案。`
                 );
                 return;
             }
             
             updateMapStatus('loading', `正在重试 (${mapLoadAttempts}/${MAX_LOAD_ATTEMPTS})...`);
             initMap();
+        }
+
+        function tryGaodeMap() {
+            closeErrorPanel();
+            switchToGaodeMap();
         }
 
         function updateTime() {
@@ -886,32 +964,248 @@
             document.getElementById('current-time').textContent = timeStr;
         }
 
+        function isValidGaodeKey(key) {
+            return key && !key.includes('your_') && key.length > 10;
+        }
+
+        function isValidMapboxToken(token) {
+            return token && !token.includes('your_') && token.length > 20 && token.startsWith('pk.');
+        }
+
+        function loadGaodeSDK(callback) {
+            if (window.AMap) {
+                callback();
+                return;
+            }
+
+            const key = appConfig.gaode_key;
+            const script = document.createElement('script');
+            script.src = `https://webapi.amap.com/maps?v=2.0&key=${key}`;
+            script.onload = callback;
+            script.onerror = () => {
+                console.error('高德地图 SDK 加载失败');
+                showErrorPanel(
+                    '高德地图加载失败',
+                    '无法加载高德地图 SDK，请检查网络连接或 API Key 配置。'
+                );
+                useFallbackMap();
+            };
+            document.head.appendChild(script);
+        }
+
+        function switchToGaodeMap() {
+            if (!appConfig || !isValidGaodeKey(appConfig.gaode_key)) {
+                showErrorPanel(
+                    '高德地图未配置',
+                    '未检测到有效的高德地图 API Key，请在 .env 中配置 GAODE_TRAFFIC_KEY。'
+                );
+                return;
+            }
+
+            hideAllMaps();
+            updateMapStatus('loading', '正在加载高德地图...');
+
+            loadGaodeSDK(() => {
+                try {
+                    const [lng, lat] = appConfig.city_center;
+                    document.getElementById('gaode-map').style.display = 'block';
+                    
+                    gaodeMap = new AMap.Map('gaode-map', {
+                        zoom: 10,
+                        center: [lng, lat],
+                        mapStyle: 'amap://styles/darkblue',
+                        viewMode: '3D',
+                        pitch: 40
+                    });
+
+                    gaodeMap.on('complete', () => {
+                        currentMapProvider = 'gaode';
+                        updateMapStatus('success', '高德地图加载成功', true);
+                        if (currentData) {
+                            renderGaodeLayers(currentData);
+                        }
+                    });
+
+                    gaodeMap.on('error', (e) => {
+                        console.error('高德地图错误:', e);
+                        showErrorPanel(
+                            '高德地图渲染错误',
+                            '地图渲染时发生错误，请检查 API Key 权限。'
+                        );
+                        useFallbackMap();
+                    });
+
+                } catch (error) {
+                    console.error('高德地图初始化失败:', error);
+                    showErrorPanel(
+                        '高德地图初始化失败',
+                        error.message || '无法初始化高德地图。'
+                    );
+                    useFallbackMap();
+                }
+            });
+        }
+
+        function renderGaodeLayers(data) {
+            if (!gaodeMap) return;
+
+            gaodePolylines.forEach(line => line.setMap(null));
+            gaodeMarkers.forEach(marker => marker.setMap(null));
+            gaodePolylines = [];
+            gaodeMarkers = [];
+
+            const maxVolume = Math.max(...data.radial_lines.map(l => l.flow_volume), 1);
+
+            data.radial_lines.forEach((line, index) => {
+                const path = [line.start, line.end];
+                const color = getCongestionColor(line.avg_congestion);
+                const normalizedWidth = Math.max(3, Math.min(15, (line.flow_volume / maxVolume) * 12));
+
+                const glowLine = new AMap.Polyline({
+                    path: path,
+                    strokeColor: color,
+                    strokeWeight: normalizedWidth * 2.5,
+                    strokeOpacity: 0.2,
+                    strokeStyle: 'solid',
+                    lineJoin: 'round',
+                    lineCap: 'round'
+                });
+                glowLine.setMap(gaodeMap);
+                gaodePolylines.push(glowLine);
+
+                const polyline = new AMap.Polyline({
+                    path: path,
+                    strokeColor: color,
+                    strokeWeight: normalizedWidth,
+                    strokeOpacity: 0.85,
+                    strokeStyle: 'solid',
+                    lineJoin: 'round',
+                    lineCap: 'round'
+                });
+                polyline.setMap(gaodeMap);
+                gaodePolylines.push(polyline);
+
+                polyline.on('click', () => {
+                    const content = `
+                        <div class="popup-title">${line.direction}方向</div>
+                        <div class="popup-item">目的地: <span>${line.destination || '分析中'}</span></div>
+                        <div class="popup-item">车流量: <span>${line.flow_volume} 段</span></div>
+                        <div class="popup-item">车流占比: <span>${line.flow_percentage.toFixed(1)}%</span></div>
+                        <div class="popup-item">拥堵状况: <span>${getCongestionText(line.avg_congestion)}</span></div>
+                    `;
+                    const infoWindow = new AMap.InfoWindow({
+                        content: content,
+                        offset: new AMap.Pixel(0, -30)
+                    });
+                    infoWindow.open(gaodeMap, line.end);
+                });
+
+                if (line.destination) {
+                    const marker = new AMap.Marker({
+                        position: line.end,
+                        title: line.destination,
+                        anchor: 'bottom-center'
+                    });
+
+                    const labelContent = `
+                        <div class="gaode-marker-label">
+                            🏛️ ${line.destination}
+                        </div>
+                    `;
+                    const labelMarker = new AMap.Text({
+                        text: line.destination,
+                        position: [line.end[0], line.end[1] - 0.02],
+                        style: {
+                            'background-color': 'rgba(124, 58, 237, 0.9)',
+                            'color': '#fff',
+                            'padding': '4px 10px',
+                            'border-radius': '4px',
+                            'font-size': '12px',
+                            'border': '1px solid rgba(255,255,255,0.3)',
+                            'text-align': 'center'
+                        },
+                        anchor: 'bottom-center'
+                    });
+                    labelMarker.setMap(gaodeMap);
+                    gaodeMarkers.push(labelMarker);
+
+                    marker.setMap(gaodeMap);
+                    gaodeMarkers.push(marker);
+
+                    marker.on('click', () => {
+                        const content = `
+                            <div class="popup-title">🏛️ ${line.destination}</div>
+                            <div class="popup-item">等级: <span>${line.destination_level || '知名景区'}</span></div>
+                            <div class="popup-item">方向: <span>${line.direction}</span></div>
+                        `;
+                        const infoWindow = new AMap.InfoWindow({
+                            content: content,
+                            offset: new AMap.Pixel(0, -30)
+                        });
+                        infoWindow.open(gaodeMap, line.end);
+                    });
+                }
+            });
+
+            const centerMarker = new AMap.Marker({
+                position: appConfig.city_center,
+                title: '城市中心',
+                anchor: 'center'
+            });
+            centerMarker.setMap(gaodeMap);
+            gaodeMarkers.push(centerMarker);
+        }
+
         async function initMap() {
             if (mapLoadTimeout) {
                 clearTimeout(mapLoadTimeout);
             }
 
+            hideAllMaps();
+            mapLoadAttempts = 0;
+            updateMapStatus('loading', '正在加载 Mapbox 地图...');
+
             mapLoadTimeout = setTimeout(() => {
+                if (isMapInitialized) return;
                 if (!map) {
-                    showErrorPanel(
-                        '地图加载超时',
-                        '地图资源加载时间过长，可能是网络问题或 Token 无效。'
-                    );
+                    console.warn('Mapbox 加载超时，尝试高德地图...');
+                    if (appConfig && isValidGaodeKey(appConfig.gaode_key)) {
+                        isMapInitialized = true;
+                        switchToGaodeMap();
+                    } else {
+                        showErrorPanel(
+                            '地图加载超时',
+                            'Mapbox 地图加载超时，且未配置高德地图 Key。'
+                        );
+                        isMapInitialized = true;
+                        useFallbackMap();
+                    }
                 }
-            }, 15000);
+            }, 10000);
 
             try {
                 const configResponse = await fetch('/api/config');
                 if (!configResponse.ok) {
                     throw new Error('配置获取失败');
                 }
-                const config = await configResponse.json();
+                appConfig = await configResponse.json();
 
-                const token = config.mapbox_token;
-                const hasValidToken = token && !token.includes('your_') && token.length > 20;
+                const token = appConfig.mapbox_token;
+                const hasValidToken = isValidMapboxToken(token);
 
                 if (!hasValidToken) {
-                    console.warn('Mapbox Token 未配置，启用备用方案');
+                    clearTimeout(mapLoadTimeout);
+                    console.warn('Mapbox Token 未配置，尝试高德地图...');
+                    
+                    if (isValidGaodeKey(appConfig.gaode_key)) {
+                        isMapInitialized = true;
+                        switchToGaodeMap();
+                        fetchTrafficData();
+                        return;
+                    }
+                    
+                    console.warn('高德 Key 也未配置，使用备用方案');
+                    isMapInitialized = true;
                     useFallbackMap();
                     fetchTrafficData();
                     return;
@@ -922,23 +1216,36 @@
                 map = new mapboxgl.Map({
                     container: 'map',
                     style: 'mapbox://styles/mapbox/dark-v11',
-                    center: config.city_center,
+                    center: appConfig.city_center,
                     zoom: 9,
                     pitch: 40
                 });
 
                 map.on('error', (e) => {
+                    if (isMapInitialized) return;
                     console.error('Mapbox error:', e);
                     clearTimeout(mapLoadTimeout);
-                    showErrorPanel(
-                        '地图渲染错误',
-                        e.error?.message || '地图加载时发生未知错误，请检查 Token 权限。'
-                    );
+                    
+                    if (appConfig && isValidGaodeKey(appConfig.gaode_key)) {
+                        console.warn('Mapbox 出错，切换到高德地图...');
+                        isMapInitialized = true;
+                        switchToGaodeMap();
+                    } else {
+                        showErrorPanel(
+                            '地图渲染错误',
+                            e.error?.message || '地图加载时发生未知错误。'
+                        );
+                        isMapInitialized = true;
+                        useFallbackMap();
+                    }
                 });
 
                 map.on('style.load', () => {
+                    if (isMapInitialized) return;
                     clearTimeout(mapLoadTimeout);
-                    updateMapStatus('success', '地图加载成功', true);
+                    isMapInitialized = true;
+                    currentMapProvider = 'mapbox';
+                    updateMapStatus('success', 'Mapbox 地图加载成功', true);
                     fetchTrafficData();
                 });
 
@@ -949,10 +1256,16 @@
             } catch (error) {
                 clearTimeout(mapLoadTimeout);
                 console.error('Failed to initialize map:', error);
-                showErrorPanel(
-                    '地图初始化失败',
-                    error.message || '无法加载地图资源，请检查网络连接。'
-                );
+                
+                if (appConfig && isValidGaodeKey(appConfig.gaode_key)) {
+                    switchToGaodeMap();
+                } else {
+                    showErrorPanel(
+                        '地图初始化失败',
+                        error.message || '无法加载地图资源。'
+                    );
+                    useFallbackMap();
+                }
             }
         }
 
@@ -966,9 +1279,11 @@
                 currentData = await response.json();
                 updateUI(currentData);
                 
-                if (map && !isUsingFallback) {
+                if (currentMapProvider === 'mapbox' && map) {
                     renderMapLayers(currentData);
-                } else {
+                } else if (currentMapProvider === 'gaode' && gaodeMap) {
+                    renderGaodeLayers(currentData);
+                } else if (isUsingFallback) {
                     renderFallbackDirections(currentData);
                 }
             } catch (error) {
@@ -994,7 +1309,7 @@
             data.radial_lines.forEach((line, index) => {
                 const item = document.createElement('div');
                 item.className = 'direction-item' + (index === 0 ? ' active' : '');
-                item.onclick = () => focusOnDirection(line);
+                item.onclick = () => focusOnDirection(line, index);
 
                 item.innerHTML = `
                     <div class="direction-top">
@@ -1157,17 +1472,19 @@
             }
         }
 
-        function focusOnDirection(line) {
-            if (map && !isUsingFallback) {
+        function focusOnDirection(line, index) {
+            if (currentMapProvider === 'mapbox' && map) {
                 map.flyTo({
                     center: line.end,
                     zoom: 11,
                     duration: 1000
                 });
+            } else if (currentMapProvider === 'gaode' && gaodeMap) {
+                gaodeMap.setZoomAndCenter(12, line.end);
             }
 
             document.querySelectorAll('.direction-item').forEach((item, i) => {
-                item.classList.toggle('active', currentData.radial_lines[i] === line);
+                item.classList.toggle('active', i === index);
             });
         }
 
@@ -1185,7 +1502,7 @@
         setInterval(updateTime, 1000);
         updateTime();
 
-        updateMapStatus('loading', '正在加载地图...');
+        updateMapStatus('loading', '正在初始化...');
         initMap();
     </script>
 </body>

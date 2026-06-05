@@ -20,6 +20,7 @@ load_dotenv()
 CITY_CENTER_LNG = float(os.getenv("CITY_CENTER_LNG", "116.397428"))
 CITY_CENTER_LAT = float(os.getenv("CITY_CENTER_LAT", "39.90923"))
 CITY_NAME = os.getenv("CITY_NAME", "北京")
+GAODE_TRAFFIC_KEY = os.getenv("GAODE_TRAFFIC_KEY", "")
 
 app = FastAPI(title="Weekend Escape API", version="1.0.0")
 
@@ -114,6 +115,7 @@ async def root():
 async def get_config():
     return {
         "mapbox_token": os.getenv("MAPBOX_TOKEN", ""),
+        "gaode_key": GAODE_TRAFFIC_KEY,
         "city_center": [CITY_CENTER_LNG, CITY_CENTER_LAT],
         "city_name": CITY_NAME
     }
