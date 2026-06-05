@@ -215,7 +215,7 @@ class PetPOIAggregator:
                 }
                 poi.pet_evidence = result.evidence
             else:
-                poi.is_pet_friendly = None
+                poi.is_pet_friendly = False
                 poi.location_restriction = "unknown"
                 poi.location_text = "暂无宠物友好信息"
                 poi.attitude = "unknown"

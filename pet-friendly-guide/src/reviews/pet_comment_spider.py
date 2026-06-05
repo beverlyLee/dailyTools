@@ -157,7 +157,9 @@ class PetCommentSpider:
 
         reviews = []
         for i, shop_name in enumerate(shop_names):
-            if i < 25:
+            if shop_name == "传统美食餐厅":
+                review_type = "forbidden"
+            elif i < 25:
                 review_type = "friendly_both"
             elif i < 50:
                 review_type = "friendly_indoor"
