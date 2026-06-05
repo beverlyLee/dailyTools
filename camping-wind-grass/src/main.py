@@ -139,9 +139,22 @@ async def process_camping_sites(use_cache: bool = True):
     for idx, site in enumerate(raw_sites):
         site_id = f"site_{idx + 1}"
 
-        lng, lat = await geo_coder.geocode(site["location"])
+        if "_generated_coords" in site:
+            coords = site["_generated_coords"]
+            lng, lat = coords["lng"], coords["lat"]
+        else:
+            lng, lat = await geo_coder.geocode(site["location"])
 
-        weather_data = await weather_service.get_historical_weather(lng, lat)
+        if "_weather_params" in site:
+            params = site["_weather_params"]
+            weather_data = await weather_service.get_historical_weather(
+                lng, lat,
+                force_wind_base=params["wind_base"],
+                force_grass=params["grass"],
+                force_rain_prob=params["rain_prob"]
+            )
+        else:
+            weather_data = await weather_service.get_historical_weather(lng, lat)
 
         comfort_data = comfort_scorer.calculate_score(
             weather_data, site.get("keywords", [])
@@ -151,12 +164,22 @@ async def process_camping_sites(use_cache: bool = True):
             "id": site_id,
             "name": site["name"],
             "location": site["location"],
+            "province": site.get("province", ""),
+            "city": site.get("city", ""),
             "description": site["description"],
+            "site_type": site.get("site_type", "营地"),
             "lng": lng,
             "lat": lat,
             "photos": site["photos"],
             "keywords": site["keywords"],
             "source": site["source"],
+            "transportation": site.get("transportation", {}),
+            "recommended_time": site.get("recommended_time", {}),
+            "facilities": site.get("facilities", {}),
+            "supply": site.get("supply", {}),
+            "safety": site.get("safety", {}),
+            "experience": site.get("experience", {}),
+            "price_info": site.get("price_info", {}),
             "weather": {
                 "avg_wind_speed": weather_data.get("avg_wind_speed"),
                 "wind_level": weather_data.get("wind_level"),
@@ -172,7 +195,8 @@ async def process_camping_sites(use_cache: bool = True):
         }
 
         processed.append(processed_site)
-        print(f"处理完成: {site['name']} - 评分: {comfort_data['total_score']}")
+        if idx < 5 or idx % 20 == 0:
+            print(f"处理完成: {site['name']} - 评分: {comfort_data['total_score']}")
 
     processed_sites = processed
 

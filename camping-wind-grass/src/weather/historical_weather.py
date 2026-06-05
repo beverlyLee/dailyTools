@@ -36,18 +36,21 @@ class HistoricalWeather:
         return f"{round(lng, 2)}_{round(lat, 2)}"
 
     async def get_historical_weather(
-        self, lng: float, lat: float, days: int = 365
+        self, lng: float, lat: float, days: int = 365,
+        force_wind_base: float = None,
+        force_grass: int = None,
+        force_rain_prob: float = None,
     ) -> Optional[Dict]:
         cache_key = self._get_cache_key(lng, lat)
-        if cache_key in self.cache:
+        if force_wind_base is None and cache_key in self.cache:
             return self.cache[cache_key]
 
         if not self.api_key:
-            result = self._mock_weather_data(lng, lat, days)
+            result = self._mock_weather_data(lng, lat, days, force_wind_base, force_grass, force_rain_prob)
         else:
             result = await self._fetch_real_weather(lng, lat, days)
 
-        if result:
+        if result and force_wind_base is None:
             self.cache[cache_key] = result
             self._save_cache()
 
@@ -59,7 +62,12 @@ class HistoricalWeather:
         result = self._mock_weather_data(lng, lat, days)
         return result
 
-    def _mock_weather_data(self, lng: float, lat: float, days: int) -> Dict:
+    def _mock_weather_data(
+        self, lng: float, lat: float, days: int,
+        force_wind_base: float = None,
+        force_grass: int = None,
+        force_rain_prob: float = None,
+    ) -> Dict:
         import hashlib
         hash_val = int(hashlib.md5(f"{lng}_{lat}".encode()).hexdigest(), 16)
 
@@ -81,17 +89,27 @@ class HistoricalWeather:
         rain_prob = 0.3
         grass_coverage = 75
 
-        for key in site_types:
-            site_info = site_types[key]
-            site_lng = site_info.get("lng", 0)
-            site_lat = site_info.get("lat", 0)
-            if site_lng > 0 and site_lat > 0:
-                distance = ((lng - site_lng) ** 2 + (lat - site_lat) ** 2) ** 0.5
-                if distance < 1.0:
-                    wind_base = site_info["wind_base"]
-                    rain_prob = site_info["rain_prob"]
-                    grass_coverage = site_info["grass"]
-                    break
+        if force_wind_base is not None:
+            wind_base = force_wind_base
+        if force_grass is not None:
+            grass_coverage = force_grass
+        if force_rain_prob is not None:
+            rain_prob = force_rain_prob
+        else:
+            for key in site_types:
+                site_info = site_types[key]
+                site_lng = site_info.get("lng", 0)
+                site_lat = site_info.get("lat", 0)
+                if site_lng > 0 and site_lat > 0:
+                    distance = ((lng - site_lng) ** 2 + (lat - site_lat) ** 2) ** 0.5
+                    if distance < 1.0:
+                        if force_wind_base is None:
+                            wind_base = site_info["wind_base"]
+                        if force_rain_prob is None:
+                            rain_prob = site_info["rain_prob"]
+                        if force_grass is None:
+                            grass_coverage = site_info["grass"]
+                        break
 
         for _ in range(days):
             wind_speed = wind_base + random.uniform(-1, 2) + random.gauss(0, 0.5)

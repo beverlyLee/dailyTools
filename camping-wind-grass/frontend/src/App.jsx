@@ -153,16 +153,29 @@ function App() {
     }
   }, [])
 
+  const getStarRating = (level) => {
+    const stars = '⭐'.repeat(level) + '☆'.repeat(5 - level)
+    return stars
+  }
+
   const createPopupContent = (site) => {
     const comfort = site.comfort || {}
     const weather = site.weather || {}
     const details = comfort.details || []
+    const trans = site.transportation || {}
+    const recTime = site.recommended_time || {}
+    const facilities = site.facilities || {}
+    const supply = site.supply || {}
+    const safety = site.safety || {}
+    const exp = site.experience || {}
+    const price = site.price_info || {}
 
     return `
-      <div class="popup-content">
+      <div class="popup-content-large">
         <div class="popup-header">
           <h3 class="popup-title">${site.name}</h3>
           <p class="popup-location">📍 ${site.location}</p>
+          <p class="popup-type">🏕️ ${site.site_type || '营地'}</p>
         </div>
         
         <div class="popup-score">
@@ -179,16 +192,116 @@ function App() {
           </div>
         </div>
 
-        <div class="popup-details">
-          ${details.map(detail => `
-            <div class="detail-item ${detail.positive ? 'detail-positive' : 'detail-negative'}">
-              <span class="detail-icon">${detail.icon}</span>
-              <div class="detail-text">
-                <p class="detail-title">${detail.title}</p>
-                <p class="detail-desc">${detail.desc}</p>
-              </div>
+        <div class="popup-tabs">
+          <div class="tab-content active" id="tab-detail">
+            <div class="popup-details">
+              ${details.map(detail => `
+                <div class="detail-item ${detail.positive ? 'detail-positive' : 'detail-negative'}">
+                  <span class="detail-icon">${detail.icon}</span>
+                  <div class="detail-text">
+                    <p class="detail-title">${detail.title}</p>
+                    <p class="detail-desc">${detail.desc}</p>
+                  </div>
+                </div>
+              `).join('')}
             </div>
-          `).join('')}
+          </div>
+        </div>
+
+        <div class="popup-section">
+          <p class="section-title">🚗 交通信息</p>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">便利程度</span>
+              <span class="info-value">${getStarRating(trans.convenience_level || 3)}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">自驾</span>
+              <span class="info-value-small">${trans.by_car || '-'}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">停车费</span>
+              <span class="info-value">${trans.parking_fee || '-'}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="popup-section">
+          <p class="section-title">📅 最佳时间</p>
+          <div class="info-grid">
+            <div class="info-item-full">
+              <span class="info-label">推荐季节</span>
+              <span class="info-tags">${(recTime.best_season || []).map(s => `<span class="tag tag-green">${s}</span>`).join('')}</span>
+            </div>
+            <div class="info-item-full">
+              <span class="info-label">避开季节</span>
+              <span class="info-tags">${(recTime.avoid_season || []).map(s => `<span class="tag tag-red">${s}</span>`).join('')}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">需要预约</span>
+              <span class="info-value">${recTime.booking_required ? '✅ 是' : '❌ 否'}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="popup-section">
+          <p class="section-title">🏠 设施配置</p>
+          <div class="facility-list">
+            <span class="facility-item ${facilities.water_available ? 'active' : 'inactive'}">💧 水源</span>
+            <span class="facility-item ${facilities.power_available ? 'active' : 'inactive'}">🔌 电源</span>
+            <span class="facility-item ${facilities.toilet_available ? 'active' : 'inactive'}">🚻 厕所</span>
+            <span class="facility-item ${facilities.shower_available ? 'active' : 'inactive'}">🚿 淋浴</span>
+            <span class="facility-item ${facilities.kitchen_available ? 'active' : 'inactive'}">🍳 厨房</span>
+          </div>
+        </div>
+
+        <div class="popup-section">
+          <p class="section-title">🛒 补给与安全</p>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">补给便利</span>
+              <span class="info-value">${getStarRating(supply.level || 3)}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">安全等级</span>
+              <span class="info-value">${getStarRating(safety.level || 3)}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">到城镇</span>
+              <span class="info-value">${supply.distance_to_town || '-'}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="popup-section">
+          <p class="section-title">🎯 特色体验</p>
+          <div class="experience-tags">
+            ${(exp.tags || []).map(tag => `<span class="exp-tag">${tag}</span>`).join('')}
+          </div>
+          <p class="section-subtitle">特色活动</p>
+          <p class="activities">${(exp.special_activities || []).join('、') || '-'}</p>
+          <div class="pet-family">
+            <span class="pet-item">🐶 宠物友好: ${exp.pet_friendly ? '✅' : '❌'}</span>
+            <span class="pet-item">👨‍👩‍👧 亲子友好: ${exp.family_friendly ? '✅' : '❌'}</span>
+          </div>
+        </div>
+
+        <div class="popup-section">
+          <p class="section-title">💰 价格信息</p>
+          <div class="price-grid">
+            <div class="price-item">
+              <span class="price-label">帐篷费</span>
+              <span class="price-value">${price.tent_fee || '-'}</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">小木屋</span>
+              <span class="price-value">${price.cabin_fee || '-'}</span>
+            </div>
+            <div class="price-item">
+              <span class="price-label">门票</span>
+              <span class="price-value">${price.entrance_fee || '-'}</span>
+            </div>
+          </div>
         </div>
 
         <div class="popup-weather">

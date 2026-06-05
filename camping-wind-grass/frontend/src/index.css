@@ -427,3 +427,181 @@ body {
   padding: 8px;
   font-size: 18px;
 }
+
+.popup-content-large {
+  min-width: 320px;
+  max-width: 360px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.popup-type {
+  font-size: 12px;
+  color: #3b82f6;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.popup-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.section-subtitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.info-item-full {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.info-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.info-value-small {
+  font-size: 11px;
+  color: #374151;
+  line-height: 1.4;
+}
+
+.info-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.tag-green {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.tag-red {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.facility-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.facility-item {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.facility-item.active {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.facility-item.inactive {
+  background: #f3f4f6;
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
+.experience-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.exp-tag {
+  padding: 4px 10px;
+  background: #f0fdf4;
+  color: #15803d;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.activities {
+  font-size: 12px;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.pet-family {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.pet-item {
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.price-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.price-item {
+  text-align: center;
+  padding: 8px 4px;
+  background: #f8fafc;
+  border-radius: 6px;
+}
+
+.price-label {
+  display: block;
+  font-size: 10px;
+  color: #9ca3af;
+  margin-bottom: 2px;
+}
+
+.price-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f2937;
+}

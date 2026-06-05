@@ -145,55 +145,14 @@ class CampingNoteSpider:
         return all_sites
 
     def load_mock_data(self) -> List[Dict]:
-        mock_data = [
-            {
-                "name": "杭州千岛湖露营基地",
-                "location": "浙江省杭州市淳安县千岛湖镇",
-                "description": "湖边草坪营地，环境优美，设施齐全",
-                "photos": [],
-                "keywords": ["草坪", "平坦", "水源", "厕所", "停车场"],
-                "source": "mock",
-                "note_id": "mock_1",
-            },
-            {
-                "name": "北京金海湖露营地",
-                "location": "北京市平谷区金海湖镇",
-                "description": "湖畔营地，草地覆盖率高，排水良好",
-                "photos": [],
-                "keywords": ["草坪", "排水好", "湖畔", "烧烤"],
-                "source": "mock",
-                "note_id": "mock_2",
-            },
-            {
-                "name": "张家口草原天路风口营地",
-                "location": "河北省张家口市张北县",
-                "description": "风口山谷位置，常年风大、暴晒，草地稀疏，雨后容易积水泥泞，蚊虫较多",
-                "photos": [],
-                "keywords": ["草原", "开阔", "风大", "暴晒", "积水", "泥泞", "蚊子多"],
-                "source": "mock",
-                "note_id": "mock_3",
-            },
-            {
-                "name": "成都三岔湖露营地",
-                "location": "四川省成都市简阳市三岔湖",
-                "description": "湖中小岛，草坪平整，适合家庭露营",
-                "photos": [],
-                "keywords": ["草坪", "钓鱼", "烧烤", "平坦"],
-                "source": "mock",
-                "note_id": "mock_4",
-            },
-            {
-                "name": "广州从化溪头村露营",
-                "location": "广东省广州市从化区溪头村",
-                "description": "山谷营地，有溪流，背风处较好",
-                "photos": [],
-                "keywords": ["山谷", "水源", "徒步", "背风"],
-                "source": "mock",
-                "note_id": "mock_5",
-            },
-        ]
-        self.camping_sites = mock_data
-        return mock_data
+        from .camping_sites_data import get_all_campsites
+        all_sites = get_all_campsites()
+
+        for idx, site in enumerate(all_sites):
+            site["note_id"] = f"mock_{idx + 1}"
+
+        self.camping_sites = all_sites
+        return all_sites
 
     def save_to_file(self, filepath: str):
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
