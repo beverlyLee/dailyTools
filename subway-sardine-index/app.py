@@ -7,6 +7,7 @@ from typing import Dict, List
 
 import pandas as pd
 import streamlit as st
+import pydeck as pdk
 from dotenv import load_dotenv
 
 project_root = Path(__file__).parent
@@ -93,11 +94,19 @@ def analyze_congestion(
 def create_map_dataframe(crowd_data: List[CrowdData], stations: List[Dict]) -> pd.DataFrame:
     station_lines = {s["name"]: s.get("lines", []) for s in stations}
 
+    COLOR_RGB = {
+        "舒适": [16, 185, 129],
+        "普通": [245, 158, 11],
+        "拥挤": [249, 115, 22],
+        "爆满": [239, 68, 68],
+    }
+
     data = []
     for item in crowd_data:
         base_size = 15
         size = base_size * item.size_multiplier
         lines = station_lines.get(item.station_name, [])
+        rgb = COLOR_RGB.get(item.crowd_level, [136, 136, 136])
 
         data.append(
             {
@@ -105,17 +114,78 @@ def create_map_dataframe(crowd_data: List[CrowdData], stations: List[Dict]) -> p
                 "lon": item.longitude,
                 "station_name": item.station_name,
                 "crowd_level": item.crowd_level,
-                "congestion_index": item.congestion_index,
+                "congestion_index": f"{item.congestion_index:.3f}",
                 "status": item.status,
-                "speed": item.speed,
+                "speed": f"{item.speed:.1f}",
                 "is_transfer": item.is_transfer,
                 "lines": "、".join(lines) if lines else "-",
-                "color": LEVEL_COLORS.get(item.crowd_level, "#888888"),
+                "color_r": rgb[0],
+                "color_g": rgb[1],
+                "color_b": rgb[2],
                 "size": size,
                 "emoji": LEVEL_EMOJIS.get(item.crowd_level, "❓"),
+                "transfer_text": "🔄 换乘站" if item.is_transfer else "⚪ 普通站",
             }
         )
     return pd.DataFrame(data)
+
+
+def create_pydeck_map(df: pd.DataFrame, city: str) -> pdk.Deck:
+    center_lat, center_lon = CITY_COORDINATES.get(city, [39.9042, 116.4074])
+
+    tooltip_html = """
+    <b>{station_name}</b><br/>
+    {transfer_text}<br/>
+    拥挤等级: {emoji} {crowd_level}<br/>
+    拥堵指数: {congestion_index}<br/>
+    周边车速: {speed} km/h<br/>
+    途经线路: {lines}
+    """
+
+    layer = pdk.Layer(
+        "ScatterplotLayer",
+        df,
+        get_position=["lon", "lat"],
+        get_fill_color=["color_r", "color_g", "color_b", 200],
+        get_radius="size * 50",
+        pickable=True,
+        opacity=0.8,
+        stroked=True,
+        filled=True,
+        radius_scale=1,
+        radius_min_pixels=5,
+        radius_max_pixels=50,
+        line_width_min_pixels=1,
+        get_line_color=[255, 255, 255, 100],
+    )
+
+    view_state = pdk.ViewState(
+        latitude=center_lat,
+        longitude=center_lon,
+        zoom=11,
+        min_zoom=8,
+        max_zoom=16,
+        pitch=0,
+        bearing=0,
+    )
+
+    deck = pdk.Deck(
+        layers=[layer],
+        initial_view_state=view_state,
+        map_style="road",
+        tooltip={
+            "html": tooltip_html,
+            "style": {
+                "backgroundColor": "rgba(0, 0, 0, 0.8)",
+                "color": "white",
+                "fontSize": "12px",
+                "padding": "8px",
+                "borderRadius": "4px",
+            },
+        },
+    )
+
+    return deck
 
 
 def color_cell(color: str) -> str:
@@ -197,20 +267,10 @@ def main():
             with col1:
                 st.subheader(f"📍 {city} 地铁拥挤度地图")
                 st.caption(f"更新时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                st.caption("💡 提示: 点击地图上的标记点可查看站点详情")
 
-                map_df = df[["lat", "lon", "size", "color"]].rename(
-                    columns={"color": "color_col", "size": "size_col"}
-                )
-
-                st.map(
-                    map_df,
-                    latitude="lat",
-                    longitude="lon",
-                    size="size_col",
-                    color="color_col",
-                    zoom=11,
-                    use_container_width=True,
-                )
+                deck = create_pydeck_map(df, city)
+                st.pydeck_chart(deck, use_container_width=True)
 
                 st.markdown(
                     """

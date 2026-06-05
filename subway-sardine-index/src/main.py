@@ -65,15 +65,26 @@ async def log_requests(request: Request, call_next):
         )
         return response
     except Exception as e:
+        error_msg = str(e)
+        if "US-ASCII" in error_msg or "ascii" in error_msg.lower() or "URL may only contain" in error_msg:
+            logger.warning(f"Non-ASCII URL detected: {request.url}")
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "detail": "URL包含非ASCII字符，请对中文参数进行URL编码",
+                    "hint": "例如: city=北京 → city=%E5%8C%97%E4%BA%AC",
+                    "example": "curl 'http://127.0.0.1:8000/stations?city=%E5%8C%97%E4%BA%AC'",
+                },
+            )
         process_time = (datetime.now() - start_time).total_seconds()
         logger.error(
             f"Request failed: {request.method} {request.url.path} "
-            f"error={str(e)} time={process_time:.3f}s"
+            f"error={error_msg} time={process_time:.3f}s"
         )
         logger.error(f"Traceback: {traceback.format_exc()}")
         return JSONResponse(
             status_code=500,
-            content={"detail": f"Internal server error: {str(e)}"},
+            content={"detail": f"Internal server error: {error_msg}"},
         )
 
 
