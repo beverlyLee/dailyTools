@@ -105,11 +105,46 @@
         }
         #sunburst-chart {
             width: 100%;
-            height: 520px;
+            height: 480px;
         }
         #bar-chart {
             width: 100%;
             height: 520px;
+        }
+
+        .sunburst-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px 4px;
+            border-top: 1px solid #ecf0f1;
+            margin-top: 8px;
+        }
+        .nav-btn {
+            padding: 6px 14px;
+            border: 1px solid #dfe6e9;
+            background: white;
+            color: #2c3e50;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover:not(:disabled) {
+            background: #f8f9fa;
+            border-color: #b2bec3;
+        }
+        .nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .nav-path {
+            margin-left: auto;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        .nav-path b {
+            color: #e74c3c;
         }
 
         .comparison-box {
@@ -429,9 +464,18 @@
             <div class="chart-card">
                 <div class="chart-title">
                     区域菜市场活力指数旭日图
-                    <span class="chart-subtitle">点击区域查看全部市场 · 仅展示TOP3火爆市场</span>
+                    <span class="chart-subtitle">点击区域查看详情 · 仅展示TOP3火爆市场</span>
                 </div>
                 <div id="sunburst-chart"></div>
+                <div class="sunburst-nav">
+                    <button class="nav-btn" id="sunburst-back" disabled>
+                        ← 返回上一层
+                    </button>
+                    <button class="nav-btn" id="sunburst-reset">
+                        ⌂ 回到最外层
+                    </button>
+                    <span class="nav-path" id="sunburst-path">上海</span>
+                </div>
             </div>
             <div class="chart-card">
                 <div class="chart-title">各行政区活力指数排名</div>
@@ -501,6 +545,10 @@
         let allDistrictsData = {};
         let allMarketsData = [];
         let currentSelectedDistrict = null;
+        let sunburstLevel = 0;
+        let sunburstPathHistory = ['上海'];
+        let modalTimer = null;
+        let highlightTimers = {};
 
         const OLD_DISTRICTS = ['黄浦区', '静安区', '虹口区', '杨浦区', '普陀区', '长宁区', '徐汇区'];
 
@@ -539,7 +587,7 @@
                                 if (d.is_district) {
                                     html += `平均活力: ${d.avg_vitality}<br/>`;
                                     html += `市场数量: ${d.market_count || 0}家<br/>`;
-                                    html += `<span style="color:#e74c3c;font-size:11px;">点击查看全部市场 →</span>`;
+                                    html += `<span style="color:#e74c3c;font-size:11px;">点击查看详情 →</span>`;
                                 } else if (d.is_market) {
                                     html += `活力指数: ${d.vitality_index}<br/>`;
                                     html += `活力等级: ${d.vitality_level || ''}<br/>`;
@@ -565,6 +613,8 @@
                                 }
                             },
                             minAngle: 8,
+                            roam: false,
+                            nodeClick: false,
                             label: {
                                 rotate: 0,
                                 fontSize: 11,
@@ -616,11 +666,13 @@
                     sunburstChart.on('click', function(params) {
                         const d = params.data;
                         if (d.is_district) {
-                            openDistrictModal(d.name);
+                            handleDistrictSelect(d.name, 'sunburst');
                         } else if (d.is_more && d.district) {
-                            openDistrictModal(d.district);
+                            handleDistrictSelect(d.district, 'sunburst');
                         }
                     });
+
+                    updateSunburstNav();
                 })
                 .catch(err => console.error('加载旭日图数据失败:', err));
         }
@@ -697,10 +749,112 @@
 
                     barChart.off('click');
                     barChart.on('click', function(params) {
-                        openDistrictModal(params.name);
+                        handleDistrictSelect(params.name, 'bar');
                     });
                 })
                 .catch(err => console.error('加载柱状图数据失败:', err));
+        }
+
+        function handleDistrictSelect(districtName, source) {
+            if (!districtName) return;
+
+            currentSelectedDistrict = districtName;
+
+            if (source === 'sunburst' && sunburstLevel === 0) {
+                sunburstZoomIn(districtName);
+            }
+
+            if (source === 'table') {
+                const chartsSection = document.querySelector('.charts-grid');
+                const targetTop = chartsSection.getBoundingClientRect().top + window.pageYOffset - 20;
+                window.scrollTo({ top: targetTop, behavior: 'smooth' });
+
+                const scrollHandler = function() {
+                    const rect = chartsSection.getBoundingClientRect();
+                    if (rect.top <= 80 && rect.bottom >= 80) {
+                        window.removeEventListener('scroll', scrollHandler);
+                        triggerHighlightAndModal(districtName);
+                    }
+                };
+                window.addEventListener('scroll', scrollHandler);
+
+                setTimeout(() => {
+                    window.removeEventListener('scroll', scrollHandler);
+                    triggerHighlightAndModal(districtName);
+                }, 800);
+
+            } else {
+                triggerHighlightAndModal(districtName);
+            }
+        }
+
+        function triggerHighlightAndModal(districtName) {
+            highlightDistrict(districtName);
+
+            if (modalTimer) clearTimeout(modalTimer);
+            modalTimer = setTimeout(() => {
+                openDistrictModal(districtName);
+            }, 400);
+        }
+
+        function updateSunburstNav() {
+            const backBtn = document.getElementById('sunburst-back');
+            const resetBtn = document.getElementById('sunburst-reset');
+            const pathEl = document.getElementById('sunburst-path');
+
+            backBtn.disabled = sunburstLevel <= 0;
+            resetBtn.disabled = sunburstLevel <= 0;
+
+            const path = sunburstPathHistory.slice(-2);
+            pathEl.innerHTML = path.map((p, i) => {
+                return i === path.length - 1 ? `<b>${p}</b>` : p;
+            }).join(' > ');
+        }
+
+        function sunburstZoomIn(districtName) {
+            const option = sunburstChart.getOption();
+            if (!option || !option.series || !option.series[0]) return;
+
+            const districtData = option.series[0].data.find(d => d.name === districtName);
+            if (!districtData || !districtData.children) return;
+
+            sunburstLevel++;
+            sunburstPathHistory.push(districtName);
+
+            sunburstChart.setOption({
+                series: [{
+                    data: districtData.children,
+                    radius: ['20%', '90%']
+                }]
+            });
+
+            updateSunburstNav();
+        }
+
+        function sunburstZoomOut() {
+            if (sunburstLevel <= 0) return;
+
+            sunburstLevel--;
+            sunburstPathHistory.pop();
+
+            if (sunburstLevel === 0) {
+                loadSunburstData();
+            } else {
+                const currentDistrict = sunburstPathHistory[sunburstPathHistory.length - 1];
+                loadSunburstData();
+                setTimeout(() => sunburstZoomIn(currentDistrict), 50);
+            }
+
+            updateSunburstNav();
+        }
+
+        function sunburstReset() {
+            if (sunburstLevel === 0) return;
+
+            sunburstLevel = 0;
+            sunburstPathHistory = ['上海'];
+            loadSunburstData();
+            updateSunburstNav();
         }
 
         function openDistrictModal(districtName) {
@@ -743,45 +897,14 @@
 
         function closeModal() {
             document.getElementById('modal-overlay').classList.remove('active');
-            clearHighlight();
-        }
-
-        function scrollToDistrict(districtName) {
-            if (!districtName) return;
-
-            currentSelectedDistrict = districtName;
-
-            const chartsSection = document.querySelector('.charts-grid');
-            chartsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-            highlightDistrict(districtName);
 
             setTimeout(() => {
-                openDistrictModal(districtName);
+                clearHighlight();
             }, 500);
         }
 
-        function highlightDistrict(districtName) {
-            clearHighlight();
-
-            const tableRows = document.querySelectorAll('#market-table tbody tr');
-            tableRows.forEach(row => {
-                const districtCell = row.querySelector('td:nth-child(4)');
-                if (districtCell && districtCell.textContent.trim() === districtName) {
-                    row.classList.add('active');
-                }
-            });
-
-            const tableSection = document.querySelector('.table-section');
-            tableSection.classList.add('highlight');
-            setTimeout(() => tableSection.classList.remove('highlight'), 1500);
-
-            const chartCards = document.querySelectorAll('.chart-card');
-            chartCards.forEach(card => card.classList.add('highlight'));
-            setTimeout(() => chartCards.forEach(card => card.classList.remove('highlight')), 1500);
-
-            highlightBarChart(districtName);
-            highlightSunburst(districtName);
+        function scrollToDistrict(districtName) {
+            handleDistrictSelect(districtName, 'table');
         }
 
         function highlightBarChart(districtName) {
@@ -837,7 +960,51 @@
             });
         }
 
+        function highlightDistrict(districtName) {
+            clearAllTimers();
+
+            currentSelectedDistrict = districtName;
+
+            const tableRows = document.querySelectorAll('#market-table tbody tr');
+            tableRows.forEach(row => {
+                const districtCell = row.querySelector('td:nth-child(4)');
+                if (districtCell && districtCell.textContent.trim() === districtName) {
+                    row.classList.add('active');
+                }
+            });
+
+            highlightBarChart(districtName);
+            highlightSunburst(districtName);
+
+            const tableSection = document.querySelector('.table-section');
+            tableSection.classList.add('highlight');
+            highlightTimers.tablePulse = setTimeout(() => {
+                tableSection.classList.remove('highlight');
+            }, 800);
+
+            const chartCards = document.querySelectorAll('.chart-card');
+            chartCards.forEach(card => card.classList.add('highlight'));
+            highlightTimers.cardPulse = setTimeout(() => {
+                chartCards.forEach(card => card.classList.remove('highlight'));
+            }, 800);
+        }
+
+        function clearAllTimers() {
+            if (modalTimer) {
+                clearTimeout(modalTimer);
+                modalTimer = null;
+            }
+            for (const key in highlightTimers) {
+                if (highlightTimers[key]) {
+                    clearTimeout(highlightTimers[key]);
+                    highlightTimers[key] = null;
+                }
+            }
+        }
+
         function clearHighlight() {
+            clearAllTimers();
+
             const tableRows = document.querySelectorAll('#market-table tbody tr');
             tableRows.forEach(row => row.classList.remove('active'));
 
@@ -865,6 +1032,11 @@
                 sunburstChart.setOption({ series: [{ data: restoredData }] });
             }
 
+            const tableSection = document.querySelector('.table-section');
+            tableSection.classList.remove('highlight');
+            const chartCards = document.querySelectorAll('.chart-card');
+            chartCards.forEach(card => card.classList.remove('highlight'));
+
             currentSelectedDistrict = null;
         }
 
@@ -875,6 +1047,9 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeModal();
         });
+
+        document.getElementById('sunburst-back').addEventListener('click', sunburstZoomOut);
+        document.getElementById('sunburst-reset').addEventListener('click', sunburstReset);
 
         function loadMarketsTable() {
             fetch('/api/markets')
