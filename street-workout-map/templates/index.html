@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>街头健身地图 - 寻找身边的健身圣地</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -15,8 +16,8 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-            background: #0a0e1a;
-            color: #e0e6f0;
+            background: #f8fafc;
+            color: #1e293b;
             overflow: hidden;
         }
 
@@ -27,48 +28,49 @@
         }
 
         #sidebar {
-            width: 360px;
-            background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
-            border-right: 1px solid #1e293b;
+            width: 340px;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
             z-index: 1000;
-            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
         }
 
         .sidebar-header {
-            padding: 24px 20px;
-            border-bottom: 1px solid #1e293b;
-            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            padding: 20px 18px;
+            border-bottom: 1px solid #e2e8f0;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
         }
 
         .sidebar-header h1 {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
-            color: #60a5fa;
-            margin-bottom: 6px;
+            color: #166534;
+            margin-bottom: 4px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .sidebar-header h1::before {
-            content: "🏋️";
-            font-size: 24px;
+        .sidebar-header h1 svg {
+            width: 24px;
+            height: 24px;
         }
 
         .sidebar-header p {
-            font-size: 13px;
-            color: #94a3b8;
+            font-size: 12px;
+            color: #64748b;
         }
 
         .filters {
-            padding: 16px 20px;
-            border-bottom: 1px solid #1e293b;
+            padding: 14px 18px;
+            border-bottom: 1px solid #f1f5f9;
+            background: #fafbfc;
         }
 
         .filter-section {
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .filter-section:last-child {
@@ -76,10 +78,10 @@
         }
 
         .filter-label {
-            font-size: 12px;
+            font-size: 11px;
             color: #94a3b8;
             margin-bottom: 8px;
-            font-weight: 500;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -87,54 +89,57 @@
         .filter-buttons {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
         }
 
         .filter-btn {
-            padding: 6px 14px;
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 20px;
-            color: #94a3b8;
+            padding: 5px 12px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            color: #64748b;
             font-size: 12px;
             cursor: pointer;
             transition: all 0.2s ease;
+            font-weight: 500;
         }
 
         .filter-btn:hover {
-            background: #334155;
-            color: #e2e8f0;
+            background: #f1f5f9;
+            color: #334155;
+            border-color: #cbd5e1;
         }
 
         .filter-btn.active {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            border-color: #3b82f6;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            border-color: #22c55e;
             color: white;
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
         }
 
         .stats-section {
-            padding: 16px 20px;
-            border-bottom: 1px solid #1e293b;
+            padding: 14px 18px;
+            border-bottom: 1px solid #f1f5f9;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 10px;
         }
 
         .stat-card {
-            background: #1e293b;
-            border-radius: 12px;
-            padding: 14px;
-            border: 1px solid #334155;
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
         }
 
         .stat-number {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
-            color: #60a5fa;
-            margin-bottom: 4px;
+            color: #16a34a;
+            margin-bottom: 2px;
         }
 
         .stat-label {
@@ -145,27 +150,29 @@
         .location-list {
             flex: 1;
             overflow-y: auto;
-            padding: 12px 16px;
+            padding: 10px 14px;
         }
 
         .location-item {
-            padding: 14px;
-            margin-bottom: 10px;
-            background: #1e293b;
-            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #ffffff;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s ease;
-            border: 1px solid #334155;
+            border: 1px solid #e2e8f0;
         }
 
         .location-item:hover {
-            background: #334155;
-            transform: translateX(4px);
+            background: #f8fafc;
+            transform: translateX(3px);
+            border-color: #bbf7d0;
         }
 
         .location-item.active {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.1) 100%);
-            border-color: #3b82f6;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+            border-color: #22c55e;
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
         }
 
         .location-header {
@@ -176,19 +183,33 @@
         }
 
         .location-name {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
-            color: #e2e8f0;
+            color: #1e293b;
             flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .location-name svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
         }
 
         .heat-badge {
-            padding: 3px 10px;
-            border-radius: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
             font-size: 11px;
             font-weight: 600;
             flex-shrink: 0;
-            margin-left: 8px;
+            margin-left: 6px;
+        }
+
+        .heat-super {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white;
         }
 
         .heat-high {
@@ -206,200 +227,194 @@
             color: white;
         }
 
-        .heat-super {
-            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-            color: white;
-        }
-
         .location-meta {
             display: flex;
-            gap: 12px;
-            font-size: 12px;
+            gap: 10px;
+            font-size: 11px;
             color: #94a3b8;
         }
 
         .location-meta span {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
         }
 
         .condition-badge {
             display: inline-block;
-            padding: 2px 8px;
-            border-radius: 8px;
-            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 10px;
             font-weight: 500;
         }
 
         .condition-excellent {
-            background: rgba(34, 197, 94, 0.2);
-            color: #22c55e;
+            background: #dcfce7;
+            color: #15803d;
         }
 
         .condition-good {
-            background: rgba(34, 197, 94, 0.15);
-            color: #4ade80;
+            background: #dcfce7;
+            color: #166534;
         }
 
         .condition-fair {
-            background: rgba(234, 179, 8, 0.2);
-            color: #eab308;
+            background: #fef3c7;
+            color: #a16207;
         }
 
         .condition-poor {
-            background: rgba(249, 115, 22, 0.2);
-            color: #f97316;
+            background: #ffedd5;
+            color: #c2410c;
         }
 
         .condition-broken {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
+            background: #fee2e2;
+            color: #b91c1c;
         }
 
         #map-container {
             flex: 1;
             position: relative;
+            background: #e2e8f0;
         }
 
         #map {
             height: 100%;
             width: 100%;
-            background: #0a0e1a;
-        }
-
-        .leaflet-container {
-            background: #0a0e1a;
         }
 
         .dumbbell-marker {
             position: relative;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -100%);
             cursor: pointer;
             transition: transform 0.2s ease;
         }
 
         .dumbbell-marker:hover {
-            transform: translate(-50%, -50%) scale(1.15);
+            transform: translate(-50%, -100%) scale(1.15);
+            z-index: 1000 !important;
         }
 
-        .dumbbell-icon {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: inherit;
-            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+        .dumbbell-marker svg {
+            display: block;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
         }
 
-        .pulse-ring {
+        .marker-pulse {
             position: absolute;
-            top: 50%;
+            bottom: 0;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            animation: pulse 2s ease-out infinite;
+            animation: marker-pulse 2s ease-out infinite;
             pointer-events: none;
         }
 
-        @keyframes pulse {
+        @keyframes marker-pulse {
             0% {
-                width: 20px;
-                height: 20px;
+                width: 10px;
+                height: 10px;
                 opacity: 0.6;
             }
             100% {
-                width: 60px;
-                height: 60px;
+                width: 50px;
+                height: 50px;
                 opacity: 0;
             }
         }
 
-        .custom-popup {
-            min-width: 280px;
-            max-width: 320px;
-            font-family: inherit;
-        }
-
         .leaflet-popup-content-wrapper {
-            background: #1e293b;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-            border: 1px solid #334155;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            border: 1px solid #e2e8f0;
         }
 
         .leaflet-popup-tip {
-            background: #1e293b;
+            background: #ffffff;
         }
 
         .leaflet-popup-content {
-            margin: 16px;
+            margin: 14px;
             width: auto !important;
         }
 
         .popup-header {
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #334155;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f1f5f9;
         }
 
         .popup-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
-            color: #e2e8f0;
-            margin-bottom: 6px;
+            color: #1e293b;
+            margin-bottom: 4px;
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        .popup-title svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .popup-addr {
+            font-size: 12px;
+            color: #94a3b8;
         }
 
         .popup-info {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 12px;
+            gap: 6px;
+            margin-bottom: 10px;
         }
 
         .popup-tag {
-            padding: 4px 10px;
-            background: #334155;
-            border-radius: 12px;
+            padding: 3px 10px;
+            background: #f1f5f9;
+            border-radius: 10px;
             font-size: 11px;
-            color: #94a3b8;
+            color: #475569;
         }
 
         .popup-stats {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 8px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
 
         .popup-stat {
             text-align: center;
-            padding: 10px 6px;
-            background: #0f172a;
+            padding: 10px 4px;
+            background: #f8fafc;
             border-radius: 10px;
+            border: 1px solid #f1f5f9;
         }
 
         .popup-stat-value {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
-            color: #60a5fa;
+            color: #16a34a;
             margin-bottom: 2px;
         }
 
         .popup-stat-label {
             font-size: 10px;
-            color: #64748b;
+            color: #94a3b8;
         }
 
         .popup-section-title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            color: #e2e8f0;
-            margin-bottom: 10px;
+            color: #334155;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -408,7 +423,7 @@
         .photo-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
+            gap: 5px;
         }
 
         .photo-item {
@@ -417,6 +432,7 @@
             overflow: hidden;
             cursor: pointer;
             transition: transform 0.2s ease;
+            border: 1px solid #e2e8f0;
         }
 
         .photo-item:hover {
@@ -430,15 +446,16 @@
         }
 
         .posts-list {
-            max-height: 200px;
+            max-height: 180px;
             overflow-y: auto;
         }
 
         .post-item {
-            padding: 10px;
-            background: #0f172a;
-            border-radius: 10px;
-            margin-bottom: 8px;
+            padding: 8px 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            border: 1px solid #f1f5f9;
         }
 
         .post-item:last-child {
@@ -446,15 +463,15 @@
         }
 
         .post-title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
-            color: #e2e8f0;
-            margin-bottom: 4px;
+            color: #1e293b;
+            margin-bottom: 3px;
         }
 
         .post-meta {
-            font-size: 11px;
-            color: #64748b;
+            font-size: 10px;
+            color: #94a3b8;
             display: flex;
             justify-content: space-between;
         }
@@ -465,20 +482,26 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(10, 14, 26, 0.9);
+            background: #f1f5f9;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 2000;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid #334155;
-            border-top-color: #3b82f6;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #22c55e;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin {
@@ -486,38 +509,38 @@
         }
 
         .loading-text {
-            margin-top: 16px;
-            color: #94a3b8;
-            font-size: 14px;
+            margin-top: 12px;
+            color: #64748b;
+            font-size: 13px;
         }
 
         .legend {
             position: absolute;
             bottom: 24px;
             right: 24px;
-            background: rgba(30, 41, 59, 0.95);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border: 1px solid #334155;
+            border: 1px solid #e2e8f0;
             border-radius: 12px;
-            padding: 16px;
+            padding: 14px;
             z-index: 500;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         }
 
         .legend-title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            color: #e2e8f0;
-            margin-bottom: 12px;
+            color: #334155;
+            margin-bottom: 10px;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 8px;
-            font-size: 12px;
-            color: #94a3b8;
+            margin-bottom: 7px;
+            font-size: 11px;
+            color: #64748b;
         }
 
         .legend-item:last-child {
@@ -525,20 +548,19 @@
         }
 
         .legend-icon {
-            font-size: 18px;
+            width: 20px;
+            height: 20px;
         }
 
         .heat-scale {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 8px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #f1f5f9;
         }
 
         .scale-bar {
-            flex: 1;
             height: 6px;
-            background: linear-gradient(90deg, #6b7280 0%, #f59e0b 50%, #ef4444 100%);
+            background: linear-gradient(90deg, #94a3b8 0%, #f59e0b 50%, #ef4444 100%);
             border-radius: 3px;
         }
 
@@ -546,7 +568,7 @@
             display: flex;
             justify-content: space-between;
             font-size: 10px;
-            color: #64748b;
+            color: #94a3b8;
             margin-top: 4px;
         }
 
@@ -556,7 +578,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.85);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -579,27 +601,62 @@
             color: white;
             cursor: pointer;
             opacity: 0.8;
+            line-height: 1;
         }
 
         .image-modal-close:hover {
             opacity: 1;
         }
 
+        .map-switcher {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            z-index: 500;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            overflow: hidden;
+        }
+
+        .map-switch-btn {
+            padding: 8px 14px;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .map-switch-btn:hover {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .map-switch-btn.active {
+            background: #22c55e;
+            color: white;
+        }
+
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 5px;
         }
 
         ::-webkit-scrollbar-track {
-            background: #0f172a;
+            background: #f1f5f9;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #334155;
+            background: #cbd5e1;
             border-radius: 3px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
+            background: #94a3b8;
         }
     </style>
 </head>
@@ -607,7 +664,17 @@
     <div id="app">
         <div id="sidebar">
             <div class="sidebar-header">
-                <h1>街头健身地图</h1>
+                <h1>
+                    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="6" y="22" width="10" height="20" rx="2" fill="#22c55e"/>
+                        <rect x="48" y="22" width="10" height="20" rx="2" fill="#22c55e"/>
+                        <rect x="13" y="25" width="6" height="14" rx="1" fill="#16a34a"/>
+                        <rect x="45" y="25" width="6" height="14" rx="1" fill="#16a34a"/>
+                        <rect x="19" y="29" width="26" height="6" rx="1" fill="#94a3b8"/>
+                        <rect x="19" y="29" width="26" height="2" rx="1" fill="#cbd5e1"/>
+                    </svg>
+                    街头健身地图
+                </h1>
                 <p>发现身边的街头健身圣地</p>
             </div>
 
@@ -649,6 +716,10 @@
         </div>
 
         <div id="map-container">
+            <div class="map-switcher">
+                <button class="map-switch-btn active" data-map="gaode">高德地图</button>
+                <button class="map-switch-btn" data-map="osm">标准地图</button>
+            </div>
             <div id="map"></div>
             <div class="loading-overlay" id="loading">
                 <div style="text-align: center;">
@@ -657,24 +728,30 @@
                 </div>
             </div>
             <div class="legend">
-                <div class="legend-title">图标说明</div>
+                <div class="legend-title">图标类型</div>
                 <div class="legend-item">
-                    <span class="legend-icon">🏋️</span>
-                    <span>公共健身点</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-icon">🏛️</span>
+                    <svg class="legend-icon" viewBox="0 0 64 64" fill="none">
+                        <rect x="6" y="22" width="10" height="20" rx="2" fill="#22c55e"/>
+                        <rect x="48" y="22" width="10" height="20" rx="2" fill="#22c55e"/>
+                        <rect x="13" y="25" width="6" height="14" rx="1" fill="#16a34a"/>
+                        <rect x="45" y="25" width="6" height="14" rx="1" fill="#16a34a"/>
+                        <rect x="19" y="29" width="26" height="6" rx="1" fill="#94a3b8"/>
+                    </svg>
                     <span>公园健身点</span>
                 </div>
                 <div class="legend-item">
-                    <span class="legend-icon">🏠</span>
+                    <svg class="legend-icon" viewBox="0 0 64 64" fill="none">
+                        <rect x="6" y="22" width="10" height="20" rx="2" fill="#f59e0b"/>
+                        <rect x="48" y="22" width="10" height="20" rx="2" fill="#f59e0b"/>
+                        <rect x="13" y="25" width="6" height="14" rx="1" fill="#d97706"/>
+                        <rect x="45" y="25" width="6" height="14" rx="1" fill="#d97706"/>
+                        <rect x="19" y="29" width="26" height="6" rx="1" fill="#94a3b8"/>
+                    </svg>
                     <span>小区健身点</span>
                 </div>
-                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #334155;">
+                <div class="heat-scale">
                     <div class="legend-title" style="margin-bottom: 8px;">热度等级</div>
-                    <div class="heat-scale">
-                        <div class="scale-bar"></div>
-                    </div>
+                    <div class="scale-bar"></div>
                     <div class="scale-labels">
                         <span>低</span>
                         <span>高</span>
@@ -691,19 +768,116 @@
         let currentFilter = 'all';
         let currentType = 'all';
         let activeMarker = null;
+        let gaodeLayer = null;
+        let osmLayer = null;
+        let currentMapLayer = 'gaode';
+
+        function getDumbbellSVG(heatScore, isPark, size) {
+            const colorStops = [
+                { score: 0, main: '#94a3b8', dark: '#64748b' },
+                { score: 0.3, main: '#f59e0b', dark: '#d97706' },
+                { score: 0.6, main: '#ef4444', dark: '#dc2626' },
+                { score: 0.9, main: '#f97316', dark: '#ea580c' }
+            ];
+
+            let mainColor, darkColor;
+            if (isPark) {
+                const parkColors = [
+                    { score: 0, main: '#86efac', dark: '#22c55e' },
+                    { score: 0.3, main: '#4ade80', dark: '#16a34a' },
+                    { score: 0.6, main: '#22c55e', dark: '#15803d' },
+                    { score: 0.9, main: '#16a34a', dark: '#166534' }
+                ];
+                const idx = Math.min(Math.floor(heatScore / 0.3), parkColors.length - 2);
+                const t = (heatScore - parkColors[idx].score) / 0.3;
+                mainColor = interpolateColor(parkColors[idx].main, parkColors[idx + 1].main, t);
+                darkColor = interpolateColor(parkColors[idx].dark, parkColors[idx + 1].dark, t);
+            } else {
+                const idx = Math.min(Math.floor(heatScore / 0.3), colorStops.length - 2);
+                const t = (heatScore - colorStops[idx].score) / 0.3;
+                mainColor = interpolateColor(colorStops[idx].main, colorStops[idx + 1].main, t);
+                darkColor = interpolateColor(colorStops[idx].dark, colorStops[idx + 1].dark, t);
+            }
+
+            const w = size;
+            const h = size * 0.6;
+            const barW = w * 0.42;
+            const weightW = w * 0.16;
+            const weightH = h * 0.65;
+            const barH = h * 0.2;
+            const innerWeightW = w * 0.1;
+            const innerWeightH = h * 0.5;
+            const leftWeightX = w * 0.08;
+            const rightWeightX = w * 0.76;
+            const leftInnerX = w * 0.2;
+            const rightInnerX = w * 0.7;
+            const barX = w * 0.26;
+            const barY = (h - barH) / 2;
+            const weightY = (h - weightH) / 2;
+            const innerY = (h - innerWeightH) / 2;
+
+            return `
+                <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="dumbbell-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:${mainColor};stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:${darkColor};stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect x="${leftWeightX}" y="${weightY}" width="${weightW}" height="${weightH}" rx="3" fill="url(#dumbbell-grad)"/>
+                    <rect x="${rightWeightX}" y="${weightY}" width="${weightW}" height="${weightH}" rx="3" fill="url(#dumbbell-grad)"/>
+                    <rect x="${leftInnerX}" y="${innerY}" width="${innerWeightW}" height="${innerWeightH}" rx="2" fill="${darkColor}" opacity="0.7"/>
+                    <rect x="${rightInnerX}" y="${innerY}" width="${innerWeightW}" height="${innerWeightH}" rx="2" fill="${darkColor}" opacity="0.7"/>
+                    <rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="1" fill="#94a3b8"/>
+                    <rect x="${barX}" y="${barY}" width="${barW}" height="${barH * 0.4}" rx="1" fill="#cbd5e1" opacity="0.6"/>
+                </svg>
+            `;
+        }
+
+        function interpolateColor(color1, color2, t) {
+            const c1 = hexToRgb(color1);
+            const c2 = hexToRgb(color2);
+            const r = Math.round(c1.r + (c2.r - c1.r) * t);
+            const g = Math.round(c1.g + (c2.g - c1.g) * t);
+            const b = Math.round(c1.b + (c2.b - c1.b) * t);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : { r: 0, g: 0, b: 0 };
+        }
 
         function initMap() {
             map = L.map('map', {
                 center: [31.2304, 121.4737],
                 zoom: 12,
-                zoomControl: true
+                zoomControl: true,
+                attributionControl: false
             });
 
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            gaodeLayer = L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+                subdomains: ['1', '2', '3', '4'],
+                attribution: '&copy; 高德地图',
+                maxZoom: 18
+            });
+
+            osmLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
                 subdomains: 'abcd',
                 maxZoom: 19
-            }).addTo(map);
+            });
+
+            gaodeLayer.addTo(map);
+
+            L.control.attribution({
+                position: 'bottomleft',
+                prefix: false
+            }).addAttribution('&copy; 高德地图 / OpenStreetMap').addTo(map);
 
             loadLocations();
         }
@@ -720,10 +894,25 @@
                     renderMarkers();
                 }
                 
-                document.getElementById('loading').style.display = 'none';
+                setTimeout(() => {
+                    const loading = document.getElementById('loading');
+                    if (loading) {
+                        loading.classList.add('hidden');
+                        setTimeout(() => {
+                            if (loading.parentNode) {
+                                loading.style.display = 'none';
+                            }
+                        }, 300);
+                    }
+                }, 300);
             } catch (error) {
                 console.error('加载数据失败:', error);
-                document.getElementById('loading').style.display = 'none';
+                document.getElementById('loading').innerHTML = `
+                    <div style="text-align: center;">
+                        <div style="font-size: 40px; margin-bottom: 12px;">😕</div>
+                        <div class="loading-text">数据加载失败，请刷新页面</div>
+                    </div>
+                `;
             }
         }
 
@@ -775,51 +964,27 @@
         }
 
         function getMarkerSize(heatScore) {
-            const minSize = 28;
-            const maxSize = 52;
+            const minSize = 36;
+            const maxSize = 64;
             return minSize + (maxSize - minSize) * heatScore;
-        }
-
-        function getMarkerIcon(location) {
-            if (location.is_park) {
-                return '🏛️';
-            }
-            if (location.type === '老旧小区' || location.equipment_condition === 'broken') {
-                return '🏚️';
-            }
-            if (location.type === '住宅小区') {
-                return '🏠';
-            }
-            return '🏋️';
         }
 
         function createDumbbellIcon(location) {
             const size = getMarkerSize(location.heat_score);
-            const icon = getMarkerIcon(location);
-            const heatLevel = getHeatLevel(location.heat_score);
-            
-            const colorMap = {
-                'super': '#f97316',
-                'high': '#ef4444',
-                'medium': '#f59e0b',
-                'low': '#6b7280',
-                'very-low': '#4b5563'
-            };
-            
-            const color = colorMap[heatLevel] || '#6b7280';
+            const svg = getDumbbellSVG(location.heat_score, location.is_park, size);
             const showPulse = location.heat_score >= 0.6;
             
             return L.divIcon({
                 className: 'dumbbell-marker-wrapper',
                 html: `
-                    <div class="dumbbell-marker" style="width: ${size}px; height: ${size}px; font-size: ${size * 0.6}px;">
-                        ${showPulse ? `<div class="pulse-ring" style="border: 2px solid ${color};"></div>` : ''}
-                        <div class="dumbbell-icon">${icon}</div>
+                    <div class="dumbbell-marker" style="width: ${size}px; height: ${size * 0.6}px;">
+                        ${showPulse ? `<div class="marker-pulse" style="background: ${location.is_park ? 'rgba(34, 197, 94, 0.4)' : 'rgba(249, 115, 22, 0.4)'};"></div>` : ''}
+                        ${svg}
                     </div>
                 `,
-                iconSize: [size, size],
-                iconAnchor: [size / 2, size / 2],
-                popupAnchor: [0, -size / 2]
+                iconSize: [size, size * 0.6],
+                iconAnchor: [size / 2, size * 0.6],
+                popupAnchor: [0, -size * 0.5]
             });
         }
 
@@ -834,8 +999,9 @@
                 const marker = L.marker([location.latitude, location.longitude], { icon: icon });
                 
                 marker.bindPopup(createPopupContent(location), {
-                    className: 'custom-popup',
-                    maxWidth: 340
+                    maxWidth: 320,
+                    minWidth: 280,
+                    className: 'custom-popup'
                 });
 
                 marker.on('click', () => {
@@ -850,14 +1016,16 @@
         function createPopupContent(location) {
             const heatLevel = getHeatLevel(location.heat_score);
             const conditionClass = getConditionClass(location.equipment_condition);
+            const size = 20;
+            const iconSvg = getDumbbellSVG(location.heat_score, location.is_park, size);
             
             const photosHtml = location.images && location.images.length > 0 
-                ? location.images.slice(0, 6).map(img => `
+                ? location.images.slice(0, 6).map((img, idx) => `
                     <div class="photo-item" onclick="showImageModal('${img}')">
-                        <img src="${img}" alt="健身照片" loading="lazy" />
+                        <img src="${img}" alt="健身照片 ${idx + 1}" loading="lazy" />
                     </div>
                 `).join('')
-                : '<div style="color: #64748b; font-size: 12px;">暂无照片</div>';
+                : '<div style="color: #94a3b8; font-size: 12px; text-align: center; padding: 20px 0;">暂无照片</div>';
 
             const postsHtml = location.posts && location.posts.length > 0
                 ? `<div class="posts-list">
@@ -866,30 +1034,30 @@
                             <div class="post-title">${post.title}</div>
                             <div class="post-meta">
                                 <span>${post.author}</span>
-                                <span>❤️ ${post.likes}</span>
+                                <span>❤️ ${post.likes.toLocaleString()}</span>
                             </div>
                         </div>
                     `).join('')}
                    </div>`
                 : '';
 
-            const tagsHtml = location.fitness_tags 
+            const tagsHtml = location.fitness_tags && location.fitness_tags.length > 0
                 ? location.fitness_tags.map(tag => `<span class="popup-tag">${tag}</span>`).join('')
                 : '';
 
             return `
                 <div class="popup-header">
                     <div class="popup-title">
+                        ${iconSvg}
                         ${location.name}
                         <span class="heat-badge ${getHeatClass(heatLevel)}">${getHeatLabel(heatLevel)}</span>
                     </div>
-                    <div style="font-size: 12px; color: #64748b;">
-                        ${location.address || ''}
-                    </div>
+                    <div class="popup-addr">${location.address || ''}</div>
                 </div>
                 
                 <div class="popup-info">
                     ${tagsHtml}
+                    <span class="condition-badge ${conditionClass}">器材${location.equipment_condition_label}</span>
                 </div>
 
                 <div class="popup-stats">
@@ -915,7 +1083,7 @@
                 </div>
 
                 ${postsHtml ? `
-                    <div style="margin-top: 14px;">
+                    <div style="margin-top: 12px;">
                         <div class="popup-section-title">
                             <span>📝</span> 相关帖子
                         </div>
@@ -948,19 +1116,23 @@
             const filtered = getFilteredLocations();
             
             if (filtered.length === 0) {
-                list.innerHTML = '<div style="text-align: center; color: #64748b; padding: 40px 20px;">暂无符合条件的地点</div>';
+                list.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 30px 15px; font-size: 13px;">暂无符合条件的地点</div>';
                 return;
             }
 
-            list.innerHTML = filtered.map((loc, index) => {
+            list.innerHTML = filtered.map(loc => {
                 const heatLevel = getHeatLevel(loc.heat_score);
                 const conditionClass = getConditionClass(loc.equipment_condition);
-                const icon = getMarkerIcon(loc);
+                const size = 16;
+                const iconSvg = getDumbbellSVG(loc.heat_score, loc.is_park, size);
                 
                 return `
                     <div class="location-item" data-id="${loc.id}" onclick="focusLocation('${loc.id}')">
                         <div class="location-header">
-                            <span class="location-name">${icon} ${loc.name}</span>
+                            <span class="location-name">
+                                ${iconSvg}
+                                ${loc.name}
+                            </span>
                             <span class="heat-badge ${getHeatClass(heatLevel)}">${getHeatLabel(heatLevel)}</span>
                         </div>
                         <div class="location-meta">
@@ -1002,12 +1174,37 @@
         function showImageModal(src) {
             const modal = document.createElement('div');
             modal.className = 'image-modal';
-            modal.onclick = () => modal.remove();
+            modal.onclick = (e) => {
+                if (e.target === modal || e.target.classList.contains('image-modal-close')) {
+                    modal.remove();
+                }
+            };
             modal.innerHTML = `
                 <span class="image-modal-close">&times;</span>
                 <img src="${src}" alt="大图预览" />
             `;
             document.body.appendChild(modal);
+        }
+
+        function switchMapLayer(type) {
+            if (type === currentMapLayer) return;
+            
+            if (type === 'gaode') {
+                if (osmLayer) map.removeLayer(osmLayer);
+                if (gaodeLayer) gaodeLayer.addTo(map);
+            } else {
+                if (gaodeLayer) map.removeLayer(gaodeLayer);
+                if (osmLayer) osmLayer.addTo(map);
+            }
+            
+            currentMapLayer = type;
+            
+            document.querySelectorAll('.map-switch-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.map === type) {
+                    btn.classList.add('active');
+                }
+            });
         }
 
         document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
@@ -1027,6 +1224,12 @@
                 currentType = btn.dataset.type;
                 renderLocationList();
                 renderMarkers();
+            });
+        });
+
+        document.querySelectorAll('.map-switch-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                switchMapLayer(btn.dataset.map);
             });
         });
 

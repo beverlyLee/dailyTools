@@ -7,6 +7,7 @@ SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
+ENV_FILE = os.path.join(BASE_DIR, ".env")
 
 sys.path.insert(0, BASE_DIR)
 
@@ -17,8 +18,29 @@ from src.social.fitness_topic_spider import FitnessTopicSpider
 from src.poi.park_facility_checker import ParkFacilityChecker
 from src.heat.workout_heat import WorkoutHeatCalculator
 
+
+def load_env():
+    if os.path.exists(ENV_FILE):
+        with open(ENV_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, value = line.split("=", 1)
+                    os.environ[key.strip()] = value.strip()
+
+
+load_env()
+
 app = Sanic("StreetWorkoutMap")
 app.static("/static", STATIC_DIR)
+
+
+@app.get("/favicon.ico")
+async def favicon(request):
+    favicon_path = os.path.join(STATIC_DIR, "favicon.svg")
+    if os.path.exists(favicon_path):
+        return await file(favicon_path, mime_type="image/svg+xml")
+    return sanic_json({"error": "not found"}, status=404)
 
 
 def _get_heat_data():
@@ -171,6 +193,22 @@ async def get_districts(request):
             "message": f"获取区域数据失败: {str(e)}",
             "data": []
         }, status=500)
+
+
+@app.get("/api/config")
+async def get_config(request):
+    gaode_key = os.environ.get("GAODE_JS_API_KEY", "")
+    gaode_web_key = os.environ.get("GAODE_WEB_API_KEY", "")
+    
+    return sanic_json({
+        "code": 0,
+        "message": "success",
+        "data": {
+            "gaode_js_key": gaode_key,
+            "gaode_web_key": gaode_web_key,
+            "has_gaode": bool(gaode_key)
+        }
+    })
 
 
 @app.get("/api/health")
