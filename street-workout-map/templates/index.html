@@ -346,30 +346,43 @@
         .popup-container {
             min-width: 360px;
             max-width: 400px;
-            max-height: 520px;
+            max-height: 480px;
             overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .popup-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .popup-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
         }
 
         .popup-header {
-            padding: 18px 18px 14px;
+            padding: 16px 16px 12px;
             border-bottom: 1px solid #f1f5f9;
-            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
             border-radius: 16px 16px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .popup-title {
-            font-size: 17px;
+            font-size: 16px;
             font-weight: 700;
             color: #0f172a;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
         .popup-title svg {
-            width: 26px;
-            height: 26px;
+            width: 24px;
+            height: 24px;
             flex-shrink: 0;
         }
 
@@ -384,21 +397,21 @@
         .popup-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 10px;
+            gap: 5px;
+            margin-top: 8px;
         }
 
         .popup-tag {
-            padding: 4px 10px;
+            padding: 3px 8px;
             background: #f1f5f9;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 11px;
             color: #475569;
             font-weight: 500;
         }
 
         .popup-section {
-            padding: 14px 18px;
+            padding: 12px 16px;
             border-bottom: 1px solid #f1f5f9;
         }
 
@@ -414,11 +427,25 @@
             margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .popup-section-title .icon {
-            font-size: 16px;
+            font-size: 15px;
+        }
+
+        .popup-section-subtitle {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 500;
+            margin: 8px 0 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .popup-section-subtitle:first-child {
+            margin-top: 0;
         }
 
         .stat-grid {
@@ -505,6 +532,193 @@
             border-radius: 8px;
             font-size: 11px;
             font-weight: 500;
+        }
+
+        .facility-group {
+            margin-bottom: 10px;
+        }
+
+        .facility-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .facility-group-title {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .facility-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .facility-item.has {
+            color: #166534;
+            background: #f0fdf4;
+        }
+
+        .facility-item.no {
+            color: #94a3b8;
+            opacity: 0.7;
+        }
+
+        .facility-item .fi-icon {
+            font-size: 14px;
+            flex-shrink: 0;
+            width: 16px;
+            text-align: center;
+        }
+
+        .facility-item .fi-label {
+            flex: 1;
+        }
+
+        .facility-item .fi-value {
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .facility-item.has .fi-value {
+            color: #166534;
+        }
+
+        .people-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .person-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .person-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .person-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .person-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .person-title {
+            font-size: 11px;
+            color: #22c55e;
+            background: #dcfce7;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .person-desc {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 2px;
+            line-height: 1.4;
+        }
+
+        .coach-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+            border-radius: 10px;
+            border: 1px solid #bbf7d0;
+        }
+
+        .coach-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .coach-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .coach-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .coach-rating {
+            font-size: 11px;
+            color: #f59e0b;
+            font-weight: 500;
+        }
+
+        .coach-specialty {
+            font-size: 11px;
+            color: #475569;
+            margin-top: 2px;
+        }
+
+        .coach-meta {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+            font-size: 10px;
+            color: #64748b;
+        }
+
+        .coach-price {
+            color: #f97316;
+            font-weight: 600;
+        }
+
+        .empty-hint {
+            color: #94a3b8;
+            font-size: 12px;
+            text-align: center;
+            padding: 12px 0;
         }
 
         .photo-grid {
@@ -875,6 +1089,9 @@
         let currentMapLayer = 'gaode';
         let attributionControl = null;
         let uniqueIdCounter = 0;
+        let tileErrorCount = { gaode: 0, osm: 0 };
+        const MAX_TILE_ERRORS = 8;
+        let hasAutoFallback = false;
 
         function generateUniqueId() {
             uniqueIdCounter++;
@@ -982,12 +1199,34 @@
 
             gaodeLayer = L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
                 subdomains: ['1', '2', '3', '4'],
-                maxZoom: 18
+                maxZoom: 18,
+                errorTileUrl: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"%3E%3Crect fill="%23f1f5f9" width="256" height="256"/%3E%3Ctext fill="%2394a3b8" font-size="14" x="128" y="128" text-anchor="middle"%3E地图加载中%3C/text%3E%3C/svg%3E'
             });
 
             osmLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
                 subdomains: 'abcd',
-                maxZoom: 19
+                maxZoom: 19,
+                errorTileUrl: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"%3E%3Crect fill="%23f1f5f9" width="256" height="256"/%3E%3Ctext fill="%2394a3b8" font-size="14" x="128" y="128" text-anchor="middle"%3E地图加载中%3C/text%3E%3C/svg%3E'
+            });
+
+            gaodeLayer.on('tileerror', function() {
+                tileErrorCount.gaode++;
+                if (tileErrorCount.gaode >= MAX_TILE_ERRORS && !hasAutoFallback && currentMapLayer === 'gaode') {
+                    hasAutoFallback = true;
+                    console.warn('高德地图瓦片加载失败过多，尝试切换备用图层');
+                    switchMapLayer('osm');
+                    setTimeout(function() { hasAutoFallback = false; }, 5000);
+                }
+            });
+
+            osmLayer.on('tileerror', function() {
+                tileErrorCount.osm++;
+                if (tileErrorCount.osm >= MAX_TILE_ERRORS && !hasAutoFallback && currentMapLayer === 'osm') {
+                    hasAutoFallback = true;
+                    console.warn('OSM地图瓦片加载失败过多，切换到高德地图');
+                    switchMapLayer('gaode');
+                    setTimeout(function() { hasAutoFallback = false; }, 5000);
+                }
             });
 
             gaodeLayer.addTo(map);
@@ -1139,22 +1378,169 @@
         function createPopupContent(location) {
             const heatLevel = getHeatLevel(location.heat_score);
             const conditionClass = getConditionClass(location.equipment_condition);
-            const iconSvg = getDumbbellSVG(location.heat_score, location.is_park, 28);
+            const iconSvg = getDumbbellSVG(location.heat_score, location.is_park, 24);
             
             const facility = location.facility_info || {};
             const amenities = location.amenities || {};
+            const famousPeople = location.famous_people || [];
+            const coaches = location.coaches || [];
+
+            const tagsHtml = location.fitness_tags && location.fitness_tags.length > 0
+                ? location.fitness_tags.slice(0, 5).map(tag => `<span class="popup-tag">${tag}</span>`).join('')
+                : '';
+
+            const facilityHtml = `
+                <div class="facility-group">
+                    <div class="facility-group-title">🏋️ 器械设施</div>
+                    <div class="info-grid" style="grid-template-columns: 1fr 1fr; gap: 6px;">
+                        <div class="facility-item ${facility.has_equipment ? 'has' : 'no'}">
+                            <span class="fi-icon">${facility.has_equipment ? '✓' : '✗'}</span>
+                            <span class="fi-label">健身器材</span>
+                        </div>
+                        <div class="facility-item ${facility.has_shade ? 'has' : 'no'}">
+                            <span class="fi-icon">${facility.has_shade ? '✓' : '✗'}</span>
+                            <span class="fi-label">遮阳设施</span>
+                        </div>
+                        <div class="facility-item ${facility.night_lighting ? 'has' : 'no'}">
+                            <span class="fi-icon">${facility.night_lighting ? '✓' : '✗'}</span>
+                            <span class="fi-label">夜间照明</span>
+                        </div>
+                        <div class="facility-item ${facility.free_access ? 'has' : 'no'}">
+                            <span class="fi-icon">${facility.free_access ? '✓' : '✗'}</span>
+                            <span class="fi-label">免费进入</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="facility-group">
+                    <div class="facility-group-title">📊 场地详情</div>
+                    <div class="info-grid" style="gap: 6px;">
+                        <div class="facility-item has">
+                            <span class="fi-icon">⭐</span>
+                            <span class="fi-label">器材质量</span>
+                            <span class="fi-value">${facility.equipment_quality || '一般'}</span>
+                        </div>
+                        <div class="facility-item has">
+                            <span class="fi-icon">📍</span>
+                            <span class="fi-label">地面类型</span>
+                            <span class="fi-value">${facility.ground_type || '未知'}</span>
+                        </div>
+                        <div class="facility-item ${facility.is_crowded ? 'has' : 'no'}">
+                            <span class="fi-icon">👥</span>
+                            <span class="fi-label">场地占用</span>
+                            <span class="fi-value">${facility.is_crowded ? '人较多' : '人较少'}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="facility-group">
+                    <div class="facility-group-title">👥 锻炼人群</div>
+                    ${facility.age_groups && facility.age_groups.length > 0 
+                        ? `<div class="age-groups" style="gap: 4px;">
+                            ${facility.age_groups.map(age => `<span class="age-tag" style="padding: 3px 8px; font-size: 11px;">${age}</span>`).join('')}
+                           </div>`
+                        : '<div style="color: #94a3b8; font-size: 11px;">未知</div>'}
+                </div>
+                <div class="facility-group" style="margin-bottom: 0;">
+                    <div class="facility-group-title">🕐 高峰时段</div>
+                    ${facility.peak_hours && facility.peak_hours.length > 0
+                        ? `<div class="peak-hours" style="gap: 4px;">
+                            ${facility.peak_hours.map(hour => `<span class="peak-hour-tag" style="padding: 3px 8px; font-size: 11px;">${hour}</span>`).join('')}
+                           </div>`
+                        : '<div style="color: #94a3b8; font-size: 11px;">未知</div>'}
+                </div>
+            `;
+
+            const amenitiesHtml = `
+                <div class="info-grid" style="grid-template-columns: 1fr 1fr; gap: 6px;">
+                    <div class="facility-item ${amenities.has_shower ? 'has' : 'no'}">
+                        <span class="fi-icon">${amenities.has_shower ? '✓' : '✗'}</span>
+                        <span class="fi-label">淋浴</span>
+                    </div>
+                    <div class="facility-item ${amenities.has_locker ? 'has' : 'no'}">
+                        <span class="fi-icon">${amenities.has_locker ? '✓' : '✗'}</span>
+                        <span class="fi-label">存包</span>
+                    </div>
+                    <div class="facility-item ${amenities.has_change_room ? 'has' : 'no'}">
+                        <span class="fi-icon">${amenities.has_change_room ? '✓' : '✗'}</span>
+                        <span class="fi-label">更衣室</span>
+                    </div>
+                    <div class="facility-item ${amenities.has_food ? 'has' : 'no'}">
+                        <span class="fi-icon">${amenities.has_food ? '✓' : '✗'}</span>
+                        <span class="fi-label">餐饮</span>
+                    </div>
+                    <div class="facility-item ${amenities.has_vending_machine ? 'has' : 'no'}">
+                        <span class="fi-icon">${amenities.has_vending_machine ? '✓' : '✗'}</span>
+                        <span class="fi-label">自动售卖</span>
+                    </div>
+                    <div class="facility-item ${amenities.has_water_fountain ? 'has' : 'no'}">
+                        <span class="fi-icon">${amenities.has_water_fountain ? '✓' : '✗'}</span>
+                        <span class="fi-label">直饮水</span>
+                    </div>
+                    <div class="facility-item ${amenities.has_equipment_shop ? 'has' : 'no'}">
+                        <span class="fi-icon">${amenities.has_equipment_shop ? '✓' : '✗'}</span>
+                        <span class="fi-label">装备售卖</span>
+                    </div>
+                    <div class="facility-item ${amenities.nearby_gym ? 'has' : 'no'}">
+                        <span class="fi-icon">${amenities.nearby_gym ? '✓' : '✗'}</span>
+                        <span class="fi-label">附近健身房</span>
+                    </div>
+                </div>
+            `;
+
+            const peopleHtml = famousPeople.length > 0 
+                ? `<div class="people-list">
+                    ${famousPeople.map(person => `
+                        <div class="person-card">
+                            <div class="person-avatar" style="background: ${person.avatar_color || '#22c55e'}">
+                                ${person.name.charAt(0)}
+                            </div>
+                            <div class="person-info">
+                                <div class="person-name">
+                                    ${person.name}
+                                    <span class="person-title">${person.title}</span>
+                                </div>
+                                <div class="person-desc">${person.description}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                   </div>`
+                : '<div class="empty-hint">暂无知名健身达人</div>';
+
+            const coachesHtml = coaches.length > 0
+                ? `<div class="people-list">
+                    ${coaches.map(coach => `
+                        <div class="coach-card">
+                            <div class="coach-avatar">
+                                ${coach.name.charAt(0)}
+                            </div>
+                            <div class="coach-info">
+                                <div class="coach-name">
+                                    ${coach.name}
+                                    <span class="coach-rating">⭐ ${coach.rating}</span>
+                                </div>
+                                <div class="coach-specialty">${coach.specialty}</div>
+                                <div class="coach-meta">
+                                    <span>经验 ${coach.experience}</span>
+                                    <span class="coach-price">${coach.price}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                   </div>`
+                : '<div class="empty-hint">暂无驻场教练</div>';
 
             const photosHtml = location.images && location.images.length > 0 
-                ? location.images.slice(0, 6).map((img, idx) => `
-                    <div class="photo-item" onclick="showImageModal('${img}')">
-                        <img src="${img}" alt="健身照片 ${idx + 1}" loading="lazy" />
-                    </div>
-                `).join('')
-                : '<div style="color: #94a3b8; font-size: 12px; text-align: center; padding: 20px 0;">暂无照片</div>';
+                ? `<div class="photo-grid">
+                    ${location.images.slice(0, 6).map((img, idx) => `
+                        <div class="photo-item" onclick="showImageModal('${img}')">
+                            <img src="${img}" alt="健身照片 ${idx + 1}" loading="lazy" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext fill=%22%2394a3b8%22 font-size=%2212%22 x=%2250%22 y=%2255%22 text-anchor=%22middle%22%3E📷 照片%3C/text%3E%3C/svg%3E'" />
+                        </div>
+                    `).join('')}
+                   </div>`
+                : '<div class="empty-hint">暂无网友实拍照片</div>';
 
             const postsHtml = location.posts && location.posts.length > 0
-                ? `<div class="posts-list">
-                    ${location.posts.map(post => `
+                ? `<div class="posts-list" style="max-height: 120px;">
+                    ${location.posts.slice(0, 3).map(post => `
                         <div class="post-item">
                             <div class="post-title">${post.title}</div>
                             <div class="post-meta">
@@ -1164,50 +1550,26 @@
                         </div>
                     `).join('')}
                    </div>`
-                : '<div style="color: #94a3b8; font-size: 12px; text-align: center;">暂无相关帖子</div>';
-
-            const tagsHtml = location.fitness_tags && location.fitness_tags.length > 0
-                ? location.fitness_tags.map(tag => `<span class="popup-tag">${tag}</span>`).join('')
-                : '';
-
-            const ageGroupsHtml = facility.age_groups && facility.age_groups.length > 0
-                ? `<div class="age-groups">
-                    ${facility.age_groups.map(age => `<span class="age-tag">${age}</span>`).join('')}
-                   </div>`
-                : '<span style="color: #94a3b8; font-size: 12px;">未知</span>';
-
-            const peakHoursHtml = facility.peak_hours && facility.peak_hours.length > 0
-                ? `<div class="peak-hours">
-                    ${facility.peak_hours.map(hour => `<span class="peak-hour-tag">🕐 ${hour}</span>`).join('')}
-                   </div>`
-                : '<span style="color: #94a3b8; font-size: 12px;">未知</span>';
-
-            const crowdedClass = facility.is_crowded ? 'crowded-yes' : 'crowded-no';
-            const crowdedText = facility.is_crowded ? '人较多' : '人较少';
-            const crowdedIcon = facility.is_crowded ? '👥' : '👤';
+                : '<div class="empty-hint">暂无相关帖子</div>';
 
             return `
                 <div class="popup-container">
                     <div class="popup-header">
                         <div class="popup-title">
                             ${iconSvg}
-                            <div style="flex: 1;">
-                                ${location.name}
-                                <span class="heat-badge ${getHeatClass(heatLevel)}" style="margin-left: 8px;">${getHeatLabel(heatLevel)}</span>
+                            <div style="flex: 1; min-width: 0;">
+                                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${location.name}</span>
                             </div>
+                            <span class="heat-badge ${getHeatClass(heatLevel)}">${getHeatLabel(heatLevel)}</span>
                         </div>
                         <div class="popup-addr">📍 ${location.address || '地址未知'}</div>
                         <div class="popup-tags">
                             ${tagsHtml}
                             <span class="condition-badge ${conditionClass}">器材${location.equipment_condition_label}</span>
-                            <span class="crowded-badge ${crowdedClass}">${crowdedIcon} ${crowdedText}</span>
                         </div>
                     </div>
 
                     <div class="popup-section">
-                        <div class="popup-section-title">
-                            <span class="icon">📊</span> 热度数据
-                        </div>
                         <div class="stat-grid">
                             <div class="stat-item">
                                 <div class="stat-item-value">${location.mention_count}</div>
@@ -1232,81 +1594,38 @@
                         <div class="popup-section-title">
                             <span class="icon">🏟️</span> 场地信息
                         </div>
-                        <div class="info-grid" style="margin-bottom: 10px;">
-                            <div class="info-item ${facility.has_equipment ? 'has' : 'no'}">
-                                <span class="status-icon">${facility.has_equipment ? '✅' : '❌'}</span>
-                                <span>健身器材</span>
-                            </div>
-                            <div class="info-item ${facility.has_shade ? 'has' : 'no'}">
-                                <span class="status-icon">${facility.has_shade ? '✅' : '❌'}</span>
-                                <span>遮阳设施</span>
-                            </div>
-                            <div class="info-item ${facility.night_lighting ? 'has' : 'no'}">
-                                <span class="status-icon">${facility.night_lighting ? '✅' : '❌'}</span>
-                                <span>夜间照明</span>
-                            </div>
-                            <div class="info-item ${facility.free_access ? 'has' : 'no'}">
-                                <span class="status-icon">${facility.free_access ? '✅' : '❌'}</span>
-                                <span>免费进入</span>
-                            </div>
-                        </div>
-                        <div style="margin-bottom: 10px;">
-                            <div style="font-size: 11px; color: #94a3b8; margin-bottom: 6px; font-weight: 500;">锻炼人群</div>
-                            ${ageGroupsHtml}
-                        </div>
-                        <div>
-                            <div style="font-size: 11px; color: #94a3b8; margin-bottom: 6px; font-weight: 500;">高峰时段</div>
-                            ${peakHoursHtml}
-                        </div>
+                        ${facilityHtml}
                     </div>
 
                     <div class="popup-section">
                         <div class="popup-section-title">
                             <span class="icon">🎒</span> 补给设施
                         </div>
-                        <div class="info-grid">
-                            <div class="info-item ${amenities.has_shower ? 'has' : 'no'}">
-                                <span class="status-icon">${amenities.has_shower ? '✅' : '❌'}</span>
-                                <span>淋浴</span>
-                            </div>
-                            <div class="info-item ${amenities.has_locker ? 'has' : 'no'}">
-                                <span class="status-icon">${amenities.has_locker ? '✅' : '❌'}</span>
-                                <span>存包</span>
-                            </div>
-                            <div class="info-item ${amenities.has_change_room ? 'has' : 'no'}">
-                                <span class="status-icon">${amenities.has_change_room ? '✅' : '❌'}</span>
-                                <span>更衣室</span>
-                            </div>
-                            <div class="info-item ${amenities.has_food ? 'has' : 'no'}">
-                                <span class="status-icon">${amenities.has_food ? '✅' : '❌'}</span>
-                                <span>餐饮</span>
-                            </div>
-                            <div class="info-item ${amenities.has_vending_machine ? 'has' : 'no'}">
-                                <span class="status-icon">${amenities.has_vending_machine ? '✅' : '❌'}</span>
-                                <span>自动售卖</span>
-                            </div>
-                            <div class="info-item ${amenities.has_water_fountain ? 'has' : 'no'}">
-                                <span class="status-icon">${amenities.has_water_fountain ? '✅' : '❌'}</span>
-                                <span>直饮水</span>
-                            </div>
-                            <div class="info-item ${amenities.has_equipment_shop ? 'has' : 'no'}">
-                                <span class="status-icon">${amenities.has_equipment_shop ? '✅' : '❌'}</span>
-                                <span>装备售卖</span>
-                            </div>
-                            <div class="info-item ${amenities.nearby_gym ? 'has' : 'no'}">
-                                <span class="status-icon">${amenities.nearby_gym ? '✅' : '❌'}</span>
-                                <span>附近健身房</span>
-                            </div>
-                        </div>
+                        ${amenitiesHtml}
                     </div>
+
+                    ${famousPeople.length > 0 || coaches.length > 0 ? `
+                    <div class="popup-section">
+                        ${famousPeople.length > 0 ? `
+                        <div class="popup-section-subtitle">
+                            <span>⭐</span> 代表人物
+                        </div>
+                        ${peopleHtml}
+                        ` : ''}
+                        ${coaches.length > 0 ? `
+                        <div class="popup-section-subtitle" style="${famousPeople.length > 0 ? 'margin-top: 10px;' : ''}">
+                            <span>🏆</span> 驻场教练
+                        </div>
+                        ${coachesHtml}
+                        ` : ''}
+                    </div>
+                    ` : ''}
 
                     <div class="popup-section">
                         <div class="popup-section-title">
                             <span class="icon">📷</span> 网友实拍
                         </div>
-                        <div class="photo-grid">
-                            ${photosHtml}
-                        </div>
+                        ${photosHtml}
                     </div>
 
                     <div class="popup-section">

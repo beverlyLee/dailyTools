@@ -74,6 +74,24 @@
       "has_water_fountain": false,
       "nearby_gym": true
     },
+    "famous_people": [
+      {
+        "name": "魔都跑酷团",
+        "title": "跑酷团队",
+        "description": "上海知名跑酷团体，每周日下午集合训练",
+        "avatar_color": "#9b59b6"
+      }
+    ],
+    "coaches": [
+      {
+        "name": "陈教练",
+        "specialty": "跑酷/极限健身",
+        "experience": "6年",
+        "price": "100元/小时",
+        "contact": "需提前预约",
+        "rating": 4.9
+      }
+    ],
     "rating": 4.9
   },
   {
@@ -166,6 +184,38 @@
       "has_water_fountain": true,
       "nearby_gym": true
     },
+    "famous_people": [
+      {
+        "name": "大强",
+        "title": "街健达人",
+        "description": "单杠世界纪录保持者，每周六上午在此训练",
+        "avatar_color": "#e74c3c"
+      },
+      {
+        "name": "王教练",
+        "title": "退役运动员",
+        "description": "前省队体操运动员，经常来此指导爱好者",
+        "avatar_color": "#3498db"
+      }
+    ],
+    "coaches": [
+      {
+        "name": "李教练",
+        "specialty": "街头健身/自重训练",
+        "experience": "5年",
+        "price": "80元/小时",
+        "contact": "微信预约",
+        "rating": 4.8
+      },
+      {
+        "name": "小张老师",
+        "specialty": "中老年健身/康复",
+        "experience": "8年",
+        "price": "60元/小时",
+        "contact": "周末全天",
+        "rating": 4.6
+      }
+    ],
     "rating": 4.8
   },
   {
@@ -235,6 +285,32 @@
       "has_water_fountain": true,
       "nearby_gym": true
     },
+    "famous_people": [
+      {
+        "name": "太极张师傅",
+        "title": "太极拳传承人",
+        "description": "杨氏太极拳第六代传人，每天清晨带20+人练太极",
+        "avatar_color": "#27ae60"
+      }
+    ],
+    "coaches": [
+      {
+        "name": "张师傅",
+        "specialty": "太极拳/八段锦",
+        "experience": "30年",
+        "price": "免费带练",
+        "contact": "早6点-8点",
+        "rating": 5.0
+      },
+      {
+        "name": "刘阿姨",
+        "specialty": "广场舞/健身操",
+        "experience": "10年",
+        "price": "免费",
+        "contact": "晚7点-8点",
+        "rating": 4.7
+      }
+    ],
     "rating": 4.8
   },
   {
@@ -301,6 +377,8 @@
       "has_water_fountain": true,
       "nearby_gym": true
     },
+    "famous_people": [],
+    "coaches": [],
     "rating": 4.6
   },
   {
@@ -368,6 +446,38 @@
       "has_water_fountain": true,
       "nearby_gym": true
     },
+    "famous_people": [
+      {
+        "name": "阿杰",
+        "title": "滑板博主",
+        "description": "B站10万粉滑板UP主，常在此拍视频",
+        "avatar_color": "#f39c12"
+      },
+      {
+        "name": "跑者小王",
+        "title": "全马300选手",
+        "description": "滨江跑团团长，每周三夜跑带队",
+        "avatar_color": "#e67e22"
+      }
+    ],
+    "coaches": [
+      {
+        "name": "王教练",
+        "specialty": "跑步/马拉松",
+        "experience": "7年",
+        "price": "150元/小时",
+        "contact": "周末上午",
+        "rating": 4.8
+      },
+      {
+        "name": "滑板小林",
+        "specialty": "滑板教学",
+        "experience": "4年",
+        "price": "120元/小时",
+        "contact": "下午时段",
+        "rating": 4.5
+      }
+    ],
     "rating": 4.7
   },
   {
@@ -432,6 +542,8 @@
       "has_water_fountain": true,
       "nearby_gym": true
     },
+    "famous_people": [],
+    "coaches": [],
     "rating": 4.6
   },
   {
@@ -498,6 +610,8 @@
       "has_water_fountain": true,
       "nearby_gym": false
     },
+    "famous_people": [],
+    "coaches": [],
     "rating": 4.4
   },
   {
@@ -564,6 +678,8 @@
       "has_water_fountain": true,
       "nearby_gym": true
     },
+    "famous_people": [],
+    "coaches": [],
     "rating": 4.5
   },
   {
@@ -629,6 +745,8 @@
       "has_water_fountain": true,
       "nearby_gym": false
     },
+    "famous_people": [],
+    "coaches": [],
     "rating": 4.3
   },
   {
@@ -693,6 +811,8 @@
       "has_water_fountain": false,
       "nearby_gym": true
     },
+    "famous_people": [],
+    "coaches": [],
     "rating": 3.2
   },
   {
@@ -757,6 +877,8 @@
       "has_water_fountain": false,
       "nearby_gym": false
     },
+    "famous_people": [],
+    "coaches": [],
     "rating": 2.5
   },
   {
@@ -819,6 +941,8 @@
       "has_water_fountain": false,
       "nearby_gym": false
     },
+    "famous_people": [],
+    "coaches": [],
     "rating": 1.8
   }
 ]

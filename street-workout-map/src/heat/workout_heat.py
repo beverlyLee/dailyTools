@@ -125,6 +125,8 @@ class WorkoutHeatCalculator:
                 "district": poi_info.get("district", ""),
                 "facility_info": poi_info.get("facility_info", {}),
                 "amenities": poi_info.get("amenities", {}),
+                "famous_people": poi_info.get("famous_people", []),
+                "coaches": poi_info.get("coaches", []),
                 "rating": poi_info.get("rating", 0)
             }
             results.append(result)

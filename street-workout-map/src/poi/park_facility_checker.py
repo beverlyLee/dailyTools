@@ -478,27 +478,26 @@ class ParkFacilityChecker:
             return self._api_verify(location_name, latitude, longitude)
 
     def _mock_verify(self, location_name, latitude=None, longitude=None):
+        poi = None
+        matched_by = "name"
+        
         if location_name in MOCK_POI_DATA:
             poi = MOCK_POI_DATA[location_name]
+        elif latitude and longitude:
+            poi = self._find_nearest_poi(latitude, longitude)
+            matched_by = "distance"
+        
+        if poi:
+            poi = self._enrich_poi_data(poi)
             is_park = poi["type"] == "park"
             has_fitness = poi.get("has_fitness_equipment", False)
             return {
                 "valid": True,
                 "is_park": is_park,
                 "has_fitness_equipment": has_fitness,
-                "poi_info": poi
+                "poi_info": poi,
+                "matched_by": matched_by
             }
-        
-        if latitude and longitude:
-            nearest = self._find_nearest_poi(latitude, longitude)
-            if nearest:
-                return {
-                    "valid": True,
-                    "is_park": nearest["type"] == "park",
-                    "has_fitness_equipment": nearest.get("has_fitness_equipment", False),
-                    "poi_info": nearest,
-                    "matched_by": "distance"
-                }
         
         return {
             "valid": False,
@@ -538,6 +537,95 @@ class ParkFacilityChecker:
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
         
         return R * c
+
+    def _enrich_poi_data(self, poi):
+        poi_id = poi.get("id", "")
+        poi_name = poi.get("name", "")
+        
+        extra_data = {
+            "famous_people": [],
+            "coaches": [],
+            "facility_info": poi.get("facility_info", {}),
+            "amenities": poi.get("amenities", {})
+        }
+        
+        if poi_name == "世纪公园":
+            extra_data["famous_people"] = [
+                {"name": "大强", "title": "街健达人", "description": "单杠世界纪录保持者，每周六上午在此训练", "avatar_color": "#e74c3c"},
+                {"name": "王教练", "title": "退役运动员", "description": "前省队体操运动员，经常来此指导爱好者", "avatar_color": "#3498db"}
+            ]
+            extra_data["coaches"] = [
+                {"name": "李教练", "specialty": "街头健身/自重训练", "experience": "5年", "price": "80元/小时", "contact": "微信预约", "rating": 4.8},
+                {"name": "小张老师", "specialty": "中老年健身/康复", "experience": "8年", "price": "60元/小时", "contact": "周末全天", "rating": 4.6}
+            ]
+        elif poi_name == "人民广场":
+            extra_data["famous_people"] = [
+                {"name": "魔都跑酷团", "title": "跑酷团队", "description": "上海知名跑酷团体，每周日下午集合训练", "avatar_color": "#9b59b6"}
+            ]
+            extra_data["coaches"] = [
+                {"name": "陈教练", "specialty": "跑酷/极限健身", "experience": "6年", "price": "100元/小时", "contact": "需提前预约", "rating": 4.9}
+            ]
+        elif poi_name == "鲁迅公园":
+            extra_data["famous_people"] = [
+                {"name": "太极张师傅", "title": "太极拳传承人", "description": "杨氏太极拳第六代传人，每天清晨带20+人练太极", "avatar_color": "#27ae60"}
+            ]
+            extra_data["coaches"] = [
+                {"name": "张师傅", "specialty": "太极拳/八段锦", "experience": "30年", "price": "免费带练", "contact": "早6点-8点", "rating": 5.0},
+                {"name": "刘阿姨", "specialty": "广场舞/健身操", "experience": "10年", "price": "免费", "contact": "晚7点-8点", "rating": 4.7}
+            ]
+        elif poi_name == "徐汇滨江公园":
+            extra_data["famous_people"] = [
+                {"name": "阿杰", "title": "滑板博主", "description": "B站10万粉滑板UP主，常在此拍视频", "avatar_color": "#f39c12"},
+                {"name": "跑者小王", "title": "全马300选手", "description": "滨江跑团团长，每周三夜跑带队", "avatar_color": "#e67e22"}
+            ]
+            extra_data["coaches"] = [
+                {"name": "王教练", "specialty": "跑步/马拉松", "experience": "7年", "price": "150元/小时", "contact": "周末上午", "rating": 4.8},
+                {"name": "滑板小林", "specialty": "滑板教学", "experience": "4年", "price": "120元/小时", "contact": "下午时段", "rating": 4.5}
+            ]
+        elif poi_name == "长风公园":
+            extra_data["famous_people"] = []
+            extra_data["coaches"] = [
+                {"name": "赵教练", "specialty": "户外健身/亲子运动", "experience": "6年", "price": "90元/小时", "contact": "周末全天", "rating": 4.6}
+            ]
+        elif poi_name == "静安公园":
+            extra_data["famous_people"] = [
+                {"name": "瑜伽Lisa姐", "title": "瑜伽导师", "description": "印度认证瑜伽老师，偶尔在此办户外瑜伽课", "avatar_color": "#1abc9c"}
+            ]
+            extra_data["coaches"] = [
+                {"name": "Lisa老师", "specialty": "户外瑜伽/冥想", "experience": "12年", "price": "200元/小时", "contact": "预约制", "rating": 4.9}
+            ]
+        
+        if not extra_data["facility_info"]:
+            extra_data["facility_info"] = {
+                "has_equipment": poi.get("has_fitness_equipment", False),
+                "equipment_quality": "一般",
+                "age_groups": ["青年", "中年", "老年"],
+                "peak_hours": ["06:00-08:00", "18:00-20:00"],
+                "is_crowded": False,
+                "has_shade": True,
+                "ground_type": "水泥地面",
+                "night_lighting": False,
+                "free_access": True
+            }
+        
+        if not extra_data["amenities"]:
+            extra_data["amenities"] = {
+                "has_shower": False,
+                "has_locker": False,
+                "has_change_room": False,
+                "has_food": False,
+                "has_equipment_shop": False,
+                "has_vending_machine": False,
+                "has_water_fountain": False,
+                "nearby_gym": False
+            }
+        
+        poi["famous_people"] = extra_data["famous_people"]
+        poi["coaches"] = extra_data["coaches"]
+        poi["facility_info"] = extra_data["facility_info"]
+        poi["amenities"] = extra_data["amenities"]
+        
+        return poi
 
     def _api_verify(self, location_name, latitude=None, longitude=None):
         print("提示：高德POI API需要配置有效的API Key")
