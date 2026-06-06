@@ -42,7 +42,7 @@ class HighwayStatusSpider:
 
     def fetch_multi_radius_traffic(self, radii: List[int] = None) -> List[Dict[str, Any]]:
         if radii is None:
-            radii = [5000, 10000, 20000, 30000, 50000]
+            radii = [5000, 10000, 20000, 30000, 50000, 70000, 100000]
         
         all_segments = []
         for radius in radii:

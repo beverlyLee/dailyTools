@@ -63,31 +63,32 @@ def generate_mock_traffic_data(flow_direction: str = "outbound") -> List[Dict[st
     
     segments = []
     
-    directions = [10, 45, 90, 135, 180, 225, 270, 315]
+    directions = [0, 20, 45, 70, 90, 110, 135, 160, 180, 200, 225, 250, 270, 290, 315, 340]
     
     if flow_direction == "inbound":
         directions = [(d + 180) % 360 for d in directions]
     
-    flow_weights = [30, 25, 15, 10, 8, 5, 4, 3]
+    flow_weights = [60, 30, 70, 35, 45, 20, 40, 25, 30, 22, 45, 20, 35, 25, 55, 28]
     
     for i, base_dir in enumerate(directions):
-        for j in range(flow_weights[i]):
+        num_segments = flow_weights[i]
+        for j in range(num_segments):
             direction = base_dir + random.uniform(-15, 15)
             angle_rad = math.radians(direction)
             
-            dist = random.uniform(5, 30)
+            dist = random.uniform(15, 90)
             start_lng = CITY_CENTER_LNG + (dist / 111.32) * math.cos(angle_rad)
             start_lat = CITY_CENTER_LAT + (dist / 111.32) * math.sin(angle_rad)
             
-            end_dist = dist + random.uniform(2, 5)
+            end_dist = dist + random.uniform(5, 15)
             end_lng = CITY_CENTER_LNG + (end_dist / 111.32) * math.cos(angle_rad)
             end_lat = CITY_CENTER_LAT + (end_dist / 111.32) * math.sin(angle_rad)
             
-            congestion = random.choices([2, 3, 4], weights=[0.3, 0.4, 0.3])[0]
+            congestion = random.choices([2, 3, 4], weights=[0.25, 0.4, 0.35])[0]
             speed = {2: 40, 3: 25, 4: 15}[congestion] + random.uniform(-5, 5)
             
             segments.append({
-                "name": f"高速{i+1}",
+                "name": f"高速{i+1}-{j+1}",
                 "start_lng": start_lng,
                 "start_lat": start_lat,
                 "end_lng": end_lng,

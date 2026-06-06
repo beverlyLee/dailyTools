@@ -14,13 +14,21 @@ CITY_CENTER_LAT = float(os.getenv("CITY_CENTER_LAT", "39.90923"))
 
 DIRECTION_NAMES = {
     0: "北",
+    22.5: "北偏东",
     45: "东北",
+    67.5: "东偏北",
     90: "东",
+    112.5: "东偏南",
     135: "东南",
+    157.5: "南偏东",
     180: "南",
+    202.5: "南偏西",
     225: "西南",
+    247.5: "西偏南",
     270: "西",
-    315: "西北"
+    292.5: "西偏北",
+    315: "西北",
+    337.5: "北偏西"
 }
 
 
@@ -31,7 +39,7 @@ class FlowDirectionAnalyzer:
         self.direction_clusters: List[Dict[str, Any]] = []
 
     def analyze_traffic_directions(self, segments: List[Dict[str, Any]], 
-                                    n_clusters: int = 8) -> List[Dict[str, Any]]:
+                                    n_clusters: int = 12) -> List[Dict[str, Any]]:
         if not segments:
             return []
 
@@ -114,7 +122,7 @@ class FlowDirectionAnalyzer:
             "name": best_segment.get("name", "")
         }
 
-    def get_radial_lines(self, max_radius_km: float = 50) -> List[Dict[str, Any]]:
+    def get_radial_lines(self, max_radius_km: float = 80) -> List[Dict[str, Any]]:
         radial_lines = []
         
         for cluster in self.direction_clusters:
