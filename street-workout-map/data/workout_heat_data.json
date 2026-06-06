@@ -1,0 +1,480 @@
+[
+  {
+    "id": "poi_002",
+    "name": "人民广场",
+    "latitude": 31.2304,
+    "longitude": 121.4737,
+    "address": "上海市黄浦区人民大道120号",
+    "type": "公园广场",
+    "is_park": true,
+    "has_fitness_equipment": true,
+    "fitness_tags": [
+      "单杠",
+      "双杠",
+      "健身角"
+    ],
+    "equipment_count": 8,
+    "equipment_condition": "excellent",
+    "equipment_condition_label": "崭新",
+    "mention_count": 2,
+    "total_likes": 9090,
+    "heat_score": 0.61,
+    "heat_level": "高热度",
+    "posts": [
+      {
+        "title": "人民广场街健圣地",
+        "author": "街健爱好者",
+        "likes": 3420,
+        "images": [
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=elderly%20man%20doing%20gymnastics%20on%20horizontal%20bar%20public%20square&image_size=square_hd"
+        ],
+        "content": "人民广场的健身角真的是卧虎藏龙，大爷们的单杠大回环看呆了！"
+      },
+      {
+        "title": "公园锻炼的大爷们",
+        "author": "青年健身记",
+        "likes": 5670,
+        "images": [
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=strong%20elderly%20chinese%20man%20pull%20up%20park%20impressive&image_size=square_hd"
+        ],
+        "content": "人民广场的健身大爷真的太强了，80岁还能做引体向上，我一个年轻人自愧不如！"
+      }
+    ],
+    "images": [
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=elderly%20man%20doing%20gymnastics%20on%20horizontal%20bar%20public%20square&image_size=square_hd",
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=strong%20elderly%20chinese%20man%20pull%20up%20park%20impressive&image_size=square_hd"
+    ],
+    "district": "黄浦区"
+  },
+  {
+    "id": "poi_001",
+    "name": "世纪公园",
+    "latitude": 31.2253,
+    "longitude": 121.5564,
+    "address": "上海市浦东新区锦绣路1001号",
+    "type": "公园",
+    "is_park": true,
+    "has_fitness_equipment": true,
+    "fitness_tags": [
+      "单杠",
+      "双杠",
+      "跑步机",
+      "健身步道",
+      "太空漫步机"
+    ],
+    "equipment_count": 15,
+    "equipment_condition": "good",
+    "equipment_condition_label": "良好",
+    "mention_count": 3,
+    "total_likes": 6494,
+    "heat_score": 0.57,
+    "heat_level": "中等热度",
+    "posts": [
+      {
+        "title": "世纪公园晨练打卡",
+        "author": "健身小王",
+        "likes": 1256,
+        "images": [
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=fitness%20man%20doing%20pull%20ups%20in%20park%20morning%20sunlight&image_size=square_hd",
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=outdoor%20gym%20equipment%20in%20chinese%20park&image_size=square_hd"
+        ],
+        "content": "每天早上六点半，世纪公园的单杠区总是挤满了健身达人！今天终于解锁了引体向上10个！💪"
+      },
+      {
+        "title": "世纪公园晨跑打卡",
+        "author": "晨跑达人",
+        "likes": 678,
+        "images": [
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=morning%20jogging%20path%20park%20china&image_size=square_hd"
+        ],
+        "content": "世纪公园3公里跑步路线，沿途有好几个健身器材点，跑完可以练练上肢。"
+      },
+      {
+        "title": "世纪公园街头健身聚会",
+        "author": "街头健身联盟",
+        "likes": 4560,
+        "images": [
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=group%20of%20street%20workout%20athletes%20gathering%20park&image_size=square_hd",
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=outdoor%20calisthenics%20competition%20park%20china&image_size=square_hd"
+        ],
+        "content": "周末世纪公园的街健聚会太热闹了，各路大神都来了，学到很多！"
+      }
+    ],
+    "images": [
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=fitness%20man%20doing%20pull%20ups%20in%20park%20morning%20sunlight&image_size=square_hd",
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=outdoor%20gym%20equipment%20in%20chinese%20park&image_size=square_hd",
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=morning%20jogging%20path%20park%20china&image_size=square_hd",
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=group%20of%20street%20workout%20athletes%20gathering%20park&image_size=square_hd",
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=outdoor%20calisthenics%20competition%20park%20china&image_size=square_hd"
+    ],
+    "district": "浦东新区"
+  },
+  {
+    "id": "poi_007",
+    "name": "鲁迅公园",
+    "latitude": 31.2639,
+    "longitude": 121.481,
+    "address": "上海市虹口区四川北路2288号",
+    "type": "公园",
+    "is_park": true,
+    "has_fitness_equipment": true,
+    "fitness_tags": [
+      "健身步道",
+      "单杠",
+      "太极区",
+      "公共健身区"
+    ],
+    "equipment_count": 14,
+    "equipment_condition": "excellent",
+    "equipment_condition_label": "崭新",
+    "mention_count": 1,
+    "total_likes": 1890,
+    "heat_score": 0.39,
+    "heat_level": "低热度",
+    "posts": [
+      {
+        "title": "鲁迅公园晨练",
+        "author": "健康生活家",
+        "likes": 1890,
+        "images": [
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=morning%20exercise%20park%20china%20tai%20chi%20fitness&image_size=square_hd"
+        ],
+        "content": "鲁迅公园的晨练氛围太好了，有打太极的，有练单杠的，还有跑步的！"
+      }
+    ],
+    "images": [
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=morning%20exercise%20park%20china%20tai%20chi%20fitness&image_size=square_hd"
+    ],
+    "district": "虹口区"
+  },
+  {
+    "id": "poi_004",
+    "name": "中山公园",
+    "latitude": 31.2165,
+    "longitude": 121.4173,
+    "address": "上海市长宁区长宁路780号",
+    "type": "公园",
+    "is_park": true,
+    "has_fitness_equipment": true,
+    "fitness_tags": [
+      "双杠",
+      "单杠",
+      "健身器材区"
+    ],
+    "equipment_count": 10,
+    "equipment_condition": "good",
+    "equipment_condition_label": "良好",
+    "mention_count": 1,
+    "total_likes": 2100,
+    "heat_score": 0.33,
+    "heat_level": "低热度",
+    "posts": [
+      {
+        "title": "中山公园双杠区",
+        "author": "街健阿凯",
+        "likes": 2100,
+        "images": [
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=man%20doing%20planche%20on%20parallel%20bars%20park&image_size=square_hd"
+        ],
+        "content": "中山公园的双杠区每天都有训练，很多街健大神在这里练俄式挺身。"
+      }
+    ],
+    "images": [
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=man%20doing%20planche%20on%20parallel%20bars%20park&image_size=square_hd"
+    ],
+    "district": "长宁区"
+  },
+  {
+    "id": "poi_003",
+    "name": "徐汇滨江公园",
+    "latitude": 31.1802,
+    "longitude": 121.466,
+    "address": "上海市徐汇区龙腾大道",
+    "type": "公园",
+    "is_park": true,
+    "has_fitness_equipment": true,
+    "fitness_tags": [
+      "健身步道",
+      "拉伸器材",
+      "公共健身区"
+    ],
+    "equipment_count": 12,
+    "equipment_condition": "good",
+    "equipment_condition_label": "良好",
+    "mention_count": 1,
+    "total_likes": 890,
+    "heat_score": 0.31,
+    "heat_level": "低热度",
+    "posts": [
+      {
+        "title": "徐汇滨江跑步+器械",
+        "author": "跑步的鱼",
+        "likes": 890,
+        "images": [
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=riverside%20fitness%20trail%20shanghai%20morning%20joggers&image_size=square_hd",
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=outdoor%20fitness%20equipment%20riverside%20park&image_size=square_hd"
+        ],
+        "content": "徐汇滨江的健身步道太棒了，跑完步还能用公共器械拉伸一下～"
+      }
+    ],
+    "images": [
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=riverside%20fitness%20trail%20shanghai%20morning%20joggers&image_size=square_hd",
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=outdoor%20fitness%20equipment%20riverside%20park&image_size=square_hd"
+    ],
+    "district": "徐汇区"
+  },
+  {
+    "id": "poi_012",
+    "name": "延中绿地",
+    "latitude": 31.228,
+    "longitude": 121.465,
+    "address": "上海市黄浦区延安中路",
+    "type": "城市绿地",
+    "is_park": true,
+    "has_fitness_equipment": true,
+    "fitness_tags": [
+      "健身区",
+      "公共健身器材"
+    ],
+    "equipment_count": 6,
+    "equipment_condition": "excellent",
+    "equipment_condition_label": "崭新",
+    "mention_count": 1,
+    "total_likes": 567,
+    "heat_score": 0.3,
+    "heat_level": "低热度",
+    "posts": [
+      {
+        "title": "延中绿地健身区",
+        "author": "午休健身党",
+        "likes": 567,
+        "images": [
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20urban%20green%20space%20fitness%20area%20office%20workers&image_size=square_hd"
+        ],
+        "content": "市中心的延中绿地居然有这么棒的健身区，上班族午休可以来练练！"
+      }
+    ],
+    "images": [
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20urban%20green%20space%20fitness%20area%20office%20workers&image_size=square_hd"
+    ],
+    "district": "黄浦区"
+  },
+  {
+    "id": "poi_009",
+    "name": "和平公园",
+    "latitude": 31.252,
+    "longitude": 121.502,
+    "address": "上海市虹口区大连路1131号",
+    "type": "公园",
+    "is_park": true,
+    "has_fitness_equipment": true,
+    "fitness_tags": [
+      "健身角",
+      "单杠",
+      "健身器材区"
+    ],
+    "equipment_count": 9,
+    "equipment_condition": "good",
+    "equipment_condition_label": "良好",
+    "mention_count": 1,
+    "total_likes": 789,
+    "heat_score": 0.28,
+    "heat_level": "低热度",
+    "posts": [
+      {
+        "title": "和平公园的健身角",
+        "author": "健身打卡",
+        "likes": 789,
+        "images": [
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=crowded%20outdoor%20gym%20park%20china%20afternoon&image_size=square_hd"
+        ],
+        "content": "和平公园的健身角器械挺全的，就是人有点多，高峰期要等位置。"
+      }
+    ],
+    "images": [
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=crowded%20outdoor%20gym%20park%20china%20afternoon&image_size=square_hd"
+    ],
+    "district": "虹口区"
+  },
+  {
+    "id": "poi_011",
+    "name": "复兴公园",
+    "latitude": 31.21,
+    "longitude": 121.468,
+    "address": "上海市黄浦区雁荡路105号",
+    "type": "公园",
+    "is_park": true,
+    "has_fitness_equipment": true,
+    "fitness_tags": [
+      "单杠",
+      "健身区",
+      "晨练区"
+    ],
+    "equipment_count": 7,
+    "equipment_condition": "good",
+    "equipment_condition_label": "良好",
+    "mention_count": 1,
+    "total_likes": 1234,
+    "heat_score": 0.28,
+    "heat_level": "低热度",
+    "posts": [
+      {
+        "title": "复兴公园晨练",
+        "author": "城市漫步",
+        "likes": 1234,
+        "images": [
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=french%20style%20park%20shanghai%20morning%20exercise&image_size=square_hd"
+        ],
+        "content": "复兴公园的法式风格配上晨练的人们，别有一番风味。单杠区有几个大佬。"
+      }
+    ],
+    "images": [
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=french%20style%20park%20shanghai%20morning%20exercise&image_size=square_hd"
+    ],
+    "district": "黄浦区"
+  },
+  {
+    "id": "poi_006",
+    "name": "闸北公园",
+    "latitude": 31.2638,
+    "longitude": 121.469,
+    "address": "上海市静安区共和新路1555号",
+    "type": "公园",
+    "is_park": true,
+    "has_fitness_equipment": true,
+    "fitness_tags": [
+      "单杠",
+      "健身器材区"
+    ],
+    "equipment_count": 8,
+    "equipment_condition": "good",
+    "equipment_condition_label": "良好",
+    "mention_count": 1,
+    "total_likes": 543,
+    "heat_score": 0.27,
+    "heat_level": "低热度",
+    "posts": [
+      {
+        "title": "闸北公园的单杠",
+        "author": "背部训练日",
+        "likes": 543,
+        "images": [
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=outdoor%20pull%20up%20bar%20chinese%20park%20muscular%20man&image_size=square_hd"
+        ],
+        "content": "闸北公园的单杠高度正合适，今天练了背，感觉泵感十足！"
+      }
+    ],
+    "images": [
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=outdoor%20pull%20up%20bar%20chinese%20park%20muscular%20man&image_size=square_hd"
+    ],
+    "district": "静安区"
+  },
+  {
+    "id": "poi_008",
+    "name": "曹杨新村",
+    "latitude": 31.244,
+    "longitude": 121.412,
+    "address": "上海市普陀区曹杨路",
+    "type": "住宅小区",
+    "is_park": false,
+    "has_fitness_equipment": true,
+    "fitness_tags": [
+      "小区健身点",
+      "健身器材"
+    ],
+    "equipment_count": 6,
+    "equipment_condition": "fair",
+    "equipment_condition_label": "一般",
+    "mention_count": 1,
+    "total_likes": 234,
+    "heat_score": 0.19,
+    "heat_level": "极低热度",
+    "posts": [
+      {
+        "title": "小区健身点打卡",
+        "author": "上班族健身",
+        "likes": 234,
+        "images": [
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=small%20community%20fitness%20area%20residential%20china&image_size=square_hd"
+        ],
+        "content": "下班回家先在小区健身点练20分钟，虽然器械不多但方便。"
+      }
+    ],
+    "images": [
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=small%20community%20fitness%20area%20residential%20china&image_size=square_hd"
+    ],
+    "district": "普陀区"
+  },
+  {
+    "id": "poi_005",
+    "name": "长风二村小区",
+    "latitude": 31.2189,
+    "longitude": 121.4056,
+    "address": "上海市普陀区怒江路",
+    "type": "住宅小区",
+    "is_park": false,
+    "has_fitness_equipment": true,
+    "fitness_tags": [
+      "健身器材",
+      "小区健身点"
+    ],
+    "equipment_count": 5,
+    "equipment_condition": "poor",
+    "equipment_condition_label": "老旧",
+    "mention_count": 1,
+    "total_likes": 156,
+    "heat_score": 0.14,
+    "heat_level": "极低热度",
+    "posts": [
+      {
+        "title": "老旧小区的健身器材",
+        "author": "健身吐槽君",
+        "likes": 156,
+        "images": [
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=old%20rusty%20outdoor%20fitness%20equipment%20old%20residential%20area&image_size=square_hd"
+        ],
+        "content": "我们小区的健身器材都快锈了，没人维护，好羡慕那些新小区啊…"
+      }
+    ],
+    "images": [
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=old%20rusty%20outdoor%20fitness%20equipment%20old%20residential%20area&image_size=square_hd"
+    ],
+    "district": "普陀区"
+  },
+  {
+    "id": "poi_010",
+    "name": "宜川五村",
+    "latitude": 31.258,
+    "longitude": 121.448,
+    "address": "上海市普陀区宜川路",
+    "type": "老旧小区",
+    "is_park": false,
+    "has_fitness_equipment": true,
+    "fitness_tags": [
+      "健身器材",
+      "损坏"
+    ],
+    "equipment_count": 4,
+    "equipment_condition": "broken",
+    "equipment_condition_label": "损坏",
+    "mention_count": 1,
+    "total_likes": 89,
+    "heat_score": 0.09,
+    "heat_level": "极低热度",
+    "posts": [
+      {
+        "title": "老小区健身器材损坏",
+        "author": "社区观察员",
+        "likes": 89,
+        "images": [
+          "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=broken%20old%20outdoor%20fitness%20equipment%20neglected&image_size=square_hd"
+        ],
+        "content": "我们小区的健身器材坏了好几个都没人修，太空漫步机都晃悠了，安全隐患啊。"
+      }
+    ],
+    "images": [
+      "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=broken%20old%20outdoor%20fitness%20equipment%20neglected&image_size=square_hd"
+    ],
+    "district": "普陀区"
+  }
+]
