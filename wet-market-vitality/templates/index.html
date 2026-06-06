@@ -182,6 +182,24 @@
         tr:hover {
             background: #f8f9fa;
         }
+        tr.active {
+            background: #fff5f5;
+            box-shadow: inset 3px 0 0 #e74c3c;
+        }
+        tr.active td {
+            border-bottom-color: #fecaca;
+        }
+
+        .chart-card.highlight {
+            box-shadow: 0 0 0 2px #e74c3c, 0 4px 20px rgba(231, 76, 60, 0.2);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+
+        .table-section.highlight {
+            box-shadow: 0 0 0 2px #e74c3c, 0 4px 20px rgba(231, 76, 60, 0.2);
+            transition: all 0.3s ease;
+        }
         .vitality-badge {
             display: inline-block;
             padding: 4px 10px;
@@ -482,6 +500,7 @@
         let barChart = echarts.init(document.getElementById('bar-chart'));
         let allDistrictsData = {};
         let allMarketsData = [];
+        let currentSelectedDistrict = null;
 
         const OLD_DISTRICTS = ['黄浦区', '静安区', '虹口区', '杨浦区', '普陀区', '长宁区', '徐汇区'];
 
@@ -724,6 +743,129 @@
 
         function closeModal() {
             document.getElementById('modal-overlay').classList.remove('active');
+            clearHighlight();
+        }
+
+        function scrollToDistrict(districtName) {
+            if (!districtName) return;
+
+            currentSelectedDistrict = districtName;
+
+            const chartsSection = document.querySelector('.charts-grid');
+            chartsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            highlightDistrict(districtName);
+
+            setTimeout(() => {
+                openDistrictModal(districtName);
+            }, 500);
+        }
+
+        function highlightDistrict(districtName) {
+            clearHighlight();
+
+            const tableRows = document.querySelectorAll('#market-table tbody tr');
+            tableRows.forEach(row => {
+                const districtCell = row.querySelector('td:nth-child(4)');
+                if (districtCell && districtCell.textContent.trim() === districtName) {
+                    row.classList.add('active');
+                }
+            });
+
+            const tableSection = document.querySelector('.table-section');
+            tableSection.classList.add('highlight');
+            setTimeout(() => tableSection.classList.remove('highlight'), 1500);
+
+            const chartCards = document.querySelectorAll('.chart-card');
+            chartCards.forEach(card => card.classList.add('highlight'));
+            setTimeout(() => chartCards.forEach(card => card.classList.remove('highlight')), 1500);
+
+            highlightBarChart(districtName);
+            highlightSunburst(districtName);
+        }
+
+        function highlightBarChart(districtName) {
+            const option = barChart.getOption();
+            if (!option || !option.series || !option.series[0]) return;
+
+            const districts = option.yAxis[0].data;
+            const index = districts.indexOf(districtName);
+            if (index === -1) return;
+
+            const data = option.series[0].data;
+            const baseColors = data.map((d, i) => {
+                const val = d.value;
+                if (val >= 0.8) return '#e74c3c';
+                if (val >= 0.6) return '#e67e22';
+                if (val >= 0.4) return '#f1c40f';
+                if (val >= 0.2) return '#3498db';
+                return '#95a5a6';
+            });
+
+            const newData = data.map((d, i) => ({
+                ...d,
+                itemStyle: {
+                    color: i === index ? '#e74c3c' : baseColors[i],
+                    opacity: i === index ? 1 : 0.5,
+                    borderRadius: i === index ? [0, 6, 6, 0] : [0, 4, 4, 0]
+                }
+            }));
+
+            barChart.setOption({
+                series: [{ data: newData }]
+            });
+        }
+
+        function highlightSunburst(districtName) {
+            const option = sunburstChart.getOption();
+            if (!option || !option.series || !option.series[0] || !option.series[0].data) return;
+
+            const data = option.series[0].data;
+            const newData = data.map(d => {
+                const isTarget = d.name === districtName;
+                return {
+                    ...d,
+                    itemStyle: {
+                        ...d.itemStyle,
+                        opacity: isTarget ? 1 : 0.5
+                    }
+                };
+            });
+
+            sunburstChart.setOption({
+                series: [{ data: newData }]
+            });
+        }
+
+        function clearHighlight() {
+            const tableRows = document.querySelectorAll('#market-table tbody tr');
+            tableRows.forEach(row => row.classList.remove('active'));
+
+            const barOption = barChart.getOption();
+            if (barOption && barOption.series && barOption.series[0]) {
+                const data = barOption.series[0].data;
+                const restoredData = data.map(d => ({
+                    ...d,
+                    itemStyle: {
+                        ...d.itemStyle,
+                        opacity: 1,
+                        borderRadius: [0, 4, 4, 0]
+                    }
+                }));
+                barChart.setOption({ series: [{ data: restoredData }] });
+            }
+
+            const sunOption = sunburstChart.getOption();
+            if (sunOption && sunOption.series && sunOption.series[0] && sunOption.series[0].data) {
+                const data = sunOption.series[0].data;
+                const restoredData = data.map(d => ({
+                    ...d,
+                    itemStyle: { ...d.itemStyle, opacity: 1 }
+                }));
+                sunburstChart.setOption({ series: [{ data: restoredData }] });
+            }
+
+            currentSelectedDistrict = null;
         }
 
         document.getElementById('modal-close').addEventListener('click', closeModal);
@@ -753,7 +895,7 @@
 
                     const tbody = document.querySelector('#market-table tbody');
                     tbody.innerHTML = sorted.map((m, i) => `
-                        <tr style="cursor:pointer;" onclick="scrollToDistrict('${m.district}')">
+                        <tr style="cursor:pointer;" data-district="${m.district || ''}" data-index="${i}">
                             <td>${i+1}</td>
                             <td><b>${m.name}</b></td>
                             <td>${m.category || '-'}</td>
@@ -765,6 +907,13 @@
                             <td>${getVitalityBadge(m.vitality_level)}</td>
                         </tr>
                     `).join('');
+
+                    tbody.querySelectorAll('tr').forEach(row => {
+                        row.addEventListener('click', function() {
+                            const district = this.getAttribute('data-district');
+                            scrollToDistrict(district);
+                        });
+                    });
                 })
                 .catch(err => {
                     console.error('加载市场数据失败:', err);
