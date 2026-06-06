@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from session import get_all_sessions, get_session_by_id, get_avg_cpu, is_trae_running, get_chat_sessions
+from session import get_all_sessions, get_session_by_id, get_avg_cpu, is_trae_running, get_chat_sessions, get_session_detail
 from monitor import get_global_monitor, MonitorStatus
 
 monitor = get_global_monitor()
@@ -119,10 +119,10 @@ async def list_chat_sessions():
 
 @app.get("/api/sessions/{session_id}")
 async def get_session(session_id: str):
-    session = get_session_by_id(session_id)
-    if not session:
+    detail = get_session_detail(session_id)
+    if not detail:
         raise HTTPException(status_code=404, detail="Session not found")
-    return session.to_dict()
+    return detail
 
 
 @app.get("/api/monitor/status")

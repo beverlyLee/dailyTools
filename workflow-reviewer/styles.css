@@ -30,8 +30,35 @@ body {
 }
 
 .container {
-    max-width: 760px;
+    max-width: 1200px;
     margin: 0 auto;
+}
+
+.project-layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.project-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.project-sidebar {
+    width: 320px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 20px;
+}
+
+.project-sidebar .card {
+    padding: 20px;
+}
+
+.project-sidebar .card-title {
+    font-size: 0.95rem;
+    margin-bottom: 16px;
 }
 
 .title {
@@ -875,6 +902,18 @@ body {
     white-space: pre-wrap;
     word-wrap: break-word;
     line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+    .project-layout {
+        flex-direction: column;
+    }
+
+    .project-sidebar {
+        width: 100%;
+        position: static;
+        order: -1;
+    }
 }
 
 @media (max-width: 600px) {

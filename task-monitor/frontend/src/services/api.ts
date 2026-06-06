@@ -1,4 +1,4 @@
-import { Session, MonitorStatus, SSEMessage } from '../types';
+import { Session, MonitorStatus, SSEMessage, SessionDetail } from '../types';
 
 const API_BASE = '/api';
 const MAX_RETRIES = 3;
@@ -46,6 +46,16 @@ export async function getChatSessions(): Promise<Session[]> {
   } catch (error) {
     console.error('Failed to get chat sessions:', error);
     return [];
+  }
+}
+
+export async function getSessionDetail(sessionId: string): Promise<SessionDetail | null> {
+  try {
+    const response = await fetchWithRetry(`${API_BASE}/sessions/${sessionId}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to get session detail:', error);
+    return null;
   }
 }
 

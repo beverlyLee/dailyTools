@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Session, MonitorStatus, SSEMessage } from './types';
+import { Session, MonitorStatus, SSEMessage, SessionDetail } from './types';
 import {
   getSessions,
   getChatSessions,
@@ -8,11 +8,13 @@ import {
   removeMonitor,
   markCompleted,
   createSSEConnection,
+  getSessionDetail,
   ConnectionStatus,
 } from './services/api';
 import { playNotificationSound, testSound } from './utils/sound';
 import MonitorCard from './components/MonitorCard';
 import ManualInput from './components/ManualInput';
+import SessionDetailModal from './components/SessionDetail';
 
 const App: React.FC = () => {
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -22,6 +24,9 @@ const App: React.FC = () => {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
   const sseConnectionRef = useRef<{ close: () => void; reconnect: () => void } | null>(null);
   const hasInteractedRef = useRef(false);
+  const [detailModalSession, setDetailModalSession] = useState<SessionDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [lookupInput, setLookupInput] = useState('');
 
   const monitoringIds = new Set(monitors.keys());
 
@@ -157,6 +162,31 @@ const App: React.FC = () => {
     testSound();
   };
 
+  const handleViewDetail = async (sessionId: string) => {
+    setDetailLoading(true);
+    try {
+      const detail = await getSessionDetail(sessionId);
+      if (detail) {
+        setDetailModalSession(detail);
+      } else {
+        alert('未找到该 Session');
+      }
+    } catch (e) {
+      alert('获取 Session 详情失败');
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const handleLookupSession = async () => {
+    const sessionId = lookupInput.trim();
+    if (!sessionId) {
+      alert('请输入 Session ID');
+      return;
+    }
+    await handleViewDetail(sessionId);
+  };
+
   const handleRefreshSessions = async () => {
     const sessionsData = await getSessions();
     setSessions(sessionsData);
@@ -283,6 +313,31 @@ const App: React.FC = () => {
             monitoringIds={monitoringIds}
           />
 
+          <div className="lookup-section">
+            <h3>🔍 查询 Session 详情</h3>
+            <div className="lookup-form">
+              <input
+                type="text"
+                value={lookupInput}
+                onChange={(e) => setLookupInput(e.target.value)}
+                placeholder="输入 Session ID 查询详情"
+                className="lookup-input"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleLookupSession();
+                  }
+                }}
+              />
+              <button
+                className="btn btn-primary"
+                onClick={handleLookupSession}
+                disabled={detailLoading}
+              >
+                {detailLoading ? '查询中...' : '查询'}
+              </button>
+            </div>
+          </div>
+
           {allActiveSessions.length > 0 && (
             <>
               <div className="session-header">
@@ -314,17 +369,25 @@ const App: React.FC = () => {
                         {session.workspace || session.session_id.slice(0, 16)}
                       </span>
                     </div>
-                    <button
-                      className={`btn btn-small ${
-                        monitoringIds.has(session.session_id)
-                          ? 'btn-secondary'
-                          : 'btn-primary'
-                      }`}
-                      onClick={() => handleStartMonitor(session.session_id)}
-                      disabled={monitoringIds.has(session.session_id)}
-                    >
-                      {monitoringIds.has(session.session_id) ? '监控中' : '监控'}
-                    </button>
+                    <div className="session-actions">
+                      <button
+                        className="btn btn-small btn-outline"
+                        onClick={() => handleViewDetail(session.session_id)}
+                      >
+                        详情
+                      </button>
+                      <button
+                        className={`btn btn-small ${
+                          monitoringIds.has(session.session_id)
+                            ? 'btn-secondary'
+                            : 'btn-primary'
+                        }`}
+                        onClick={() => handleStartMonitor(session.session_id)}
+                        disabled={monitoringIds.has(session.session_id)}
+                      >
+                        {monitoringIds.has(session.session_id) ? '监控中' : '监控'}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -350,17 +413,25 @@ const App: React.FC = () => {
                         <span className="session-badge chat-badge">{session.workspace}</span>
                       </div>
                     </div>
-                    <button
-                      className={`btn btn-small ${
-                        monitoringIds.has(session.session_id)
-                          ? 'btn-secondary'
-                          : 'btn-outline'
-                      }`}
-                      onClick={() => handleStartMonitor(session.session_id)}
-                      disabled={monitoringIds.has(session.session_id)}
-                    >
-                      {monitoringIds.has(session.session_id) ? '监控中' : '监控'}
-                    </button>
+                    <div className="session-actions">
+                      <button
+                        className="btn btn-small btn-outline"
+                        onClick={() => handleViewDetail(session.session_id)}
+                      >
+                        详情
+                      </button>
+                      <button
+                        className={`btn btn-small ${
+                          monitoringIds.has(session.session_id)
+                            ? 'btn-secondary'
+                            : 'btn-outline'
+                        }`}
+                        onClick={() => handleStartMonitor(session.session_id)}
+                        disabled={monitoringIds.has(session.session_id)}
+                      >
+                        {monitoringIds.has(session.session_id) ? '监控中' : '监控'}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -392,17 +463,25 @@ const App: React.FC = () => {
                       </span>
                       <span className="session-time">{session.created_at_str}</span>
                     </div>
-                    <button
-                      className={`btn btn-small ${
-                        monitoringIds.has(session.session_id)
-                          ? 'btn-secondary'
-                          : 'btn-outline'
-                      }`}
-                      onClick={() => handleStartMonitor(session.session_id)}
-                      disabled={monitoringIds.has(session.session_id)}
-                    >
-                      {monitoringIds.has(session.session_id) ? '监控中' : '监控'}
-                    </button>
+                    <div className="session-actions">
+                      <button
+                        className="btn btn-small btn-outline"
+                        onClick={() => handleViewDetail(session.session_id)}
+                      >
+                        详情
+                      </button>
+                      <button
+                        className={`btn btn-small ${
+                          monitoringIds.has(session.session_id)
+                            ? 'btn-secondary'
+                            : 'btn-outline'
+                        }`}
+                        onClick={() => handleStartMonitor(session.session_id)}
+                        disabled={monitoringIds.has(session.session_id)}
+                      >
+                        {monitoringIds.has(session.session_id) ? '监控中' : '监控'}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -417,6 +496,11 @@ const App: React.FC = () => {
           )}
         </div>
       </main>
+
+      <SessionDetailModal
+        session={detailModalSession}
+        onClose={() => setDetailModalSession(null)}
+      />
 
       <style>{`
         .app {
@@ -818,6 +902,49 @@ const App: React.FC = () => {
         
         .session-list-container::-webkit-scrollbar-thumb:hover {
           background: #aaa;
+        }
+        
+        .lookup-section {
+          background: white;
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .lookup-section h3 {
+          margin: 0 0 16px 0;
+          font-size: 18px;
+          color: #333;
+        }
+        
+        .lookup-form {
+          display: flex;
+          gap: 12px;
+        }
+        
+        .lookup-input {
+          flex: 1;
+          padding: 12px 16px;
+          border: 2px solid #e0e0e0;
+          border-radius: 8px;
+          font-size: 14px;
+          font-family: monospace;
+          transition: border-color 0.2s;
+        }
+        
+        .lookup-input:focus {
+          outline: none;
+          border-color: #667eea;
+        }
+        
+        .lookup-input::placeholder {
+          color: #aaa;
+        }
+        
+        .session-actions {
+          display: flex;
+          gap: 8px;
+          align-items: center;
         }
       `}</style>
     </div>

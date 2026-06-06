@@ -12,6 +12,12 @@ export interface Session {
   session_type: 'sandbox' | 'chat';
 }
 
+export interface SessionDetail extends Session {
+  prompt: string;
+  output: string;
+  output_available: boolean;
+}
+
 export interface MonitorStatus {
   session_id: string;
   display_name: string;

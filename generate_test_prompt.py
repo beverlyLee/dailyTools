@@ -60,6 +60,8 @@ def generate_test_prompt(project_name, first_round_prompt, current_round_prompt,
     filtered_lines = []
     for line in process_content.split('\n'):
         stripped = line.strip()
+        if not stripped:
+            continue
         if stripped.startswith('toolName'):
             continue
         if stripped.startswith('status'):
@@ -70,10 +72,24 @@ def generate_test_prompt(project_name, first_round_prompt, current_round_prompt,
             continue
         if stripped.startswith('changes'):
             continue
+        if stripped.startswith('command') or stripped.startswith('Command'):
+            continue
+        if stripped.lower().startswith('mcp'):
+            continue
+        if re.match(r'^第[一二三四五六七八九十百千\d]+轮', stripped):
+            continue
+        if '第' in stripped and '轮' in stripped and len(stripped) < 30:
+            continue
         if stripped.startswith('/') and len(stripped) > 1 and not stripped.startswith('//'):
             continue
-        if stripped:
-            filtered_lines.append(line)
+        if re.search(r'/[^/\s]+\.py#?L?\d', stripped):
+            continue
+        if re.match(r'^[-*]\s+(toolName|status|filePath|changes|command)', stripped, re.IGNORECASE):
+            continue
+        if stripped.startswith('🎉') or stripped.startswith('✅') or stripped.startswith('❌') or stripped.startswith('📦'):
+            if len(stripped) < 50:
+                continue
+        filtered_lines.append(line)
     
     process_content = '\n'.join(filtered_lines).strip()
     if not process_content:
