@@ -1,6 +1,6 @@
 import maplibregl from 'maplibre-gl';
 import { MapboxOverlay } from '@deck.gl/mapbox';
-import { GeoJsonLayer, TextLayer } from '@deck.gl/layers';
+import { GeoJsonLayer } from '@deck.gl/layers';
 
 const INITIAL_VIEW_STATE = {
   longitude: 113.93,
@@ -98,6 +98,23 @@ const MAP_PROVIDERS = {
   }
 };
 
+const BUILDING_NAME_PREFIXES = [
+  '万科', '保利', '华润', '中海', '碧桂园', '恒大', '融创',
+  '金地', '招商', '华侨城', '卓越', '京基', '华润置地',
+  '天健', '深业', '振业', '长城', '宝能', '佳兆业', '龙光'
+];
+
+const BUILDING_NAME_MIDDLES = [
+  '城', '花园', '府', '苑', '公馆', '中心', '广场', '湾',
+  '里', '座', '大厦', '公寓', '华庭', '豪庭', '景园',
+  '家园', '佳园', '名苑', '名都', '国际'
+];
+
+const BUILDING_NAME_SUFFIXES = [
+  '一期', '二期', '三期', 'A座', 'B座', 'C座',
+  '东园', '西园', '南苑', '北苑', '1栋', '2栋', '3栋'
+];
+
 class BuildingVisualization {
   constructor() {
     this.allBuildings = [];
@@ -111,8 +128,11 @@ class BuildingVisualization {
     this.currentMapProvider = 'gaode';
     this.map = null;
     this.deckOverlay = null;
+    this.labelContainer = null;
+    this.labelElements = new Map();
     
     this.initMap();
+    this.initLabels();
     this.bindEvents();
     this.loadData();
   }
@@ -148,11 +168,40 @@ class BuildingVisualization {
       this.updateVisualization();
     });
 
-    this.map.on('mousemove', (e) => {
-      const features = this.deckOverlay._deck ? 
-        this.deckOverlay._deck.pickObject({ x: e.point.x, y: e.point.y }) : null;
-      this.handleHover(features, e.point);
+    this.map.on('move', () => {
+      this.updateLabelPositions();
     });
+
+    this.map.on('mousemove', (e) => {
+      const deck = this.deckOverlay && this.deckOverlay._deck;
+      if (deck && deck.pickObject) {
+        const picked = deck.pickObject({ x: e.point.x, y: e.point.y });
+        this.handleHover(picked, e.point);
+      }
+    });
+  }
+
+  initLabels() {
+    this.labelContainer = document.createElement('div');
+    this.labelContainer.className = 'building-labels';
+    this.labelContainer.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+      overflow: hidden;
+    `;
+    document.getElementById('map-container').appendChild(this.labelContainer);
+  }
+
+  generateBuildingName(index) {
+    const prefix = BUILDING_NAME_PREFIXES[index % BUILDING_NAME_PREFIXES.length];
+    const middle = BUILDING_NAME_MIDDLES[Math.floor(index / BUILDING_NAME_PREFIXES.length) % BUILDING_NAME_MIDDLES.length];
+    const suffix = BUILDING_NAME_SUFFIXES[index % BUILDING_NAME_SUFFIXES.length];
+    return `${prefix}${middle}${suffix}`;
   }
 
   switchMapProvider(provider) {
@@ -170,11 +219,16 @@ class BuildingVisualization {
   async loadData() {
     try {
       const response = await fetch('/api/timeline');
+      if (!response.ok) throw new Error('API error');
       const data = await response.json();
       this.allBuildings = data.buildings || [];
-      this.stats = data.stats || {};
-      console.log(`Loaded ${this.allBuildings.length} buildings from API`);
-      this.updateVisualization();
+      if (this.allBuildings.length > 0) {
+        console.log(`Loaded ${this.allBuildings.length} buildings from API`);
+        this.updateVisualization();
+        return;
+      }
+      console.warn('API returned empty data, using mock data');
+      this.loadMockData();
     } catch (error) {
       console.warn('Failed to load data from API, using mock data:', error);
       this.loadMockData();
@@ -234,7 +288,7 @@ class BuildingVisualization {
       
       this.allBuildings.push({
         id: `building_${i}`,
-        name: `建筑${i}`,
+        name: this.generateBuildingName(i),
         polygon: polygon,
         height: height,
         baseHeight: 0,
@@ -291,13 +345,13 @@ class BuildingVisualization {
     
     this.updateStats();
     this.renderLayers();
+    this.updateLabels();
   }
 
   updateStats() {
     const buildings = this.currentBuildings;
     const count = buildings.length;
     const totalHeight = buildings.reduce((sum, b) => sum + b.height, 0);
-    const avgHeight = count > 0 ? totalHeight / count : 0;
     const maxHeight = count > 0 ? Math.max(...buildings.map(b => b.height)) : 0;
     
     document.getElementById('current-year').textContent = this.currentYear;
@@ -341,31 +395,77 @@ class BuildingVisualization {
     
     layers.push(buildingLayer);
 
-    if (this.showLabels) {
-      const labelData = buildingData
-        .filter(b => b.height >= 40)
-        .map(b => ({
-          ...b,
-          position: b.centroid
-        }));
-
-      const textLayer = new TextLayer({
-        id: 'building-labels',
-        data: labelData,
-        getPosition: d => d.position,
-        getText: d => d.name,
-        getSize: 12,
-        getColor: [255, 255, 255],
-        getAngle: 0,
-        getTextAnchor: 'middle',
-        getAlignmentBaseline: 'bottom',
-        billboard: true
-      });
-      
-      layers.push(textLayer);
-    }
-
     this.deckOverlay.setProps({ layers });
+  }
+
+  updateLabels() {
+    if (!this.showLabels || !this.map) {
+      this.labelContainer.style.display = 'none';
+      return;
+    }
+    
+    this.labelContainer.style.display = 'block';
+    
+    const visibleBuildings = this.currentBuildings.filter(b => b.height >= 50);
+    
+    const currentIds = new Set(visibleBuildings.map(b => b.id));
+    
+    for (const [id, el] of this.labelElements) {
+      if (!currentIds.has(id)) {
+        el.remove();
+        this.labelElements.delete(id);
+      }
+    }
+    
+    for (const building of visibleBuildings) {
+      if (!this.labelElements.has(building.id)) {
+        const label = document.createElement('div');
+        label.className = 'building-label';
+        label.style.cssText = `
+          position: absolute;
+          transform: translate(-50%, -100%);
+          font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+          font-size: 12px;
+          font-weight: 600;
+          color: #ffffff;
+          text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 0 6px rgba(0, 0, 0, 0.5);
+          white-space: nowrap;
+          pointer-events: none;
+          opacity: 0.9;
+          letter-spacing: 0.5px;
+          z-index: 100;
+        `;
+        label.textContent = building.name;
+        this.labelContainer.appendChild(label);
+        this.labelElements.set(building.id, label);
+      }
+    }
+    
+    this.updateLabelPositions();
+  }
+
+  updateLabelPositions() {
+    if (!this.showLabels || !this.map) return;
+    
+    const containerRect = this.labelContainer.getBoundingClientRect();
+    
+    for (const [id, el] of this.labelElements) {
+      const building = this.currentBuildings.find(b => b.id === id);
+      if (!building) continue;
+      
+      const point = this.map.project(building.centroid);
+      
+      const x = point.x;
+      const y = point.y - building.height * 0.15;
+      
+      if (x < 0 || x > containerRect.width || y < 0 || y > containerRect.height) {
+        el.style.display = 'none';
+      } else {
+        el.style.display = 'block';
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+      }
+    }
   }
 
   handleHover(feature, point) {
@@ -436,7 +536,11 @@ class BuildingVisualization {
 
   toggleLabels(show) {
     this.showLabels = show;
-    this.renderLayers();
+    if (show) {
+      this.updateLabels();
+    } else {
+      this.labelContainer.style.display = 'none';
+    }
   }
 
   toggleColorByYear(colorByYear) {
