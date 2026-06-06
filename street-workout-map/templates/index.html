@@ -718,7 +718,252 @@
             color: #94a3b8;
             font-size: 12px;
             text-align: center;
-            padding: 12px 0;
+            padding: 10px 0;
+        }
+
+        .collapsible-section {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .collapsible-section .popup-section-title {
+            margin-bottom: 0;
+        }
+
+        .collapsible-section .section-toggle {
+            margin-left: auto;
+            font-size: 12px;
+            color: #94a3b8;
+            transition: transform 0.2s ease;
+        }
+
+        .collapsible-section.collapsed .section-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            max-height: 500px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding-top: 10px;
+        }
+
+        .collapsible-section.collapsed .collapsible-content {
+            max-height: 0;
+            padding-top: 0;
+        }
+
+        .famous-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%);
+            border: 1px solid #fde68a;
+            margin: 0;
+            position: relative;
+        }
+
+        .famous-section::before {
+            content: '⭐';
+            position: absolute;
+            top: -8px;
+            right: 12px;
+            font-size: 18px;
+            background: white;
+            padding: 0 4px;
+            border-radius: 50%;
+        }
+
+        .famous-section .popup-section-title {
+            color: #92400e;
+        }
+
+        .famous-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            margin-bottom: 8px;
+            backdrop-filter: blur(4px);
+        }
+
+        .famous-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .famous-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 15px;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .famous-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .famous-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #78350f;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .famous-badge {
+            font-size: 10px;
+            color: #92400e;
+            background: #fde68a;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .famous-desc {
+            font-size: 11px;
+            color: #92400e;
+            margin-top: 2px;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        .coach-section {
+            background: linear-gradient(135deg, #dcfce7 0%, #d1fae5 100%);
+            border: 1px solid #86efac;
+            margin: 0;
+            position: relative;
+        }
+
+        .coach-section::before {
+            content: '🏆';
+            position: absolute;
+            top: -8px;
+            right: 12px;
+            font-size: 18px;
+            background: white;
+            padding: 0 4px;
+            border-radius: 50%;
+        }
+
+        .coach-section .popup-section-title {
+            color: #166534;
+        }
+
+        .coach-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            margin-bottom: 8px;
+            backdrop-filter: blur(4px);
+        }
+
+        .coach-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .coach-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 15px;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+        }
+
+        .coach-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .coach-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #14532d;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .coach-rating {
+            font-size: 11px;
+            color: #ca8a04;
+            font-weight: 600;
+        }
+
+        .coach-specialty {
+            font-size: 11px;
+            color: #166534;
+            margin-top: 2px;
+            opacity: 0.8;
+        }
+
+        .coach-meta {
+            display: flex;
+            gap: 10px;
+            margin-top: 4px;
+            font-size: 10px;
+            color: #15803d;
+        }
+
+        .coach-price {
+            color: #ea580c;
+            font-weight: 700;
+        }
+
+        .compact-photos {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .compact-photos .photo-item {
+            width: 56px;
+            height: 56px;
+            flex-shrink: 0;
+            border-radius: 6px;
+        }
+
+        .compact-posts {
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .compact-posts .post-item {
+            padding: 6px 8px;
+            margin-bottom: 4px;
+        }
+
+        .compact-posts .post-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .compact-posts .post-title {
+            font-size: 11px;
+            margin-bottom: 2px;
+        }
+
+        .compact-posts .post-meta {
+            font-size: 9px;
         }
 
         .photo-grid {
@@ -1034,8 +1279,8 @@
 
         <div id="map-container">
             <div class="map-switcher">
-                <button class="map-switch-btn active" data-map="gaode">高德地图</button>
-                <button class="map-switch-btn" data-map="osm">标准地图</button>
+                <button class="map-switch-btn active" data-map="gaode">标准地图</button>
+                <button class="map-switch-btn" data-map="gaodeSatellite">卫星地图</button>
             </div>
             <div id="map"></div>
             <div class="loading-overlay" id="loading">
@@ -1085,11 +1330,11 @@
         let currentFilter = 'all';
         let currentType = 'all';
         let gaodeLayer = null;
-        let osmLayer = null;
+        let gaodeSatelliteLayer = null;
         let currentMapLayer = 'gaode';
         let attributionControl = null;
         let uniqueIdCounter = 0;
-        let tileErrorCount = { gaode: 0, osm: 0 };
+        let tileErrorCount = { gaode: 0, gaodeSatellite: 0 };
         const MAX_TILE_ERRORS = 8;
         let hasAutoFallback = false;
 
@@ -1203,27 +1448,36 @@
                 errorTileUrl: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"%3E%3Crect fill="%23f1f5f9" width="256" height="256"/%3E%3Ctext fill="%2394a3b8" font-size="14" x="128" y="128" text-anchor="middle"%3E地图加载中%3C/text%3E%3C/svg%3E'
             });
 
-            osmLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                subdomains: 'abcd',
-                maxZoom: 19,
+            gaodeSatelliteLayer = L.layerGroup();
+            
+            const satelliteImg = L.tileLayer('https://webst0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}', {
+                subdomains: ['1', '2', '3', '4'],
+                maxZoom: 18,
                 errorTileUrl: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"%3E%3Crect fill="%23f1f5f9" width="256" height="256"/%3E%3Ctext fill="%2394a3b8" font-size="14" x="128" y="128" text-anchor="middle"%3E地图加载中%3C/text%3E%3C/svg%3E'
             });
+            const satelliteLabel = L.tileLayer('https://webst0{s}.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}', {
+                subdomains: ['1', '2', '3', '4'],
+                maxZoom: 18,
+                errorTileUrl: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"%3E%3Crect fill="%23f1f5f9" width="256" height="256"/%3E%3Ctext fill="%2394a3b8" font-size="14" x="128" y="128" text-anchor="middle"%3E地图加载中%3C/text%3E%3C/svg%3E'
+            });
+            gaodeSatelliteLayer.addLayer(satelliteImg);
+            gaodeSatelliteLayer.addLayer(satelliteLabel);
 
             gaodeLayer.on('tileerror', function() {
                 tileErrorCount.gaode++;
                 if (tileErrorCount.gaode >= MAX_TILE_ERRORS && !hasAutoFallback && currentMapLayer === 'gaode') {
                     hasAutoFallback = true;
-                    console.warn('高德地图瓦片加载失败过多，尝试切换备用图层');
-                    switchMapLayer('osm');
+                    console.warn('高德标准图层加载失败过多，切换到卫星图层');
+                    switchMapLayer('gaodeSatellite');
                     setTimeout(function() { hasAutoFallback = false; }, 5000);
                 }
             });
 
-            osmLayer.on('tileerror', function() {
-                tileErrorCount.osm++;
-                if (tileErrorCount.osm >= MAX_TILE_ERRORS && !hasAutoFallback && currentMapLayer === 'osm') {
+            satelliteImg.on('tileerror', function() {
+                tileErrorCount.gaodeSatellite++;
+                if (tileErrorCount.gaodeSatellite >= MAX_TILE_ERRORS && !hasAutoFallback && currentMapLayer === 'gaodeSatellite') {
                     hasAutoFallback = true;
-                    console.warn('OSM地图瓦片加载失败过多，切换到高德地图');
+                    console.warn('高德卫星图层加载失败过多，切换到标准图层');
                     switchMapLayer('gaode');
                     setTimeout(function() { hasAutoFallback = false; }, 5000);
                 }
@@ -1377,7 +1631,6 @@
 
         function createPopupContent(location) {
             const heatLevel = getHeatLevel(location.heat_score);
-            const conditionClass = getConditionClass(location.equipment_condition);
             const iconSvg = getDumbbellSVG(location.heat_score, location.is_park, 24);
             
             const facility = location.facility_info || {};
@@ -1386,7 +1639,7 @@
             const coaches = location.coaches || [];
 
             const tagsHtml = location.fitness_tags && location.fitness_tags.length > 0
-                ? location.fitness_tags.slice(0, 5).map(tag => `<span class="popup-tag">${tag}</span>`).join('')
+                ? location.fitness_tags.slice(0, 6).map(tag => `<span class="popup-tag">${tag}</span>`).join('')
                 : '';
 
             const facilityHtml = `
@@ -1486,28 +1739,34 @@
                 </div>
             `;
 
-            const peopleHtml = famousPeople.length > 0 
-                ? `<div class="people-list">
-                    ${famousPeople.map(person => `
-                        <div class="person-card">
-                            <div class="person-avatar" style="background: ${person.avatar_color || '#22c55e'}">
+            const famousHtml = famousPeople.length > 0 
+                ? `<div class="famous-section popup-section">
+                    <div class="popup-section-title">
+                        <span class="icon">⭐</span> 代表人物
+                    </div>
+                    ${famousPeople.slice(0, 2).map(person => `
+                        <div class="famous-card">
+                            <div class="famous-avatar" style="background: ${person.avatar_color || '#f59e0b'}">
                                 ${person.name.charAt(0)}
                             </div>
-                            <div class="person-info">
-                                <div class="person-name">
+                            <div class="famous-info">
+                                <div class="famous-name">
                                     ${person.name}
-                                    <span class="person-title">${person.title}</span>
+                                    <span class="famous-badge">${person.title}</span>
                                 </div>
-                                <div class="person-desc">${person.description}</div>
+                                <div class="famous-desc">${person.description}</div>
                             </div>
                         </div>
                     `).join('')}
                    </div>`
-                : '<div class="empty-hint">暂无知名健身达人</div>';
+                : '';
 
             const coachesHtml = coaches.length > 0
-                ? `<div class="people-list">
-                    ${coaches.map(coach => `
+                ? `<div class="coach-section popup-section">
+                    <div class="popup-section-title">
+                        <span class="icon">🏆</span> 驻场教练
+                    </div>
+                    ${coaches.slice(0, 2).map(coach => `
                         <div class="coach-card">
                             <div class="coach-avatar">
                                 ${coach.name.charAt(0)}
@@ -1526,21 +1785,21 @@
                         </div>
                     `).join('')}
                    </div>`
-                : '<div class="empty-hint">暂无驻场教练</div>';
+                : '';
 
             const photosHtml = location.images && location.images.length > 0 
-                ? `<div class="photo-grid">
+                ? `<div class="compact-photos">
                     ${location.images.slice(0, 6).map((img, idx) => `
                         <div class="photo-item" onclick="showImageModal('${img}')">
-                            <img src="${img}" alt="健身照片 ${idx + 1}" loading="lazy" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext fill=%22%2394a3b8%22 font-size=%2212%22 x=%2250%22 y=%2255%22 text-anchor=%22middle%22%3E📷 照片%3C/text%3E%3C/svg%3E'" />
+                            <img src="${img}" alt="健身照片 ${idx + 1}" loading="lazy" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext fill=%22%2394a3b8%22 font-size=%2212%22 x=%2250%22 y=%2255%22 text-anchor=%22middle%22%3E📷%3C/text%3E%3C/svg%3E'" />
                         </div>
                     `).join('')}
                    </div>`
-                : '<div class="empty-hint">暂无网友实拍照片</div>';
+                : '<div class="empty-hint">暂无照片</div>';
 
             const postsHtml = location.posts && location.posts.length > 0
-                ? `<div class="posts-list" style="max-height: 120px;">
-                    ${location.posts.slice(0, 3).map(post => `
+                ? `<div class="compact-posts">
+                    ${location.posts.slice(0, 2).map(post => `
                         <div class="post-item">
                             <div class="post-title">${post.title}</div>
                             <div class="post-meta">
@@ -1550,10 +1809,12 @@
                         </div>
                     `).join('')}
                    </div>`
-                : '<div class="empty-hint">暂无相关帖子</div>';
+                : '<div class="empty-hint">暂无帖子</div>';
+
+            const popupId = 'popup-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
 
             return `
-                <div class="popup-container">
+                <div class="popup-container" id="${popupId}">
                     <div class="popup-header">
                         <div class="popup-title">
                             ${iconSvg}
@@ -1565,11 +1826,10 @@
                         <div class="popup-addr">📍 ${location.address || '地址未知'}</div>
                         <div class="popup-tags">
                             ${tagsHtml}
-                            <span class="condition-badge ${conditionClass}">器材${location.equipment_condition_label}</span>
                         </div>
                     </div>
 
-                    <div class="popup-section">
+                    <div class="popup-section" style="padding-top: 12px; padding-bottom: 12px;">
                         <div class="stat-grid">
                             <div class="stat-item">
                                 <div class="stat-item-value">${location.mention_count}</div>
@@ -1590,52 +1850,56 @@
                         </div>
                     </div>
 
-                    <div class="popup-section">
+                    ${famousHtml}
+
+                    ${coachesHtml}
+
+                    <div class="popup-section collapsible-section" onclick="toggleSection(this)">
                         <div class="popup-section-title">
                             <span class="icon">🏟️</span> 场地信息
+                            <span class="section-toggle">▼</span>
                         </div>
-                        ${facilityHtml}
+                        <div class="collapsible-content">
+                            ${facilityHtml}
+                        </div>
                     </div>
 
-                    <div class="popup-section">
+                    <div class="popup-section collapsible-section collapsed" onclick="toggleSection(this)">
                         <div class="popup-section-title">
                             <span class="icon">🎒</span> 补给设施
+                            <span class="section-toggle">▼</span>
                         </div>
-                        ${amenitiesHtml}
+                        <div class="collapsible-content">
+                            ${amenitiesHtml}
+                        </div>
                     </div>
 
-                    ${famousPeople.length > 0 || coaches.length > 0 ? `
-                    <div class="popup-section">
-                        ${famousPeople.length > 0 ? `
-                        <div class="popup-section-subtitle">
-                            <span>⭐</span> 代表人物
-                        </div>
-                        ${peopleHtml}
-                        ` : ''}
-                        ${coaches.length > 0 ? `
-                        <div class="popup-section-subtitle" style="${famousPeople.length > 0 ? 'margin-top: 10px;' : ''}">
-                            <span>🏆</span> 驻场教练
-                        </div>
-                        ${coachesHtml}
-                        ` : ''}
-                    </div>
-                    ` : ''}
-
-                    <div class="popup-section">
+                    <div class="popup-section collapsible-section collapsed" onclick="toggleSection(this)">
                         <div class="popup-section-title">
                             <span class="icon">📷</span> 网友实拍
+                            <span class="section-toggle">▼</span>
                         </div>
-                        ${photosHtml}
+                        <div class="collapsible-content">
+                            ${photosHtml}
+                        </div>
                     </div>
 
-                    <div class="popup-section">
+                    <div class="popup-section collapsible-section collapsed" onclick="toggleSection(this)">
                         <div class="popup-section-title">
                             <span class="icon">📝</span> 相关帖子
+                            <span class="section-toggle">▼</span>
                         </div>
-                        ${postsHtml}
+                        <div class="collapsible-content">
+                            ${postsHtml}
+                        </div>
                     </div>
                 </div>
             `;
+        }
+
+        function toggleSection(el) {
+            event.stopPropagation();
+            el.classList.toggle('collapsed');
         }
 
         function getFilteredLocations() {
@@ -1734,19 +1998,11 @@
             if (type === currentMapLayer) return;
             
             if (type === 'gaode') {
-                if (osmLayer) map.removeLayer(osmLayer);
+                if (gaodeSatelliteLayer) map.removeLayer(gaodeSatelliteLayer);
                 if (gaodeLayer) gaodeLayer.addTo(map);
-                if (attributionControl) {
-                    attributionControl.removeAttribution('&copy; OpenStreetMap contributors &copy; CARTO');
-                    attributionControl.addAttribution('&copy; 高德地图');
-                }
-            } else {
+            } else if (type === 'gaodeSatellite') {
                 if (gaodeLayer) map.removeLayer(gaodeLayer);
-                if (osmLayer) osmLayer.addTo(map);
-                if (attributionControl) {
-                    attributionControl.removeAttribution('&copy; 高德地图');
-                    attributionControl.addAttribution('&copy; OpenStreetMap contributors &copy; CARTO');
-                }
+                if (gaodeSatelliteLayer) gaodeSatelliteLayer.addTo(map);
             }
             
             currentMapLayer = type;
