@@ -1,0 +1,3592 @@
+[
+  {
+    "id": "beijing_houchangcun_000",
+    "name": "瑞幸咖啡(NO.1)",
+    "brand": "luckin",
+    "address": "北京市后厂村第1分店",
+    "longitude": 116.31266025202927,
+    "latitude": 40.03929324511085,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_001",
+    "name": "瑞幸咖啡(NO.2)",
+    "brand": "luckin",
+    "address": "北京市后厂村第2分店",
+    "longitude": 116.29043568976235,
+    "latitude": 40.04198089711142,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_002",
+    "name": "瑞幸咖啡(NO.3)",
+    "brand": "luckin",
+    "address": "北京市后厂村第3分店",
+    "longitude": 116.3050931833506,
+    "latitude": 40.05516067843421,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_003",
+    "name": "瑞幸咖啡(NO.4)",
+    "brand": "luckin",
+    "address": "北京市后厂村第4分店",
+    "longitude": 116.32211543855298,
+    "latitude": 40.03891822044767,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_004",
+    "name": "星巴克(NO.5)",
+    "brand": "starbucks",
+    "address": "北京市后厂村第5分店",
+    "longitude": 116.29561699400588,
+    "latitude": 40.04599130679241,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_005",
+    "name": "星巴克(NO.6)",
+    "brand": "starbucks",
+    "address": "北京市后厂村第6分店",
+    "longitude": 116.31582803574284,
+    "latitude": 40.0369679101225,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_006",
+    "name": "星巴克(NO.7)",
+    "brand": "starbucks",
+    "address": "北京市后厂村第7分店",
+    "longitude": 116.28679427316342,
+    "latitude": 40.0359463804174,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_007",
+    "name": "瑞幸咖啡(NO.8)",
+    "brand": "luckin",
+    "address": "北京市后厂村第8分店",
+    "longitude": 116.29353686389747,
+    "latitude": 40.0365098418242,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_008",
+    "name": "星巴克(NO.9)",
+    "brand": "starbucks",
+    "address": "北京市后厂村第9分店",
+    "longitude": 116.31440139840481,
+    "latitude": 40.03792616289281,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_009",
+    "name": "Seesaw Coffee(NO.10)",
+    "brand": "seesaw",
+    "address": "北京市后厂村第10分店",
+    "longitude": 116.30339639907733,
+    "latitude": 40.03219294018953,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_010",
+    "name": "瑞幸咖啡(NO.11)",
+    "brand": "luckin",
+    "address": "北京市后厂村第11分店",
+    "longitude": 116.30628014138459,
+    "latitude": 40.03400830734698,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_houchangcun_011",
+    "name": "Seesaw Coffee(NO.12)",
+    "brand": "seesaw",
+    "address": "北京市后厂村第12分店",
+    "longitude": 116.30511444946745,
+    "latitude": 40.04468269789904,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_012",
+    "name": "Manner Coffee(NO.13)",
+    "brand": "manner",
+    "address": "北京市后厂村第13分店",
+    "longitude": 116.31835206399788,
+    "latitude": 40.053526903173584,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_013",
+    "name": "Manner Coffee(NO.14)",
+    "brand": "manner",
+    "address": "北京市后厂村第14分店",
+    "longitude": 116.31913026551705,
+    "latitude": 40.05051811587918,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_014",
+    "name": "瑞幸咖啡(NO.15)",
+    "brand": "luckin",
+    "address": "北京市后厂村第15分店",
+    "longitude": 116.29287692771778,
+    "latitude": 40.03927571135329,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_015",
+    "name": "星巴克(NO.16)",
+    "brand": "starbucks",
+    "address": "北京市后厂村第16分店",
+    "longitude": 116.32415289457695,
+    "latitude": 40.04640786622982,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_houchangcun_016",
+    "name": "Seesaw Coffee(NO.17)",
+    "brand": "seesaw",
+    "address": "北京市后厂村第17分店",
+    "longitude": 116.29342693214467,
+    "latitude": 40.04925989258994,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_houchangcun_017",
+    "name": "瑞幸咖啡(NO.18)",
+    "brand": "luckin",
+    "address": "北京市后厂村第18分店",
+    "longitude": 116.31946538741221,
+    "latitude": 40.04195922012416,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_018",
+    "name": "星巴克(NO.19)",
+    "brand": "starbucks",
+    "address": "北京市后厂村第19分店",
+    "longitude": 116.30439563243667,
+    "latitude": 40.05064119952922,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_019",
+    "name": "瑞幸咖啡(NO.20)",
+    "brand": "luckin",
+    "address": "北京市后厂村第20分店",
+    "longitude": 116.29719926210646,
+    "latitude": 40.049678423007194,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_020",
+    "name": "Seesaw Coffee(NO.21)",
+    "brand": "seesaw",
+    "address": "北京市后厂村第21分店",
+    "longitude": 116.30640059964848,
+    "latitude": 40.0376690072304,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_021",
+    "name": "星巴克(NO.22)",
+    "brand": "starbucks",
+    "address": "北京市后厂村第22分店",
+    "longitude": 116.3085085774462,
+    "latitude": 40.045883858974555,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_022",
+    "name": "Manner Coffee(NO.23)",
+    "brand": "manner",
+    "address": "北京市后厂村第23分店",
+    "longitude": 116.28618252110083,
+    "latitude": 40.03751119086011,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_023",
+    "name": "Seesaw Coffee(NO.24)",
+    "brand": "seesaw",
+    "address": "北京市后厂村第24分店",
+    "longitude": 116.31337502488093,
+    "latitude": 40.05939214889928,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_024",
+    "name": "瑞幸咖啡(NO.25)",
+    "brand": "luckin",
+    "address": "北京市后厂村第25分店",
+    "longitude": 116.29293465876825,
+    "latitude": 40.058570054480604,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_025",
+    "name": "巷里咖啡店",
+    "brand": "independent",
+    "address": "北京市后厂村第26分店",
+    "longitude": 116.29208722900847,
+    "latitude": 40.05288728585412,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_026",
+    "name": "瑞幸咖啡(NO.27)",
+    "brand": "luckin",
+    "address": "北京市后厂村第27分店",
+    "longitude": 116.32269235168991,
+    "latitude": 40.055789732363664,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_houchangcun_027",
+    "name": "星巴克(NO.28)",
+    "brand": "starbucks",
+    "address": "北京市后厂村第28分店",
+    "longitude": 116.31266830590076,
+    "latitude": 40.04584954692332,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_zhongguancun_000",
+    "name": "Manner Coffee(NO.1)",
+    "brand": "manner",
+    "address": "北京市中关村第1分店",
+    "longitude": 116.33540901109414,
+    "latitude": 39.99387737900648,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_zhongguancun_001",
+    "name": "Seesaw Coffee(NO.2)",
+    "brand": "seesaw",
+    "address": "北京市中关村第2分店",
+    "longitude": 116.32585678194107,
+    "latitude": 39.9809342672072,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_zhongguancun_002",
+    "name": "Seesaw Coffee(NO.3)",
+    "brand": "seesaw",
+    "address": "北京市中关村第3分店",
+    "longitude": 116.29600904262935,
+    "latitude": 39.97237729112517,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_zhongguancun_003",
+    "name": "Tims天好咖啡(NO.4)",
+    "brand": "timhortons",
+    "address": "北京市中关村第4分店",
+    "longitude": 116.29598490845984,
+    "latitude": 39.99527572776048,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_zhongguancun_004",
+    "name": "时光咖啡店",
+    "brand": "independent",
+    "address": "北京市中关村第5分店",
+    "longitude": 116.30747787003578,
+    "latitude": 39.983849048800565,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_zhongguancun_005",
+    "name": "Seesaw Coffee(NO.6)",
+    "brand": "seesaw",
+    "address": "北京市中关村第6分店",
+    "longitude": 116.32521987411279,
+    "latitude": 39.975316240409036,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_zhongguancun_006",
+    "name": "星巴克(NO.7)",
+    "brand": "starbucks",
+    "address": "北京市中关村第7分店",
+    "longitude": 116.30393623541445,
+    "latitude": 39.996296515353684,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_zhongguancun_007",
+    "name": "星巴克(NO.8)",
+    "brand": "starbucks",
+    "address": "北京市中关村第8分店",
+    "longitude": 116.30678518319287,
+    "latitude": 39.971228739614276,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_zhongguancun_008",
+    "name": "遇见咖啡店",
+    "brand": "independent",
+    "address": "北京市中关村第9分店",
+    "longitude": 116.29717252399259,
+    "latitude": 39.98340847239373,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_zhongguancun_009",
+    "name": "瑞幸咖啡(NO.10)",
+    "brand": "luckin",
+    "address": "北京市中关村第10分店",
+    "longitude": 116.3253439076915,
+    "latitude": 39.98673420004938,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_zhongguancun_010",
+    "name": "瑞幸咖啡(NO.11)",
+    "brand": "luckin",
+    "address": "北京市中关村第11分店",
+    "longitude": 116.32998435064926,
+    "latitude": 39.99265674311601,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_zhongguancun_011",
+    "name": "Costa Coffee(NO.12)",
+    "brand": "costa",
+    "address": "北京市中关村第12分店",
+    "longitude": 116.30262094875972,
+    "latitude": 39.97785995200922,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_zhongguancun_012",
+    "name": "遇见咖啡店",
+    "brand": "independent",
+    "address": "北京市中关村第13分店",
+    "longitude": 116.32855466919843,
+    "latitude": 39.994457262697715,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_zhongguancun_013",
+    "name": "巷里咖啡店",
+    "brand": "independent",
+    "address": "北京市中关村第14分店",
+    "longitude": 116.32243187071975,
+    "latitude": 39.98610203184588,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_zhongguancun_014",
+    "name": "瑞幸咖啡(NO.15)",
+    "brand": "luckin",
+    "address": "北京市中关村第15分店",
+    "longitude": 116.30773677418671,
+    "latitude": 39.98924532496559,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_zhongguancun_015",
+    "name": "瑞幸咖啡(NO.16)",
+    "brand": "luckin",
+    "address": "北京市中关村第16分店",
+    "longitude": 116.32879695326464,
+    "latitude": 39.98484154319602,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_zhongguancun_016",
+    "name": "瑞幸咖啡(NO.17)",
+    "brand": "luckin",
+    "address": "北京市中关村第17分店",
+    "longitude": 116.31751996408784,
+    "latitude": 39.99053463059238,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_zhongguancun_017",
+    "name": "星巴克(NO.18)",
+    "brand": "starbucks",
+    "address": "北京市中关村第18分店",
+    "longitude": 116.32982449060806,
+    "latitude": 39.97211373369604,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_wangjing_000",
+    "name": "Seesaw Coffee(NO.1)",
+    "brand": "seesaw",
+    "address": "北京市望京第1分店",
+    "longitude": 116.4670023459046,
+    "latitude": 40.010621751133556,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_wangjing_001",
+    "name": "巷里咖啡店",
+    "brand": "independent",
+    "address": "北京市望京第2分店",
+    "longitude": 116.46821403075009,
+    "latitude": 40.00921709242382,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_002",
+    "name": "瑞幸咖啡(NO.3)",
+    "brand": "luckin",
+    "address": "北京市望京第3分店",
+    "longitude": 116.4829070769661,
+    "latitude": 39.99939380110144,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_003",
+    "name": "Manner Coffee(NO.4)",
+    "brand": "manner",
+    "address": "北京市望京第4分店",
+    "longitude": 116.48483015061204,
+    "latitude": 39.99384932182127,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_004",
+    "name": "Seesaw Coffee(NO.5)",
+    "brand": "seesaw",
+    "address": "北京市望京第5分店",
+    "longitude": 116.4688690506276,
+    "latitude": 39.99103641975709,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_wangjing_005",
+    "name": "瑞幸咖啡(NO.6)",
+    "brand": "luckin",
+    "address": "北京市望京第6分店",
+    "longitude": 116.48928625398894,
+    "latitude": 39.99559347802756,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_006",
+    "name": "暖光咖啡店",
+    "brand": "independent",
+    "address": "北京市望京第7分店",
+    "longitude": 116.45721083590243,
+    "latitude": 40.00858603810764,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_007",
+    "name": "Seesaw Coffee(NO.8)",
+    "brand": "seesaw",
+    "address": "北京市望京第8分店",
+    "longitude": 116.4639671471255,
+    "latitude": 40.00336348518986,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_008",
+    "name": "Seesaw Coffee(NO.9)",
+    "brand": "seesaw",
+    "address": "北京市望京第9分店",
+    "longitude": 116.45709677814989,
+    "latitude": 39.99661278068559,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_009",
+    "name": "星巴克(NO.10)",
+    "brand": "starbucks",
+    "address": "北京市望京第10分店",
+    "longitude": 116.48210247316543,
+    "latitude": 40.01667895502345,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_010",
+    "name": "星巴克(NO.11)",
+    "brand": "starbucks",
+    "address": "北京市望京第11分店",
+    "longitude": 116.45617656179333,
+    "latitude": 40.00536908342293,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_011",
+    "name": "瑞幸咖啡(NO.12)",
+    "brand": "luckin",
+    "address": "北京市望京第12分店",
+    "longitude": 116.49486107868238,
+    "latitude": 40.014940680786715,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_012",
+    "name": "遇见咖啡店",
+    "brand": "independent",
+    "address": "北京市望京第13分店",
+    "longitude": 116.47544768638564,
+    "latitude": 39.991964389580296,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_013",
+    "name": "瑞幸咖啡(NO.14)",
+    "brand": "luckin",
+    "address": "北京市望京第14分店",
+    "longitude": 116.4753718616773,
+    "latitude": 40.003450327161374,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_014",
+    "name": "瑞幸咖啡(NO.15)",
+    "brand": "luckin",
+    "address": "北京市望京第15分店",
+    "longitude": 116.48147035955836,
+    "latitude": 40.001480552075215,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_015",
+    "name": "初心咖啡店",
+    "brand": "independent",
+    "address": "北京市望京第16分店",
+    "longitude": 116.46654982833037,
+    "latitude": 40.006790238597624,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_016",
+    "name": "瑞幸咖啡(NO.17)",
+    "brand": "luckin",
+    "address": "北京市望京第17分店",
+    "longitude": 116.46474146218975,
+    "latitude": 40.000565302350346,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_017",
+    "name": "Seesaw Coffee(NO.18)",
+    "brand": "seesaw",
+    "address": "北京市望京第18分店",
+    "longitude": 116.4650147293485,
+    "latitude": 40.01197052833497,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_018",
+    "name": "遇见咖啡店",
+    "brand": "independent",
+    "address": "北京市望京第19分店",
+    "longitude": 116.46155556473464,
+    "latitude": 40.00700287488504,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_wangjing_019",
+    "name": "瑞幸咖啡(NO.20)",
+    "brand": "luckin",
+    "address": "北京市望京第20分店",
+    "longitude": 116.4853873866686,
+    "latitude": 39.99744960163935,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_020",
+    "name": "瑞幸咖啡(NO.21)",
+    "brand": "luckin",
+    "address": "北京市望京第21分店",
+    "longitude": 116.46288464130501,
+    "latitude": 40.01263182071524,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_021",
+    "name": "Manner Coffee(NO.22)",
+    "brand": "manner",
+    "address": "北京市望京第22分店",
+    "longitude": 116.46678668067266,
+    "latitude": 40.00182644625586,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_wangjing_022",
+    "name": "瑞幸咖啡(NO.23)",
+    "brand": "luckin",
+    "address": "北京市望京第23分店",
+    "longitude": 116.48719151073988,
+    "latitude": 40.01713356394551,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_wangjing_023",
+    "name": "星巴克(NO.24)",
+    "brand": "starbucks",
+    "address": "北京市望京第24分店",
+    "longitude": 116.48206274761095,
+    "latitude": 40.00160593188587,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_wangjing_024",
+    "name": "Seesaw Coffee(NO.25)",
+    "brand": "seesaw",
+    "address": "北京市望京第25分店",
+    "longitude": 116.4892723948708,
+    "latitude": 39.99701646448946,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_guomao_000",
+    "name": "瑞幸咖啡(NO.1)",
+    "brand": "luckin",
+    "address": "北京市国贸CBD第1分店",
+    "longitude": 116.4430572974134,
+    "latitude": 39.90913960089524,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_guomao_001",
+    "name": "星巴克(NO.2)",
+    "brand": "starbucks",
+    "address": "北京市国贸CBD第2分店",
+    "longitude": 116.44119748311685,
+    "latitude": 39.92178732681592,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_guomao_002",
+    "name": "瑞幸咖啡(NO.3)",
+    "brand": "luckin",
+    "address": "北京市国贸CBD第3分店",
+    "longitude": 116.4468531604452,
+    "latitude": 39.89967775747212,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_guomao_003",
+    "name": "星巴克(NO.4)",
+    "brand": "starbucks",
+    "address": "北京市国贸CBD第4分店",
+    "longitude": 116.45362362878289,
+    "latitude": 39.89787641885964,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_guomao_004",
+    "name": "星巴克(NO.5)",
+    "brand": "starbucks",
+    "address": "北京市国贸CBD第5分店",
+    "longitude": 116.46864836128023,
+    "latitude": 39.915013828320845,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_guomao_005",
+    "name": "Manner Coffee(NO.6)",
+    "brand": "manner",
+    "address": "北京市国贸CBD第6分店",
+    "longitude": 116.47414880786877,
+    "latitude": 39.91843728342615,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_guomao_006",
+    "name": "初心咖啡店",
+    "brand": "independent",
+    "address": "北京市国贸CBD第7分店",
+    "longitude": 116.44204551784982,
+    "latitude": 39.920778480299504,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_guomao_007",
+    "name": "晨雾咖啡店",
+    "brand": "independent",
+    "address": "北京市国贸CBD第8分店",
+    "longitude": 116.46034051013491,
+    "latitude": 39.9243568477664,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_guomao_008",
+    "name": "星巴克(NO.9)",
+    "brand": "starbucks",
+    "address": "北京市国贸CBD第9分店",
+    "longitude": 116.47099032003777,
+    "latitude": 39.903808355228676,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_guomao_009",
+    "name": "瑞幸咖啡(NO.10)",
+    "brand": "luckin",
+    "address": "北京市国贸CBD第10分店",
+    "longitude": 116.46380892453384,
+    "latitude": 39.90394210525739,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_guomao_010",
+    "name": "瑞幸咖啡(NO.11)",
+    "brand": "luckin",
+    "address": "北京市国贸CBD第11分店",
+    "longitude": 116.4443780276161,
+    "latitude": 39.903997082604086,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_guomao_011",
+    "name": "时光咖啡店",
+    "brand": "independent",
+    "address": "北京市国贸CBD第12分店",
+    "longitude": 116.4438716759002,
+    "latitude": 39.921688911446594,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_guomao_012",
+    "name": "星巴克(NO.13)",
+    "brand": "starbucks",
+    "address": "北京市国贸CBD第13分店",
+    "longitude": 116.45141252767392,
+    "latitude": 39.90620682672373,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_guomao_013",
+    "name": "星巴克(NO.14)",
+    "brand": "starbucks",
+    "address": "北京市国贸CBD第14分店",
+    "longitude": 116.4683044768037,
+    "latitude": 39.896863999564566,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_guomao_014",
+    "name": "瑞幸咖啡(NO.15)",
+    "brand": "luckin",
+    "address": "北京市国贸CBD第15分店",
+    "longitude": 116.46931053100322,
+    "latitude": 39.91504568867152,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_guomao_015",
+    "name": "Costa Coffee(NO.16)",
+    "brand": "costa",
+    "address": "北京市国贸CBD第16分店",
+    "longitude": 116.45171942761914,
+    "latitude": 39.924983976762874,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "beijing_guomao_016",
+    "name": "瑞幸咖啡(NO.17)",
+    "brand": "luckin",
+    "address": "北京市国贸CBD第17分店",
+    "longitude": 116.46990821890284,
+    "latitude": 39.89779805889115,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_guomao_017",
+    "name": "Manner Coffee(NO.18)",
+    "brand": "manner",
+    "address": "北京市国贸CBD第18分店",
+    "longitude": 116.46080564861805,
+    "latitude": 39.9017078294602,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "beijing_guomao_018",
+    "name": "慢时光咖啡店",
+    "brand": "independent",
+    "address": "北京市国贸CBD第19分店",
+    "longitude": 116.45985730316751,
+    "latitude": 39.921983023156734,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_kexing_000",
+    "name": "遇见咖啡店",
+    "brand": "independent",
+    "address": "深圳市科兴科学园第1分店",
+    "longitude": 113.94025647215189,
+    "latitude": 22.54215962842006,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_001",
+    "name": "瑞幸咖啡(NO.2)",
+    "brand": "luckin",
+    "address": "深圳市科兴科学园第2分店",
+    "longitude": 113.95560732002305,
+    "latitude": 22.551364152241835,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_002",
+    "name": "星巴克(NO.3)",
+    "brand": "starbucks",
+    "address": "深圳市科兴科学园第3分店",
+    "longitude": 113.93913637307202,
+    "latitude": 22.550668985413314,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_kexing_003",
+    "name": "Costa Coffee(NO.4)",
+    "brand": "costa",
+    "address": "深圳市科兴科学园第4分店",
+    "longitude": 113.93575989448046,
+    "latitude": 22.55175259137656,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_004",
+    "name": "Manner Coffee(NO.5)",
+    "brand": "manner",
+    "address": "深圳市科兴科学园第5分店",
+    "longitude": 113.93370405560576,
+    "latitude": 22.559755117578185,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_005",
+    "name": "瑞幸咖啡(NO.6)",
+    "brand": "luckin",
+    "address": "深圳市科兴科学园第6分店",
+    "longitude": 113.94450127454469,
+    "latitude": 22.552956431112992,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_006",
+    "name": "Seesaw Coffee(NO.7)",
+    "brand": "seesaw",
+    "address": "深圳市科兴科学园第7分店",
+    "longitude": 113.94432745802364,
+    "latitude": 22.549774713082652,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_007",
+    "name": "瑞幸咖啡(NO.8)",
+    "brand": "luckin",
+    "address": "深圳市科兴科学园第8分店",
+    "longitude": 113.93565807970413,
+    "latitude": 22.555869425552327,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_008",
+    "name": "Manner Coffee(NO.9)",
+    "brand": "manner",
+    "address": "深圳市科兴科学园第9分店",
+    "longitude": 113.95683988915827,
+    "latitude": 22.543100071288016,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_009",
+    "name": "Manner Coffee(NO.10)",
+    "brand": "manner",
+    "address": "深圳市科兴科学园第10分店",
+    "longitude": 113.94110455310846,
+    "latitude": 22.555779343057193,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_010",
+    "name": "Manner Coffee(NO.11)",
+    "brand": "manner",
+    "address": "深圳市科兴科学园第11分店",
+    "longitude": 113.93633456604879,
+    "latitude": 22.538825815088195,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_011",
+    "name": "瑞幸咖啡(NO.12)",
+    "brand": "luckin",
+    "address": "深圳市科兴科学园第12分店",
+    "longitude": 113.93820361980227,
+    "latitude": 22.549974314091877,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_012",
+    "name": "瑞幸咖啡(NO.13)",
+    "brand": "luckin",
+    "address": "深圳市科兴科学园第13分店",
+    "longitude": 113.94491229717589,
+    "latitude": 22.546712937914016,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_013",
+    "name": "瑞幸咖啡(NO.14)",
+    "brand": "luckin",
+    "address": "深圳市科兴科学园第14分店",
+    "longitude": 113.94116172834163,
+    "latitude": 22.555646600205858,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_014",
+    "name": "遇见咖啡店",
+    "brand": "independent",
+    "address": "深圳市科兴科学园第15分店",
+    "longitude": 113.94124361410837,
+    "latitude": 22.54445202444097,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_015",
+    "name": "瑞幸咖啡(NO.16)",
+    "brand": "luckin",
+    "address": "深圳市科兴科学园第16分店",
+    "longitude": 113.94768043285049,
+    "latitude": 22.547141861336932,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_016",
+    "name": "瑞幸咖啡(NO.17)",
+    "brand": "luckin",
+    "address": "深圳市科兴科学园第17分店",
+    "longitude": 113.9537806582449,
+    "latitude": 22.54155179606413,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_kexing_017",
+    "name": "星巴克(NO.18)",
+    "brand": "starbucks",
+    "address": "深圳市科兴科学园第18分店",
+    "longitude": 113.9350930385963,
+    "latitude": 22.549365611603584,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_018",
+    "name": "瑞幸咖啡(NO.19)",
+    "brand": "luckin",
+    "address": "深圳市科兴科学园第19分店",
+    "longitude": 113.93304658315085,
+    "latitude": 22.557403456248743,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_019",
+    "name": "Manner Coffee(NO.20)",
+    "brand": "manner",
+    "address": "深圳市科兴科学园第20分店",
+    "longitude": 113.94424438140108,
+    "latitude": 22.553233384549106,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_020",
+    "name": "Manner Coffee(NO.21)",
+    "brand": "manner",
+    "address": "深圳市科兴科学园第21分店",
+    "longitude": 113.95405809083736,
+    "latitude": 22.55687597912403,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_021",
+    "name": "Tims天好咖啡(NO.22)",
+    "brand": "timhortons",
+    "address": "深圳市科兴科学园第22分店",
+    "longitude": 113.94053976606804,
+    "latitude": 22.549029546805368,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_022",
+    "name": "星巴克(NO.23)",
+    "brand": "starbucks",
+    "address": "深圳市科兴科学园第23分店",
+    "longitude": 113.9467095283896,
+    "latitude": 22.541047796264067,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_023",
+    "name": "星巴克(NO.24)",
+    "brand": "starbucks",
+    "address": "深圳市科兴科学园第24分店",
+    "longitude": 113.95127346620077,
+    "latitude": 22.543764791403422,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_024",
+    "name": "星巴克(NO.25)",
+    "brand": "starbucks",
+    "address": "深圳市科兴科学园第25分店",
+    "longitude": 113.93379404607313,
+    "latitude": 22.558494741299057,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_025",
+    "name": "Manner Coffee(NO.26)",
+    "brand": "manner",
+    "address": "深圳市科兴科学园第26分店",
+    "longitude": 113.95681429288157,
+    "latitude": 22.54703933221405,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_kexing_026",
+    "name": "星巴克(NO.27)",
+    "brand": "starbucks",
+    "address": "深圳市科兴科学园第27分店",
+    "longitude": 113.94459432458939,
+    "latitude": 22.548661213664488,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_027",
+    "name": "瑞幸咖啡(NO.28)",
+    "brand": "luckin",
+    "address": "深圳市科兴科学园第28分店",
+    "longitude": 113.93995121224849,
+    "latitude": 22.54927209034079,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_028",
+    "name": "瑞幸咖啡(NO.29)",
+    "brand": "luckin",
+    "address": "深圳市科兴科学园第29分店",
+    "longitude": 113.93933885666509,
+    "latitude": 22.55101125452688,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_029",
+    "name": "瑞幸咖啡(NO.30)",
+    "brand": "luckin",
+    "address": "深圳市科兴科学园第30分店",
+    "longitude": 113.95483278044703,
+    "latitude": 22.543314207903425,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_030",
+    "name": "瑞幸咖啡(NO.31)",
+    "brand": "luckin",
+    "address": "深圳市科兴科学园第31分店",
+    "longitude": 113.95410163242882,
+    "latitude": 22.5536794468198,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_031",
+    "name": "瑞幸咖啡(NO.32)",
+    "brand": "luckin",
+    "address": "深圳市科兴科学园第32分店",
+    "longitude": 113.93958743250705,
+    "latitude": 22.55680130314035,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_032",
+    "name": "Manner Coffee(NO.33)",
+    "brand": "manner",
+    "address": "深圳市科兴科学园第33分店",
+    "longitude": 113.95194451929034,
+    "latitude": 22.555271655206273,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_kexing_033",
+    "name": "Manner Coffee(NO.34)",
+    "brand": "manner",
+    "address": "深圳市科兴科学园第34分店",
+    "longitude": 113.95470972377804,
+    "latitude": 22.557115058170375,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_034",
+    "name": "暖光咖啡店",
+    "brand": "independent",
+    "address": "深圳市科兴科学园第35分店",
+    "longitude": 113.9365121497244,
+    "latitude": 22.543446248830485,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_035",
+    "name": "瑞幸咖啡(NO.36)",
+    "brand": "luckin",
+    "address": "深圳市科兴科学园第36分店",
+    "longitude": 113.94466825101799,
+    "latitude": 22.556902022593913,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_kexing_036",
+    "name": "瑞幸咖啡(NO.37)",
+    "brand": "luckin",
+    "address": "深圳市科兴科学园第37分店",
+    "longitude": 113.95505243927497,
+    "latitude": 22.5475805669654,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_kexing_037",
+    "name": "Tims天好咖啡(NO.38)",
+    "brand": "timhortons",
+    "address": "深圳市科兴科学园第38分店",
+    "longitude": 113.93593352701879,
+    "latitude": 22.55367747225158,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_000",
+    "name": "Manner Coffee(NO.1)",
+    "brand": "manner",
+    "address": "深圳市南山智园第1分店",
+    "longitude": 113.94612107256273,
+    "latitude": 22.594837418789336,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_001",
+    "name": "星巴克(NO.2)",
+    "brand": "starbucks",
+    "address": "深圳市南山智园第2分店",
+    "longitude": 113.96450670465057,
+    "latitude": 22.605313609565158,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_002",
+    "name": "晨雾咖啡店",
+    "brand": "independent",
+    "address": "深圳市南山智园第3分店",
+    "longitude": 113.96696280904592,
+    "latitude": 22.606027922869018,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_003",
+    "name": "瑞幸咖啡(NO.4)",
+    "brand": "luckin",
+    "address": "深圳市南山智园第4分店",
+    "longitude": 113.96465156938055,
+    "latitude": 22.594125085007324,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_004",
+    "name": "Manner Coffee(NO.5)",
+    "brand": "manner",
+    "address": "深圳市南山智园第5分店",
+    "longitude": 113.96661385606008,
+    "latitude": 22.590388627970572,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_005",
+    "name": "瑞幸咖啡(NO.6)",
+    "brand": "luckin",
+    "address": "深圳市南山智园第6分店",
+    "longitude": 113.95638547162065,
+    "latitude": 22.5921958627434,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_006",
+    "name": "星巴克(NO.7)",
+    "brand": "starbucks",
+    "address": "深圳市南山智园第7分店",
+    "longitude": 113.96596153844499,
+    "latitude": 22.60010205245999,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_007",
+    "name": "Manner Coffee(NO.8)",
+    "brand": "manner",
+    "address": "深圳市南山智园第8分店",
+    "longitude": 113.95316117062545,
+    "latitude": 22.60319357051322,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_008",
+    "name": "星巴克(NO.9)",
+    "brand": "starbucks",
+    "address": "深圳市南山智园第9分店",
+    "longitude": 113.96129198861878,
+    "latitude": 22.607605632372522,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_009",
+    "name": "瑞幸咖啡(NO.10)",
+    "brand": "luckin",
+    "address": "深圳市南山智园第10分店",
+    "longitude": 113.95759208820624,
+    "latitude": 22.600845416451655,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_010",
+    "name": "Tims天好咖啡(NO.11)",
+    "brand": "timhortons",
+    "address": "深圳市南山智园第11分店",
+    "longitude": 113.95408096804765,
+    "latitude": 22.601479394941173,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_011",
+    "name": "瑞幸咖啡(NO.12)",
+    "brand": "luckin",
+    "address": "深圳市南山智园第12分店",
+    "longitude": 113.9588026615101,
+    "latitude": 22.58958606279912,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_012",
+    "name": "Manner Coffee(NO.13)",
+    "brand": "manner",
+    "address": "深圳市南山智园第13分店",
+    "longitude": 113.96357039070237,
+    "latitude": 22.603395538633475,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_013",
+    "name": "瑞幸咖啡(NO.14)",
+    "brand": "luckin",
+    "address": "深圳市南山智园第14分店",
+    "longitude": 113.96150213230551,
+    "latitude": 22.59733845518435,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_014",
+    "name": "瑞幸咖啡(NO.15)",
+    "brand": "luckin",
+    "address": "深圳市南山智园第15分店",
+    "longitude": 113.96502035411555,
+    "latitude": 22.59440899550337,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_015",
+    "name": "慢时光咖啡店",
+    "brand": "independent",
+    "address": "深圳市南山智园第16分店",
+    "longitude": 113.95641729294503,
+    "latitude": 22.60390010277363,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_016",
+    "name": "慢时光咖啡店",
+    "brand": "independent",
+    "address": "深圳市南山智园第17分店",
+    "longitude": 113.95519109317094,
+    "latitude": 22.60216588624495,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_017",
+    "name": "Costa Coffee(NO.18)",
+    "brand": "costa",
+    "address": "深圳市南山智园第18分店",
+    "longitude": 113.96317601949399,
+    "latitude": 22.595357109483224,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_018",
+    "name": "星巴克(NO.19)",
+    "brand": "starbucks",
+    "address": "深圳市南山智园第19分店",
+    "longitude": 113.94656401230453,
+    "latitude": 22.607476564336174,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_019",
+    "name": "Tims天好咖啡(NO.20)",
+    "brand": "timhortons",
+    "address": "深圳市南山智园第20分店",
+    "longitude": 113.9568423204553,
+    "latitude": 22.604168063198728,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_020",
+    "name": "瑞幸咖啡(NO.21)",
+    "brand": "luckin",
+    "address": "深圳市南山智园第21分店",
+    "longitude": 113.95884509597379,
+    "latitude": 22.60783083358554,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_021",
+    "name": "暖光咖啡店",
+    "brand": "independent",
+    "address": "深圳市南山智园第22分店",
+    "longitude": 113.9682028673919,
+    "latitude": 22.588978710041975,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_022",
+    "name": "拾光咖啡店",
+    "brand": "independent",
+    "address": "深圳市南山智园第23分店",
+    "longitude": 113.95212067513361,
+    "latitude": 22.588385232571003,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_023",
+    "name": "瑞幸咖啡(NO.24)",
+    "brand": "luckin",
+    "address": "深圳市南山智园第24分店",
+    "longitude": 113.94957641378771,
+    "latitude": 22.603382704370546,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_024",
+    "name": "星巴克(NO.25)",
+    "brand": "starbucks",
+    "address": "深圳市南山智园第25分店",
+    "longitude": 113.96119133113389,
+    "latitude": 22.600895891757382,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_025",
+    "name": "Seesaw Coffee(NO.26)",
+    "brand": "seesaw",
+    "address": "深圳市南山智园第26分店",
+    "longitude": 113.94996852705468,
+    "latitude": 22.600273769896123,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_nanshan_zhiyuan_026",
+    "name": "星巴克(NO.27)",
+    "brand": "starbucks",
+    "address": "深圳市南山智园第27分店",
+    "longitude": 113.95043825315031,
+    "latitude": 22.60261738029529,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_000",
+    "name": "瑞幸咖啡(NO.1)",
+    "brand": "luckin",
+    "address": "深圳市福田中心区第1分店",
+    "longitude": 114.05489370980958,
+    "latitude": 22.550897189098915,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_001",
+    "name": "Tims天好咖啡(NO.2)",
+    "brand": "timhortons",
+    "address": "深圳市福田中心区第2分店",
+    "longitude": 114.04801801569212,
+    "latitude": 22.535262365896227,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_002",
+    "name": "瑞幸咖啡(NO.3)",
+    "brand": "luckin",
+    "address": "深圳市福田中心区第3分店",
+    "longitude": 114.06627652901524,
+    "latitude": 22.540809048642963,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_003",
+    "name": "Manner Coffee(NO.4)",
+    "brand": "manner",
+    "address": "深圳市福田中心区第4分店",
+    "longitude": 114.0615131835877,
+    "latitude": 22.536597585538004,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_004",
+    "name": "星巴克(NO.5)",
+    "brand": "starbucks",
+    "address": "深圳市福田中心区第5分店",
+    "longitude": 114.07391023293442,
+    "latitude": 22.53208025296954,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_futian_central_005",
+    "name": "星巴克(NO.6)",
+    "brand": "starbucks",
+    "address": "深圳市福田中心区第6分店",
+    "longitude": 114.06366608909484,
+    "latitude": 22.533263204451664,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_006",
+    "name": "星巴克(NO.7)",
+    "brand": "starbucks",
+    "address": "深圳市福田中心区第7分店",
+    "longitude": 114.07232104824935,
+    "latitude": 22.545055113863075,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_007",
+    "name": "星巴克(NO.8)",
+    "brand": "starbucks",
+    "address": "深圳市福田中心区第8分店",
+    "longitude": 114.05678058616773,
+    "latitude": 22.55424882703868,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_008",
+    "name": "Manner Coffee(NO.9)",
+    "brand": "manner",
+    "address": "深圳市福田中心区第9分店",
+    "longitude": 114.06140684725868,
+    "latitude": 22.542177958272568,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_futian_central_009",
+    "name": "星巴克(NO.10)",
+    "brand": "starbucks",
+    "address": "深圳市福田中心区第10分店",
+    "longitude": 114.05873309332051,
+    "latitude": 22.541705036274674,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_futian_central_010",
+    "name": "Manner Coffee(NO.11)",
+    "brand": "manner",
+    "address": "深圳市福田中心区第11分店",
+    "longitude": 114.0509189433141,
+    "latitude": 22.538686574442398,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_futian_central_011",
+    "name": "遇见咖啡店",
+    "brand": "independent",
+    "address": "深圳市福田中心区第12分店",
+    "longitude": 114.06727547436283,
+    "latitude": 22.53596681918082,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_012",
+    "name": "星巴克(NO.13)",
+    "brand": "starbucks",
+    "address": "深圳市福田中心区第13分店",
+    "longitude": 114.04506474915173,
+    "latitude": 22.535576108911457,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_futian_central_013",
+    "name": "星巴克(NO.14)",
+    "brand": "starbucks",
+    "address": "深圳市福田中心区第14分店",
+    "longitude": 114.0538639545582,
+    "latitude": 22.537308205930255,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_futian_central_014",
+    "name": "星巴克(NO.15)",
+    "brand": "starbucks",
+    "address": "深圳市福田中心区第15分店",
+    "longitude": 114.05558045833581,
+    "latitude": 22.55011806610105,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_futian_central_015",
+    "name": "Seesaw Coffee(NO.16)",
+    "brand": "seesaw",
+    "address": "深圳市福田中心区第16分店",
+    "longitude": 114.07220530550542,
+    "latitude": 22.556745315253767,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_016",
+    "name": "星巴克(NO.17)",
+    "brand": "starbucks",
+    "address": "深圳市福田中心区第17分店",
+    "longitude": 114.05168692385836,
+    "latitude": 22.556192556073256,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_017",
+    "name": "星巴克(NO.18)",
+    "brand": "starbucks",
+    "address": "深圳市福田中心区第18分店",
+    "longitude": 114.07874389934709,
+    "latitude": 22.538200102531025,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_018",
+    "name": "Tims天好咖啡(NO.19)",
+    "brand": "timhortons",
+    "address": "深圳市福田中心区第19分店",
+    "longitude": 114.05792729176214,
+    "latitude": 22.532503384591465,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_019",
+    "name": "星巴克(NO.20)",
+    "brand": "starbucks",
+    "address": "深圳市福田中心区第20分店",
+    "longitude": 114.06279777039185,
+    "latitude": 22.54089004963168,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_020",
+    "name": "Seesaw Coffee(NO.21)",
+    "brand": "seesaw",
+    "address": "深圳市福田中心区第21分店",
+    "longitude": 114.06651982329512,
+    "latitude": 22.557190245702635,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_futian_central_021",
+    "name": "瑞幸咖啡(NO.22)",
+    "brand": "luckin",
+    "address": "深圳市福田中心区第22分店",
+    "longitude": 114.0721901513884,
+    "latitude": 22.535557141447832,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_022",
+    "name": "瑞幸咖啡(NO.23)",
+    "brand": "luckin",
+    "address": "深圳市福田中心区第23分店",
+    "longitude": 114.07508835563446,
+    "latitude": 22.546563914044512,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_023",
+    "name": "星巴克(NO.24)",
+    "brand": "starbucks",
+    "address": "深圳市福田中心区第24分店",
+    "longitude": 114.05038486055139,
+    "latitude": 22.554527263693323,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_024",
+    "name": "瑞幸咖啡(NO.25)",
+    "brand": "luckin",
+    "address": "深圳市福田中心区第25分店",
+    "longitude": 114.0554450819336,
+    "latitude": 22.551791127781282,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shenzhen_futian_central_025",
+    "name": "遇见咖啡店",
+    "brand": "independent",
+    "address": "深圳市福田中心区第26分店",
+    "longitude": 114.04533972194797,
+    "latitude": 22.553018287197496,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shenzhen_futian_central_026",
+    "name": "Manner Coffee(NO.27)",
+    "brand": "manner",
+    "address": "深圳市福田中心区第27分店",
+    "longitude": 114.07541728550376,
+    "latitude": 22.54921916780702,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_lujiazui_000",
+    "name": "Costa Coffee(NO.1)",
+    "brand": "costa",
+    "address": "上海市陆家嘴第1分店",
+    "longitude": 121.50772526984889,
+    "latitude": 31.239466393434455,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_lujiazui_001",
+    "name": "瑞幸咖啡(NO.2)",
+    "brand": "luckin",
+    "address": "上海市陆家嘴第2分店",
+    "longitude": 121.50703358887564,
+    "latitude": 31.23255129543267,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_lujiazui_002",
+    "name": "午后咖啡店",
+    "brand": "independent",
+    "address": "上海市陆家嘴第3分店",
+    "longitude": 121.50145636658834,
+    "latitude": 31.251737483171258,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_lujiazui_003",
+    "name": "时光咖啡店",
+    "brand": "independent",
+    "address": "上海市陆家嘴第4分店",
+    "longitude": 121.52109142528747,
+    "latitude": 31.242339005845395,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_lujiazui_004",
+    "name": "暖光咖啡店",
+    "brand": "independent",
+    "address": "上海市陆家嘴第5分店",
+    "longitude": 121.50349453221446,
+    "latitude": 31.242861940391236,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_lujiazui_005",
+    "name": "Costa Coffee(NO.6)",
+    "brand": "costa",
+    "address": "上海市陆家嘴第6分店",
+    "longitude": 121.49875365409353,
+    "latitude": 31.23604616211121,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_lujiazui_006",
+    "name": "Manner Coffee(NO.7)",
+    "brand": "manner",
+    "address": "上海市陆家嘴第7分店",
+    "longitude": 121.50401359472154,
+    "latitude": 31.246400862460384,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_lujiazui_007",
+    "name": "星巴克(NO.8)",
+    "brand": "starbucks",
+    "address": "上海市陆家嘴第8分店",
+    "longitude": 121.51034037931926,
+    "latitude": 31.241686125724886,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_lujiazui_008",
+    "name": "Seesaw Coffee(NO.9)",
+    "brand": "seesaw",
+    "address": "上海市陆家嘴第9分店",
+    "longitude": 121.49940467206508,
+    "latitude": 31.228278464935762,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_lujiazui_009",
+    "name": "瑞幸咖啡(NO.10)",
+    "brand": "luckin",
+    "address": "上海市陆家嘴第10分店",
+    "longitude": 121.51484732879197,
+    "latitude": 31.236332607796808,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_lujiazui_010",
+    "name": "瑞幸咖啡(NO.11)",
+    "brand": "luckin",
+    "address": "上海市陆家嘴第11分店",
+    "longitude": 121.50029511280171,
+    "latitude": 31.24900306182983,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_lujiazui_011",
+    "name": "转角咖啡店",
+    "brand": "independent",
+    "address": "上海市陆家嘴第12分店",
+    "longitude": 121.51674840722909,
+    "latitude": 31.246108551962266,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_lujiazui_012",
+    "name": "星巴克(NO.13)",
+    "brand": "starbucks",
+    "address": "上海市陆家嘴第13分店",
+    "longitude": 121.50991728283806,
+    "latitude": 31.251600446691057,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_lujiazui_013",
+    "name": "星巴克(NO.14)",
+    "brand": "starbucks",
+    "address": "上海市陆家嘴第14分店",
+    "longitude": 121.49473789582821,
+    "latitude": 31.234667007960702,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_lujiazui_014",
+    "name": "Costa Coffee(NO.15)",
+    "brand": "costa",
+    "address": "上海市陆家嘴第15分店",
+    "longitude": 121.52238671573015,
+    "latitude": 31.230489386913938,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_lujiazui_015",
+    "name": "Seesaw Coffee(NO.16)",
+    "brand": "seesaw",
+    "address": "上海市陆家嘴第16分店",
+    "longitude": 121.5119916843172,
+    "latitude": 31.23396021829743,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_lujiazui_016",
+    "name": "Manner Coffee(NO.17)",
+    "brand": "manner",
+    "address": "上海市陆家嘴第17分店",
+    "longitude": 121.49926594429729,
+    "latitude": 31.240718190147348,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_lujiazui_017",
+    "name": "Costa Coffee(NO.18)",
+    "brand": "costa",
+    "address": "上海市陆家嘴第18分店",
+    "longitude": 121.516066578236,
+    "latitude": 31.248984065974835,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_lujiazui_018",
+    "name": "巷里咖啡店",
+    "brand": "independent",
+    "address": "上海市陆家嘴第19分店",
+    "longitude": 121.50657911124726,
+    "latitude": 31.244450094388057,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_lujiazui_019",
+    "name": "拾光咖啡店",
+    "brand": "independent",
+    "address": "上海市陆家嘴第20分店",
+    "longitude": 121.52127763822894,
+    "latitude": 31.23908560102785,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_lujiazui_020",
+    "name": "瑞幸咖啡(NO.21)",
+    "brand": "luckin",
+    "address": "上海市陆家嘴第21分店",
+    "longitude": 121.49281563576801,
+    "latitude": 31.24241623162819,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_lujiazui_021",
+    "name": "Manner Coffee(NO.22)",
+    "brand": "manner",
+    "address": "上海市陆家嘴第22分店",
+    "longitude": 121.51063559676383,
+    "latitude": 31.23712650802781,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_lujiazui_022",
+    "name": "拾光咖啡店",
+    "brand": "independent",
+    "address": "上海市陆家嘴第23分店",
+    "longitude": 121.51615175537331,
+    "latitude": 31.242259027736974,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_zhangjiang_000",
+    "name": "Tims天好咖啡(NO.1)",
+    "brand": "timhortons",
+    "address": "上海市张江高科技园区第1分店",
+    "longitude": 121.58719389980848,
+    "latitude": 31.211693880078858,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_zhangjiang_001",
+    "name": "慢时光咖啡店",
+    "brand": "independent",
+    "address": "上海市张江高科技园区第2分店",
+    "longitude": 121.57564384560158,
+    "latitude": 31.193101642978665,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_zhangjiang_002",
+    "name": "Seesaw Coffee(NO.3)",
+    "brand": "seesaw",
+    "address": "上海市张江高科技园区第3分店",
+    "longitude": 121.59707202179152,
+    "latitude": 31.211211979591273,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_zhangjiang_003",
+    "name": "Manner Coffee(NO.4)",
+    "brand": "manner",
+    "address": "上海市张江高科技园区第4分店",
+    "longitude": 121.58689532175221,
+    "latitude": 31.195107044922494,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_zhangjiang_004",
+    "name": "瑞幸咖啡(NO.5)",
+    "brand": "luckin",
+    "address": "上海市张江高科技园区第5分店",
+    "longitude": 121.60323047487498,
+    "latitude": 31.214434940606274,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_zhangjiang_005",
+    "name": "瑞幸咖啡(NO.6)",
+    "brand": "luckin",
+    "address": "上海市张江高科技园区第6分店",
+    "longitude": 121.59478543021814,
+    "latitude": 31.21353178935446,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_zhangjiang_006",
+    "name": "Manner Coffee(NO.7)",
+    "brand": "manner",
+    "address": "上海市张江高科技园区第7分店",
+    "longitude": 121.58786475133896,
+    "latitude": 31.216375390943092,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_zhangjiang_007",
+    "name": "Tims天好咖啡(NO.8)",
+    "brand": "timhortons",
+    "address": "上海市张江高科技园区第8分店",
+    "longitude": 121.59468837955923,
+    "latitude": 31.208642833488522,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_zhangjiang_008",
+    "name": "拾光咖啡店",
+    "brand": "independent",
+    "address": "上海市张江高科技园区第9分店",
+    "longitude": 121.60618295820765,
+    "latitude": 31.193748654485155,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_zhangjiang_009",
+    "name": "瑞幸咖啡(NO.10)",
+    "brand": "luckin",
+    "address": "上海市张江高科技园区第10分店",
+    "longitude": 121.5790244832487,
+    "latitude": 31.21611847575554,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_zhangjiang_010",
+    "name": "晨雾咖啡店",
+    "brand": "independent",
+    "address": "上海市张江高科技园区第11分店",
+    "longitude": 121.6049005069512,
+    "latitude": 31.217114910422907,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_zhangjiang_011",
+    "name": "Manner Coffee(NO.12)",
+    "brand": "manner",
+    "address": "上海市张江高科技园区第12分店",
+    "longitude": 121.59541181700092,
+    "latitude": 31.21168401579119,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_zhangjiang_012",
+    "name": "瑞幸咖啡(NO.13)",
+    "brand": "luckin",
+    "address": "上海市张江高科技园区第13分店",
+    "longitude": 121.5858327552019,
+    "latitude": 31.210037690044242,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_zhangjiang_013",
+    "name": "Manner Coffee(NO.14)",
+    "brand": "manner",
+    "address": "上海市张江高科技园区第14分店",
+    "longitude": 121.57640808057673,
+    "latitude": 31.194944246342548,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_zhangjiang_014",
+    "name": "瑞幸咖啡(NO.15)",
+    "brand": "luckin",
+    "address": "上海市张江高科技园区第15分店",
+    "longitude": 121.60410953809844,
+    "latitude": 31.193763555785413,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_zhangjiang_015",
+    "name": "Manner Coffee(NO.16)",
+    "brand": "manner",
+    "address": "上海市张江高科技园区第16分店",
+    "longitude": 121.60554569746427,
+    "latitude": 31.214237703424324,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_zhangjiang_016",
+    "name": "Costa Coffee(NO.17)",
+    "brand": "costa",
+    "address": "上海市张江高科技园区第17分店",
+    "longitude": 121.58421982795781,
+    "latitude": 31.2100380300587,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_zhangjiang_017",
+    "name": "Tims天好咖啡(NO.18)",
+    "brand": "timhortons",
+    "address": "上海市张江高科技园区第18分店",
+    "longitude": 121.59716453723378,
+    "latitude": 31.215643495418476,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_zhangjiang_018",
+    "name": "星巴克(NO.19)",
+    "brand": "starbucks",
+    "address": "上海市张江高科技园区第19分店",
+    "longitude": 121.57259150221942,
+    "latitude": 31.194985932960815,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_zhangjiang_019",
+    "name": "瑞幸咖啡(NO.20)",
+    "brand": "luckin",
+    "address": "上海市张江高科技园区第20分店",
+    "longitude": 121.60508471388577,
+    "latitude": 31.206454291661778,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "shanghai_zhangjiang_020",
+    "name": "星巴克(NO.21)",
+    "brand": "starbucks",
+    "address": "上海市张江高科技园区第21分店",
+    "longitude": 121.60184343844489,
+    "latitude": 31.204812549744418,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_zhangjiang_021",
+    "name": "瑞幸咖啡(NO.22)",
+    "brand": "luckin",
+    "address": "上海市张江高科技园区第22分店",
+    "longitude": 121.58670800316219,
+    "latitude": 31.200417656617287,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "shanghai_zhangjiang_022",
+    "name": "星巴克(NO.23)",
+    "brand": "starbucks",
+    "address": "上海市张江高科技园区第23分店",
+    "longitude": 121.60466428631132,
+    "latitude": 31.218693829829945,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "hangzhou_binjiang_000",
+    "name": "瑞幸咖啡(NO.1)",
+    "brand": "luckin",
+    "address": "杭州市滨江高新区第1分店",
+    "longitude": 120.20816998757807,
+    "latitude": 30.211037521595376,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_001",
+    "name": "瑞幸咖啡(NO.2)",
+    "brand": "luckin",
+    "address": "杭州市滨江高新区第2分店",
+    "longitude": 120.20807156411445,
+    "latitude": 30.21039886552832,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_002",
+    "name": "瑞幸咖啡(NO.3)",
+    "brand": "luckin",
+    "address": "杭州市滨江高新区第3分店",
+    "longitude": 120.20816727921607,
+    "latitude": 30.22098971626132,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_003",
+    "name": "午后咖啡店",
+    "brand": "independent",
+    "address": "杭州市滨江高新区第4分店",
+    "longitude": 120.20677838997254,
+    "latitude": 30.19248341961758,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_004",
+    "name": "星巴克(NO.5)",
+    "brand": "starbucks",
+    "address": "杭州市滨江高新区第5分店",
+    "longitude": 120.19872781940573,
+    "latitude": 30.202386937384833,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "hangzhou_binjiang_005",
+    "name": "Manner Coffee(NO.6)",
+    "brand": "manner",
+    "address": "杭州市滨江高新区第6分店",
+    "longitude": 120.21140312172604,
+    "latitude": 30.20796144545091,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_006",
+    "name": "遇见咖啡店",
+    "brand": "independent",
+    "address": "杭州市滨江高新区第7分店",
+    "longitude": 120.21284174495067,
+    "latitude": 30.220623152023975,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_007",
+    "name": "星巴克(NO.8)",
+    "brand": "starbucks",
+    "address": "杭州市滨江高新区第8分店",
+    "longitude": 120.20488044131973,
+    "latitude": 30.20353339097472,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_008",
+    "name": "瑞幸咖啡(NO.9)",
+    "brand": "luckin",
+    "address": "杭州市滨江高新区第9分店",
+    "longitude": 120.2026662645512,
+    "latitude": 30.21371882451121,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_009",
+    "name": "瑞幸咖啡(NO.10)",
+    "brand": "luckin",
+    "address": "杭州市滨江高新区第10分店",
+    "longitude": 120.19711140351595,
+    "latitude": 30.21090616978022,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_010",
+    "name": "Manner Coffee(NO.11)",
+    "brand": "manner",
+    "address": "杭州市滨江高新区第11分店",
+    "longitude": 120.21837621293567,
+    "latitude": 30.207303889626953,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_011",
+    "name": "初心咖啡店",
+    "brand": "independent",
+    "address": "杭州市滨江高新区第12分店",
+    "longitude": 120.20996014317899,
+    "latitude": 30.21690781224999,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_012",
+    "name": "瑞幸咖啡(NO.13)",
+    "brand": "luckin",
+    "address": "杭州市滨江高新区第13分店",
+    "longitude": 120.20273188520812,
+    "latitude": 30.214314292331228,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_013",
+    "name": "Tims天好咖啡(NO.14)",
+    "brand": "timhortons",
+    "address": "杭州市滨江高新区第14分店",
+    "longitude": 120.21384169552852,
+    "latitude": 30.19977115955634,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_014",
+    "name": "星巴克(NO.15)",
+    "brand": "starbucks",
+    "address": "杭州市滨江高新区第15分店",
+    "longitude": 120.22623612119737,
+    "latitude": 30.195825787444193,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "hangzhou_binjiang_015",
+    "name": "瑞幸咖啡(NO.16)",
+    "brand": "luckin",
+    "address": "杭州市滨江高新区第16分店",
+    "longitude": 120.21146232629643,
+    "latitude": 30.205098511959033,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_016",
+    "name": "星巴克(NO.17)",
+    "brand": "starbucks",
+    "address": "杭州市滨江高新区第17分店",
+    "longitude": 120.2266428867318,
+    "latitude": 30.214543424173836,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_017",
+    "name": "拾光咖啡店",
+    "brand": "independent",
+    "address": "杭州市滨江高新区第18分店",
+    "longitude": 120.22599600934535,
+    "latitude": 30.1981689349995,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_018",
+    "name": "瑞幸咖啡(NO.19)",
+    "brand": "luckin",
+    "address": "杭州市滨江高新区第19分店",
+    "longitude": 120.19476381491934,
+    "latitude": 30.198110922987233,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_019",
+    "name": "Seesaw Coffee(NO.20)",
+    "brand": "seesaw",
+    "address": "杭州市滨江高新区第20分店",
+    "longitude": 120.19408247166923,
+    "latitude": 30.20459751560566,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_020",
+    "name": "瑞幸咖啡(NO.21)",
+    "brand": "luckin",
+    "address": "杭州市滨江高新区第21分店",
+    "longitude": 120.19357179619591,
+    "latitude": 30.21034758727102,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_021",
+    "name": "瑞幸咖啡(NO.22)",
+    "brand": "luckin",
+    "address": "杭州市滨江高新区第22分店",
+    "longitude": 120.21704817202075,
+    "latitude": 30.1946226496762,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_022",
+    "name": "Tims天好咖啡(NO.23)",
+    "brand": "timhortons",
+    "address": "杭州市滨江高新区第23分店",
+    "longitude": 120.21649871467703,
+    "latitude": 30.20948933421694,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_023",
+    "name": "Seesaw Coffee(NO.24)",
+    "brand": "seesaw",
+    "address": "杭州市滨江高新区第24分店",
+    "longitude": 120.22528346474945,
+    "latitude": 30.200589036550703,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_024",
+    "name": "Manner Coffee(NO.25)",
+    "brand": "manner",
+    "address": "杭州市滨江高新区第25分店",
+    "longitude": 120.20695625604917,
+    "latitude": 30.194913585419787,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_025",
+    "name": "星巴克(NO.26)",
+    "brand": "starbucks",
+    "address": "杭州市滨江高新区第26分店",
+    "longitude": 120.217680025054,
+    "latitude": 30.209640566471315,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_026",
+    "name": "Tims天好咖啡(NO.27)",
+    "brand": "timhortons",
+    "address": "杭州市滨江高新区第27分店",
+    "longitude": 120.20251728419092,
+    "latitude": 30.206743439700347,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_027",
+    "name": "星巴克(NO.28)",
+    "brand": "starbucks",
+    "address": "杭州市滨江高新区第28分店",
+    "longitude": 120.1922817212841,
+    "latitude": 30.21993423617376,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_028",
+    "name": "瑞幸咖啡(NO.29)",
+    "brand": "luckin",
+    "address": "杭州市滨江高新区第29分店",
+    "longitude": 120.21563664463746,
+    "latitude": 30.20803450761564,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_029",
+    "name": "瑞幸咖啡(NO.30)",
+    "brand": "luckin",
+    "address": "杭州市滨江高新区第30分店",
+    "longitude": 120.2100092173982,
+    "latitude": 30.213699620753584,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "hangzhou_binjiang_030",
+    "name": "时光咖啡店",
+    "brand": "independent",
+    "address": "杭州市滨江高新区第31分店",
+    "longitude": 120.201435824716,
+    "latitude": 30.210660418985693,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_031",
+    "name": "Seesaw Coffee(NO.32)",
+    "brand": "seesaw",
+    "address": "杭州市滨江高新区第32分店",
+    "longitude": 120.22679789980353,
+    "latitude": 30.199609840796853,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_032",
+    "name": "Manner Coffee(NO.33)",
+    "brand": "manner",
+    "address": "杭州市滨江高新区第33分店",
+    "longitude": 120.22482957184609,
+    "latitude": 30.22042681362948,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "hangzhou_binjiang_033",
+    "name": "星巴克(NO.34)",
+    "brand": "starbucks",
+    "address": "杭州市滨江高新区第34分店",
+    "longitude": 120.1990696294273,
+    "latitude": 30.20381700869347,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_034",
+    "name": "星巴克(NO.35)",
+    "brand": "starbucks",
+    "address": "杭州市滨江高新区第35分店",
+    "longitude": 120.21380863109137,
+    "latitude": 30.198803606190516,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "hangzhou_binjiang_035",
+    "name": "晨雾咖啡店",
+    "brand": "independent",
+    "address": "杭州市滨江高新区第36分店",
+    "longitude": 120.19808173251285,
+    "latitude": 30.20595112449055,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_036",
+    "name": "暖光咖啡店",
+    "brand": "independent",
+    "address": "杭州市滨江高新区第37分店",
+    "longitude": 120.20760374724782,
+    "latitude": 30.21884643906924,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "hangzhou_binjiang_037",
+    "name": "瑞幸咖啡(NO.38)",
+    "brand": "luckin",
+    "address": "杭州市滨江高新区第38分店",
+    "longitude": 120.20648237889124,
+    "latitude": 30.220259127539695,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_tianhe_000",
+    "name": "Seesaw Coffee(NO.1)",
+    "brand": "seesaw",
+    "address": "广州市天河CBD第1分店",
+    "longitude": 113.3197402111124,
+    "latitude": 23.117450816388548,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_tianhe_001",
+    "name": "暖光咖啡店",
+    "brand": "independent",
+    "address": "广州市天河CBD第2分店",
+    "longitude": 113.32915134785821,
+    "latitude": 23.114366347330307,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_tianhe_002",
+    "name": "Costa Coffee(NO.3)",
+    "brand": "costa",
+    "address": "广州市天河CBD第3分店",
+    "longitude": 113.33821661559669,
+    "latitude": 23.125828075947727,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_tianhe_003",
+    "name": "Seesaw Coffee(NO.4)",
+    "brand": "seesaw",
+    "address": "广州市天河CBD第4分店",
+    "longitude": 113.31401036574339,
+    "latitude": 23.12602405555483,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_tianhe_004",
+    "name": "Manner Coffee(NO.5)",
+    "brand": "manner",
+    "address": "广州市天河CBD第5分店",
+    "longitude": 113.31269021343532,
+    "latitude": 23.138896034568354,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_tianhe_005",
+    "name": "星巴克(NO.6)",
+    "brand": "starbucks",
+    "address": "广州市天河CBD第6分店",
+    "longitude": 113.32642645385054,
+    "latitude": 23.13746637214457,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_tianhe_006",
+    "name": "Manner Coffee(NO.7)",
+    "brand": "manner",
+    "address": "广州市天河CBD第7分店",
+    "longitude": 113.31987465656445,
+    "latitude": 23.115792343887538,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_tianhe_007",
+    "name": "Costa Coffee(NO.8)",
+    "brand": "costa",
+    "address": "广州市天河CBD第8分店",
+    "longitude": 113.34060874837405,
+    "latitude": 23.13825457589937,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_tianhe_008",
+    "name": "星巴克(NO.9)",
+    "brand": "starbucks",
+    "address": "广州市天河CBD第9分店",
+    "longitude": 113.32717614999355,
+    "latitude": 23.126414672412626,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_tianhe_009",
+    "name": "Costa Coffee(NO.10)",
+    "brand": "costa",
+    "address": "广州市天河CBD第10分店",
+    "longitude": 113.33743026157236,
+    "latitude": 23.11244632436319,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_tianhe_010",
+    "name": "暖光咖啡店",
+    "brand": "independent",
+    "address": "广州市天河CBD第11分店",
+    "longitude": 113.31458554702137,
+    "latitude": 23.124831460607567,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_tianhe_011",
+    "name": "瑞幸咖啡(NO.12)",
+    "brand": "luckin",
+    "address": "广州市天河CBD第12分店",
+    "longitude": 113.32538110931884,
+    "latitude": 23.143947683645763,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_tianhe_012",
+    "name": "Manner Coffee(NO.13)",
+    "brand": "manner",
+    "address": "广州市天河CBD第13分店",
+    "longitude": 113.3229605168604,
+    "latitude": 23.123836703591685,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_tianhe_013",
+    "name": "Tims天好咖啡(NO.14)",
+    "brand": "timhortons",
+    "address": "广州市天河CBD第14分店",
+    "longitude": 113.32473862453145,
+    "latitude": 23.1353732984987,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_tianhe_014",
+    "name": "Manner Coffee(NO.15)",
+    "brand": "manner",
+    "address": "广州市天河CBD第15分店",
+    "longitude": 113.33945084381017,
+    "latitude": 23.142308101056596,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_tianhe_015",
+    "name": "Tims天好咖啡(NO.16)",
+    "brand": "timhortons",
+    "address": "广州市天河CBD第16分店",
+    "longitude": 113.33546032243834,
+    "latitude": 23.115283144724362,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_tianhe_016",
+    "name": "初心咖啡店",
+    "brand": "independent",
+    "address": "广州市天河CBD第17分店",
+    "longitude": 113.33495701159363,
+    "latitude": 23.136070380642987,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_tianhe_017",
+    "name": "瑞幸咖啡(NO.18)",
+    "brand": "luckin",
+    "address": "广州市天河CBD第18分店",
+    "longitude": 113.32124247414514,
+    "latitude": 23.123402301590957,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_tianhe_018",
+    "name": "星巴克(NO.19)",
+    "brand": "starbucks",
+    "address": "广州市天河CBD第19分店",
+    "longitude": 113.34227098469543,
+    "latitude": 23.12300309723306,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_tianhe_019",
+    "name": "星巴克(NO.20)",
+    "brand": "starbucks",
+    "address": "广州市天河CBD第20分店",
+    "longitude": 113.33619756813903,
+    "latitude": 23.134155614428224,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_tianhe_020",
+    "name": "瑞幸咖啡(NO.21)",
+    "brand": "luckin",
+    "address": "广州市天河CBD第21分店",
+    "longitude": 113.32537842172624,
+    "latitude": 23.125471030919588,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_tianhe_021",
+    "name": "星巴克(NO.22)",
+    "brand": "starbucks",
+    "address": "广州市天河CBD第22分店",
+    "longitude": 113.31252963065596,
+    "latitude": 23.1306622948023,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_tianhe_022",
+    "name": "Seesaw Coffee(NO.23)",
+    "brand": "seesaw",
+    "address": "广州市天河CBD第23分店",
+    "longitude": 113.33805161521852,
+    "latitude": 23.12715497164104,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_tianhe_023",
+    "name": "星巴克(NO.24)",
+    "brand": "starbucks",
+    "address": "广州市天河CBD第24分店",
+    "longitude": 113.34004917799614,
+    "latitude": 23.1309541693038,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_000",
+    "name": "Manner Coffee(NO.1)",
+    "brand": "manner",
+    "address": "广州市琶洲数字经济区第1分店",
+    "longitude": 113.34886095542504,
+    "latitude": 23.104322918050546,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_pazhou_001",
+    "name": "星巴克(NO.2)",
+    "brand": "starbucks",
+    "address": "广州市琶洲数字经济区第2分店",
+    "longitude": 113.36979212926015,
+    "latitude": 23.093897465370944,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_pazhou_002",
+    "name": "星巴克(NO.3)",
+    "brand": "starbucks",
+    "address": "广州市琶洲数字经济区第3分店",
+    "longitude": 113.34442218162552,
+    "latitude": 23.096661905561152,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_003",
+    "name": "星巴克(NO.4)",
+    "brand": "starbucks",
+    "address": "广州市琶洲数字经济区第4分店",
+    "longitude": 113.34661243932312,
+    "latitude": 23.108226811888773,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_004",
+    "name": "Costa Coffee(NO.5)",
+    "brand": "costa",
+    "address": "广州市琶洲数字经济区第5分店",
+    "longitude": 113.34740990153253,
+    "latitude": 23.110032852076284,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_005",
+    "name": "瑞幸咖啡(NO.6)",
+    "brand": "luckin",
+    "address": "广州市琶洲数字经济区第6分店",
+    "longitude": 113.34694894262822,
+    "latitude": 23.110056708125438,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_pazhou_006",
+    "name": "瑞幸咖啡(NO.7)",
+    "brand": "luckin",
+    "address": "广州市琶洲数字经济区第7分店",
+    "longitude": 113.34679568416895,
+    "latitude": 23.111449278305837,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_007",
+    "name": "星巴克(NO.8)",
+    "brand": "starbucks",
+    "address": "广州市琶洲数字经济区第8分店",
+    "longitude": 113.35649263528757,
+    "latitude": 23.098863290127856,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_008",
+    "name": "星巴克(NO.9)",
+    "brand": "starbucks",
+    "address": "广州市琶洲数字经济区第9分店",
+    "longitude": 113.36017893325456,
+    "latitude": 23.10747258295941,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_009",
+    "name": "瑞幸咖啡(NO.10)",
+    "brand": "luckin",
+    "address": "广州市琶洲数字经济区第10分店",
+    "longitude": 113.36331766428096,
+    "latitude": 23.098585186042847,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_010",
+    "name": "瑞幸咖啡(NO.11)",
+    "brand": "luckin",
+    "address": "广州市琶洲数字经济区第11分店",
+    "longitude": 113.36450113152831,
+    "latitude": 23.11785445081591,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_011",
+    "name": "瑞幸咖啡(NO.12)",
+    "brand": "luckin",
+    "address": "广州市琶洲数字经济区第12分店",
+    "longitude": 113.35224778294297,
+    "latitude": 23.10410871171936,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_012",
+    "name": "星巴克(NO.13)",
+    "brand": "starbucks",
+    "address": "广州市琶洲数字经济区第13分店",
+    "longitude": 113.36980907671011,
+    "latitude": 23.112236321219605,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_013",
+    "name": "拾光咖啡店",
+    "brand": "independent",
+    "address": "广州市琶洲数字经济区第14分店",
+    "longitude": 113.34647743042545,
+    "latitude": 23.10403308878094,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_014",
+    "name": "Costa Coffee(NO.15)",
+    "brand": "costa",
+    "address": "广州市琶洲数字经济区第15分店",
+    "longitude": 113.34281411056897,
+    "latitude": 23.110860234641407,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "guangzhou_pazhou_015",
+    "name": "暖光咖啡店",
+    "brand": "independent",
+    "address": "广州市琶洲数字经济区第16分店",
+    "longitude": 113.36899278700119,
+    "latitude": 23.11146199575941,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_016",
+    "name": "瑞幸咖啡(NO.17)",
+    "brand": "luckin",
+    "address": "广州市琶洲数字经济区第17分店",
+    "longitude": 113.3715594850241,
+    "latitude": 23.097161092921358,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_017",
+    "name": "瑞幸咖啡(NO.18)",
+    "brand": "luckin",
+    "address": "广州市琶洲数字经济区第18分店",
+    "longitude": 113.359923299011,
+    "latitude": 23.114746571679333,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_018",
+    "name": "慢时光咖啡店",
+    "brand": "independent",
+    "address": "广州市琶洲数字经济区第19分店",
+    "longitude": 113.36810446808549,
+    "latitude": 23.09359379439098,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_019",
+    "name": "Manner Coffee(NO.20)",
+    "brand": "manner",
+    "address": "广州市琶洲数字经济区第20分店",
+    "longitude": 113.35376086553806,
+    "latitude": 23.108284373321666,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "guangzhou_pazhou_020",
+    "name": "暖光咖啡店",
+    "brand": "independent",
+    "address": "广州市琶洲数字经济区第21分店",
+    "longitude": 113.37413773768563,
+    "latitude": 23.11463716192044,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "chengdu_tianfu_000",
+    "name": "星巴克(NO.1)",
+    "brand": "starbucks",
+    "address": "成都市天府软件园第1分店",
+    "longitude": 104.06372008622814,
+    "latitude": 30.540920101726066,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_001",
+    "name": "暖光咖啡店",
+    "brand": "independent",
+    "address": "成都市天府软件园第2分店",
+    "longitude": 104.06337424831294,
+    "latitude": 30.549369446721023,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "chengdu_tianfu_002",
+    "name": "Manner Coffee(NO.3)",
+    "brand": "manner",
+    "address": "成都市天府软件园第3分店",
+    "longitude": 104.070746484274,
+    "latitude": 30.534215838129843,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_003",
+    "name": "Costa Coffee(NO.4)",
+    "brand": "costa",
+    "address": "成都市天府软件园第4分店",
+    "longitude": 104.05100215484234,
+    "latitude": 30.53578735326665,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_004",
+    "name": "星巴克(NO.5)",
+    "brand": "starbucks",
+    "address": "成都市天府软件园第5分店",
+    "longitude": 104.07826719424881,
+    "latitude": 30.53779332202334,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "chengdu_tianfu_005",
+    "name": "瑞幸咖啡(NO.6)",
+    "brand": "luckin",
+    "address": "成都市天府软件园第6分店",
+    "longitude": 104.07695044846771,
+    "latitude": 30.549879042235876,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_006",
+    "name": "Seesaw Coffee(NO.7)",
+    "brand": "seesaw",
+    "address": "成都市天府软件园第7分店",
+    "longitude": 104.07347114110677,
+    "latitude": 30.538292588663847,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_007",
+    "name": "Costa Coffee(NO.8)",
+    "brand": "costa",
+    "address": "成都市天府软件园第8分店",
+    "longitude": 104.08075019261587,
+    "latitude": 30.532168300895133,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_008",
+    "name": "瑞幸咖啡(NO.9)",
+    "brand": "luckin",
+    "address": "成都市天府软件园第9分店",
+    "longitude": 104.06147105298672,
+    "latitude": 30.54889365330293,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_009",
+    "name": "星巴克(NO.10)",
+    "brand": "starbucks",
+    "address": "成都市天府软件园第10分店",
+    "longitude": 104.08156808028346,
+    "latitude": 30.540401246839686,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_010",
+    "name": "瑞幸咖啡(NO.11)",
+    "brand": "luckin",
+    "address": "成都市天府软件园第11分店",
+    "longitude": 104.08064687140042,
+    "latitude": 30.532822702617075,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_011",
+    "name": "星巴克(NO.12)",
+    "brand": "starbucks",
+    "address": "成都市天府软件园第12分店",
+    "longitude": 104.06154900451833,
+    "latitude": 30.543536407386107,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_012",
+    "name": "星巴克(NO.13)",
+    "brand": "starbucks",
+    "address": "成都市天府软件园第13分店",
+    "longitude": 104.0751606906359,
+    "latitude": 30.539650570334476,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "chengdu_tianfu_013",
+    "name": "瑞幸咖啡(NO.14)",
+    "brand": "luckin",
+    "address": "成都市天府软件园第14分店",
+    "longitude": 104.05301941139165,
+    "latitude": 30.544607414257037,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_014",
+    "name": "瑞幸咖啡(NO.15)",
+    "brand": "luckin",
+    "address": "成都市天府软件园第15分店",
+    "longitude": 104.06658443116689,
+    "latitude": 30.5328100603665,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_015",
+    "name": "Manner Coffee(NO.16)",
+    "brand": "manner",
+    "address": "成都市天府软件园第16分店",
+    "longitude": 104.07369944675757,
+    "latitude": 30.548071169828596,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "chengdu_tianfu_016",
+    "name": "遇见咖啡店",
+    "brand": "independent",
+    "address": "成都市天府软件园第17分店",
+    "longitude": 104.07812849261465,
+    "latitude": 30.547091776551607,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_017",
+    "name": "Seesaw Coffee(NO.18)",
+    "brand": "seesaw",
+    "address": "成都市天府软件园第18分店",
+    "longitude": 104.06758281070707,
+    "latitude": 30.539522723625367,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_018",
+    "name": "瑞幸咖啡(NO.19)",
+    "brand": "luckin",
+    "address": "成都市天府软件园第19分店",
+    "longitude": 104.05432485173888,
+    "latitude": 30.5424414420053,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_019",
+    "name": "瑞幸咖啡(NO.20)",
+    "brand": "luckin",
+    "address": "成都市天府软件园第20分店",
+    "longitude": 104.0624516508668,
+    "latitude": 30.542396671856228,
+    "business_hours": "10:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "chengdu_tianfu_020",
+    "name": "Manner Coffee(NO.21)",
+    "brand": "manner",
+    "address": "成都市天府软件园第21分店",
+    "longitude": 104.07860991946633,
+    "latitude": 30.55723027684202,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "chengdu_tianfu_021",
+    "name": "Tims天好咖啡(NO.22)",
+    "brand": "timhortons",
+    "address": "成都市天府软件园第22分店",
+    "longitude": 104.07370449382951,
+    "latitude": 30.543523918258405,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_022",
+    "name": "Manner Coffee(NO.23)",
+    "brand": "manner",
+    "address": "成都市天府软件园第23分店",
+    "longitude": 104.06330284707215,
+    "latitude": 30.541908162614885,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_023",
+    "name": "瑞幸咖啡(NO.24)",
+    "brand": "luckin",
+    "address": "成都市天府软件园第24分店",
+    "longitude": 104.06864564151759,
+    "latitude": 30.550240328263214,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_024",
+    "name": "转角咖啡店",
+    "brand": "independent",
+    "address": "成都市天府软件园第25分店",
+    "longitude": 104.05812542911792,
+    "latitude": 30.550693624463364,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_025",
+    "name": "时光咖啡店",
+    "brand": "independent",
+    "address": "成都市天府软件园第26分店",
+    "longitude": 104.07501745878446,
+    "latitude": 30.553807984091822,
+    "business_hours": "08:30-19:30",
+    "is_open_late": false
+  },
+  {
+    "id": "chengdu_tianfu_026",
+    "name": "星巴克(NO.27)",
+    "brand": "starbucks",
+    "address": "成都市天府软件园第27分店",
+    "longitude": 104.05277539008442,
+    "latitude": 30.55212225513646,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_027",
+    "name": "Seesaw Coffee(NO.28)",
+    "brand": "seesaw",
+    "address": "成都市天府软件园第28分店",
+    "longitude": 104.07613149262818,
+    "latitude": 30.53538827705871,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_028",
+    "name": "瑞幸咖啡(NO.29)",
+    "brand": "luckin",
+    "address": "成都市天府软件园第29分店",
+    "longitude": 104.07166893447338,
+    "latitude": 30.534003628676885,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "chengdu_tianfu_029",
+    "name": "星巴克(NO.30)",
+    "brand": "starbucks",
+    "address": "成都市天府软件园第30分店",
+    "longitude": 104.07063534194536,
+    "latitude": 30.557032543116243,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "wuhan_guanggu_000",
+    "name": "时光咖啡店",
+    "brand": "independent",
+    "address": "武汉市光谷第1分店",
+    "longitude": 114.415450679259,
+    "latitude": 30.48076790287215,
+    "business_hours": "24小时营业",
+    "is_open_late": true
+  },
+  {
+    "id": "wuhan_guanggu_001",
+    "name": "Seesaw Coffee(NO.2)",
+    "brand": "seesaw",
+    "address": "武汉市光谷第2分店",
+    "longitude": 114.39232518460491,
+    "latitude": 30.463850042421566,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "wuhan_guanggu_002",
+    "name": "Manner Coffee(NO.3)",
+    "brand": "manner",
+    "address": "武汉市光谷第3分店",
+    "longitude": 114.40451359304068,
+    "latitude": 30.463038905807384,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "wuhan_guanggu_003",
+    "name": "午后咖啡店",
+    "brand": "independent",
+    "address": "武汉市光谷第4分店",
+    "longitude": 114.39800758563806,
+    "latitude": 30.48246729131654,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "wuhan_guanggu_004",
+    "name": "星巴克(NO.5)",
+    "brand": "starbucks",
+    "address": "武汉市光谷第5分店",
+    "longitude": 114.39536356493765,
+    "latitude": 30.47435104722428,
+    "business_hours": "09:00-20:00",
+    "is_open_late": false
+  },
+  {
+    "id": "wuhan_guanggu_005",
+    "name": "星巴克(NO.6)",
+    "brand": "starbucks",
+    "address": "武汉市光谷第6分店",
+    "longitude": 114.42209584800449,
+    "latitude": 30.481429598025848,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "wuhan_guanggu_006",
+    "name": "瑞幸咖啡(NO.7)",
+    "brand": "luckin",
+    "address": "武汉市光谷第7分店",
+    "longitude": 114.399651665234,
+    "latitude": 30.486456417808725,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "wuhan_guanggu_007",
+    "name": "星巴克(NO.8)",
+    "brand": "starbucks",
+    "address": "武汉市光谷第8分店",
+    "longitude": 114.39663810008688,
+    "latitude": 30.47766940944104,
+    "business_hours": "08:00-21:00",
+    "is_open_late": false
+  },
+  {
+    "id": "wuhan_guanggu_008",
+    "name": "巷里咖啡店",
+    "brand": "independent",
+    "address": "武汉市光谷第9分店",
+    "longitude": 114.41472052347537,
+    "latitude": 30.46606213370183,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  },
+  {
+    "id": "wuhan_guanggu_009",
+    "name": "Manner Coffee(NO.10)",
+    "brand": "manner",
+    "address": "武汉市光谷第10分店",
+    "longitude": 114.41240422424752,
+    "latitude": 30.467040370143362,
+    "business_hours": "07:30-21:30",
+    "is_open_late": false
+  },
+  {
+    "id": "wuhan_guanggu_010",
+    "name": "瑞幸咖啡(NO.11)",
+    "brand": "luckin",
+    "address": "武汉市光谷第11分店",
+    "longitude": 114.39912747167867,
+    "latitude": 30.47116821480789,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "wuhan_guanggu_011",
+    "name": "Tims天好咖啡(NO.12)",
+    "brand": "timhortons",
+    "address": "武汉市光谷第12分店",
+    "longitude": 114.39931903949453,
+    "latitude": 30.47089800306962,
+    "business_hours": "08:00-22:30",
+    "is_open_late": true
+  },
+  {
+    "id": "wuhan_guanggu_012",
+    "name": "瑞幸咖啡(NO.13)",
+    "brand": "luckin",
+    "address": "武汉市光谷第13分店",
+    "longitude": 114.39955259752355,
+    "latitude": 30.471086296746567,
+    "business_hours": "07:00-23:00",
+    "is_open_late": true
+  },
+  {
+    "id": "wuhan_guanggu_013",
+    "name": "星巴克(NO.14)",
+    "brand": "starbucks",
+    "address": "武汉市光谷第14分店",
+    "longitude": 114.416859194788,
+    "latitude": 30.468510271317985,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "wuhan_guanggu_014",
+    "name": "瑞幸咖啡(NO.15)",
+    "brand": "luckin",
+    "address": "武汉市光谷第15分店",
+    "longitude": 114.40605227525951,
+    "latitude": 30.471753026568823,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "wuhan_guanggu_015",
+    "name": "瑞幸咖啡(NO.16)",
+    "brand": "luckin",
+    "address": "武汉市光谷第16分店",
+    "longitude": 114.41036278176996,
+    "latitude": 30.464378963394793,
+    "business_hours": "07:30-23:30",
+    "is_open_late": true
+  },
+  {
+    "id": "wuhan_guanggu_016",
+    "name": "Tims天好咖啡(NO.17)",
+    "brand": "timhortons",
+    "address": "武汉市光谷第17分店",
+    "longitude": 114.42241211658532,
+    "latitude": 30.47901367141821,
+    "business_hours": "08:00-24:00",
+    "is_open_late": true
+  },
+  {
+    "id": "wuhan_guanggu_017",
+    "name": "星巴克(NO.18)",
+    "brand": "starbucks",
+    "address": "武汉市光谷第18分店",
+    "longitude": 114.40907782552362,
+    "latitude": 30.471157586361144,
+    "business_hours": "06:30-22:00",
+    "is_open_late": true
+  }
+]

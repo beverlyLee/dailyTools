@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>咖啡加班指数 - Coffee Overtime Index</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        #app {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #ffd700, #ff6b6b, #c44569);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .header .subtitle {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .city-selector {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 12px 20px;
+            color: #fff;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .city-selector:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .city-selector.active {
+            background: linear-gradient(135deg, #ff6b6b, #c44569);
+            border-color: transparent;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-title .icon {
+            font-size: 20px;
+        }
+
+        #mapChart {
+            width: 100%;
+            height: 500px;
+        }
+
+        #pieChart {
+            width: 100%;
+            height: 280px;
+        }
+
+        #rankingChart {
+            width: 100%;
+            height: 500px;
+        }
+
+        .detail-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+
+        .detail-panel h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #e2e8f0;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .stat-item .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffd700;
+        }
+
+        .stat-item .label {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .district-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .district-desc {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 16px;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+            color: #94a3b8;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #ff6b6b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .legend-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .legend-bar .gradient {
+            width: 200px;
+            height: 12px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, #1e3a5f, #3d5a80, #ee6c4d, #e63946, #9b2226);
+        }
+
+        .legend-bar .label {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .index-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .index-badge.high {
+            background: rgba(230, 57, 70, 0.3);
+            color: #ff6b6b;
+        }
+
+        .index-badge.medium {
+            background: rgba(238, 108, 77, 0.3);
+            color: #ee6c4d;
+        }
+
+        .index-badge.low {
+            background: rgba(61, 90, 128, 0.3);
+            color: #98c1d9;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-btn.active {
+            background: rgba(255, 107, 107, 0.2);
+            border-color: rgba(255, 107, 107, 0.4);
+            color: #fff;
+        }
+
+        .footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .footer span {
+            margin: 0 4px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="header">
+            <h1>☕ 咖啡加班指数</h1>
+            <p class="subtitle">以咖啡馆密度与深夜营业比例，衡量城市商务区的加班强度</p>
+        </div>
+
+        <div class="controls">
+            <button
+                v-for="city in cities"
+                :key="city"
+                class="city-selector"
+                :class="{ active: selectedCity === city }"
+                @click="selectCity(city)"
+            >
+                {{ city }}
+            </button>
+        </div>
+
+        <div class="main-content">
+            <div class="chart-card">
+                <div class="chart-title">
+                    <span class="icon">🗺️</span>
+                    <span>区域加班指数分布图</span>
+                    <span v-if="selectedDistrict" class="index-badge" :class="getIndexClass(selectedDistrict.overtime_index.overtime_index)">
+                        {{ selectedDistrict.overtime_index.overtime_index.toFixed(1) }}
+                    </span>
+                </div>
+                <div id="mapChart"></div>
+                <div class="legend-bar">
+                    <span class="label">低</span>
+                    <div class="gradient"></div>
+                    <span class="label">高</span>
+                    <span class="label" style="margin-left: 16px;">加班指数</span>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title">
+                    <span class="icon">🏆</span>
+                    <span>排行榜</span>
+                </div>
+                <div id="rankingChart"></div>
+            </div>
+        </div>
+
+        <div class="chart-card" v-if="selectedDistrict">
+            <div class="chart-title">
+                <span class="icon">📊</span>
+                <span>{{ selectedDistrict.district.name }} - 详细数据</span>
+            </div>
+            <div class="district-name" style="margin-top: 8px;">
+                {{ selectedDistrict.district.name }}
+                <span class="index-badge" :class="getIndexClass(selectedDistrict.overtime_index.overtime_index)">
+                    加班指数 {{ selectedDistrict.overtime_index.overtime_index.toFixed(1) }}
+                </span>
+            </div>
+            <div class="district-desc">{{ selectedDistrict.district.description }}</div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div>
+                    <div class="tabs">
+                        <button class="tab-btn" :class="{ active: pieType === 'all' }" @click="pieType = 'all'">全部咖啡</button>
+                        <button class="tab-btn" :class="{ active: pieType === 'late' }" @click="pieType = 'late'">深夜营业</button>
+                    </div>
+                    <div id="pieChart"></div>
+                </div>
+                <div class="detail-panel" style="margin-top: 0;">
+                    <h3>核心指标</h3>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <div class="value">{{ selectedDistrict.overtime_index.overtime_index.toFixed(1) }}</div>
+                            <div class="label">加班指数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="value">{{ selectedDistrict.overtime_index.total_shops }}</div>
+                            <div class="label">咖啡馆总数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="value">{{ selectedDistrict.overtime_index.density_score.toFixed(1) }}</div>
+                            <div class="label">密度得分</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="value">{{ selectedDistrict.overtime_index.late_night_ratio.toFixed(1) }}%</div>
+                            <div class="label">深夜营业比例</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="value">{{ selectedDistrict.overtime_index.late_night_shops }}</div>
+                            <div class="label">深夜营业店铺</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="value">{{ selectedDistrict.overtime_index.area_km2 }} km²</div>
+                            <div class="label">区域面积</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <span>☕ 咖啡是打工人的续命水</span>
+            <span>|</span>
+            <span>数据来源：高德 POI API</span>
+            <span>|</span>
+            <span>加班指数 = 密度×0.5 + 深夜营业比例×0.5</span>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, onMounted, watch, nextTick, computed } = Vue;
+
+        const BRAND_NAMES = {
+            starbucks: '星巴克',
+            luckin: '瑞幸咖啡',
+            manner: 'Manner',
+            seesaw: 'Seesaw',
+            costa: 'Costa',
+            timhortons: 'Tims',
+            independent: '独立咖啡馆'
+        };
+
+        const BRAND_COLORS = {
+            starbucks: '#00704A',
+            luckin: '#002B5B',
+            manner: '#D4A574',
+            seesaw: '#2C3E50',
+            costa: '#BC4749',
+            timhortons: '#DD2E44',
+            independent: '#6C757D'
+        };
+
+        createApp({
+            setup() {
+                const cities = ref([]);
+                const selectedCity = ref('北京');
+                const districts = ref([]);
+                const selectedDistrict = ref(null);
+                const pieType = ref('all');
+                let mapChart = null;
+                let pieChart = null;
+                let rankingChart = null;
+
+                const fetchCities = async () => {
+                    try {
+                        const res = await fetch('/api/cities');
+                        cities.value = await res.json();
+                        if (cities.value.length > 0 && !selectedCity.value) {
+                            selectedCity.value = cities.value[0];
+                        }
+                    } catch (e) {
+                        console.error('Failed to fetch cities:', e);
+                    }
+                };
+
+                const fetchDistricts = async () => {
+                    try {
+                        const res = await fetch(`/api/overtime?city=${encodeURIComponent(selectedCity.value)}`);
+                        districts.value = await res.json();
+                        if (districts.value.length > 0) {
+                            selectedDistrict.value = districts.value[0];
+                        }
+                        await nextTick();
+                        renderMapChart();
+                        renderRankingChart();
+                    } catch (e) {
+                        console.error('Failed to fetch districts:', e);
+                    }
+                };
+
+                const selectCity = (city) => {
+                    selectedCity.value = city;
+                };
+
+                const getIndexColor = (value) => {
+                    const v = Math.max(0, Math.min(100, value)) / 100;
+                    const colors = [
+                        [30, 58, 95],
+                        [61, 90, 128],
+                        [238, 108, 77],
+                        [230, 57, 70],
+                        [155, 34, 38]
+                    ];
+                    const i = v * (colors.length - 1);
+                    const idx = Math.floor(i);
+                    const frac = i - idx;
+                    const c1 = colors[idx];
+                    const c2 = colors[Math.min(idx + 1, colors.length - 1)];
+                    const r = Math.round(c1[0] + (c2[0] - c1[0]) * frac);
+                    const g = Math.round(c1[1] + (c2[1] - c1[1]) * frac);
+                    const b = Math.round(c1[2] + (c2[2] - c1[2]) * frac);
+                    return `rgb(${r}, ${g}, ${b})`;
+                };
+
+                const getIndexClass = (value) => {
+                    if (value >= 60) return 'high';
+                    if (value >= 40) return 'medium';
+                    return 'low';
+                };
+
+                const renderMapChart = () => {
+                    const el = document.getElementById('mapChart');
+                    if (!el || districts.value.length === 0) return;
+                    if (!mapChart) {
+                        mapChart = echarts.init(el);
+                        mapChart.on('click', (params) => {
+                            if (params.data && params.data.district) {
+                                selectedDistrict.value = params.data.district;
+                            }
+                        });
+                    }
+
+                    const data = districts.value.map((d, i) => {
+                        const cols = Math.ceil(Math.sqrt(districts.value.length));
+                        const row = Math.floor(i / cols);
+                        const col = i % cols;
+                        return {
+                            name: d.district.name,
+                            value: [
+                                col * 100 + 50,
+                                row * 120 + 60,
+                                d.overtime_index.overtime_index
+                            ],
+                            itemStyle: {
+                                color: getIndexColor(d.overtime_index.overtime_index)
+                            },
+                            district: d
+                        };
+                    });
+
+                    const option = {
+                        tooltip: {
+                            trigger: 'item',
+                            backgroundColor: 'rgba(20, 30, 50, 0.95)',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            textStyle: { color: '#fff' },
+                            formatter: (params) => {
+                                const d = params.data.district;
+                                const idx = d.overtime_index.overtime_index;
+                                return `
+                                    <div style="padding: 4px 0;">
+                                        <div style="font-weight: 600; font-size: 14px; margin-bottom: 6px;">${d.district.name}</div>
+                                        <div style="color: #ffd700; font-size: 18px; font-weight: 700; margin-bottom: 6px;">${idx.toFixed(1)} <span style="font-size: 12px; color: #94a3b8;">加班指数</span></div>
+                                        <div style="font-size: 12px; color: #94a3b8;">
+                                            咖啡馆: ${d.overtime_index.total_shops}家 | 深夜营业: ${d.overtime_index.late_night_shops}家
+                                        </div>
+                                        <div style="font-size: 12px; color: #64748b; margin-top: 4px;">点击查看详情 →</div>
+                                    </div>
+                                `;
+                            }
+                        },
+                        grid: {
+                            left: 20,
+                            right: 20,
+                            top: 20,
+                            bottom: 20,
+                            containLabel: true
+                        },
+                        xAxis: {
+                            show: false,
+                            type: 'value',
+                            min: 0,
+                            max: Math.ceil(Math.sqrt(districts.value.length)) * 100
+                        },
+                        yAxis: {
+                            show: false,
+                            type: 'value',
+                            min: 0,
+                            max: Math.ceil(districts.value.length / Math.ceil(Math.sqrt(districts.value.length))) * 120
+                        },
+                        series: [{
+                            type: 'scatter',
+                            symbol: 'rect',
+                            symbolSize: [80, 50],
+                            data: data,
+                            label: {
+                                show: true,
+                                position: 'inside',
+                                formatter: (params) => {
+                                    const name = params.name;
+                                    const short = name.length > 6 ? name.slice(0, 6) + '...' : name;
+                                    return `{name|${short}}\n{val|${params.value[2].toFixed(0)}}`;
+                                },
+                                rich: {
+                                    name: {
+                                        color: '#fff',
+                                        fontSize: 12,
+                                        fontWeight: 600,
+                                        lineHeight: 18
+                                    },
+                                    val: {
+                                        color: 'rgba(255,255,255,0.9)',
+                                        fontSize: 14,
+                                        fontWeight: 700
+                                    }
+                                }
+                            },
+                            itemStyle: {
+                                borderRadius: 8,
+                                shadowBlur: 20,
+                                shadowColor: 'rgba(255, 107, 107, 0.3)'
+                            },
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 30,
+                                    shadowColor: 'rgba(255, 215, 0, 0.5)',
+                                    borderColor: '#ffd700',
+                                    borderWidth: 2
+                                },
+                                scale: 1.1
+                            }
+                        }]
+                    };
+
+                    mapChart.setOption(option);
+                };
+
+                const renderPieChart = () => {
+                    const el = document.getElementById('pieChart');
+                    if (!el || !selectedDistrict.value) return;
+                    if (!pieChart) {
+                        pieChart = echarts.init(el);
+                    }
+
+                    const dist = pieType.value === 'all'
+                        ? selectedDistrict.value.overtime_index.brand_distribution
+                        : selectedDistrict.value.overtime_index.late_night_brand_distribution;
+
+                    const data = Object.entries(dist || {})
+                        .map(([key, value]) => ({
+                            name: BRAND_NAMES[key] || key,
+                            value: value,
+                            itemStyle: { color: BRAND_COLORS[key] || '#888' }
+                        }))
+                        .sort((a, b) => b.value - a.value);
+
+                    const option = {
+                        tooltip: {
+                            trigger: 'item',
+                            backgroundColor: 'rgba(20, 30, 50, 0.95)',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            textStyle: { color: '#fff' },
+                            formatter: '{b}: {c}家 ({d}%)'
+                        },
+                        legend: {
+                            orient: 'vertical',
+                            right: 10,
+                            top: 'center',
+                            textStyle: { color: '#94a3b8', fontSize: 12 },
+                            itemWidth: 10,
+                            itemHeight: 10
+                        },
+                        series: [{
+                            type: 'pie',
+                            radius: ['45%', '70%'],
+                            center: ['35%', '50%'],
+                            data: data,
+                            label: {
+                                show: false
+                            },
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 20,
+                                    shadowOffsetX: 0,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                }
+                            }
+                        }]
+                    };
+
+                    pieChart.setOption(option);
+                };
+
+                const renderRankingChart = () => {
+                    const el = document.getElementById('rankingChart');
+                    if (!el || districts.value.length === 0) return;
+                    if (!rankingChart) {
+                        rankingChart = echarts.init(el);
+                        rankingChart.on('click', (params) => {
+                            const d = districts.value.find(x => x.district.name === params.name);
+                            if (d) {
+                                selectedDistrict.value = d;
+                            }
+                        });
+                    }
+
+                    const sorted = [...districts.value].sort((a, b) => a.overtime_index.overtime_index - b.overtime_index.overtime_index);
+
+                    const option = {
+                        tooltip: {
+                            trigger: 'axis',
+                            backgroundColor: 'rgba(20, 30, 50, 0.95)',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            textStyle: { color: '#fff' },
+                            axisPointer: { type: 'shadow' },
+                            formatter: (params) => {
+                                const item = params[0];
+                                const d = districts.value.find(x => x.district.name === item.name);
+                                if (d) {
+                                    return `${d.district.name}<br/>加班指数: <b>${d.overtime_index.overtime_index.toFixed(1)}</b><br/>咖啡馆: ${d.overtime_index.total_shops}家`;
+                                }
+                                return item.name;
+                            }
+                        },
+                        grid: {
+                            left: 80,
+                            right: 30,
+                            top: 10,
+                            bottom: 20,
+                            containLabel: false
+                        },
+                        xAxis: {
+                            type: 'value',
+                            max: 100,
+                            axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+                            splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } },
+                            axisLabel: { color: '#64748b', fontSize: 10 }
+                        },
+                        yAxis: {
+                            type: 'category',
+                            data: sorted.map(d => d.district.name),
+                            axisLine: { show: false },
+                            axisTick: { show: false },
+                            axisLabel: { color: '#94a3b8', fontSize: 12 }
+                        },
+                        series: [{
+                            type: 'bar',
+                            data: sorted.map(d => ({
+                                value: d.overtime_index.overtime_index,
+                                itemStyle: {
+                                    color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                                        { offset: 0, color: getIndexColor(d.overtime_index.overtime_index * 0.6) },
+                                        { offset: 1, color: getIndexColor(d.overtime_index.overtime_index) }
+                                    ]),
+                                    borderRadius: [0, 4, 4, 0]
+                                }
+                            })),
+                            barWidth: 16,
+                            label: {
+                                show: true,
+                                position: 'right',
+                                color: '#e2e8f0',
+                                fontSize: 11,
+                                formatter: '{c}'
+                            },
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 15,
+                                    shadowColor: 'rgba(255, 107, 107, 0.4)'
+                                }
+                            }
+                        }]
+                    };
+
+                    rankingChart.setOption(option);
+                };
+
+                watch(selectedCity, () => {
+                    fetchDistricts();
+                });
+
+                watch(selectedDistrict, () => {
+                    nextTick(() => {
+                        renderPieChart();
+                    });
+                });
+
+                watch(pieType, () => {
+                    renderPieChart();
+                });
+
+                const handleResize = () => {
+                    mapChart && mapChart.resize();
+                    pieChart && pieChart.resize();
+                    rankingChart && rankingChart.resize();
+                };
+
+                onMounted(async () => {
+                    await fetchCities();
+                    await fetchDistricts();
+                    window.addEventListener('resize', handleResize);
+                });
+
+                return {
+                    cities,
+                    selectedCity,
+                    districts,
+                    selectedDistrict,
+                    pieType,
+                    selectCity,
+                    getIndexClass
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
