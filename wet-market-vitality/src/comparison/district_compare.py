@@ -93,15 +93,18 @@ class DistrictCompare:
             },
         }
 
-    def build_sunburst_data(self):
-        comparison = self.old_vs_new_comparison()
+    def build_sunburst_data(self, top_n=3):
         district_summary = self.district_summary()
 
         children = []
         for district_name, district_info in district_summary.items():
             area_type = "老城区" if district_name in OLD_DISTRICTS else "新建商品房区域"
+            all_markets = district_info["markets"]
+            display_markets = all_markets[:top_n]
+            remaining_count = len(all_markets) - top_n
+
             market_children = []
-            for market in district_info["markets"]:
+            for market in display_markets:
                 market_children.append({
                     "name": market["name"],
                     "value": round(market["vitality_index"] * 100, 1),
@@ -110,17 +113,33 @@ class DistrictCompare:
                     "category": market.get("category", ""),
                     "business_hours": market.get("business_hours", ""),
                     "review_count": market.get("review_count", 0),
+                    "is_market": True,
                     "itemStyle": {
                         "color": self._vitality_color(market["vitality_index"])
                     }
                 })
 
+            if remaining_count > 0:
+                avg_rest = 0
+                if all_markets[top_n:]:
+                    avg_rest = sum(m["vitality_index"] for m in all_markets[top_n:]) / len(all_markets[top_n:])
+                market_children.append({
+                    "name": f"更多{remaining_count}家",
+                    "value": round(avg_rest * 100 * remaining_count, 1),
+                    "is_more": True,
+                    "district": district_name,
+                    "itemStyle": {
+                        "color": "#bdc3c7"
+                    }
+                })
+
             children.append({
                 "name": district_name,
-                "value": round(district_info["avg_vitality"] * 100, 1),
+                "value": round(district_info["avg_vitality"] * 100 * len(all_markets), 1),
                 "area_type": area_type,
                 "market_count": district_info["market_count"],
                 "avg_vitality": district_info["avg_vitality"],
+                "is_district": True,
                 "children": market_children,
                 "itemStyle": {
                     "color": self._vitality_color(district_info["avg_vitality"])

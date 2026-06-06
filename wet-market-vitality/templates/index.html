@@ -46,6 +46,11 @@
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
         }
         .stat-card .label {
             font-size: 13px;
@@ -92,16 +97,58 @@
             background: #e74c3c;
             border-radius: 2px;
         }
+        .chart-subtitle {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-left: auto;
+            font-weight: normal;
+        }
         #sunburst-chart {
             width: 100%;
-            height: 500px;
+            height: 520px;
         }
         #bar-chart {
             width: 100%;
-            height: 500px;
+            height: 520px;
         }
-        .full-width {
-            grid-column: 1 / -1;
+
+        .comparison-box {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .compare-item {
+            flex: 1;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .compare-item:hover {
+            transform: scale(1.02);
+        }
+        .compare-item.old {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        }
+        .compare-item.new {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        }
+        .compare-item .title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .compare-item .score {
+            font-size: 42px;
+            font-weight: bold;
+            line-height: 1;
+        }
+        .compare-item.old .score { color: #dc2626; }
+        .compare-item.new .score { color: #2563eb; }
+        .compare-item .desc {
+            font-size: 12px;
+            margin-top: 6px;
+            opacity: 0.7;
         }
 
         .table-section {
@@ -109,6 +156,10 @@
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .table-scroll {
+            max-height: 400px;
+            overflow-y: auto;
         }
         table {
             width: 100%;
@@ -124,6 +175,9 @@
             font-weight: 600;
             font-size: 13px;
             color: #7f8c8d;
+            position: sticky;
+            top: 0;
+            z-index: 1;
         }
         tr:hover {
             background: #f8f9fa;
@@ -141,39 +195,171 @@
         .badge-low-mid { background: #e8f4fc; color: #3498db; }
         .badge-low { background: #f0f3f4; color: #95a5a6; }
 
-        .comparison-box {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 20px;
+        /* 弹窗样式 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
         }
-        .compare-item {
-            flex: 1;
-            padding: 20px;
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalIn 0.25s ease-out;
+        }
+        @keyframes modalIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #ecf0f1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-header h3 {
+            font-size: 18px;
+            color: #2c3e50;
+        }
+        .modal-header .district-badge {
+            padding: 4px 12px;
             border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+        .modal-header .district-badge.old { background: #fee; color: #e74c3c; }
+        .modal-header .district-badge.new { background: #e8f4fc; color: #3498db; }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #95a5a6;
+            cursor: pointer;
+            line-height: 1;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .modal-close:hover {
+            background: #f0f3f4;
+            color: #2c3e50;
+        }
+        .modal-body {
+            padding: 16px 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .modal-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .modal-stat {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
             text-align: center;
         }
-        .compare-item.old {
-            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        .modal-stat .num {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
         }
-        .compare-item.new {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        .modal-stat .label {
+            font-size: 11px;
+            color: #7f8c8d;
+            margin-top: 2px;
         }
-        .compare-item .title {
-            font-size: 14px;
+        .modal-market-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .modal-market-item {
+            padding: 14px 16px;
+            border: 1px solid #ecf0f1;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.2s;
+        }
+        .modal-market-item:hover {
+            border-color: #e74c3c;
+            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.1);
+        }
+        .market-rank {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #ecf0f1;
+            color: #7f8c8d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
             font-weight: 600;
-            margin-bottom: 8px;
+            flex-shrink: 0;
         }
-        .compare-item .score {
-            font-size: 36px;
+        .market-rank.top1 { background: #e74c3c; color: white; }
+        .market-rank.top2 { background: #e67e22; color: white; }
+        .market-rank.top3 { background: #f1c40f; color: white; }
+        .market-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .market-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        .market-meta {
+            font-size: 12px;
+            color: #7f8c8d;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .market-meta span::before {
+            content: '·';
+            margin-right: 6px;
+            color: #bdc3c7;
+        }
+        .market-meta span:first-child::before {
+            display: none;
+        }
+        .market-vitality {
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .market-vitality .score {
+            font-size: 20px;
             font-weight: bold;
         }
-        .compare-item.old .score { color: #dc2626; }
-        .compare-item.new .score { color: #2563eb; }
-        .compare-item .desc {
-            font-size: 12px;
-            margin-top: 4px;
-            opacity: 0.7;
-        }
+        .market-vitality .score.high { color: #e74c3c; }
+        .market-vitality .score.mid-high { color: #e67e22; }
+        .market-vitality .score.mid { color: #f1c40f; }
+        .market-vitality .score.low-mid { color: #3498db; }
+        .market-vitality .score.low { color: #95a5a6; }
 
         @media (max-width: 1024px) {
             .charts-grid { grid-template-columns: 1fr; }
@@ -223,7 +409,10 @@
 
         <div class="charts-grid">
             <div class="chart-card">
-                <div class="chart-title">区域菜市场活力指数旭日图</div>
+                <div class="chart-title">
+                    区域菜市场活力指数旭日图
+                    <span class="chart-subtitle">点击区域查看全部市场 · 仅展示TOP3火爆市场</span>
+                </div>
                 <div id="sunburst-chart"></div>
             </div>
             <div class="chart-card">
@@ -234,29 +423,67 @@
 
         <div class="table-section">
             <div class="chart-title">市场活力详情</div>
-            <table id="market-table">
-                <thead>
-                    <tr>
-                        <th>市场名称</th>
-                        <th>类型</th>
-                        <th>行政区</th>
-                        <th>营业时间</th>
-                        <th>评论数</th>
-                        <th>人均消费</th>
-                        <th>活力指数</th>
-                        <th>活力等级</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td colspan="8" style="text-align:center;color:#95a5a6;">加载中...</td></tr>
-                </tbody>
-            </table>
+            <div class="table-scroll">
+                <table id="market-table">
+                    <thead>
+                        <tr>
+                            <th>排名</th>
+                            <th>市场名称</th>
+                            <th>类型</th>
+                            <th>行政区</th>
+                            <th>营业时间</th>
+                            <th>评论数</th>
+                            <th>人均消费</th>
+                            <th>活力指数</th>
+                            <th>活力等级</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="9" style="text-align:center;color:#95a5a6;">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗 -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center;">
+                    <h3 id="modal-title">区域详情</h3>
+                    <span class="district-badge" id="modal-badge">老城区</span>
+                </div>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-stats">
+                    <div class="modal-stat">
+                        <div class="num" id="modal-market-count">--</div>
+                        <div class="label">市场总数</div>
+                    </div>
+                    <div class="modal-stat">
+                        <div class="num" id="modal-avg-vitality">--</div>
+                        <div class="label">平均活力指数</div>
+                    </div>
+                    <div class="modal-stat">
+                        <div class="num" id="modal-early-count">--</div>
+                        <div class="label">早市数量</div>
+                    </div>
+                </div>
+                <div class="modal-market-list" id="modal-market-list">
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         let sunburstChart = echarts.init(document.getElementById('sunburst-chart'));
         let barChart = echarts.init(document.getElementById('bar-chart'));
+        let allDistrictsData = {};
+        let allMarketsData = [];
+
+        const OLD_DISTRICTS = ['黄浦区', '静安区', '虹口区', '杨浦区', '普陀区', '长宁区', '徐汇区'];
 
         function getVitalityBadge(level) {
             const map = {
@@ -269,6 +496,17 @@
             return `<span class="vitality-badge ${map[level] || 'badge-low'}">${level}</span>`;
         }
 
+        function getVitalityClass(level) {
+            const map = {
+                '高活力': 'high',
+                '中高活力': 'mid-high',
+                '中等活力': 'mid',
+                '较低活力': 'low-mid',
+                '低活力': 'low'
+            };
+            return map[level] || 'low';
+        }
+
         function loadSunburstData() {
             fetch('/api/sunburst')
                 .then(res => res.json())
@@ -279,19 +517,17 @@
                             formatter: function(params) {
                                 const d = params.data;
                                 let html = `<b>${d.name}</b><br/>`;
-                                if (d.vitality_index !== undefined) {
+                                if (d.is_district) {
+                                    html += `平均活力: ${d.avg_vitality}<br/>`;
+                                    html += `市场数量: ${d.market_count || 0}家<br/>`;
+                                    html += `<span style="color:#e74c3c;font-size:11px;">点击查看全部市场 →</span>`;
+                                } else if (d.is_market) {
                                     html += `活力指数: ${d.vitality_index}<br/>`;
                                     html += `活力等级: ${d.vitality_level || ''}<br/>`;
-                                }
-                                if (d.avg_vitality !== undefined) {
-                                    html += `平均活力: ${d.avg_vitality}<br/>`;
-                                    html += `市场数量: ${d.market_count || 0}<br/>`;
-                                }
-                                if (d.category) {
-                                    html += `类型: ${d.category}<br/>`;
-                                }
-                                if (d.review_count !== undefined) {
-                                    html += `评论数: ${d.review_count}`;
+                                    html += `类型: ${d.category || '-'}<br/>`;
+                                    html += `评论数: ${d.review_count || 0}`;
+                                } else if (d.is_more) {
+                                    html += `点击查看该区域全部市场 →`;
                                 }
                                 return html;
                             }
@@ -299,33 +535,73 @@
                         series: [{
                             type: 'sunburst',
                             data: data.children || [],
-                            radius: ['15%', '90%'],
+                            radius: ['12%', '95%'],
                             sort: null,
+                            center: ['50%', '52%'],
                             emphasis: {
-                                focus: 'ancestor'
+                                focus: 'ancestor',
+                                itemStyle: {
+                                    shadowBlur: 10,
+                                    shadowColor: 'rgba(0, 0, 0, 0.3)'
+                                }
+                            },
+                            minAngle: 8,
+                            label: {
+                                rotate: 0,
+                                fontSize: 11,
+                                color: '#fff',
+                                textShadowColor: 'rgba(0,0,0,0.5)',
+                                textShadowBlur: 3,
+                                formatter: function(params) {
+                                    const name = params.name;
+                                    if (name.length > 6) {
+                                        return name.slice(0, 6) + '...';
+                                    }
+                                    return name;
+                                }
                             },
                             levels: [
                                 {},
                                 {
-                                    r0: '15%',
-                                    r: '40%',
+                                    r0: '12%',
+                                    r: '35%',
                                     label: {
                                         rotate: 'tangential',
-                                        fontSize: 12
+                                        fontSize: 12,
+                                        fontWeight: 600
+                                    },
+                                    itemStyle: {
+                                        borderWidth: 2,
+                                        borderColor: '#fff'
                                     }
                                 },
                                 {
-                                    r0: '40%',
-                                    r: '90%',
+                                    r0: '35%',
+                                    r: '95%',
                                     label: {
                                         rotate: 'radial',
-                                        fontSize: 10
+                                        fontSize: 10,
+                                        align: 'right'
+                                    },
+                                    itemStyle: {
+                                        borderWidth: 1,
+                                        borderColor: '#fff'
                                     }
                                 }
                             ]
                         }]
                     };
                     sunburstChart.setOption(option);
+
+                    sunburstChart.off('click');
+                    sunburstChart.on('click', function(params) {
+                        const d = params.data;
+                        if (d.is_district) {
+                            openDistrictModal(d.name);
+                        } else if (d.is_more && d.district) {
+                            openDistrictModal(d.district);
+                        }
+                    });
                 })
                 .catch(err => console.error('加载旭日图数据失败:', err));
         }
@@ -334,6 +610,7 @@
             fetch('/api/districts')
                 .then(res => res.json())
                 .then(data => {
+                    allDistrictsData = data;
                     const districts = Object.keys(data);
                     const values = districts.map(d => data[d].avg_vitality);
                     const colors = values.map(v => {
@@ -347,54 +624,121 @@
                     const option = {
                         tooltip: {
                             trigger: 'axis',
+                            axisPointer: { type: 'shadow' },
                             formatter: function(params) {
                                 const d = data[params[0].name];
                                 return `<b>${params[0].name}</b><br/>
                                     平均活力指数: ${d.avg_vitality}<br/>
-                                    市场数量: ${d.market_count}<br/>
-                                    早市数量: ${d.early_market_count}`;
+                                    市场数量: ${d.market_count}家<br/>
+                                    早市数量: ${d.early_market_count}家<br/>
+                                    <span style="color:#3498db;font-size:11px;">点击查看详情 →</span>`;
                             }
                         },
                         grid: {
                             left: '3%',
                             right: '4%',
                             bottom: '3%',
+                            top: '10px',
                             containLabel: true
                         },
                         xAxis: {
                             type: 'value',
                             max: 1,
-                            axisLabel: { show: false }
+                            axisLabel: { show: false },
+                            splitLine: { show: false }
                         },
                         yAxis: {
                             type: 'category',
                             data: districts,
-                            axisLabel: { fontSize: 12 }
+                            axisLabel: { fontSize: 12 },
+                            axisTick: { show: false },
+                            axisLine: { show: false }
                         },
                         series: [{
                             type: 'bar',
                             data: values.map((v, i) => ({
                                 value: v,
-                                itemStyle: { color: colors[i] }
+                                itemStyle: {
+                                    color: colors[i],
+                                    borderRadius: [0, 4, 4, 0]
+                                }
                             })),
-                            barWidth: 16,
+                            barWidth: 18,
                             label: {
                                 show: true,
                                 position: 'right',
                                 fontSize: 11,
+                                fontWeight: 500,
                                 formatter: '{c}'
-                            }
+                            },
+                            cursor: 'pointer'
                         }]
                     };
                     barChart.setOption(option);
+
+                    barChart.off('click');
+                    barChart.on('click', function(params) {
+                        openDistrictModal(params.name);
+                    });
                 })
                 .catch(err => console.error('加载柱状图数据失败:', err));
         }
+
+        function openDistrictModal(districtName) {
+            const districtData = allDistrictsData[districtName];
+            if (!districtData) return;
+
+            document.getElementById('modal-title').textContent = districtName + ' 菜市场详情';
+
+            const badge = document.getElementById('modal-badge');
+            const isOld = OLD_DISTRICTS.includes(districtName);
+            badge.textContent = isOld ? '老城区' : '新城区';
+            badge.className = 'district-badge ' + (isOld ? 'old' : 'new');
+
+            document.getElementById('modal-market-count').textContent = districtData.market_count + ' 家';
+            document.getElementById('modal-avg-vitality').textContent = districtData.avg_vitality;
+            document.getElementById('modal-early-count').textContent = districtData.early_market_count + ' 家';
+
+            const list = document.getElementById('modal-market-list');
+            list.innerHTML = districtData.markets.map((m, i) => `
+                <div class="modal-market-item">
+                    <div class="market-rank ${i < 3 ? 'top' + (i+1) : ''}">${i+1}</div>
+                    <div class="market-info">
+                        <div class="market-name">${m.name}</div>
+                        <div class="market-meta">
+                            <span>${m.category || '-'}</span>
+                            <span>${m.business_hours || '营业时间未知'}</span>
+                            <span>评论 ${m.review_count || 0}</span>
+                            <span>${m.avg_price ? '¥' + m.avg_price + '/人' : '-'}</span>
+                        </div>
+                    </div>
+                    <div class="market-vitality">
+                        <div class="score ${getVitalityClass(m.vitality_level)}">${m.vitality_index}</div>
+                        <div style="font-size:11px;color:#95a5a6;margin-top:2px;">${m.vitality_level}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('modal-overlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+        }
+
+        document.getElementById('modal-close').addEventListener('click', closeModal);
+        document.getElementById('modal-overlay').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
 
         function loadMarketsTable() {
             fetch('/api/markets')
                 .then(res => res.json())
                 .then(data => {
+                    allMarketsData = data;
                     const sorted = data.sort((a, b) => b.vitality_index - a.vitality_index);
 
                     let total = sorted.length;
@@ -408,9 +752,10 @@
                     document.getElementById('supermarkets').textContent = supermarketCount;
 
                     const tbody = document.querySelector('#market-table tbody');
-                    tbody.innerHTML = sorted.map(m => `
-                        <tr>
-                            <td>${m.name}</td>
+                    tbody.innerHTML = sorted.map((m, i) => `
+                        <tr style="cursor:pointer;" onclick="scrollToDistrict('${m.district}')">
+                            <td>${i+1}</td>
+                            <td><b>${m.name}</b></td>
                             <td>${m.category || '-'}</td>
                             <td>${m.district || '-'}</td>
                             <td>${m.business_hours || '-'}</td>
@@ -424,7 +769,7 @@
                 .catch(err => {
                     console.error('加载市场数据失败:', err);
                     document.querySelector('#market-table tbody').innerHTML =
-                        '<tr><td colspan="8" style="text-align:center;color:#e74c3c;">数据加载失败</td></tr>';
+                        '<tr><td colspan="9" style="text-align:center;color:#e74c3c;">数据加载失败</td></tr>';
                 });
         }
 

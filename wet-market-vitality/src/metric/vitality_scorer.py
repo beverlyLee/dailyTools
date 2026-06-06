@@ -9,8 +9,11 @@ WEIGHT_EARLY_MARKET = 0.4
 WEIGHT_DAILY_REVIEWS = 0.3
 WEIGHT_CATEGORIES = 0.3
 
-MAX_DAILY_REVIEWS = 50
+MAX_DAILY_REVIEWS = 15
 MAX_CATEGORIES = 20
+
+TRADITIONAL_MARKET_BONUS = 0.15
+SUPERMARKET_PENALTY = 0.05
 
 
 class VitalityScorer:
@@ -40,6 +43,14 @@ class VitalityScorer:
             + daily_reviews_score * WEIGHT_DAILY_REVIEWS
             + categories_score * WEIGHT_CATEGORIES
         )
+
+        category = market.get("category", "")
+        if category == "菜市场":
+            total_score += TRADITIONAL_MARKET_BONUS
+        elif category == "生鲜超市":
+            total_score -= SUPERMARKET_PENALTY
+
+        total_score = max(0.0, min(1.0, total_score))
 
         vitality_level = self._get_vitality_level(total_score)
 
