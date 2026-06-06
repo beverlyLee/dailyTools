@@ -271,6 +271,10 @@ function createNewProject() {
             files: [],
             history: [],
             currentResult: null,
+            dissatisfyRaw: '',
+            dissatisfyResult: '',
+            promptRaw: '',
+            promptResult: '',
             lastUpdated: Date.now()
         }
     };
@@ -476,7 +480,15 @@ function renderWorkspace() {
             newRoundBtn: content.querySelector('.field-newRoundBtn'),
             historyCard: content.querySelector('.field-historyCard'),
             historyList: content.querySelector('.field-historyList'),
-            clearHistoryBtn: content.querySelector('.field-clearHistoryBtn')
+            clearHistoryBtn: content.querySelector('.field-clearHistoryBtn'),
+            dissatisfyRaw: content.querySelector('.field-dissatisfyRaw'),
+            dissatisfyResult: content.querySelector('.field-dissatisfyResult'),
+            extractDissatisfyBtn: content.querySelector('.field-extractDissatisfyBtn'),
+            saveDissatisfyBtn: content.querySelector('.field-saveDissatisfyBtn'),
+            promptRaw: content.querySelector('.field-promptRaw'),
+            promptResult: content.querySelector('.field-promptResult'),
+            extractPromptBtn: content.querySelector('.field-extractPromptBtn'),
+            savePromptBtn: content.querySelector('.field-savePromptBtn')
         };
         
         fields.projectName.value = data.projectName || '';
@@ -490,6 +502,10 @@ function renderWorkspace() {
         if (fields.startupScript) fields.startupScript.value = data.startupScript || '';
         if (fields.backendScript) fields.backendScript.value = data.backendScript || '';
         if (fields.frontendScript) fields.frontendScript.value = data.frontendScript || '';
+        if (fields.dissatisfyRaw) fields.dissatisfyRaw.value = data.dissatisfyRaw || '';
+        if (fields.dissatisfyResult) fields.dissatisfyResult.value = data.dissatisfyResult || '';
+        if (fields.promptRaw) fields.promptRaw.value = data.promptRaw || '';
+        if (fields.promptResult) fields.promptResult.value = data.promptResult || '';
         
         fields.projectName.addEventListener('input', () => {
             project.data.projectName = fields.projectName.value;
@@ -595,6 +611,30 @@ function renderWorkspace() {
         fields.syncFeishuBtn.addEventListener('click', () => syncToFeishu(project, fields));
         fields.newRoundBtn.addEventListener('click', () => newRound(project, fields));
         fields.clearHistoryBtn.addEventListener('click', () => clearHistory(project, fields));
+        fields.extractDissatisfyBtn.addEventListener('click', () => extractDissatisfy(project, fields));
+        fields.saveDissatisfyBtn.addEventListener('click', () => saveDissatisfy(project, fields));
+        fields.dissatisfyRaw.addEventListener('input', () => {
+            project.data.dissatisfyRaw = fields.dissatisfyRaw.value;
+            project.data.lastUpdated = Date.now();
+            saveProjects();
+        });
+        fields.dissatisfyResult.addEventListener('input', () => {
+            project.data.dissatisfyResult = fields.dissatisfyResult.value;
+            project.data.lastUpdated = Date.now();
+            saveProjects();
+        });
+        fields.extractPromptBtn.addEventListener('click', () => extractNextPrompt(project, fields));
+        fields.savePromptBtn.addEventListener('click', () => saveNextPrompt(project, fields));
+        fields.promptRaw.addEventListener('input', () => {
+            project.data.promptRaw = fields.promptRaw.value;
+            project.data.lastUpdated = Date.now();
+            saveProjects();
+        });
+        fields.promptResult.addEventListener('input', () => {
+            project.data.promptResult = fields.promptResult.value;
+            project.data.lastUpdated = Date.now();
+            saveProjects();
+        });
         
         renderProjectPreviews(project, fields);
         renderProjectHistory(project, fields);
@@ -1790,6 +1830,260 @@ async function gitCommit(project, fields) {
         fields.gitCommitBtn.disabled = false;
         fields.gitCommitBtn.textContent = '📝 提交代码';
     }
+}
+
+function extractDissatisfy(project, fields) {
+    const raw = fields.dissatisfyRaw.value.trim();
+    if (!raw) {
+        showToast('请先输入原始不满意原因');
+        return;
+    }
+
+    const productSection = extractSection(raw, ['产物不满意', '产品不满意', '产出不满意']);
+    const processSection = extractSection(raw, ['过程不满意']);
+
+    const productResult = processDissatisfySection(productSection);
+    const processResult = processDissatisfySection(processSection);
+
+    let result = '';
+    if (productResult) {
+        result += '产物不满意：' + productResult + '\n';
+    }
+    if (processResult) {
+        result += '过程不满意：' + processResult;
+    }
+
+    result = result.trim();
+    fields.dissatisfyResult.value = result;
+    project.data.dissatisfyResult = result;
+    project.data.lastUpdated = Date.now();
+    saveProjects();
+
+    showToast('✅ 提取完成');
+}
+
+function extractSection(text, markers) {
+    let section = '';
+    let found = false;
+
+    const lines = text.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+
+        let isMarker = false;
+        for (const marker of markers) {
+            if (line.trim().startsWith(marker)) {
+                isMarker = true;
+                found = true;
+                const rest = line.trim().substring(marker.length).replace(/^[：: 　]*/, '');
+                if (rest) {
+                    section += rest + '\n';
+                }
+                break;
+            }
+        }
+
+        if (!isMarker && found) {
+            const allMarkers = ['产物不满意', '产品不满意', '产出不满意', '过程不满意'];
+            let isOtherSection = false;
+            for (const m of allMarkers) {
+                if (line.trim().startsWith(m)) {
+                    isOtherSection = true;
+                    break;
+                }
+            }
+            if (isOtherSection) {
+                break;
+            }
+            section += line + '\n';
+        }
+    }
+
+    return section.trim();
+}
+
+function processDissatisfySection(text) {
+    if (!text) return '';
+
+    let lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    let result = lines.join(' ');
+    result = result.replace(/\s+/g, ' ');
+
+    const filterPrefixes = [
+        '期望', '原因分析', '分析', '预期', '希望', '建议', '改进建议',
+        '产物不满意', '产品不满意', '产出不满意', '过程不满意'
+    ];
+
+    for (const prefix of filterPrefixes) {
+        const pattern = new RegExp(prefix + '[：:][^。]*。', 'g');
+        result = result.replace(pattern, '');
+    }
+
+    const sentences = result.split(/(?<=。)/);
+    const filtered = [];
+    for (const sentence of sentences) {
+        const trimmed = sentence.trim();
+        if (!trimmed) continue;
+        let skip = false;
+        for (const prefix of filterPrefixes) {
+            if (trimmed.startsWith(prefix)) {
+                skip = true;
+                break;
+            }
+        }
+        if (!skip) {
+            filtered.push(trimmed);
+        }
+    }
+
+    result = filtered.join('');
+
+    result = result.replace(/\b([1-9]\d*)[.、．]\s*/g, '$1. ');
+    result = result.replace(/。\s*([1-9]\d*)[.、．]/g, '。$1.');
+
+    result = result.trim();
+
+    return result;
+}
+
+function saveDissatisfy(project, fields) {
+    project.data.dissatisfyRaw = fields.dissatisfyRaw.value;
+    project.data.dissatisfyResult = fields.dissatisfyResult.value;
+    project.data.lastUpdated = Date.now();
+    saveProjects();
+    showToast('✅ 已保存');
+}
+
+function extractNextPrompt(project, fields) {
+    const raw = fields.promptRaw.value.trim();
+    if (!raw) {
+        showToast('请先输入原始下一轮 Prompt');
+        return;
+    }
+
+    const result = compressNextPrompt(raw);
+    fields.promptResult.value = result;
+    project.data.promptResult = result;
+    project.data.lastUpdated = Date.now();
+    saveProjects();
+
+    showToast('✅ 提取完成');
+}
+
+function extractPromptSection(text) {
+    const patterns = [
+        /[#\s]*【下一轮\s*Prompt】/,
+        /[#\s]*下一轮\s*Prompt/,
+        /[#\s]*下一轮\s*prompt/,
+    ];
+
+    let startIdx = null;
+    for (const pattern of patterns) {
+        const match = text.match(pattern);
+        if (match) {
+            startIdx = match.index + match[0].length;
+            break;
+        }
+    }
+
+    if (startIdx === null) {
+        return text;
+    }
+
+    return text.substring(startIdx).trim();
+}
+
+function extractTasksFromPrompt(text) {
+    const tasks = [];
+    const taskPattern = /(?:^|\n)\s*任务\s*(\d+)\s*[：:]\s*([\s\S]*?)(?=\n\s*任务\s*\d+\s*[：:]|$)/g;
+
+    let match;
+    while ((match = taskPattern.exec(text)) !== null) {
+        const taskContent = match[2];
+        const lines = taskContent.trim().split('\n');
+        const title = lines[0]?.trim() || '';
+
+        let fixContent = '';
+        const fixMatch = taskContent.match(/(?:^|\n)\s*[-*]\s*修正\s*[：:]\s*([\s\S]*?)(?=\n\s*[-*]\s*[\u4e00-\u9fa5]+\s*[：:]|$)/);
+        if (fixMatch) {
+            fixContent = fixMatch[1].trim();
+        }
+
+        if (title && fixContent) {
+            tasks.push([title, fixContent]);
+        }
+    }
+
+    return tasks;
+}
+
+function cleanPromptText(text) {
+    let result = text;
+
+    result = result.replace(/（[^）]*）/g, '');
+    result = result.replace(/\([^)]*\)/g, '');
+
+    result = result.replace(/[「」【】《》]/g, '');
+
+    result = result.replace(/\s+/g, ' ');
+
+    result = result.replace(/，+/g, '，');
+    result = result.replace(/。+/g, '。');
+    result = result.replace(/，。/g, '。');
+    result = result.replace(/，\s*，+/g, '，');
+
+    const removePhrases = [
+        '别漏项', '别遗漏', '白做', '等于没做', '等于白做',
+    ];
+    for (const phrase of removePhrases) {
+        result = result.replace(new RegExp(phrase, 'g'), '');
+    }
+
+    result = result.replace(/^[，、。\s]+|[，、。\s]+$/g, '');
+
+    return result.trim();
+}
+
+function compressNextPrompt(rawText) {
+    const promptText = extractPromptSection(rawText);
+    const tasks = extractTasksFromPrompt(promptText);
+
+    if (!tasks || tasks.length === 0) {
+        return '';
+    }
+
+    const parts = [];
+    for (let i = 0; i < tasks.length; i++) {
+        const [title, fixContent] = tasks[i];
+        const cleanTitle = cleanPromptText(title);
+        const cleanFix = cleanPromptText(fixContent);
+
+        if (cleanTitle && cleanFix) {
+            let fix = cleanFix;
+            if (!fix.endsWith('。')) {
+                fix += '。';
+            }
+            parts.push(`${i + 1}.${cleanTitle}：${fix}`);
+        }
+    }
+
+    if (parts.length === 0) {
+        return '';
+    }
+
+    let result = '优化系统实现：' + parts.join('');
+
+    result = result.replace(/。+/g, '。');
+
+    return result;
+}
+
+function saveNextPrompt(project, fields) {
+    project.data.promptRaw = fields.promptRaw.value;
+    project.data.promptResult = fields.promptResult.value;
+    project.data.lastUpdated = Date.now();
+    saveProjects();
+    showToast('✅ 已保存');
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

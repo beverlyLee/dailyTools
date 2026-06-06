@@ -241,6 +241,42 @@
                         </div>
                         <div class="field-historyList"></div>
                     </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">📝 不满意原因提取</h2>
+                            <div class="card-actions">
+                                <button class="btn btn-secondary btn-sm field-extractDissatisfyBtn">🔄 提取精简</button>
+                                <button class="btn btn-success btn-sm field-saveDissatisfyBtn">💾 保存</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>原始不满意原因</label>
+                            <textarea class="field-dissatisfyRaw" rows="10" placeholder="粘贴包含产物不满意和过程不满意的原始文本..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>处理后不满意原因（可编辑）</label>
+                            <textarea class="field-dissatisfyResult" rows="6" placeholder="点击「提取精简」按钮生成处理后的内容..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">💡 下一轮 Prompt 提取</h2>
+                            <div class="card-actions">
+                                <button class="btn btn-secondary btn-sm field-extractPromptBtn">🔄 提取精简</button>
+                                <button class="btn btn-success btn-sm field-savePromptBtn">💾 保存</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>原始下一轮 Prompt</label>
+                            <textarea class="field-promptRaw" rows="10" placeholder="粘贴包含任务1、任务2...的下一轮 Prompt 原始文本..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>提取后 Prompt（可编辑）</label>
+                            <textarea class="field-promptResult" rows="6" placeholder="点击「提取精简」按钮生成精简后的 Prompt..."></textarea>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="project-sidebar">
@@ -266,7 +302,7 @@
         </div>
     </template>
 
-    <script src="main.js?v=20260606"></script>
+    <script src="main.js?v=2026060604"></script>
     <script src="test_functions.js"></script>
 </body>
 </html>

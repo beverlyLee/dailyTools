@@ -93,6 +93,27 @@ body {
     margin-bottom: 20px;
 }
 
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.card-header .card-title {
+    margin-bottom: 0;
+}
+
+.card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.card-actions .btn {
+    padding: 6px 14px;
+    font-size: 0.85rem;
+}
+
 .form-group {
     margin-bottom: 18px;
 }
