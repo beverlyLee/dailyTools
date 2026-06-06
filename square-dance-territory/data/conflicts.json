@@ -1,0 +1,58 @@
+{
+  "summary": {
+    "total_conflicts": 2,
+    "high_severity": 1,
+    "medium_severity": 1,
+    "low_severity": 0
+  },
+  "conflicts": [
+    {
+      "conflict_id": "conflict_0_5",
+      "cluster_a_id": 0,
+      "cluster_b_id": 5,
+      "cluster_a_name": "文化广场舞队",
+      "cluster_b_name": "人民广场舞队",
+      "overlap_area_sqm": 5732.03,
+      "overlap_percentage_a": 0.56,
+      "overlap_percentage_b": 73.57,
+      "center_distance_meters": 553.67,
+      "severity": "high",
+      "severity_color": "#FF0000",
+      "intersection_points": [
+        {
+          "lat": 39.907638,
+          "lng": 116.402852
+        },
+        {
+          "lat": 39.908447,
+          "lng": 116.402568
+        }
+      ],
+      "warning_label": "⚠️ 严重冲突！两舞队活动范围高度重叠"
+    },
+    {
+      "conflict_id": "conflict_2_4",
+      "cluster_a_id": 2,
+      "cluster_b_id": 4,
+      "cluster_a_name": "世纪公园舞队",
+      "cluster_b_name": "世纪公园2队",
+      "overlap_area_sqm": 30591.72,
+      "overlap_percentage_a": 9.21,
+      "overlap_percentage_b": 38.76,
+      "center_distance_meters": 340.89,
+      "severity": "medium",
+      "severity_color": "#FF8C00",
+      "intersection_points": [
+        {
+          "lat": 39.897649,
+          "lng": 116.406206
+        },
+        {
+          "lat": 39.896701,
+          "lng": 116.402922
+        }
+      ],
+      "warning_label": "⚡ 中度冲突，建议错峰活动"
+    }
+  ]
+}

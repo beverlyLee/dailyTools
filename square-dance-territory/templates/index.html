@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>广场舞领地分析系统</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+                         'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+            overflow: hidden;
+        }
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 360px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+        .sidebar-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px 20px;
+        }
+        .sidebar-header h1 {
+            font-size: 20px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sidebar-header .subtitle {
+            font-size: 12px;
+            opacity: 0.85;
+        }
+        .stats-section {
+            padding: 16px 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .stats-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .stat-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px 8px;
+            text-align: center;
+        }
+        .stat-item .num {
+            font-size: 22px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-item .label {
+            font-size: 11px;
+            color: #7f8c8d;
+            margin-top: 4px;
+        }
+        .stat-item.conflict .num { color: #e74c3c; }
+        .stat-item.team .num { color: #27ae60; }
+
+        .team-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+        }
+        .team-list-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .team-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+        }
+        .team-card:hover {
+            background: #eef1ff;
+            transform: translateX(2px);
+        }
+        .team-card.active {
+            background: #eef1ff;
+            border-left-color: #667eea;
+        }
+        .team-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .team-color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .team-name {
+            font-size: 14px;
+            font-weight: 600;
+            flex: 1;
+        }
+        .team-info-row {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        .team-info-row span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .conflict-section {
+            padding: 16px 20px;
+            border-top: 1px solid #eee;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .conflict-card {
+            background: #fff5f5;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 3px solid #e74c3c;
+        }
+        .conflict-card.medium {
+            background: #fff8e1;
+            border-left-color: #f39c12;
+        }
+        .conflict-card.low {
+            background: #f0f9ff;
+            border-left-color: #3498db;
+        }
+        .conflict-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #e74c3c;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .conflict-card.medium .conflict-title { color: #f39c12; }
+        .conflict-card.low .conflict-title { color: #3498db; }
+        .conflict-detail {
+            font-size: 11px;
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        .map-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            z-index: 5;
+        }
+        .control-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .control-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .control-divider {
+            height: 1px;
+            background: #eee;
+            margin: 6px 0;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 10px;
+            padding: 14px 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            z-index: 5;
+            font-size: 12px;
+        }
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            opacity: 0.6;
+            border: 2px solid;
+        }
+        .legend-stripe {
+            width: 16px;
+            height: 16px;
+            background: repeating-linear-gradient(
+                45deg,
+                #e74c3c,
+                #e74c3c 3px,
+                #ffeb3b 3px,
+                #ffeb3b 6px
+            );
+            border-radius: 3px;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 20;
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #eee;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-text {
+            margin-top: 12px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .no-data {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            color: #95a5a6;
+        }
+        .no-data-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .no-data-text {
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        .popup-content {
+            padding: 4px;
+            max-width: 240px;
+        }
+        .popup-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #2c3e50;
+        }
+        .popup-row {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin: 3px 0;
+        }
+        .popup-tag {
+            display: inline-block;
+            background: #eef1ff;
+            color: #667eea;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .conflict-pulse {
+            animation: pulse-border 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>🕺 广场舞领地分析</h1>
+                <div class="subtitle">基于短视频地理标签的舞队活动范围分析</div>
+            </div>
+
+            <div class="stats-section">
+                <div class="stats-title">📊 数据概览</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="num" id="statVideos">0</div>
+                        <div class="label">视频数</div>
+                    </div>
+                    <div class="stat-item team">
+                        <div class="num" id="statClusters">0</div>
+                        <div class="label">舞队数</div>
+                    </div>
+                    <div class="stat-item conflict">
+                        <div class="num" id="statConflicts">0</div>
+                        <div class="label">冲突区</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="team-list">
+                <div class="team-list-title">
+                    <span>🎯 舞队领地</span>
+                    <span style="font-size:12px;color:#7f8c8d;" id="teamCount">0 支</span>
+                </div>
+                <div id="teamListContainer">
+                    <div class="no-data">
+                        <div class="no-data-icon">💃</div>
+                        <div class="no-data-text">加载中...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="conflict-section">
+                <div class="stats-title">⚠️ 冲突预警</div>
+                <div id="conflictListContainer">
+                    <div class="no-data" style="padding: 20px 0;">
+                        <div class="no-data-text" style="font-size: 12px;">暂无冲突数据</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="map-controls">
+                <div class="control-item">
+                    <input type="checkbox" id="showVideos" checked>
+                    <label for="showVideos">视频点位</label>
+                </div>
+                <div class="control-item">
+                    <input type="checkbox" id="showTerritories" checked>
+                    <label for="showTerritories">领地范围</label>
+                </div>
+                <div class="control-divider"></div>
+                <div class="control-item">
+                    <input type="checkbox" id="showConflicts" checked>
+                    <label for="showConflicts">冲突标记</label>
+                </div>
+            </div>
+            <div class="legend">
+                <div class="legend-title">📋 图例</div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background:#4ECDC4;border-color:#26a69a;"></div>
+                    <span>舞队领地</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-stripe"></div>
+                    <span>冲突重叠区</span>
+                </div>
+                <div class="legend-item">
+                    <div style="width:8px;height:8px;background:#e74c3c;border-radius:50%;"></div>
+                    <span>视频位置</span>
+                </div>
+            </div>
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">正在加载地图数据...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const MAPBOX_TOKEN = 'pk.eyJ1IjoiZGVtby11c2VyIiwiYSI6ImNrbm93aG52azFpa2sydnF1aTg5dTFydXkifQ.demo';
+
+        let map;
+        let allData = null;
+        let videoMarkers = [];
+        let territoryLayers = [];
+        let conflictLayers = [];
+        let activeClusterId = null;
+        let mapLoaded = false;
+
+        function initMap() {
+            loadData();
+
+            mapboxgl.accessToken = MAPBOX_TOKEN;
+
+            try {
+                map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/light-v11',
+                    center: [116.4074, 39.9042],
+                    zoom: 12,
+                });
+
+                map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+                map.addControl(new mapboxgl.ScaleControl({
+                    maxWidth: 100,
+                    unit: 'metric'
+                }), 'bottom-left');
+
+                map.on('load', () => {
+                    mapLoaded = true;
+                    if (allData) {
+                        renderMap(allData);
+                    }
+                });
+
+                map.on('error', (e) => {
+                    console.warn('Mapbox error:', e.error);
+                    showFallbackMap();
+                });
+            } catch (e) {
+                console.error('Map init failed:', e);
+                showFallbackMap();
+            }
+        }
+
+        function showFallbackMap() {
+            if (!allData || !allData.clusters) return;
+
+            const mapContainer = document.getElementById('map');
+            mapContainer.innerHTML = `
+                <div style="width:100%;height:100%;background:linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 50%, #fff8e1 100%);
+                            position:relative;overflow:hidden;">
+                    <div style="position:absolute;top:20px;left:20px;background:white;padding:10px 14px;
+                                border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);font-size:13px;color:#666;">
+                        🗺️ 示意图模式（配置 Mapbox Token 可启用真实地图）
+                    </div>
+                    <svg id="fallbackSvg" width="100%" height="100%" style="position:absolute;top:0;left:0;"></svg>
+                </div>
+            `;
+
+            renderFallbackMap();
+        }
+
+        function renderFallbackMap() {
+            if (!allData || !allData.clusters) return;
+
+            const svg = document.getElementById('fallbackSvg');
+            if (!svg) return;
+
+            const clusters = allData.clusters;
+            const conflicts = allData.conflicts || [];
+            const videos = allData.videos || [];
+
+            const width = svg.clientWidth || 800;
+            const height = svg.clientHeight || 600;
+            const padding = 80;
+
+            const lats = clusters.map(c => c.center.lat);
+            const lngs = clusters.map(c => c.center.lng);
+            const minLat = Math.min(...lats) - 0.005;
+            const maxLat = Math.max(...lats) + 0.005;
+            const minLng = Math.min(...lngs) - 0.005;
+            const maxLng = Math.max(...lngs) + 0.005;
+
+            const latRange = maxLat - minLat;
+            const lngRange = maxLng - minLng;
+
+            const scaleX = (width - 2 * padding) / lngRange;
+            const scaleY = (height - 2 * padding) / latRange;
+            const scale = Math.min(scaleX, scaleY);
+
+            const offsetX = (width - lngRange * scale) / 2;
+            const offsetY = (height - latRange * scale) / 2;
+
+            function latLngToXY(lat, lng) {
+                const x = offsetX + (lng - minLng) * scale;
+                const y = height - offsetY - (lat - minLat) * scale;
+                return { x, y };
+            }
+
+            let svgContent = '';
+
+            conflicts.forEach(conflict => {
+                const clusterA = clusters.find(c => c.cluster_id === conflict.cluster_a_id);
+                const clusterB = clusters.find(c => c.cluster_id === conflict.cluster_b_id);
+                if (!clusterA || !clusterB) return;
+
+                const posA = latLngToXY(clusterA.center.lat, clusterA.center.lng);
+                const posB = latLngToXY(clusterB.center.lat, clusterB.center.lng);
+
+                const midX = (posA.x + posB.x) / 2;
+                const midY = (posA.y + posB.y) / 2;
+
+                const rA = clusterA.radius_meters / 111000 * Math.cos(clusterA.center.lat * Math.PI / 180) * scale;
+                const rB = clusterB.radius_meters / 111000 * Math.cos(clusterB.center.lat * Math.PI / 180) * scale;
+
+                const overlapRadius = Math.min(rA, rB) * 0.7;
+
+                const patternId = 'stripe-' + conflict.conflict_id;
+                svgContent += `
+                    <defs>
+                        <pattern id="${patternId}" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+                            <rect width="4" height="8" fill="#e74c3c" opacity="0.6"/>
+                        </pattern>
+                    </defs>
+                    <circle cx="${midX}" cy="${midY}" r="${overlapRadius}"
+                            fill="url(#${patternId})"
+                            stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,5">
+                        <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite"/>
+                    </circle>
+                `;
+            });
+
+            clusters.forEach(cluster => {
+                const pos = latLngToXY(cluster.center.lat, cluster.center.lng);
+                const radiusPx = cluster.radius_meters / 111000 * Math.cos(cluster.center.lat * Math.PI / 180) * scale;
+
+                svgContent += `
+                    <circle cx="${pos.x}" cy="${pos.y}" r="${radiusPx}"
+                            fill="${cluster.color}" fill-opacity="0.25"
+                            stroke="${cluster.color}" stroke-width="2.5"/>
+                    <circle cx="${pos.x}" cy="${pos.y}" r="6" fill="${cluster.color}" stroke="white" stroke-width="2"/>
+                    <text x="${pos.x}" y="${pos.y - radiusPx - 8}" text-anchor="middle"
+                          font-size="13" font-weight="600" fill="#2c3e50">
+                        ${cluster.name}
+                    </text>
+                    <text x="${pos.x}" y="${pos.y - radiusPx + 8}" text-anchor="middle"
+                          font-size="11" fill="#7f8c8d">
+                        ${cluster.video_count}个视频 · ${cluster.radius_meters}米
+                    </text>
+                `;
+            });
+
+            videos.slice(0, 50).forEach(video => {
+                const pos = latLngToXY(video.lat, video.lng);
+                svgContent += `
+                    <circle cx="${pos.x}" cy="${pos.y}" r="3" fill="#e74c3c" opacity="0.6"/>
+                `;
+            });
+
+            conflicts.forEach(conflict => {
+                const clusterA = clusters.find(c => c.cluster_id === conflict.cluster_a_id);
+                const clusterB = clusters.find(c => c.cluster_id === conflict.cluster_b_id);
+                if (!clusterA || !clusterB) return;
+
+                const posA = latLngToXY(clusterA.center.lat, clusterA.center.lng);
+                const posB = latLngToXY(clusterB.center.lat, clusterB.center.lng);
+                const midX = (posA.x + posB.x) / 2;
+                const midY = (posA.y + posB.y) / 2;
+
+                const severityColors = { high: '#e74c3c', medium: '#f39c12', low: '#3498db' };
+                const color = severityColors[conflict.severity] || '#e74c3c';
+
+                svgContent += `
+                    <g transform="translate(${midX}, ${midY - 40})">
+                        <rect x="-60" y="-18" width="120" height="36" rx="6"
+                              fill="white" stroke="${color}" stroke-width="2"/>
+                        <text x="0" y="-4" text-anchor="middle" font-size="11" font-weight="600" fill="${color}">
+                            ⚠️ 冲突警告
+                        </text>
+                        <text x="0" y="10" text-anchor="middle" font-size="10" fill="#7f8c8d">
+                            ${conflict.overlap_area_sqm.toFixed(0)}㎡ 重叠
+                        </text>
+                    </g>
+                `;
+            });
+
+            svg.innerHTML = svgContent;
+        }
+
+        async function loadData() {
+            try {
+                const response = await fetch('/api/territories');
+                if (!response.ok) {
+                    throw new Error('数据加载失败');
+                }
+                const data = await response.json();
+                allData = data;
+                renderData(data);
+
+                if (!map || !mapLoaded) {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    showFallbackMap();
+                }
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                document.getElementById('loadingOverlay').innerHTML = `
+                    <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+                    <div style="font-size: 16px; color: #2c3e50; margin-bottom: 8px;">暂无数据</div>
+                    <div style="font-size: 12px; color: #7f8c8d; margin-bottom: 16px;">请先生成模拟数据</div>
+                    <button class="btn" onclick="generateMockData()">生成演示数据</button>
+                `;
+            }
+        }
+
+        async function generateMockData() {
+            document.getElementById('loadingOverlay').innerHTML = `
+                <div class="loading-spinner"></div>
+                <div class="loading-text">正在生成模拟数据...</div>
+            `;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+
+            try {
+                const response = await fetch('/api/generate-mock', { method: 'POST' });
+                if (response.ok) {
+                    loadData();
+                } else {
+                    throw new Error('生成失败');
+                }
+            } catch (error) {
+                alert('数据生成失败: ' + error.message);
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+        }
+
+        function renderData(data) {
+            updateStats(data.stats);
+            renderTeamList(data.clusters);
+            renderConflictList(data.conflicts);
+
+            if (map && mapLoaded) {
+                renderMap(data);
+            }
+        }
+
+        function updateStats(stats) {
+            document.getElementById('statVideos').textContent = stats.total_videos;
+            document.getElementById('statClusters').textContent = stats.total_clusters;
+            document.getElementById('statConflicts').textContent = stats.total_conflicts;
+            document.getElementById('teamCount').textContent = stats.total_clusters + ' 支';
+        }
+
+        function renderTeamList(clusters) {
+            const container = document.getElementById('teamListContainer');
+
+            if (!clusters || clusters.length === 0) {
+                container.innerHTML = `
+                    <div class="no-data">
+                        <div class="no-data-icon">💃</div>
+                        <div class="no-data-text">暂无舞队数据</div>
+                    </div>
+                `;
+                return;
+            }
+
+            clusters.sort((a, b) => b.video_count - a.video_count);
+
+            container.innerHTML = clusters.map(c => `
+                <div class="team-card ${activeClusterId === c.cluster_id ? 'active' : ''}"
+                     data-id="${c.cluster_id}"
+                     onclick="focusOnCluster(${c.cluster_id})">
+                    <div class="team-card-header">
+                        <div class="team-color-dot" style="background:${c.color};"></div>
+                        <div class="team-name">${c.name}</div>
+                    </div>
+                    <div class="team-info-row">
+                        <span>🎥 ${c.video_count}个视频</span>
+                        <span>❤️ ${c.total_likes.toLocaleString()}赞</span>
+                        <span>📏 ${c.radius_meters}米</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderConflictList(conflicts) {
+            const container = document.getElementById('conflictListContainer');
+
+            if (!conflicts || conflicts.length === 0) {
+                container.innerHTML = `
+                    <div class="no-data" style="padding: 20px 0;">
+                        <div class="no-data-text" style="font-size: 12px;">✅ 目前无明显领地冲突</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const severityOrder = { high: 0, medium: 1, low: 2 };
+            conflicts.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
+
+            container.innerHTML = conflicts.map(c => `
+                <div class="conflict-card ${c.severity}"
+                     onclick="focusOnConflict('${c.conflict_id}')"
+                     style="cursor:pointer;">
+                    <div class="conflict-title">${c.warning_label}</div>
+                    <div class="conflict-detail">
+                        ${c.cluster_a_name} ↔ ${c.cluster_b_name}<br>
+                        重叠面积: ${c.overlap_area_sqm.toFixed(1)} ㎡
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderMap(data) {
+            if (!map || !map.loaded()) {
+                setTimeout(() => renderMap(data), 500);
+                return;
+            }
+
+            if (data.clusters && data.clusters.length > 0) {
+                const first = data.clusters[0];
+                if (first && first.center) {
+                    map.flyTo({
+                        center: [first.center.lng, first.center.lat],
+                        zoom: 13.5,
+                        speed: 1.2,
+                    });
+                }
+            }
+
+            clearMapLayers();
+            addTerritoryLayers(data.clusters);
+            addConflictLayers(data.conflicts);
+            addVideoMarkers(data.videos);
+        }
+
+        function clearMapLayers() {
+            videoMarkers.forEach(m => m.remove());
+            videoMarkers = [];
+
+            if (map.getSource('conflict-fill')) map.removeSource('conflict-fill');
+            if (map.getLayer('conflict-fill')) map.removeLayer('conflict-fill');
+            if (map.getSource('conflict-outline')) map.removeSource('conflict-outline');
+            if (map.getLayer('conflict-outline')) map.removeLayer('conflict-outline');
+
+            territoryLayers.forEach(id => {
+                if (map.getSource(id + '-fill')) map.removeSource(id + '-fill');
+                if (map.getLayer(id + '-fill')) map.removeLayer(id + '-fill');
+                if (map.getSource(id + '-outline')) map.removeSource(id + '-outline');
+                if (map.getLayer(id + '-outline')) map.removeLayer(id + '-outline');
+            });
+            territoryLayers = [];
+        }
+
+        function addTerritoryLayers(clusters) {
+            if (!clusters) return;
+
+            clusters.forEach(cluster => {
+                const id = 'territory-' + cluster.cluster_id;
+                territoryLayers.push(id);
+
+                const coordinates = cluster.boundary.map(p => [p.lng, p.lat]);
+                coordinates.push(coordinates[0]);
+
+                const geojson = {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Polygon',
+                        coordinates: [coordinates]
+                    },
+                    properties: {
+                        name: cluster.name,
+                        count: cluster.video_count,
+                        color: cluster.color,
+                        clusterId: cluster.cluster_id
+                    }
+                };
+
+                map.addSource(id + '-fill', { type: 'geojson', data: geojson });
+                map.addLayer({
+                    id: id + '-fill',
+                    type: 'fill',
+                    source: id + '-fill',
+                    paint: {
+                        'fill-color': cluster.color,
+                        'fill-opacity': 0.25,
+                    }
+                });
+
+                map.addLayer({
+                    id: id + '-outline',
+                    type: 'line',
+                    source: id + '-fill',
+                    paint: {
+                        'line-color': cluster.color,
+                        'line-width': 2.5,
+                        'line-opacity': 0.9,
+                    }
+                });
+
+                const centerMarker = new mapboxgl.Marker({ color: cluster.color })
+                    .setLngLat([cluster.center.lng, cluster.center.lat])
+                    .setPopup(new mapboxgl.Popup({ offset: 15 }).setHTML(`
+                        <div class="popup-content">
+                            <div class="popup-title">${cluster.name}</div>
+                            <div class="popup-row">🎥 视频数量: ${cluster.video_count}</div>
+                            <div class="popup-row">❤️ 总点赞数: ${cluster.total_likes.toLocaleString()}</div>
+                            <div class="popup-row">📏 活动半径: ${cluster.radius_meters} 米</div>
+                            <div class="popup-tag">领地范围</div>
+                        </div>
+                    `))
+                    .addTo(map);
+
+                map.on('click', id + '-fill', (e) => {
+                    focusOnCluster(cluster.cluster_id);
+                });
+            });
+        }
+
+        function addConflictLayers(conflicts) {
+            if (!conflicts || conflicts.length === 0) return;
+
+            const conflictPolygons = conflicts.map(c => {
+                const clusterA = allData.clusters.find(cl => cl.cluster_id === c.cluster_a_id);
+                const clusterB = allData.clusters.find(cl => cl.cluster_id === c.cluster_b_id);
+
+                if (!clusterA || !clusterB) return null;
+
+                const centerA = clusterA.center;
+                const centerB = clusterB.center;
+                const rA = clusterA.radius_meters;
+                const rB = clusterB.radius_meters;
+
+                const overlapCenter = {
+                    lat: (centerA.lat + centerB.lat) / 2,
+                    lng: (centerA.lng + centerB.lng) / 2
+                };
+
+                const dx = (centerB.lng - centerA.lng) * Math.cos(centerA.lat * Math.PI / 180) * 111000;
+                const dy = (centerB.lat - centerA.lat) * 111000;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                const overlapRadius = Math.min(rA, rB) * 0.6;
+
+                const coordinates = [];
+                for (let i = 0; i < 36; i++) {
+                    const angle = 2 * Math.PI * i / 36;
+                    const r = overlapRadius;
+                    const dLat = (r * Math.sin(angle)) / 111000;
+                    const dLng = (r * Math.cos(angle)) / (111000 * Math.cos(overlapCenter.lat * Math.PI / 180));
+                    coordinates.push([overlapCenter.lng + dLng, overlapCenter.lat + dLat]);
+                }
+                coordinates.push(coordinates[0]);
+
+                return {
+                    type: 'Feature',
+                    geometry: { type: 'Polygon', coordinates: [coordinates] },
+                    properties: {
+                        conflictId: c.conflict_id,
+                        severity: c.severity,
+                        label: c.warning_label
+                    }
+                };
+            }).filter(Boolean);
+
+            if (conflictPolygons.length === 0) return;
+
+            map.addSource('conflict-fill', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: conflictPolygons }
+            });
+
+            map.addLayer({
+                id: 'conflict-fill',
+                type: 'fill',
+                source: 'conflict-fill',
+                paint: {
+                    'fill-pattern': 'pattern',
+                    'fill-color': '#e74c3c',
+                    'fill-opacity': 0.4,
+                }
+            });
+
+            map.addLayer({
+                id: 'conflict-outline',
+                type: 'line',
+                source: 'conflict-fill',
+                paint: {
+                    'line-color': '#e74c3c',
+                    'line-width': 3,
+                    'line-dasharray': [2, 2],
+                }
+            });
+
+            conflicts.forEach(c => {
+                if (c.intersection_points && c.intersection_points.length >= 2) {
+                    const midIdx = Math.floor(c.intersection_points.length / 2);
+                    const midPoint = c.intersection_points[midIdx];
+                    if (midPoint) {
+                        new mapboxgl.Marker({ color: '#e74c3c', scale: 0.8 })
+                            .setLngLat([midPoint.lng, midPoint.lat])
+                            .setPopup(new mapboxgl.Popup().setHTML(`
+                                <div class="popup-content">
+                                    <div class="popup-title" style="color:#e74c3c;">⚠️ ${c.warning_label}</div>
+                                    <div class="popup-row">${c.cluster_a_name} ↔ ${c.cluster_b_name}</div>
+                                    <div class="popup-row">重叠面积: ${c.overlap_area_sqm.toFixed(1)} ㎡</div>
+                                    <div class="popup-row">重叠比例: ${c.overlap_percentage_a}% / ${c.overlap_percentage_b}%</div>
+                                </div>
+                            `))
+                            .addTo(map);
+                    }
+                }
+            });
+        }
+
+        function addVideoMarkers(videos) {
+            if (!videos) return;
+
+            videos.forEach(video => {
+                const el = document.createElement('div');
+                el.style.width = '8px';
+                el.style.height = '8px';
+                el.style.borderRadius = '50%';
+                el.style.backgroundColor = '#e74c3c';
+                el.style.border = '2px solid white';
+                el.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
+                el.style.cursor = 'pointer';
+
+                const marker = new mapboxgl.Marker({ element: el })
+                    .setLngLat([video.lng, video.lat])
+                    .setPopup(new mapboxgl.Popup({ offset: 10 }).setHTML(`
+                        <div class="popup-content">
+                            <div class="popup-title">${video.title || '广场舞视频'}</div>
+                            <div class="popup-row">📍 ${video.poi_name || '未知地点'}</div>
+                            <div class="popup-row">📱 ${video.platform || '未知平台'}</div>
+                            <div class="popup-row">❤️ ${video.likes || 0} 赞</div>
+                            <div class="popup-tag">${video.platform}</div>
+                        </div>
+                    `))
+                    .addTo(map);
+
+                videoMarkers.push(marker);
+            });
+        }
+
+        function focusOnCluster(clusterId) {
+            activeClusterId = clusterId;
+            renderTeamList(allData.clusters);
+
+            const cluster = allData.clusters.find(c => c.cluster_id === clusterId);
+            if (cluster && map) {
+                map.flyTo({
+                    center: [cluster.center.lng, cluster.center.lat],
+                    zoom: 15,
+                    speed: 1.0,
+                });
+            }
+        }
+
+        function focusOnConflict(conflictId) {
+            const conflict = allData.conflicts.find(c => c.conflict_id === conflictId);
+            if (conflict && map) {
+                const clusterA = allData.clusters.find(cl => cl.cluster_id === conflict.cluster_a_id);
+                const clusterB = allData.clusters.find(cl => cl.cluster_id === conflict.cluster_b_id);
+
+                if (clusterA && clusterB) {
+                    const center = {
+                        lng: (clusterA.center.lng + clusterB.center.lng) / 2,
+                        lat: (clusterA.center.lat + clusterB.center.lat) / 2
+                    };
+                    map.flyTo({
+                        center: [center.lng, center.lat],
+                        zoom: 14.5,
+                        speed: 1.0,
+                    });
+                }
+            }
+        }
+
+        document.getElementById('showVideos').addEventListener('change', (e) => {
+            const visible = e.target.checked;
+            videoMarkers.forEach(m => {
+                if (visible) m.addTo(map);
+                else m.remove();
+            });
+        });
+
+        document.getElementById('showTerritories').addEventListener('change', (e) => {
+            const visible = e.target.checked;
+            const visibility = visible ? 'visible' : 'none';
+            territoryLayers.forEach(id => {
+                if (map.getLayer(id + '-fill')) {
+                    map.setLayoutProperty(id + '-fill', 'visibility', visibility);
+                }
+                if (map.getLayer(id + '-outline')) {
+                    map.setLayoutProperty(id + '-outline', 'visibility', visibility);
+                }
+            });
+        });
+
+        document.getElementById('showConflicts').addEventListener('change', (e) => {
+            const visible = e.target.checked;
+            const visibility = visible ? 'visible' : 'none';
+            if (map.getLayer('conflict-fill')) {
+                map.setLayoutProperty('conflict-fill', 'visibility', visibility);
+            }
+            if (map.getLayer('conflict-outline')) {
+                map.setLayoutProperty('conflict-outline', 'visibility', visibility);
+            }
+        });
+
+        initMap();
+    </script>
+</body>
+</html>
