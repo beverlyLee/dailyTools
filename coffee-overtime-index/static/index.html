@@ -21,14 +21,14 @@
         }
 
         #app {
-            max-width: 1400px;
+            max-width: 1500px;
             margin: 0 auto;
             padding: 24px;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
         }
 
         .header h1 {
@@ -48,7 +48,7 @@
 
         .controls {
             display: flex;
-            gap: 16px;
+            gap: 12px;
             justify-content: center;
             margin-bottom: 24px;
             flex-wrap: wrap;
@@ -58,9 +58,9 @@
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 12px;
-            padding: 12px 20px;
+            padding: 10px 20px;
             color: #fff;
-            font-size: 15px;
+            font-size: 14px;
             cursor: pointer;
             transition: all 0.3s;
         }
@@ -77,7 +77,7 @@
 
         .main-content {
             display: grid;
-            grid-template-columns: 1fr 320px;
+            grid-template-columns: 1fr 340px;
             gap: 24px;
             margin-bottom: 24px;
         }
@@ -97,7 +97,7 @@
         }
 
         .chart-title {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 600;
             margin-bottom: 16px;
             color: #e2e8f0;
@@ -112,31 +112,73 @@
 
         #mapChart {
             width: 100%;
-            height: 500px;
-        }
-
-        #pieChart {
-            width: 100%;
-            height: 280px;
+            height: 540px;
         }
 
         #rankingChart {
             width: 100%;
-            height: 500px;
+            height: 540px;
         }
 
-        .detail-panel {
+        .detail-section {
+            margin-top: 24px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .detail-card {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
             padding: 20px;
-            margin-top: 24px;
+            backdrop-filter: blur(10px);
         }
 
-        .detail-panel h3 {
-            font-size: 16px;
-            margin-bottom: 12px;
-            color: #e2e8f0;
+        .district-name {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .district-type-tag {
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .district-type-tag.tech {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+        }
+
+        .district-type-tag.finance {
+            background: rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+        }
+
+        .district-type-tag.government {
+            background: rgba(100, 149, 237, 0.2);
+            color: #6495ed;
+        }
+
+        .district-desc {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 20px;
         }
 
         .stat-grid {
@@ -153,7 +195,7 @@
         }
 
         .stat-item .value {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             color: #ffd700;
         }
@@ -164,82 +206,12 @@
             margin-top: 4px;
         }
 
-        .district-name {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .district-desc {
-            font-size: 13px;
-            color: #94a3b8;
-            margin-bottom: 16px;
-        }
-
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 300px;
-            color: #94a3b8;
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top-color: #ff6b6b;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .legend-bar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 16px;
-            flex-wrap: wrap;
-        }
-
-        .legend-bar .gradient {
-            width: 200px;
-            height: 12px;
-            border-radius: 6px;
-            background: linear-gradient(90deg, #1e3a5f, #3d5a80, #ee6c4d, #e63946, #9b2226);
-        }
-
-        .legend-bar .label {
-            font-size: 12px;
-            color: #94a3b8;
-        }
-
-        .index-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            margin-left: 8px;
-        }
-
-        .index-badge.high {
-            background: rgba(230, 57, 70, 0.3);
-            color: #ff6b6b;
-        }
-
-        .index-badge.medium {
-            background: rgba(238, 108, 77, 0.3);
-            color: #ee6c4d;
-        }
-
-        .index-badge.low {
-            background: rgba(61, 90, 128, 0.3);
-            color: #98c1d9;
+        .pie-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
         }
 
         .tabs {
@@ -270,6 +242,16 @@
             color: #fff;
         }
 
+        #pieChart {
+            width: 100%;
+            height: 300px;
+        }
+
+        .tooltip-pie-container {
+            width: 200px;
+            height: 200px;
+        }
+
         .footer {
             text-align: center;
             color: #64748b;
@@ -282,6 +264,52 @@
         .footer span {
             margin: 0 4px;
         }
+
+        .legend-panel {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .legend-panel .gradient-bar {
+            width: 180px;
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(90deg, #1e3a5f, #3d5a80, #ee6c4d, #e63946, #9b2226);
+        }
+
+        .legend-panel .label {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .district-type-legend {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .type-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .type-legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .type-legend-dot.tech { background: #ff6b6b; }
+        .type-legend-dot.finance { background: #ffd700; }
+        .type-legend-dot.government { background: #6495ed; }
     </style>
 </head>
 <body>
@@ -308,51 +336,49 @@
                 <div class="chart-title">
                     <span class="icon">🗺️</span>
                     <span>区域加班指数分布图</span>
-                    <span v-if="selectedDistrict" class="index-badge" :class="getIndexClass(selectedDistrict.overtime_index.overtime_index)">
-                        {{ selectedDistrict.overtime_index.overtime_index.toFixed(1) }}
-                    </span>
                 </div>
                 <div id="mapChart"></div>
-                <div class="legend-bar">
+                <div class="legend-panel">
                     <span class="label">低</span>
-                    <div class="gradient"></div>
+                    <div class="gradient-bar"></div>
                     <span class="label">高</span>
-                    <span class="label" style="margin-left: 16px;">加班指数</span>
+                    <span class="label" style="margin-left: 12px;">加班指数</span>
+                </div>
+                <div class="district-type-legend">
+                    <div class="type-legend-item">
+                        <span class="type-legend-dot tech"></span>
+                        <span>科技园区</span>
+                    </div>
+                    <div class="type-legend-item">
+                        <span class="type-legend-dot finance"></span>
+                        <span>金融区</span>
+                    </div>
+                    <div class="type-legend-item">
+                        <span class="type-legend-dot government"></span>
+                        <span>政务区</span>
+                    </div>
                 </div>
             </div>
 
             <div class="chart-card">
                 <div class="chart-title">
                     <span class="icon">🏆</span>
-                    <span>排行榜</span>
+                    <span>加班指数排行</span>
                 </div>
                 <div id="rankingChart"></div>
             </div>
         </div>
 
-        <div class="chart-card" v-if="selectedDistrict">
-            <div class="chart-title">
-                <span class="icon">📊</span>
-                <span>{{ selectedDistrict.district.name }} - 详细数据</span>
-            </div>
-            <div class="district-name" style="margin-top: 8px;">
-                {{ selectedDistrict.district.name }}
-                <span class="index-badge" :class="getIndexClass(selectedDistrict.overtime_index.overtime_index)">
-                    加班指数 {{ selectedDistrict.overtime_index.overtime_index.toFixed(1) }}
-                </span>
-            </div>
-            <div class="district-desc">{{ selectedDistrict.district.description }}</div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-                <div>
-                    <div class="tabs">
-                        <button class="tab-btn" :class="{ active: pieType === 'all' }" @click="pieType = 'all'">全部咖啡</button>
-                        <button class="tab-btn" :class="{ active: pieType === 'late' }" @click="pieType = 'late'">深夜营业</button>
+        <div class="detail-section" v-if="selectedDistrict">
+            <div class="detail-grid">
+                <div class="detail-card">
+                    <div class="district-name">
+                        {{ selectedDistrict.district.name }}
+                        <span class="district-type-tag" :class="selectedDistrict.district.district_type">
+                            {{ getTypeName(selectedDistrict.district.district_type) }}
+                        </span>
                     </div>
-                    <div id="pieChart"></div>
-                </div>
-                <div class="detail-panel" style="margin-top: 0;">
-                    <h3>核心指标</h3>
+                    <div class="district-desc">{{ selectedDistrict.district.description }}</div>
                     <div class="stat-grid">
                         <div class="stat-item">
                             <div class="value">{{ selectedDistrict.overtime_index.overtime_index.toFixed(1) }}</div>
@@ -379,6 +405,18 @@
                             <div class="label">区域面积</div>
                         </div>
                     </div>
+                </div>
+
+                <div class="pie-section">
+                    <div class="chart-title" style="margin-bottom: 12px;">
+                        <span class="icon">🥧</span>
+                        <span>咖啡品牌分布</span>
+                    </div>
+                    <div class="tabs">
+                        <button class="tab-btn" :class="{ active: pieType === 'all' }" @click="pieType = 'all'">全部咖啡馆</button>
+                        <button class="tab-btn" :class="{ active: pieType === 'late' }" @click="pieType = 'late'">深夜营业</button>
+                    </div>
+                    <div id="pieChart"></div>
                 </div>
             </div>
         </div>
@@ -415,6 +453,12 @@
             independent: '#6C757D'
         };
 
+        const TYPE_NAMES = {
+            tech: '科技园区',
+            finance: '金融区',
+            government: '政务区'
+        };
+
         createApp({
             setup() {
                 const cities = ref([]);
@@ -422,40 +466,10 @@
                 const districts = ref([]);
                 const selectedDistrict = ref(null);
                 const pieType = ref('all');
+
                 let mapChart = null;
                 let pieChart = null;
                 let rankingChart = null;
-
-                const fetchCities = async () => {
-                    try {
-                        const res = await fetch('/api/cities');
-                        cities.value = await res.json();
-                        if (cities.value.length > 0 && !selectedCity.value) {
-                            selectedCity.value = cities.value[0];
-                        }
-                    } catch (e) {
-                        console.error('Failed to fetch cities:', e);
-                    }
-                };
-
-                const fetchDistricts = async () => {
-                    try {
-                        const res = await fetch(`/api/overtime?city=${encodeURIComponent(selectedCity.value)}`);
-                        districts.value = await res.json();
-                        if (districts.value.length > 0) {
-                            selectedDistrict.value = districts.value[0];
-                        }
-                        await nextTick();
-                        renderMapChart();
-                        renderRankingChart();
-                    } catch (e) {
-                        console.error('Failed to fetch districts:', e);
-                    }
-                };
-
-                const selectCity = (city) => {
-                    selectedCity.value = city;
-                };
 
                 const getIndexColor = (value) => {
                     const v = Math.max(0, Math.min(100, value)) / 100;
@@ -477,123 +491,207 @@
                     return `rgb(${r}, ${g}, ${b})`;
                 };
 
-                const getIndexClass = (value) => {
-                    if (value >= 60) return 'high';
-                    if (value >= 40) return 'medium';
-                    return 'low';
+                const getTypeName = (type) => TYPE_NAMES[type] || type;
+
+                const buildGeoJSON = (districtData) => {
+                    const features = districtData.map((d, idx) => {
+                        const polygon = d.district.polygon || [];
+                        return {
+                            type: 'Feature',
+                            id: d.district.id,
+                            properties: {
+                                name: d.district.name,
+                                index: d.overtime_index.overtime_index,
+                                district_type: d.district.district_type,
+                                total_shops: d.overtime_index.total_shops,
+                                late_shops: d.overtime_index.late_night_shops,
+                                brand_dist: d.overtime_index.brand_distribution,
+                                late_brand_dist: d.overtime_index.late_night_brand_distribution,
+                                description: d.district.description,
+                                density_score: d.overtime_index.density_score,
+                                late_ratio: d.overtime_index.late_night_ratio,
+                                area_km2: d.overtime_index.area_km2
+                            },
+                            geometry: {
+                                type: 'Polygon',
+                                coordinates: [polygon]
+                            }
+                        };
+                    });
+
+                    return {
+                        type: 'FeatureCollection',
+                        features: features
+                    };
                 };
 
                 const renderMapChart = () => {
                     const el = document.getElementById('mapChart');
                     if (!el || districts.value.length === 0) return;
+
                     if (!mapChart) {
                         mapChart = echarts.init(el);
                         mapChart.on('click', (params) => {
-                            if (params.data && params.data.district) {
-                                selectedDistrict.value = params.data.district;
+                            const d = districts.value.find(x => x.district.id === params.name);
+                            if (d) {
+                                selectedDistrict.value = d;
                             }
                         });
                     }
 
-                    const data = districts.value.map((d, i) => {
-                        const cols = Math.ceil(Math.sqrt(districts.value.length));
-                        const row = Math.floor(i / cols);
-                        const col = i % cols;
-                        return {
-                            name: d.district.name,
-                            value: [
-                                col * 100 + 50,
-                                row * 120 + 60,
-                                d.overtime_index.overtime_index
-                            ],
-                            itemStyle: {
-                                color: getIndexColor(d.overtime_index.overtime_index)
-                            },
-                            district: d
-                        };
+                    const geoJSON = buildGeoJSON(districts.value);
+                    echarts.registerMap('cityDistricts', geoJSON);
+
+                    const districtMap = {};
+                    districts.value.forEach(d => {
+                        districtMap[d.district.name] = d;
                     });
+
+                    const mapData = districts.value.map(d => ({
+                        name: d.district.name,
+                        value: d.overtime_index.overtime_index
+                    }));
 
                     const option = {
                         tooltip: {
                             trigger: 'item',
-                            backgroundColor: 'rgba(20, 30, 50, 0.95)',
+                            backgroundColor: 'rgba(15, 23, 42, 0.98)',
                             borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            padding: [14, 16, 16, 16],
                             textStyle: { color: '#fff' },
+                            extraCssText: 'box-shadow: 0 10px 40px rgba(0,0,0,0.5); border-radius: 12px;',
                             formatter: (params) => {
-                                const d = params.data.district;
-                                const idx = d.overtime_index.overtime_index;
+                                const districtData = districtMap[params.name];
+                                if (!districtData) return '';
+                                const dist = districtData.district;
+                                const idx = districtData.overtime_index;
+                                const brandDist = idx.brand_distribution || {};
+                                const brands = Object.entries(brandDist)
+                                    .sort((a, b) => b[1] - a[1])
+                                    .slice(0, 5);
+
+                                const total = brands.reduce((s, b) => s + b[1], 0) || 1;
+
+                                let pieSvg = '';
+                                let cumulativeAngle = -Math.PI / 2;
+                                const cx = 50, cy = 50, r = 35;
+
+                                brands.forEach(([key, count]) => {
+                                    const angle = (count / total) * Math.PI * 2;
+                                    const startAngle = cumulativeAngle;
+                                    const endAngle = cumulativeAngle + angle;
+                                    cumulativeAngle = endAngle;
+
+                                    const x1 = cx + r * Math.cos(startAngle);
+                                    const y1 = cy + r * Math.sin(startAngle);
+                                    const x2 = cx + r * Math.cos(endAngle);
+                                    const y2 = cy + r * Math.sin(endAngle);
+                                    const largeArc = angle > Math.PI ? 1 : 0;
+
+                                    const color = BRAND_COLORS[key] || '#888';
+                                    pieSvg += `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${largeArc},1 ${x2},${y2} Z" fill="${color}"/>`;
+                                });
+
+                                const indexValue = idx.overtime_index;
+                                const indexColor = getIndexColor(indexValue);
+
                                 return `
-                                    <div style="padding: 4px 0;">
-                                        <div style="font-weight: 600; font-size: 14px; margin-bottom: 6px;">${d.district.name}</div>
-                                        <div style="color: #ffd700; font-size: 18px; font-weight: 700; margin-bottom: 6px;">${idx.toFixed(1)} <span style="font-size: 12px; color: #94a3b8;">加班指数</span></div>
-                                        <div style="font-size: 12px; color: #94a3b8;">
-                                            咖啡馆: ${d.overtime_index.total_shops}家 | 深夜营业: ${d.overtime_index.late_night_shops}家
+                                    <div style="min-width: 280px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                            <div>
+                                                <div style="font-size: 15px; font-weight: 600;">${dist.name}</div>
+                                                <div style="font-size: 11px; color: #64748b; margin-top: 2px;">${dist.description || ''}</div>
+                                            </div>
+                                            <div style="text-align: right;">
+                                                <div style="font-size: 24px; font-weight: 700; color: ${indexColor};">${indexValue.toFixed(1)}</div>
+                                                <div style="font-size: 11px; color: #64748b;">加班指数</div>
+                                            </div>
                                         </div>
-                                        <div style="font-size: 12px; color: #64748b; margin-top: 4px;">点击查看详情 →</div>
+                                        <div style="display: flex; align-items: center; gap: 16px;">
+                                            <svg width="100" height="100" viewBox="0 0 100 100">
+                                                ${pieSvg}
+                                            </svg>
+                                            <div style="flex: 1; font-size: 12px;">
+                                                ${brands.map(([key, count]) => `
+                                                    <div style="display: flex; justify-content: space-between; padding: 2px 0;">
+                                                        <span style="display: flex; align-items: center; gap: 6px;">
+                                                            <span style="width: 8px; height: 8px; border-radius: 50%; background: ${BRAND_COLORS[key] || '#888'};"></span>
+                                                            <span style="color: #94a3b8;">${BRAND_NAMES[key] || key}</span>
+                                                        </span>
+                                                        <span style="color: #e2e8f0; font-weight: 500;">${count}家</span>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
+                                            <div>
+                                                <span style="color: #64748b;">咖啡馆总数:</span>
+                                                <span style="color: #e2e8f0; margin-left: 4px;">${idx.total_shops}家</span>
+                                            </div>
+                                            <div>
+                                                <span style="color: #64748b;">深夜营业:</span>
+                                                <span style="color: #ffd700; margin-left: 4px;">${idx.late_night_shops}家 (${(idx.late_night_ratio * 100).toFixed(0)}%)</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 `;
                             }
                         },
-                        grid: {
-                            left: 20,
-                            right: 20,
-                            top: 20,
-                            bottom: 20,
-                            containLabel: true
-                        },
-                        xAxis: {
+                        visualMap: {
                             show: false,
-                            type: 'value',
                             min: 0,
-                            max: Math.ceil(Math.sqrt(districts.value.length)) * 100
-                        },
-                        yAxis: {
-                            show: false,
-                            type: 'value',
-                            min: 0,
-                            max: Math.ceil(districts.value.length / Math.ceil(Math.sqrt(districts.value.length))) * 120
+                            max: 100,
+                            left: 'left',
+                            top: 'bottom',
+                            text: ['高', '低'],
+                            calculable: true,
+                            inRange: {
+                                color: ['#1e3a5f', '#3d5a80', '#ee6c4d', '#e63946', '#9b2226']
+                            }
                         },
                         series: [{
-                            type: 'scatter',
-                            symbol: 'rect',
-                            symbolSize: [80, 50],
-                            data: data,
+                            name: '加班指数',
+                            type: 'map',
+                            map: 'cityDistricts',
+                            roam: false,
+                            zoom: 1.2,
                             label: {
                                 show: true,
-                                position: 'inside',
-                                formatter: (params) => {
-                                    const name = params.name;
-                                    const short = name.length > 6 ? name.slice(0, 6) + '...' : name;
-                                    return `{name|${short}}\n{val|${params.value[2].toFixed(0)}}`;
-                                },
-                                rich: {
-                                    name: {
-                                        color: '#fff',
-                                        fontSize: 12,
-                                        fontWeight: 600,
-                                        lineHeight: 18
-                                    },
-                                    val: {
-                                        color: 'rgba(255,255,255,0.9)',
-                                        fontSize: 14,
-                                        fontWeight: 700
-                                    }
-                                }
+                                color: '#fff',
+                                fontSize: 12,
+                                fontWeight: 500
                             },
                             itemStyle: {
-                                borderRadius: 8,
-                                shadowBlur: 20,
-                                shadowColor: 'rgba(255, 107, 107, 0.3)'
+                                borderColor: 'rgba(255,255,255,0.3)',
+                                borderWidth: 1.5,
+                                shadowBlur: 15,
+                                shadowColor: 'rgba(0,0,0,0.3)'
                             },
                             emphasis: {
                                 itemStyle: {
-                                    shadowBlur: 30,
-                                    shadowColor: 'rgba(255, 215, 0, 0.5)',
                                     borderColor: '#ffd700',
-                                    borderWidth: 2
+                                    borderWidth: 2.5,
+                                    shadowBlur: 25,
+                                    shadowColor: 'rgba(255,215,0,0.4)'
                                 },
-                                scale: 1.1
-                            }
+                                label: {
+                                    show: true,
+                                    color: '#ffd700',
+                                    fontSize: 13,
+                                    fontWeight: 600
+                                }
+                            },
+                            select: {
+                                itemStyle: {
+                                    borderColor: '#ff6b6b',
+                                    borderWidth: 3
+                                },
+                                label: {
+                                    color: '#ff6b6b'
+                                }
+                            },
+                            data: mapData
                         }]
                     };
 
@@ -637,7 +735,7 @@
                         },
                         series: [{
                             type: 'pie',
-                            radius: ['45%', '70%'],
+                            radius: ['50%', '75%'],
                             center: ['35%', '50%'],
                             data: data,
                             label: {
@@ -648,12 +746,14 @@
                                     shadowBlur: 20,
                                     shadowOffsetX: 0,
                                     shadowColor: 'rgba(0, 0, 0, 0.5)'
-                                }
+                                },
+                                scale: true,
+                                scaleSize: 6
                             }
                         }]
                     };
 
-                    pieChart.setOption(option);
+                    pieChart.setOption(option, true);
                 };
 
                 const renderRankingChart = () => {
@@ -688,8 +788,8 @@
                             }
                         },
                         grid: {
-                            left: 80,
-                            right: 30,
+                            left: 90,
+                            right: 40,
                             top: 10,
                             bottom: 20,
                             containLabel: false
@@ -706,7 +806,20 @@
                             data: sorted.map(d => d.district.name),
                             axisLine: { show: false },
                             axisTick: { show: false },
-                            axisLabel: { color: '#94a3b8', fontSize: 12 }
+                            axisLabel: {
+                                color: '#94a3b8',
+                                fontSize: 12,
+                                formatter: (value) => {
+                                    const d = sorted.find(x => x.district.name === value);
+                                    const type = d ? d.district.district_type : 'tech';
+                                    const typeColors = {
+                                        tech: '#ff6b6b',
+                                        finance: '#ffd700',
+                                        government: '#6495ed'
+                                    };
+                                    return value;
+                                }
+                            }
                         },
                         series: [{
                             type: 'bar',
@@ -720,7 +833,7 @@
                                     borderRadius: [0, 4, 4, 0]
                                 }
                             })),
-                            barWidth: 16,
+                            barWidth: 14,
                             label: {
                                 show: true,
                                 position: 'right',
@@ -738,6 +851,37 @@
                     };
 
                     rankingChart.setOption(option);
+                };
+
+                const fetchCities = async () => {
+                    try {
+                        const res = await fetch('/api/cities');
+                        cities.value = await res.json();
+                        if (cities.value.length > 0 && !selectedCity.value) {
+                            selectedCity.value = cities.value[0];
+                        }
+                    } catch (e) {
+                        console.error('Failed to fetch cities:', e);
+                    }
+                };
+
+                const fetchDistricts = async () => {
+                    try {
+                        const res = await fetch(`/api/overtime?city=${encodeURIComponent(selectedCity.value)}`);
+                        districts.value = await res.json();
+                        if (districts.value.length > 0) {
+                            selectedDistrict.value = districts.value[0];
+                        }
+                        await nextTick();
+                        renderMapChart();
+                        renderRankingChart();
+                    } catch (e) {
+                        console.error('Failed to fetch districts:', e);
+                    }
+                };
+
+                const selectCity = (city) => {
+                    selectedCity.value = city;
                 };
 
                 watch(selectedCity, () => {
@@ -773,7 +917,7 @@
                     selectedDistrict,
                     pieType,
                     selectCity,
-                    getIndexClass
+                    getTypeName
                 };
             }
         }).mount('#app');

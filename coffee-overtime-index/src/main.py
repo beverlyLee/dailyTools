@@ -48,6 +48,7 @@ class OfficeDistrictSchema(BaseModel):
     ne_lat: float
     district_type: str
     description: str
+    polygon: List[List[float]]
 
 
 class OvertimeIndexSchema(BaseModel):
@@ -92,6 +93,7 @@ def _district_to_schema(district: OfficeDistrict) -> OfficeDistrictSchema:
         ne_lat=district.ne_lat,
         district_type=district.district_type,
         description=district.description,
+        polygon=district.polygon,
     )
 
 

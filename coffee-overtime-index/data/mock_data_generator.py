@@ -40,11 +40,24 @@ BRAND_WEIGHTS_OTHER = {
 }
 
 
+BRAND_WEIGHTS_GOVERNMENT = {
+    "starbucks": 15,
+    "luckin": 20,
+    "manner": 8,
+    "independent": 40,
+    "seesaw": 3,
+    "costa": 4,
+    "timhortons": 3,
+}
+
+
 def _pick_brand(district_type: str) -> str:
     if district_type == "tech":
         weights = BRAND_WEIGHTS_TECH
     elif district_type == "finance":
         weights = BRAND_WEIGHTS_FINANCE
+    elif district_type == "government":
+        weights = BRAND_WEIGHTS_GOVERNMENT
     else:
         weights = BRAND_WEIGHTS_OTHER
 
@@ -111,6 +124,9 @@ def generate_mock_shops_for_district(district: OfficeDistrict, seed: int = 42) -
     elif district.district_type == "finance":
         shop_count = random.randint(15, 28)
         late_ratio = random.uniform(0.4, 0.65)
+    elif district.district_type == "government":
+        shop_count = random.randint(6, 12)
+        late_ratio = random.uniform(0.08, 0.2)
     else:
         shop_count = random.randint(5, 12)
         late_ratio = random.uniform(0.1, 0.3)
