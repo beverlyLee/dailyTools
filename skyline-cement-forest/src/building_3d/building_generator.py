@@ -203,6 +203,32 @@ class BuildingGenerator:
         print(f"Saved Deck.gl data to {filepath}")
 
 
+BUILDING_NAME_PREFIXES = [
+    '万科', '保利', '华润', '中海', '碧桂园', '恒大', '融创',
+    '金地', '招商', '华侨城', '卓越', '京基', '天健', '深业',
+    '振业', '长城', '宝能', '佳兆业', '龙光', '绿景'
+]
+
+BUILDING_NAME_MIDDLES = [
+    '城', '花园', '府', '苑', '公馆', '中心', '广场', '湾',
+    '里', '座', '大厦', '公寓', '华庭', '豪庭', '景园',
+    '家园', '佳园', '名苑', '名都', '国际'
+]
+
+BUILDING_NAME_SUFFIXES = [
+    '一期', '二期', '三期', 'A区', 'B区', 'C区',
+    '东园', '西园', '南苑', '北苑', 'A座', 'B座', 'C座'
+]
+
+
+def generate_building_name(index: int) -> str:
+    prefix = BUILDING_NAME_PREFIXES[index % len(BUILDING_NAME_PREFIXES)]
+    middle_index = index // len(BUILDING_NAME_PREFIXES)
+    middle = BUILDING_NAME_MIDDLES[middle_index % len(BUILDING_NAME_MIDDLES)]
+    suffix = BUILDING_NAME_SUFFIXES[index % len(BUILDING_NAME_SUFFIXES)]
+    return f"{prefix}{middle}{suffix}"
+
+
 def generate_sample_buildings(count: int = 200) -> List[Building3D]:
     generator = BuildingGenerator()
     
@@ -236,7 +262,7 @@ def generate_sample_buildings(count: int = 200) -> List[Building3D]:
         
         mock_building = BuildingData(
             id=f"mock_{i:04d}",
-            name=f"建筑{i}",
+            name=generate_building_name(i),
             address="",
             district="南山区",
             city="深圳",

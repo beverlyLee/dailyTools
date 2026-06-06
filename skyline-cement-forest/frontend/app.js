@@ -100,8 +100,8 @@ const MAP_PROVIDERS = {
 
 const BUILDING_NAME_PREFIXES = [
   '万科', '保利', '华润', '中海', '碧桂园', '恒大', '融创',
-  '金地', '招商', '华侨城', '卓越', '京基', '华润置地',
-  '天健', '深业', '振业', '长城', '宝能', '佳兆业', '龙光'
+  '金地', '招商', '华侨城', '卓越', '京基', '天健', '深业',
+  '振业', '长城', '宝能', '佳兆业', '龙光', '绿景'
 ];
 
 const BUILDING_NAME_MIDDLES = [
@@ -111,8 +111,8 @@ const BUILDING_NAME_MIDDLES = [
 ];
 
 const BUILDING_NAME_SUFFIXES = [
-  '一期', '二期', '三期', 'A座', 'B座', 'C座',
-  '东园', '西园', '南苑', '北苑', '1栋', '2栋', '3栋'
+  '一期', '二期', '三期', 'A区', 'B区', 'C区',
+  '东园', '西园', '南苑', '北苑', 'A座', 'B座', 'C座'
 ];
 
 class BuildingVisualization {
@@ -399,14 +399,17 @@ class BuildingVisualization {
   }
 
   updateLabels() {
-    if (!this.showLabels || !this.map) {
+    if (!this.map) return;
+    
+    if (!this.showLabels) {
       this.labelContainer.style.display = 'none';
       return;
     }
     
     this.labelContainer.style.display = 'block';
     
-    const visibleBuildings = this.currentBuildings.filter(b => b.height >= 50);
+    const minHeight = 35;
+    const visibleBuildings = this.currentBuildings.filter(b => b.height >= minHeight);
     
     const currentIds = new Set(visibleBuildings.map(b => b.id));
     
@@ -423,17 +426,24 @@ class BuildingVisualization {
         label.className = 'building-label';
         label.style.cssText = `
           position: absolute;
-          transform: translate(-50%, -100%);
-          font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
-          font-size: 12px;
+          transform: translate(-50%, -8px);
+          font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Heiti SC", sans-serif;
+          font-size: 11px;
           font-weight: 600;
           color: #ffffff;
-          text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 0 6px rgba(0, 0, 0, 0.5);
+          text-shadow: 
+            -1px -1px 0 rgba(0,0,0,0.8),
+            1px -1px 0 rgba(0,0,0,0.8),
+            -1px 1px 0 rgba(0,0,0,0.8),
+            1px 1px 0 rgba(0,0,0,0.8),
+            0 2px 4px rgba(0,0,0,0.5);
           white-space: nowrap;
           pointer-events: none;
-          opacity: 0.9;
-          letter-spacing: 0.5px;
+          opacity: 0.95;
+          letter-spacing: 0.3px;
           z-index: 100;
+          padding: 2px 0;
+          line-height: 1.2;
         `;
         label.textContent = building.name;
         this.labelContainer.appendChild(label);
@@ -448,24 +458,50 @@ class BuildingVisualization {
     if (!this.showLabels || !this.map) return;
     
     const containerRect = this.labelContainer.getBoundingClientRect();
+    const zoom = this.map.getZoom();
+    const pitch = this.map.getPitch() * Math.PI / 180;
+    
+    const metersPerPixel = this._getMetersPerPixel();
     
     for (const [id, el] of this.labelElements) {
       const building = this.currentBuildings.find(b => b.id === id);
       if (!building) continue;
       
-      const point = this.map.project(building.centroid);
+      const groundPoint = this.map.project(building.centroid);
       
-      const x = point.x;
-      const y = point.y - building.height * 0.15;
+      const heightPixels = building.height / metersPerPixel;
+      const pitchOffset = heightPixels * Math.sin(pitch);
       
-      if (x < 0 || x > containerRect.width || y < 0 || y > containerRect.height) {
+      const x = groundPoint.x;
+      const y = groundPoint.y - pitchOffset - 4;
+      
+      if (x < -50 || x > containerRect.width + 50 || y < -50 || y > containerRect.height + 50) {
         el.style.display = 'none';
       } else {
         el.style.display = 'block';
         el.style.left = `${x}px`;
         el.style.top = `${y}px`;
+        
+        if (zoom < 13) {
+          el.style.fontSize = '10px';
+          el.style.opacity = '0.8';
+        } else if (zoom < 14) {
+          el.style.fontSize = '11px';
+          el.style.opacity = '0.9';
+        } else {
+          el.style.fontSize = '12px';
+          el.style.opacity = '0.95';
+        }
       }
     }
+  }
+
+  _getMetersPerPixel() {
+    const zoom = this.map.getZoom();
+    const lat = this.map.getCenter().lat;
+    const metersPerPixelEquator = 156543.03392;
+    const metersPerPixel = metersPerPixelEquator * Math.cos(lat * Math.PI / 180) / Math.pow(2, zoom);
+    return metersPerPixel;
   }
 
   handleHover(feature, point) {
