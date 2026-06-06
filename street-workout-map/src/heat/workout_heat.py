@@ -122,7 +122,10 @@ class WorkoutHeatCalculator:
                 "heat_level": heat_level,
                 "posts": post_summaries,
                 "images": all_images,
-                "district": poi_info.get("district", "")
+                "district": poi_info.get("district", ""),
+                "facility_info": poi_info.get("facility_info", {}),
+                "amenities": poi_info.get("amenities", {}),
+                "rating": poi_info.get("rating", 0)
             }
             results.append(result)
         

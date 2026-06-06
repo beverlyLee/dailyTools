@@ -21,7 +21,28 @@ MOCK_POI_DATA = {
         "rating": 4.8,
         "province": "上海市",
         "city": "上海市",
-        "district": "浦东新区"
+        "district": "浦东新区",
+        "facility_info": {
+            "has_equipment": True,
+            "equipment_quality": "良好",
+            "age_groups": ["青年", "中年", "老年"],
+            "peak_hours": ["06:00-08:00", "18:00-20:00"],
+            "is_crowded": True,
+            "has_shade": True,
+            "ground_type": "塑胶地面",
+            "night_lighting": True,
+            "free_access": True
+        },
+        "amenities": {
+            "has_shower": False,
+            "has_locker": False,
+            "has_change_room": False,
+            "has_food": True,
+            "has_equipment_shop": False,
+            "has_vending_machine": True,
+            "has_water_fountain": True,
+            "nearby_gym": True
+        }
     },
     "人民广场": {
         "id": "poi_002",
@@ -38,7 +59,28 @@ MOCK_POI_DATA = {
         "rating": 4.9,
         "province": "上海市",
         "city": "上海市",
-        "district": "黄浦区"
+        "district": "黄浦区",
+        "facility_info": {
+            "has_equipment": True,
+            "equipment_quality": "崭新",
+            "age_groups": ["青年", "中年", "老年", "少年"],
+            "peak_hours": ["05:30-07:30", "15:00-17:00"],
+            "is_crowded": True,
+            "has_shade": False,
+            "ground_type": "水泥地面",
+            "night_lighting": True,
+            "free_access": True
+        },
+        "amenities": {
+            "has_shower": False,
+            "has_locker": False,
+            "has_change_room": False,
+            "has_food": True,
+            "has_equipment_shop": False,
+            "has_vending_machine": True,
+            "has_water_fountain": False,
+            "nearby_gym": True
+        }
     },
     "徐汇滨江公园": {
         "id": "poi_003",
@@ -55,7 +97,28 @@ MOCK_POI_DATA = {
         "rating": 4.7,
         "province": "上海市",
         "city": "上海市",
-        "district": "徐汇区"
+        "district": "徐汇区",
+        "facility_info": {
+            "has_equipment": True,
+            "equipment_quality": "良好",
+            "age_groups": ["青年", "中年"],
+            "peak_hours": ["07:00-09:00", "19:00-21:00"],
+            "is_crowded": False,
+            "has_shade": True,
+            "ground_type": "塑胶步道",
+            "night_lighting": True,
+            "free_access": True
+        },
+        "amenities": {
+            "has_shower": False,
+            "has_locker": False,
+            "has_change_room": False,
+            "has_food": True,
+            "has_equipment_shop": False,
+            "has_vending_machine": True,
+            "has_water_fountain": True,
+            "nearby_gym": True
+        }
     },
     "中山公园": {
         "id": "poi_004",
@@ -72,7 +135,28 @@ MOCK_POI_DATA = {
         "rating": 4.6,
         "province": "上海市",
         "city": "上海市",
-        "district": "长宁区"
+        "district": "长宁区",
+        "facility_info": {
+            "has_equipment": True,
+            "equipment_quality": "良好",
+            "age_groups": ["青年", "中年", "老年"],
+            "peak_hours": ["06:30-08:00", "17:30-19:30"],
+            "is_crowded": True,
+            "has_shade": True,
+            "ground_type": "塑胶地面",
+            "night_lighting": False,
+            "free_access": True
+        },
+        "amenities": {
+            "has_shower": False,
+            "has_locker": False,
+            "has_change_room": False,
+            "has_food": True,
+            "has_equipment_shop": False,
+            "has_vending_machine": False,
+            "has_water_fountain": True,
+            "nearby_gym": True
+        }
     },
     "长风二村小区": {
         "id": "poi_005",
@@ -89,7 +173,28 @@ MOCK_POI_DATA = {
         "rating": 2.5,
         "province": "上海市",
         "city": "上海市",
-        "district": "普陀区"
+        "district": "普陀区",
+        "facility_info": {
+            "has_equipment": True,
+            "equipment_quality": "较老旧",
+            "age_groups": ["中年", "老年"],
+            "peak_hours": ["06:00-07:00", "18:00-20:00"],
+            "is_crowded": False,
+            "has_shade": True,
+            "ground_type": "水泥地面",
+            "night_lighting": False,
+            "free_access": True
+        },
+        "amenities": {
+            "has_shower": False,
+            "has_locker": False,
+            "has_change_room": False,
+            "has_food": False,
+            "has_equipment_shop": False,
+            "has_vending_machine": False,
+            "has_water_fountain": False,
+            "nearby_gym": False
+        }
     },
     "闸北公园": {
         "id": "poi_006",
@@ -106,7 +211,28 @@ MOCK_POI_DATA = {
         "rating": 4.3,
         "province": "上海市",
         "city": "上海市",
-        "district": "静安区"
+        "district": "静安区",
+        "facility_info": {
+            "has_equipment": True,
+            "equipment_quality": "良好",
+            "age_groups": ["青年", "中年", "老年"],
+            "peak_hours": ["06:00-08:00", "17:00-19:00"],
+            "is_crowded": False,
+            "has_shade": True,
+            "ground_type": "塑胶地面",
+            "night_lighting": True,
+            "free_access": True
+        },
+        "amenities": {
+            "has_shower": False,
+            "has_locker": False,
+            "has_change_room": False,
+            "has_food": True,
+            "has_equipment_shop": False,
+            "has_vending_machine": False,
+            "has_water_fountain": True,
+            "nearby_gym": False
+        }
     },
     "鲁迅公园": {
         "id": "poi_007",
@@ -123,7 +249,28 @@ MOCK_POI_DATA = {
         "rating": 4.8,
         "province": "上海市",
         "city": "上海市",
-        "district": "虹口区"
+        "district": "虹口区",
+        "facility_info": {
+            "has_equipment": True,
+            "equipment_quality": "崭新",
+            "age_groups": ["青年", "中年", "老年", "少年"],
+            "peak_hours": ["05:30-07:30", "09:00-11:00", "18:00-20:00"],
+            "is_crowded": True,
+            "has_shade": True,
+            "ground_type": "塑胶地面",
+            "night_lighting": True,
+            "free_access": True
+        },
+        "amenities": {
+            "has_shower": False,
+            "has_locker": False,
+            "has_change_room": False,
+            "has_food": True,
+            "has_equipment_shop": False,
+            "has_vending_machine": True,
+            "has_water_fountain": True,
+            "nearby_gym": True
+        }
     },
     "曹杨新村": {
         "id": "poi_008",
@@ -140,7 +287,28 @@ MOCK_POI_DATA = {
         "rating": 3.2,
         "province": "上海市",
         "city": "上海市",
-        "district": "普陀区"
+        "district": "普陀区",
+        "facility_info": {
+            "has_equipment": True,
+            "equipment_quality": "一般",
+            "age_groups": ["中年", "老年"],
+            "peak_hours": ["06:30-08:00", "19:00-20:30"],
+            "is_crowded": False,
+            "has_shade": True,
+            "ground_type": "水泥地面",
+            "night_lighting": False,
+            "free_access": True
+        },
+        "amenities": {
+            "has_shower": False,
+            "has_locker": False,
+            "has_change_room": False,
+            "has_food": False,
+            "has_equipment_shop": False,
+            "has_vending_machine": False,
+            "has_water_fountain": False,
+            "nearby_gym": True
+        }
     },
     "和平公园": {
         "id": "poi_009",
@@ -157,7 +325,28 @@ MOCK_POI_DATA = {
         "rating": 4.4,
         "province": "上海市",
         "city": "上海市",
-        "district": "虹口区"
+        "district": "虹口区",
+        "facility_info": {
+            "has_equipment": True,
+            "equipment_quality": "良好",
+            "age_groups": ["青年", "中年", "老年"],
+            "peak_hours": ["06:00-08:00", "17:00-19:00"],
+            "is_crowded": True,
+            "has_shade": True,
+            "ground_type": "塑胶地面",
+            "night_lighting": True,
+            "free_access": True
+        },
+        "amenities": {
+            "has_shower": False,
+            "has_locker": False,
+            "has_change_room": False,
+            "has_food": True,
+            "has_equipment_shop": False,
+            "has_vending_machine": False,
+            "has_water_fountain": True,
+            "nearby_gym": False
+        }
     },
     "宜川五村": {
         "id": "poi_010",
@@ -174,7 +363,28 @@ MOCK_POI_DATA = {
         "rating": 1.8,
         "province": "上海市",
         "city": "上海市",
-        "district": "普陀区"
+        "district": "普陀区",
+        "facility_info": {
+            "has_equipment": True,
+            "equipment_quality": "部分损坏",
+            "age_groups": ["老年"],
+            "peak_hours": ["07:00-09:00"],
+            "is_crowded": False,
+            "has_shade": False,
+            "ground_type": "水泥地面",
+            "night_lighting": False,
+            "free_access": True
+        },
+        "amenities": {
+            "has_shower": False,
+            "has_locker": False,
+            "has_change_room": False,
+            "has_food": False,
+            "has_equipment_shop": False,
+            "has_vending_machine": False,
+            "has_water_fountain": False,
+            "nearby_gym": False
+        }
     },
     "复兴公园": {
         "id": "poi_011",
@@ -191,7 +401,28 @@ MOCK_POI_DATA = {
         "rating": 4.5,
         "province": "上海市",
         "city": "上海市",
-        "district": "黄浦区"
+        "district": "黄浦区",
+        "facility_info": {
+            "has_equipment": True,
+            "equipment_quality": "良好",
+            "age_groups": ["青年", "中年", "老年"],
+            "peak_hours": ["06:00-08:00", "18:00-20:00"],
+            "is_crowded": False,
+            "has_shade": True,
+            "ground_type": "草地旁水泥地",
+            "night_lighting": False,
+            "free_access": True
+        },
+        "amenities": {
+            "has_shower": False,
+            "has_locker": False,
+            "has_change_room": False,
+            "has_food": True,
+            "has_equipment_shop": False,
+            "has_vending_machine": False,
+            "has_water_fountain": True,
+            "nearby_gym": True
+        }
     },
     "延中绿地": {
         "id": "poi_012",
@@ -208,7 +439,28 @@ MOCK_POI_DATA = {
         "rating": 4.6,
         "province": "上海市",
         "city": "上海市",
-        "district": "黄浦区"
+        "district": "黄浦区",
+        "facility_info": {
+            "has_equipment": True,
+            "equipment_quality": "崭新",
+            "age_groups": ["青年", "中年"],
+            "peak_hours": ["12:00-13:30", "18:30-20:00"],
+            "is_crowded": False,
+            "has_shade": True,
+            "ground_type": "塑胶地面",
+            "night_lighting": True,
+            "free_access": True
+        },
+        "amenities": {
+            "has_shower": False,
+            "has_locker": False,
+            "has_change_room": False,
+            "has_food": True,
+            "has_equipment_shop": False,
+            "has_vending_machine": True,
+            "has_water_fountain": True,
+            "nearby_gym": True
+        }
     }
 }
 

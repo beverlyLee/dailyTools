@@ -44,7 +44,37 @@
       "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=elderly%20man%20doing%20gymnastics%20on%20horizontal%20bar%20public%20square&image_size=square_hd",
       "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=strong%20elderly%20chinese%20man%20pull%20up%20park%20impressive&image_size=square_hd"
     ],
-    "district": "黄浦区"
+    "district": "黄浦区",
+    "facility_info": {
+      "has_equipment": true,
+      "equipment_quality": "崭新",
+      "age_groups": [
+        "青年",
+        "中年",
+        "老年",
+        "少年"
+      ],
+      "peak_hours": [
+        "05:30-07:30",
+        "15:00-17:00"
+      ],
+      "is_crowded": true,
+      "has_shade": false,
+      "ground_type": "水泥地面",
+      "night_lighting": true,
+      "free_access": true
+    },
+    "amenities": {
+      "has_shower": false,
+      "has_locker": false,
+      "has_change_room": false,
+      "has_food": true,
+      "has_equipment_shop": false,
+      "has_vending_machine": true,
+      "has_water_fountain": false,
+      "nearby_gym": true
+    },
+    "rating": 4.9
   },
   {
     "id": "poi_001",
@@ -107,7 +137,36 @@
       "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=group%20of%20street%20workout%20athletes%20gathering%20park&image_size=square_hd",
       "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=outdoor%20calisthenics%20competition%20park%20china&image_size=square_hd"
     ],
-    "district": "浦东新区"
+    "district": "浦东新区",
+    "facility_info": {
+      "has_equipment": true,
+      "equipment_quality": "良好",
+      "age_groups": [
+        "青年",
+        "中年",
+        "老年"
+      ],
+      "peak_hours": [
+        "06:00-08:00",
+        "18:00-20:00"
+      ],
+      "is_crowded": true,
+      "has_shade": true,
+      "ground_type": "塑胶地面",
+      "night_lighting": true,
+      "free_access": true
+    },
+    "amenities": {
+      "has_shower": false,
+      "has_locker": false,
+      "has_change_room": false,
+      "has_food": true,
+      "has_equipment_shop": false,
+      "has_vending_machine": true,
+      "has_water_fountain": true,
+      "nearby_gym": true
+    },
+    "rating": 4.8
   },
   {
     "id": "poi_007",
@@ -145,7 +204,38 @@
     "images": [
       "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=morning%20exercise%20park%20china%20tai%20chi%20fitness&image_size=square_hd"
     ],
-    "district": "虹口区"
+    "district": "虹口区",
+    "facility_info": {
+      "has_equipment": true,
+      "equipment_quality": "崭新",
+      "age_groups": [
+        "青年",
+        "中年",
+        "老年",
+        "少年"
+      ],
+      "peak_hours": [
+        "05:30-07:30",
+        "09:00-11:00",
+        "18:00-20:00"
+      ],
+      "is_crowded": true,
+      "has_shade": true,
+      "ground_type": "塑胶地面",
+      "night_lighting": true,
+      "free_access": true
+    },
+    "amenities": {
+      "has_shower": false,
+      "has_locker": false,
+      "has_change_room": false,
+      "has_food": true,
+      "has_equipment_shop": false,
+      "has_vending_machine": true,
+      "has_water_fountain": true,
+      "nearby_gym": true
+    },
+    "rating": 4.8
   },
   {
     "id": "poi_004",
@@ -182,7 +272,36 @@
     "images": [
       "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=man%20doing%20planche%20on%20parallel%20bars%20park&image_size=square_hd"
     ],
-    "district": "长宁区"
+    "district": "长宁区",
+    "facility_info": {
+      "has_equipment": true,
+      "equipment_quality": "良好",
+      "age_groups": [
+        "青年",
+        "中年",
+        "老年"
+      ],
+      "peak_hours": [
+        "06:30-08:00",
+        "17:30-19:30"
+      ],
+      "is_crowded": true,
+      "has_shade": true,
+      "ground_type": "塑胶地面",
+      "night_lighting": false,
+      "free_access": true
+    },
+    "amenities": {
+      "has_shower": false,
+      "has_locker": false,
+      "has_change_room": false,
+      "has_food": true,
+      "has_equipment_shop": false,
+      "has_vending_machine": false,
+      "has_water_fountain": true,
+      "nearby_gym": true
+    },
+    "rating": 4.6
   },
   {
     "id": "poi_003",
@@ -221,7 +340,35 @@
       "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=riverside%20fitness%20trail%20shanghai%20morning%20joggers&image_size=square_hd",
       "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=outdoor%20fitness%20equipment%20riverside%20park&image_size=square_hd"
     ],
-    "district": "徐汇区"
+    "district": "徐汇区",
+    "facility_info": {
+      "has_equipment": true,
+      "equipment_quality": "良好",
+      "age_groups": [
+        "青年",
+        "中年"
+      ],
+      "peak_hours": [
+        "07:00-09:00",
+        "19:00-21:00"
+      ],
+      "is_crowded": false,
+      "has_shade": true,
+      "ground_type": "塑胶步道",
+      "night_lighting": true,
+      "free_access": true
+    },
+    "amenities": {
+      "has_shower": false,
+      "has_locker": false,
+      "has_change_room": false,
+      "has_food": true,
+      "has_equipment_shop": false,
+      "has_vending_machine": true,
+      "has_water_fountain": true,
+      "nearby_gym": true
+    },
+    "rating": 4.7
   },
   {
     "id": "poi_012",
@@ -257,7 +404,35 @@
     "images": [
       "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20urban%20green%20space%20fitness%20area%20office%20workers&image_size=square_hd"
     ],
-    "district": "黄浦区"
+    "district": "黄浦区",
+    "facility_info": {
+      "has_equipment": true,
+      "equipment_quality": "崭新",
+      "age_groups": [
+        "青年",
+        "中年"
+      ],
+      "peak_hours": [
+        "12:00-13:30",
+        "18:30-20:00"
+      ],
+      "is_crowded": false,
+      "has_shade": true,
+      "ground_type": "塑胶地面",
+      "night_lighting": true,
+      "free_access": true
+    },
+    "amenities": {
+      "has_shower": false,
+      "has_locker": false,
+      "has_change_room": false,
+      "has_food": true,
+      "has_equipment_shop": false,
+      "has_vending_machine": true,
+      "has_water_fountain": true,
+      "nearby_gym": true
+    },
+    "rating": 4.6
   },
   {
     "id": "poi_009",
@@ -294,7 +469,36 @@
     "images": [
       "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=crowded%20outdoor%20gym%20park%20china%20afternoon&image_size=square_hd"
     ],
-    "district": "虹口区"
+    "district": "虹口区",
+    "facility_info": {
+      "has_equipment": true,
+      "equipment_quality": "良好",
+      "age_groups": [
+        "青年",
+        "中年",
+        "老年"
+      ],
+      "peak_hours": [
+        "06:00-08:00",
+        "17:00-19:00"
+      ],
+      "is_crowded": true,
+      "has_shade": true,
+      "ground_type": "塑胶地面",
+      "night_lighting": true,
+      "free_access": true
+    },
+    "amenities": {
+      "has_shower": false,
+      "has_locker": false,
+      "has_change_room": false,
+      "has_food": true,
+      "has_equipment_shop": false,
+      "has_vending_machine": false,
+      "has_water_fountain": true,
+      "nearby_gym": false
+    },
+    "rating": 4.4
   },
   {
     "id": "poi_011",
@@ -331,7 +535,36 @@
     "images": [
       "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=french%20style%20park%20shanghai%20morning%20exercise&image_size=square_hd"
     ],
-    "district": "黄浦区"
+    "district": "黄浦区",
+    "facility_info": {
+      "has_equipment": true,
+      "equipment_quality": "良好",
+      "age_groups": [
+        "青年",
+        "中年",
+        "老年"
+      ],
+      "peak_hours": [
+        "06:00-08:00",
+        "18:00-20:00"
+      ],
+      "is_crowded": false,
+      "has_shade": true,
+      "ground_type": "草地旁水泥地",
+      "night_lighting": false,
+      "free_access": true
+    },
+    "amenities": {
+      "has_shower": false,
+      "has_locker": false,
+      "has_change_room": false,
+      "has_food": true,
+      "has_equipment_shop": false,
+      "has_vending_machine": false,
+      "has_water_fountain": true,
+      "nearby_gym": true
+    },
+    "rating": 4.5
   },
   {
     "id": "poi_006",
@@ -367,7 +600,36 @@
     "images": [
       "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=outdoor%20pull%20up%20bar%20chinese%20park%20muscular%20man&image_size=square_hd"
     ],
-    "district": "静安区"
+    "district": "静安区",
+    "facility_info": {
+      "has_equipment": true,
+      "equipment_quality": "良好",
+      "age_groups": [
+        "青年",
+        "中年",
+        "老年"
+      ],
+      "peak_hours": [
+        "06:00-08:00",
+        "17:00-19:00"
+      ],
+      "is_crowded": false,
+      "has_shade": true,
+      "ground_type": "塑胶地面",
+      "night_lighting": true,
+      "free_access": true
+    },
+    "amenities": {
+      "has_shower": false,
+      "has_locker": false,
+      "has_change_room": false,
+      "has_food": true,
+      "has_equipment_shop": false,
+      "has_vending_machine": false,
+      "has_water_fountain": true,
+      "nearby_gym": false
+    },
+    "rating": 4.3
   },
   {
     "id": "poi_008",
@@ -403,7 +665,35 @@
     "images": [
       "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=small%20community%20fitness%20area%20residential%20china&image_size=square_hd"
     ],
-    "district": "普陀区"
+    "district": "普陀区",
+    "facility_info": {
+      "has_equipment": true,
+      "equipment_quality": "一般",
+      "age_groups": [
+        "中年",
+        "老年"
+      ],
+      "peak_hours": [
+        "06:30-08:00",
+        "19:00-20:30"
+      ],
+      "is_crowded": false,
+      "has_shade": true,
+      "ground_type": "水泥地面",
+      "night_lighting": false,
+      "free_access": true
+    },
+    "amenities": {
+      "has_shower": false,
+      "has_locker": false,
+      "has_change_room": false,
+      "has_food": false,
+      "has_equipment_shop": false,
+      "has_vending_machine": false,
+      "has_water_fountain": false,
+      "nearby_gym": true
+    },
+    "rating": 3.2
   },
   {
     "id": "poi_005",
@@ -439,7 +729,35 @@
     "images": [
       "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=old%20rusty%20outdoor%20fitness%20equipment%20old%20residential%20area&image_size=square_hd"
     ],
-    "district": "普陀区"
+    "district": "普陀区",
+    "facility_info": {
+      "has_equipment": true,
+      "equipment_quality": "较老旧",
+      "age_groups": [
+        "中年",
+        "老年"
+      ],
+      "peak_hours": [
+        "06:00-07:00",
+        "18:00-20:00"
+      ],
+      "is_crowded": false,
+      "has_shade": true,
+      "ground_type": "水泥地面",
+      "night_lighting": false,
+      "free_access": true
+    },
+    "amenities": {
+      "has_shower": false,
+      "has_locker": false,
+      "has_change_room": false,
+      "has_food": false,
+      "has_equipment_shop": false,
+      "has_vending_machine": false,
+      "has_water_fountain": false,
+      "nearby_gym": false
+    },
+    "rating": 2.5
   },
   {
     "id": "poi_010",
@@ -475,6 +793,32 @@
     "images": [
       "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=broken%20old%20outdoor%20fitness%20equipment%20neglected&image_size=square_hd"
     ],
-    "district": "普陀区"
+    "district": "普陀区",
+    "facility_info": {
+      "has_equipment": true,
+      "equipment_quality": "部分损坏",
+      "age_groups": [
+        "老年"
+      ],
+      "peak_hours": [
+        "07:00-09:00"
+      ],
+      "is_crowded": false,
+      "has_shade": false,
+      "ground_type": "水泥地面",
+      "night_lighting": false,
+      "free_access": true
+    },
+    "amenities": {
+      "has_shower": false,
+      "has_locker": false,
+      "has_change_room": false,
+      "has_food": false,
+      "has_equipment_shop": false,
+      "has_vending_machine": false,
+      "has_water_fountain": false,
+      "nearby_gym": false
+    },
+    "rating": 1.8
   }
 ]
