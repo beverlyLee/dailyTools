@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>城市孤独文化地图 - 书店评论分析</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1>🏙️ 城市孤独文化地图</h1>
+            <p class="subtitle">基于书店评论数据的"独处文化"空间分布分析</p>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="control-panel">
+                <h3>控制面板</h3>
+                <div class="control-group">
+                    <label>城市选择</label>
+                    <select id="citySelect">
+                        <option value="上海">上海</option>
+                        <option value="北京">北京</option>
+                        <option value="广州">广州</option>
+                        <option value="成都">成都</option>
+                        <option value="杭州">杭州</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>相似度阈值</label>
+                    <input type="range" id="similarityThreshold" min="0" max="1" step="0.05" value="0.3">
+                    <span id="thresholdValue">0.30</span>
+                </div>
+                <div class="control-group">
+                    <label>节点大小</label>
+                    <input type="range" id="nodeScale" min="1" max="5" step="0.5" value="2.5">
+                    <span id="nodeScaleValue">2.5x</span>
+                </div>
+                <button id="refreshBtn" class="btn-refresh">🔄 刷新数据</button>
+                <button id="crawlBtn" class="btn-crawl">🕷️ 开始爬取</button>
+            </div>
+
+            <div class="legend-panel">
+                <h3>类型图例</h3>
+                <div class="legend-list">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #1a365d;"></span>
+                        <span class="legend-text">深度阅读型</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #2f855a;"></span>
+                        <span class="legend-text">亲子型</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #d69e2e;"></span>
+                        <span class="legend-text">网红打卡型</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #742a2a;"></span>
+                        <span class="legend-text">教辅型</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <h3>城市统计</h3>
+                <div class="stat-item">
+                    <span class="stat-label">平均孤独指数</span>
+                    <span class="stat-value" id="avgSolitude">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">高独处书店</span>
+                    <span class="stat-value" id="highSolitude">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">书店总数</span>
+                    <span class="stat-value" id="totalBookstores">-</span>
+                </div>
+            </div>
+
+            <div class="type-stats-panel">
+                <h3>类型分布</h3>
+                <div id="typeStats" class="type-stats-list"></div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="chart-container">
+                <div class="chart-title">
+                    <h2>📚 书店关系网络</h2>
+                    <p>节点大小 = 孤独指数 | 连线 = 类型相似性</p>
+                </div>
+                <div id="forceGraph" class="force-graph"></div>
+            </div>
+
+            <div id="detailPanel" class="detail-panel hidden">
+                <div class="detail-header">
+                    <h3 id="detailName">书店名称</h3>
+                    <button id="closeDetail" class="btn-close">✕</button>
+                </div>
+                <div class="detail-body">
+                    <div class="detail-row">
+                        <span class="detail-label">类型</span>
+                        <span id="detailType" class="detail-value">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">孤独指数</span>
+                        <span id="detailSolitude" class="detail-value">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">评分</span>
+                        <span id="detailRating" class="detail-value">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">地址</span>
+                        <span id="detailAddress" class="detail-value">-</span>
+                    </div>
+                    <div class="score-bars">
+                        <div class="score-bar-item">
+                            <span class="score-label">独处</span>
+                            <div class="score-bar">
+                                <div id="barSolitude" class="score-fill solitude"></div>
+                            </div>
+                            <span id="valSolitude" class="score-value">0</span>
+                        </div>
+                        <div class="score-bar-item">
+                            <span class="score-label">亲子</span>
+                            <div class="score-bar">
+                                <div id="barFamily" class="score-fill family"></div>
+                            </div>
+                            <span id="valFamily" class="score-value">0</span>
+                        </div>
+                        <div class="score-bar-item">
+                            <span class="score-label">学习</span>
+                            <div class="score-bar">
+                                <div id="barStudent" class="score-fill student"></div>
+                            </div>
+                            <span id="valStudent" class="score-value">0</span>
+                        </div>
+                        <div class="score-bar-item">
+                            <span class="score-label">网红</span>
+                            <div class="score-bar">
+                                <div id="barInternet" class="score-fill internet"></div>
+                            </div>
+                            <span id="valInternet" class="score-value">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
