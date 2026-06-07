@@ -125,8 +125,8 @@ def generate_mock_shops_for_district(district: OfficeDistrict, seed: int = 42) -
         shop_count = random.randint(15, 28)
         late_ratio = random.uniform(0.4, 0.65)
     elif district.district_type == "government":
-        shop_count = random.randint(6, 12)
-        late_ratio = random.uniform(0.08, 0.2)
+        shop_count = random.randint(8, 15)
+        late_ratio = random.uniform(0.12, 0.28)
     else:
         shop_count = random.randint(5, 12)
         late_ratio = random.uniform(0.1, 0.3)
@@ -153,6 +153,16 @@ def generate_mock_shops_for_district(district: OfficeDistrict, seed: int = 42) -
             is_open_late=is_late,
         )
         shops.append(shop)
+
+    if district.district_type == "government" and shop_count >= 3:
+        late_count = sum(1 for s in shops if s.is_open_late)
+        min_late = max(1, int(shop_count * 0.12))
+        if late_count < min_late:
+            indices = [i for i, s in enumerate(shops) if not s.is_open_late]
+            random.shuffle(indices)
+            for idx in indices[: min_late - late_count]:
+                shops[idx].is_open_late = True
+                shops[idx].business_hours = _generate_hours(district.district_type, True)
 
     return shops
 

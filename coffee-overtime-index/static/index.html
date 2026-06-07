@@ -853,8 +853,8 @@
                     if (!amapInstance) {
                         amapInstance = new AMap.Map(el, {
                             viewMode: '2D',
-                            mapStyle: 'amap://styles/darkblue',
-                            features: ['bg', 'road', 'building'],
+                            mapStyle: 'amap://styles/normal',
+                            features: ['bg', 'road', 'building', 'water'],
                             zooms: [10, 18]
                         });
                     }
@@ -878,19 +878,38 @@
 
                         const polygon = new AMap.Polygon({
                             path: path,
-                            strokeColor: 'rgba(255,255,255,0.5)',
+                            strokeColor: 'rgba(40, 40, 40, 0.7)',
                             strokeWeight: 2,
                             fillColor: fillColor,
-                            fillOpacity: 0.7,
+                            fillOpacity: 0.75,
                             cursor: 'pointer',
+                            extData: d
+                        });
+
+                        const centerLng = d.district.center_lng;
+                        const centerLat = d.district.center_lat;
+                        const text = new AMap.Text({
+                            text: d.district.name,
+                            anchor: 'center',
+                            position: [centerLng, centerLat],
+                            style: {
+                                'font-size': '13px',
+                                'font-weight': '600',
+                                'color': '#1a1a2e',
+                                'background-color': 'rgba(255, 255, 255, 0.85)',
+                                'padding': '4px 10px',
+                                'border-radius': '4px',
+                                'box-shadow': '0 2px 6px rgba(0,0,0,0.15)',
+                                'border': 'none'
+                            },
                             extData: d
                         });
 
                         polygon.on('mouseover', (e) => {
                             polygon.setOptions({
-                                strokeColor: '#ffd700',
+                                strokeColor: '#d4a017',
                                 strokeWeight: 3,
-                                fillOpacity: 0.85
+                                fillOpacity: 0.9
                             });
                             const pixel = amapInstance.lngLatToContainer(e.lnglat);
                             showAmapTooltip(d, pixel);
@@ -903,9 +922,9 @@
 
                         polygon.on('mouseout', () => {
                             polygon.setOptions({
-                                strokeColor: 'rgba(255,255,255,0.5)',
+                                strokeColor: 'rgba(40, 40, 40, 0.7)',
                                 strokeWeight: 2,
-                                fillOpacity: 0.7
+                                fillOpacity: 0.75
                             });
                             hideAmapTooltip();
                         });
@@ -914,8 +933,14 @@
                             selectedDistrict.value = d;
                         });
 
+                        text.on('click', () => {
+                            selectedDistrict.value = d;
+                        });
+
                         polygon.setMap(amapInstance);
+                        text.setMap(amapInstance);
                         amapPolygons.push(polygon);
+                        amapPolygons.push(text);
 
                         path.forEach(p => bounds.push(p));
                     });
