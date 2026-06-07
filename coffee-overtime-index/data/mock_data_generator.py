@@ -1,11 +1,13 @@
 import random
 import json
 import os
+import math
 from typing import List
 from dataclasses import asdict
 
 from src.poi.coffee_shop_spider import CoffeeShop, _classify_brand
 from src.spatial.office_district_match import PRESET_DISTRICTS, OfficeDistrict
+from src.index.overtime_calculator import calculate_overtime_index
 
 MOCK_DATA_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "mock_coffee_shops.json")
 
@@ -126,43 +128,73 @@ def generate_mock_shops_for_district(district: OfficeDistrict, seed: int = 42) -
         late_ratio = random.uniform(0.4, 0.65)
     elif district.district_type == "government":
         shop_count = random.randint(8, 15)
-        late_ratio = random.uniform(0.12, 0.28)
+        late_ratio = random.uniform(0.15, 0.30)
     else:
         shop_count = random.randint(5, 12)
         late_ratio = random.uniform(0.1, 0.3)
 
-    shops = []
-    for i in range(shop_count):
-        lng = random.uniform(district.sw_lng, district.ne_lng)
-        lat = random.uniform(district.sw_lat, district.ne_lat)
+    min_late_ratio_government = 0.08
+    min_overtime_government = 8.0
 
-        brand = _pick_brand(district.district_type)
-        name = _brand_to_name(brand, i + 1)
+    def _build_shops(count, target_late_ratio):
+        shops = []
+        for i in range(count):
+            lng = random.uniform(district.sw_lng, district.ne_lng)
+            lat = random.uniform(district.sw_lat, district.ne_lat)
+            brand = _pick_brand(district.district_type)
+            name = _brand_to_name(brand, i + 1)
+            is_late = random.random() < target_late_ratio
+            hours = _generate_hours(district.district_type, is_late)
+            shop = CoffeeShop(
+                id=f"{district.id}_{i:03d}",
+                name=name,
+                brand=brand,
+                address=f"{district.city}市{district.name}第{i+1}分店",
+                longitude=lng,
+                latitude=lat,
+                business_hours=hours,
+                is_open_late=is_late,
+            )
+            shops.append(shop)
 
-        is_late = random.random() < late_ratio
-        hours = _generate_hours(district.district_type, is_late)
+        if district.district_type == "government":
+            min_late_count = math.ceil(count * min_late_ratio_government)
+            late_count = sum(1 for s in shops if s.is_open_late)
+            if late_count < min_late_count:
+                indices = [i for i, s in enumerate(shops) if not s.is_open_late]
+                random.shuffle(indices)
+                for idx in indices[: min_late_count - late_count]:
+                    shops[idx].is_open_late = True
+                    shops[idx].business_hours = _generate_hours(district.district_type, True)
 
-        shop = CoffeeShop(
-            id=f"{district.id}_{i:03d}",
-            name=name,
-            brand=brand,
-            address=f"{district.city}市{district.name}第{i+1}分店",
-            longitude=lng,
-            latitude=lat,
-            business_hours=hours,
-            is_open_late=is_late,
+        return shops
+
+    shops = _build_shops(shop_count, late_ratio)
+
+    if district.district_type == "government":
+        idx = calculate_overtime_index(
+            shops, district.sw_lng, district.sw_lat, district.ne_lng, district.ne_lat
         )
-        shops.append(shop)
+        current_idx = idx.overtime_index
+        attempts = 0
+        max_attempts = 10
 
-    if district.district_type == "government" and shop_count >= 3:
-        late_count = sum(1 for s in shops if s.is_open_late)
-        min_late = max(1, int(shop_count * 0.12))
-        if late_count < min_late:
-            indices = [i for i, s in enumerate(shops) if not s.is_open_late]
-            random.shuffle(indices)
-            for idx in indices[: min_late - late_count]:
-                shops[idx].is_open_late = True
-                shops[idx].business_hours = _generate_hours(district.district_type, True)
+        while current_idx < min_overtime_government and attempts < max_attempts:
+            attempts += 1
+            diff = min_overtime_government - current_idx
+
+            if idx.density_score < 40:
+                new_count = min(shop_count + 5, 20)
+                if new_count > shop_count:
+                    shop_count = new_count
+            else:
+                late_ratio = min(late_ratio + 0.08, 0.45)
+
+            shops = _build_shops(shop_count, late_ratio)
+            idx = calculate_overtime_index(
+                shops, district.sw_lng, district.sw_lat, district.ne_lng, district.ne_lat
+            )
+            current_idx = idx.overtime_index
 
     return shops
 
