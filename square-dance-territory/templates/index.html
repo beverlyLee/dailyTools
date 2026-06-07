@@ -6,6 +6,9 @@
     <title>广场舞领地分析系统</title>
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    {% if map_config.gaode_js_key %}
+    <script src="https://webapi.amap.com/maps?v=2.0&key={{ map_config.gaode_js_key }}"></script>
+    {% endif %}
     <style>
         * {
             margin: 0;
@@ -444,214 +447,669 @@
     </div>
 
     <script>
-        const MAPBOX_TOKEN = 'pk.eyJ1IjoiZGVtby11c2VyIiwiYSI6ImNrbm93aG52azFpa2sydnF1aTg5dTFydXkifQ.demo';
+        const mapConfig = {
+            mapboxToken: "{{ map_config.mapbox_token }}",
+            gaodeJsKey: "{{ map_config.gaode_js_key }}",
+        };
 
-        let map;
         let allData = null;
-        let videoMarkers = [];
-        let territoryLayers = [];
-        let conflictLayers = [];
         let activeClusterId = null;
-        let mapLoaded = false;
+        let currentMapType = null;
+        let mapManager = null;
 
-        function initMap() {
-            loadData();
+        const layerVisibility = {
+            videos: true,
+            territories: true,
+            conflicts: true,
+        };
 
-            mapboxgl.accessToken = MAPBOX_TOKEN;
+        const MapManager = {
+            init() {
+                loadData();
+                this.tryMapbox();
+            },
 
-            try {
-                map = new mapboxgl.Map({
-                    container: 'map',
-                    style: 'mapbox://styles/mapbox/light-v11',
-                    center: [116.4074, 39.9042],
-                    zoom: 12,
-                });
+            tryMapbox() {
+                if (!mapConfig.mapboxToken || typeof mapboxgl === 'undefined') {
+                    this.tryGaode();
+                    return;
+                }
 
-                map.addControl(new mapboxgl.NavigationControl(), 'top-left');
-                map.addControl(new mapboxgl.ScaleControl({
-                    maxWidth: 100,
-                    unit: 'metric'
-                }), 'bottom-left');
+                try {
+                    mapboxgl.accessToken = mapConfig.mapboxToken;
+                    const map = new mapboxgl.Map({
+                        container: 'map',
+                        style: 'mapbox://styles/mapbox/light-v11',
+                        center: [116.4074, 39.9042],
+                        zoom: 12,
+                    });
 
-                map.on('load', () => {
-                    mapLoaded = true;
-                    if (allData) {
-                        renderMap(allData);
-                    }
-                });
+                    map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+                    map.addControl(new mapboxgl.ScaleControl({
+                        maxWidth: 100,
+                        unit: 'metric'
+                    }), 'bottom-left');
 
-                map.on('error', (e) => {
-                    console.warn('Mapbox error:', e.error);
-                    showFallbackMap();
-                });
-            } catch (e) {
-                console.error('Map init failed:', e);
-                showFallbackMap();
+                    let hasError = false;
+                    const errorHandler = (e) => {
+                        if (!hasError) {
+                            hasError = true;
+                            console.warn('Mapbox error, falling back to Gaode:', e && e.error ? e.error : e);
+                            try { map.remove(); } catch (_) {}
+                            this.tryGaode();
+                        }
+                    };
+
+                    map.on('error', errorHandler);
+                    map.on('style.error', errorHandler);
+                    map.on('data', (e) => {
+                        if (e.dataType === 'style' && e.type === 'error') {
+                            errorHandler(e);
+                        }
+                    });
+
+                    map.on('load', () => {
+                        if (hasError) return;
+                        console.log('Mapbox loaded successfully');
+                        currentMapType = 'mapbox';
+                        mapManager = this.createMapboxManager(map);
+                        if (allData) {
+                            mapManager.render(allData);
+                            mapManager.applyLayerVisibility();
+                        }
+                        hideLoading();
+                    });
+
+                    setTimeout(() => {
+                        if (!hasError && currentMapType !== 'mapbox') {
+                        }
+                    }, 8000);
+
+                } catch (e) {
+                    console.error('Mapbox init failed, falling back to Gaode:', e);
+                    this.tryGaode();
+                }
+            },
+
+            tryGaode() {
+                if (!mapConfig.gaodeJsKey || typeof AMap === 'undefined') {
+                    console.warn('Gaode not available, falling back to SVG');
+                    this.showSvgFallback();
+                    return;
+                }
+
+                try {
+                    const map = new AMap.Map('map', {
+                        zoom: 12,
+                        center: [116.4074, 39.9042],
+                        mapStyle: 'amap://styles/light',
+                    });
+
+                    map.on('complete', () => {
+                        console.log('Gaode map loaded successfully');
+                        currentMapType = 'gaode';
+                        mapManager = this.createGaodeManager(map);
+                        if (allData) {
+                            mapManager.render(allData);
+                            mapManager.applyLayerVisibility();
+                        }
+                        hideLoading();
+                    });
+
+                    map.on('error', (e) => {
+                        console.warn('Gaode map error, falling back to SVG:', e);
+                        this.showSvgFallback();
+                    });
+
+                } catch (e) {
+                    console.error('Gaode init failed, falling back to SVG:', e);
+                    this.showSvgFallback();
+                }
+            },
+
+            showSvgFallback() {
+                currentMapType = 'svg';
+                mapManager = this.createSvgManager();
+                if (allData) {
+                    mapManager.render(allData);
+                    mapManager.applyLayerVisibility();
+                }
+                hideLoading();
+            },
+
+            createMapboxManager(map) {
+                const self = this;
+                let videoMarkers = [];
+                let territoryLayerIds = [];
+                let conflictMarkers = [];
+
+                return {
+                    type: 'mapbox',
+
+                    render(data) {
+                        this.clear();
+
+                        if (data.clusters && data.clusters.length > 0) {
+                            const first = data.clusters[0];
+                            if (first && first.center) {
+                                map.flyTo({
+                                    center: [first.center.lng, first.center.lat],
+                                    zoom: 13.5,
+                                    speed: 1.2,
+                                });
+                            }
+                        }
+
+                        this.addTerritories(data.clusters);
+                        this.addConflicts(data.conflicts);
+                        this.addVideos(data.videos);
+                    },
+
+                    clear() {
+                        videoMarkers.forEach(m => m.remove());
+                        videoMarkers = [];
+
+                        conflictMarkers.forEach(m => m.remove());
+                        conflictMarkers = [];
+
+                        territoryLayerIds.forEach(id => {
+                            try {
+                                if (map.getLayer(id + '-fill')) map.removeLayer(id + '-fill');
+                                if (map.getSource(id + '-fill')) map.removeSource(id + '-fill');
+                                if (map.getLayer(id + '-outline')) map.removeLayer(id + '-outline');
+                                if (map.getSource(id + '-outline')) map.removeSource(id + '-outline');
+                            } catch (_) {}
+                        });
+                        territoryLayerIds = [];
+
+                        try {
+                            if (map.getLayer('conflict-fill')) map.removeLayer('conflict-fill');
+                            if (map.getSource('conflict-fill')) map.removeSource('conflict-fill');
+                            if (map.getLayer('conflict-outline')) map.removeLayer('conflict-outline');
+                            if (map.getSource('conflict-outline')) map.removeSource('conflict-outline');
+                        } catch (_) {}
+                    },
+
+                    addTerritories(clusters) {
+                        if (!clusters) return;
+
+                        clusters.forEach(cluster => {
+                            const id = 'territory-' + cluster.cluster_id;
+                            territoryLayerIds.push(id);
+
+                            const coordinates = cluster.boundary.map(p => [p.lng, p.lat]);
+                            coordinates.push(coordinates[0]);
+
+                            const geojson = {
+                                type: 'Feature',
+                                geometry: {
+                                    type: 'Polygon',
+                                    coordinates: [coordinates]
+                                },
+                                properties: { clusterId: cluster.cluster_id }
+                            };
+
+                            map.addSource(id + '-fill', { type: 'geojson', data: geojson });
+                            map.addLayer({
+                                id: id + '-fill',
+                                type: 'fill',
+                                source: id + '-fill',
+                                paint: {
+                                    'fill-color': cluster.color,
+                                    'fill-opacity': 0.25,
+                                }
+                            });
+                            map.addLayer({
+                                id: id + '-outline',
+                                type: 'line',
+                                source: id + '-fill',
+                                paint: {
+                                    'line-color': cluster.color,
+                                    'line-width': 2.5,
+                                }
+                            });
+
+                            new mapboxgl.Marker({ color: cluster.color })
+                                .setLngLat([cluster.center.lng, cluster.center.lat])
+                                .setPopup(new mapboxgl.Popup({ offset: 15 }).setHTML(`
+                                    <div class="popup-content">
+                                        <div class="popup-title">${cluster.name}</div>
+                                        <div class="popup-row">🎥 ${cluster.video_count}个视频</div>
+                                        <div class="popup-row">❤️ ${cluster.total_likes.toLocaleString()}赞</div>
+                                        <div class="popup-row">📏 半径: ${cluster.radius_meters}米</div>
+                                    </div>
+                                `))
+                                .addTo(map);
+                        });
+                    },
+
+                    addConflicts(conflicts) {
+                        if (!conflicts || conflicts.length === 0) return;
+
+                        const features = [];
+                        conflicts.forEach(c => {
+                            const clusterA = allData.clusters.find(cl => cl.cluster_id === c.cluster_a_id);
+                            const clusterB = allData.clusters.find(cl => cl.cluster_id === c.cluster_b_id);
+                            if (!clusterA || !clusterB) return;
+
+                            const midLat = (clusterA.center.lat + clusterB.center.lat) / 2;
+                            const midLng = (clusterA.center.lng + clusterB.center.lng) / 2;
+                            const overlapR = Math.min(clusterA.radius_meters, clusterB.radius_meters) * 0.6;
+
+                            const coords = [];
+                            for (let i = 0; i < 36; i++) {
+                                const angle = 2 * Math.PI * i / 36;
+                                const dLat = (overlapR * Math.sin(angle)) / 111000;
+                                const dLng = (overlapR * Math.cos(angle)) / (111000 * Math.cos(midLat * Math.PI / 180));
+                                coords.push([midLng + dLng, midLat + dLat]);
+                            }
+                            coords.push(coords[0]);
+
+                            features.push({
+                                type: 'Feature',
+                                geometry: { type: 'Polygon', coordinates: [coords] },
+                                properties: { conflictId: c.conflict_id }
+                            });
+                        });
+
+                        if (features.length === 0) return;
+
+                        map.addSource('conflict-fill', {
+                            type: 'geojson',
+                            data: { type: 'FeatureCollection', features }
+                        });
+
+                        map.addLayer({
+                            id: 'conflict-fill',
+                            type: 'fill',
+                            source: 'conflict-fill',
+                            paint: {
+                                'fill-color': '#e74c3c',
+                                'fill-opacity': 0.3,
+                            }
+                        });
+
+                        map.addLayer({
+                            id: 'conflict-outline',
+                            type: 'line',
+                            source: 'conflict-fill',
+                            paint: {
+                                'line-color': '#e74c3c',
+                                'line-width': 3,
+                                'line-dasharray': [4, 3],
+                            }
+                        });
+                    },
+
+                    addVideos(videos) {
+                        if (!videos) return;
+                        videos.forEach(video => {
+                            const el = document.createElement('div');
+                            el.style.cssText = 'width:8px;height:8px;border-radius:50%;background:#e74c3c;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3);cursor:pointer;';
+                            const marker = new mapboxgl.Marker({ element: el })
+                                .setLngLat([video.lng, video.lat])
+                                .setPopup(new mapboxgl.Popup({ offset: 10 }).setHTML(`
+                                    <div class="popup-content">
+                                        <div class="popup-title">${video.title || '广场舞视频'}</div>
+                                        <div class="popup-row">📍 ${video.poi_name || ''}</div>
+                                        <div class="popup-row">📱 ${video.platform || ''}</div>
+                                        <div class="popup-row">❤️ ${video.likes || 0}</div>
+                                    </div>
+                                `))
+                                .addTo(map);
+                            videoMarkers.push(marker);
+                        });
+                    },
+
+                    setLayerVisible(layer, visible) {
+                        if (layer === 'videos') {
+                            videoMarkers.forEach(m => visible ? m.addTo(map) : m.remove());
+                        } else if (layer === 'territories') {
+                            const visibility = visible ? 'visible' : 'none';
+                            territoryLayerIds.forEach(id => {
+                                try {
+                                    map.setLayoutProperty(id + '-fill', 'visibility', visibility);
+                                    map.setLayoutProperty(id + '-outline', 'visibility', visibility);
+                                } catch (_) {}
+                            });
+                        } else if (layer === 'conflicts') {
+                            const visibility = visible ? 'visible' : 'none';
+                            try {
+                                map.setLayoutProperty('conflict-fill', 'visibility', visibility);
+                                map.setLayoutProperty('conflict-outline', 'visibility', visibility);
+                            } catch (_) {}
+                        }
+                    },
+
+                    applyLayerVisibility() {
+                        this.setLayerVisible('videos', layerVisibility.videos);
+                        this.setLayerVisible('territories', layerVisibility.territories);
+                        this.setLayerVisible('conflicts', layerVisibility.conflicts);
+                    },
+
+                    flyTo(lat, lng, zoom) {
+                        map.flyTo({ center: [lng, lat], zoom: zoom || 15 });
+                    },
+                };
+            },
+
+            createGaodeManager(map) {
+                let videoMarkers = [];
+                let territoryCircles = [];
+                let conflictCircles = [];
+
+                return {
+                    type: 'gaode',
+
+                    render(data) {
+                        this.clear();
+
+                        if (data.clusters && data.clusters.length > 0) {
+                            const first = data.clusters[0];
+                            if (first && first.center) {
+                                map.setZoomAndCenter(13.5, [first.center.lng, first.center.lat]);
+                            }
+                        }
+
+                        this.addTerritories(data.clusters);
+                        this.addConflicts(data.conflicts);
+                        this.addVideos(data.videos);
+                    },
+
+                    clear() {
+                        videoMarkers.forEach(m => map.remove(m));
+                        videoMarkers = [];
+                        territoryCircles.forEach(c => map.remove(c));
+                        territoryCircles = [];
+                        conflictCircles.forEach(c => map.remove(c));
+                        conflictCircles = [];
+                    },
+
+                    addTerritories(clusters) {
+                        if (!clusters) return;
+                        clusters.forEach(cluster => {
+                            const circle = new AMap.Circle({
+                                center: [cluster.center.lng, cluster.center.lat],
+                                radius: cluster.radius_meters,
+                                strokeColor: cluster.color,
+                                strokeWeight: 2.5,
+                                strokeOpacity: 0.9,
+                                fillColor: cluster.color,
+                                fillOpacity: 0.25,
+                                cursor: 'pointer',
+                            });
+                            circle.setMap(map);
+                            circle.on('click', () => focusOnCluster(cluster.cluster_id));
+                            territoryCircles.push(circle);
+
+                            const marker = new AMap.Marker({
+                                position: [cluster.center.lng, cluster.center.lat],
+                                offset: new AMap.Pixel(-10, -10),
+                                content: `<div style="width:20px;height:20px;border-radius:50%;background:${cluster.color};border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.2);"></div>`,
+                            });
+                            marker.setMap(map);
+                            territoryCircles.push(marker);
+                        });
+                    },
+
+                    addConflicts(conflicts) {
+                        if (!conflicts || conflicts.length === 0) return;
+                        conflicts.forEach(c => {
+                            const clusterA = allData.clusters.find(cl => cl.cluster_id === c.cluster_a_id);
+                            const clusterB = allData.clusters.find(cl => cl.cluster_id === c.cluster_b_id);
+                            if (!clusterA || !clusterB) return;
+
+                            const midLng = (clusterA.center.lng + clusterB.center.lng) / 2;
+                            const midLat = (clusterA.center.lat + clusterB.center.lat) / 2;
+                            const overlapR = Math.min(clusterA.radius_meters, clusterB.radius_meters) * 0.6;
+
+                            const circle = new AMap.Circle({
+                                center: [midLng, midLat],
+                                radius: overlapR,
+                                strokeColor: '#e74c3c',
+                                strokeWeight: 3,
+                                strokeStyle: 'dashed',
+                                strokeOpacity: 0.9,
+                                fillColor: '#e74c3c',
+                                fillOpacity: 0.3,
+                            });
+                            circle.setMap(map);
+                            conflictCircles.push(circle);
+                        });
+                    },
+
+                    addVideos(videos) {
+                        if (!videos) return;
+                        videos.slice(0, 100).forEach(video => {
+                            const marker = new AMap.Marker({
+                                position: [video.lng, video.lat],
+                                offset: new AMap.Pixel(-5, -5),
+                                content: `<div style="width:10px;height:10px;border-radius:50%;background:#e74c3c;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>`,
+                            });
+                            marker.setMap(map);
+                            videoMarkers.push(marker);
+                        });
+                    },
+
+                    setLayerVisible(layer, visible) {
+                        const show = visible ? 'show' : 'hide';
+                        if (layer === 'videos') {
+                            videoMarkers.forEach(m => m[show]());
+                        } else if (layer === 'territories') {
+                            territoryCircles.forEach(c => c[show]());
+                        } else if (layer === 'conflicts') {
+                            conflictCircles.forEach(c => c[show]());
+                        }
+                    },
+
+                    applyLayerVisibility() {
+                        this.setLayerVisible('videos', layerVisibility.videos);
+                        this.setLayerVisible('territories', layerVisibility.territories);
+                        this.setLayerVisible('conflicts', layerVisibility.conflicts);
+                    },
+
+                    flyTo(lat, lng, zoom) {
+                        map.setZoomAndCenter(zoom || 15, [lng, lat]);
+                    },
+                };
+            },
+
+            createSvgManager() {
+                const container = document.getElementById('map');
+                let svg = null;
+
+                function getProjection() {
+                    if (!allData || !allData.clusters || allData.clusters.length === 0) return null;
+
+                    const clusters = allData.clusters;
+                    const w = container.clientWidth || 800;
+                    const h = container.clientHeight || 600;
+                    const padding = 100;
+
+                    const lats = clusters.map(c => c.center.lat);
+                    const lngs = clusters.map(c => c.center.lng);
+                    const minLat = Math.min(...lats) - 0.008;
+                    const maxLat = Math.max(...lats) + 0.008;
+                    const minLng = Math.min(...lngs) - 0.008;
+                    const maxLng = Math.max(...lngs) + 0.008;
+
+                    const latRange = maxLat - minLat;
+                    const lngRange = maxLng - minLng;
+                    const scale = Math.min((w - 2 * padding) / lngRange, (h - 2 * padding) / latRange);
+                    const offsetX = (w - lngRange * scale) / 2;
+                    const offsetY = (h - latRange * scale) / 2;
+
+                    return {
+                        w, h, minLat, maxLat, minLng, maxLng, scale, offsetX, offsetY,
+                        latLngToXY(lat, lng) {
+                            const x = offsetX + (lng - minLng) * scale;
+                            const y = h - offsetY - (lat - minLat) * scale;
+                            return { x, y };
+                        }
+                    };
+                }
+
+                return {
+                    type: 'svg',
+
+                    render(data) {
+                        const proj = getProjection();
+                        if (!proj) return;
+
+                        container.innerHTML = `
+                            <div style="width:100%;height:100%;background:linear-gradient(135deg, #f0f9ff 0%, #f0fdf4 50%, #fefce8 100%);position:relative;overflow:hidden;">
+                                <div style="position:absolute;top:20px;left:20px;background:white;padding:8px 12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);font-size:12px;color:#666;z-index:5;">
+                                    🗺️ 示意图模式（配置地图 Token 可启用真实地图）
+                                </div>
+                                <svg id="svgMap" width="100%" height="100%" style="position:absolute;top:0;left:0;"></svg>
+                            </div>
+                        `;
+
+                        svg = document.getElementById('svgMap');
+                        this.redraw();
+                    },
+
+                    redraw() {
+                        if (!svg || !allData) return;
+                        const proj = getProjection();
+                        if (!proj) return;
+
+                        const { latLngToXY } = proj;
+                        const clusters = allData.clusters;
+                        const conflicts = allData.conflicts || [];
+                        const videos = allData.videos || [];
+
+                        let content = '';
+
+                        if (layerVisibility.conflicts) {
+                            conflicts.forEach(conflict => {
+                                const a = clusters.find(c => c.cluster_id === conflict.cluster_a_id);
+                                const b = clusters.find(c => c.cluster_id === conflict.cluster_b_id);
+                                if (!a || !b) return;
+
+                                const pa = latLngToXY(a.center.lat, a.center.lng);
+                                const pb = latLngToXY(b.center.lat, b.center.lng);
+                                const midX = (pa.x + pb.x) / 2;
+                                const midY = (pa.y + pb.y) / 2;
+
+                                const rA = a.radius_meters / 111000 * Math.cos(a.center.lat * Math.PI / 180) * proj.scale;
+                                const rB = b.radius_meters / 111000 * Math.cos(b.center.lat * Math.PI / 180) * proj.scale;
+                                const overlapR = Math.min(rA, rB) * 0.65;
+
+                                const pid = 'stripe-' + conflict.conflict_id;
+                                content += `
+                                    <defs>
+                                        <pattern id="${pid}" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)">
+                                            <rect width="5" height="10" fill="#ef4444" opacity="0.5"/>
+                                        </pattern>
+                                    </defs>
+                                    <circle cx="${midX}" cy="${midY}" r="${overlapR}"
+                                            fill="url(#${pid})" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="6,4" class="conflict-layer">
+                                        <animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite"/>
+                                    </circle>
+                                `;
+                            });
+                        }
+
+                        if (layerVisibility.territories) {
+                            clusters.forEach(cluster => {
+                                const p = latLngToXY(cluster.center.lat, cluster.center.lng);
+                                const rPx = cluster.radius_meters / 111000 * Math.cos(cluster.center.lat * Math.PI / 180) * proj.scale;
+
+                                content += `
+                                    <g class="territory-layer" data-id="${cluster.cluster_id}"
+                                       onclick="focusOnCluster(${cluster.cluster_id})" style="cursor:pointer;">
+                                        <circle cx="${p.x}" cy="${p.y}" r="${rPx}"
+                                                fill="${cluster.color}" fill-opacity="0.28"
+                                                stroke="${cluster.color}" stroke-width="2.5"/>
+                                        <circle cx="${p.x}" cy="${p.y}" r="7" fill="${cluster.color}" stroke="white" stroke-width="2.5"/>
+                                        <text x="${p.x}" y="${p.y - rPx - 10}" text-anchor="middle"
+                                              font-size="13" font-weight="600" fill="#1e293b">
+                                            ${cluster.name}
+                                        </text>
+                                        <text x="${p.x}" y="${p.y - rPx + 8}" text-anchor="middle"
+                                              font-size="11" fill="#64748b">
+                                            ${cluster.video_count}视频 · ${cluster.radius_meters}米
+                                        </text>
+                                    </g>
+                                `;
+                            });
+                        }
+
+                        if (layerVisibility.videos) {
+                            videos.slice(0, 60).forEach(video => {
+                                const p = latLngToXY(video.lat, video.lng);
+                                content += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="#ef4444" opacity="0.7" class="video-layer"/>`;
+                            });
+                        }
+
+                        if (layerVisibility.conflicts) {
+                            conflicts.forEach(conflict => {
+                                const a = clusters.find(c => c.cluster_id === conflict.cluster_a_id);
+                                const b = clusters.find(c => c.cluster_id === conflict.cluster_b_id);
+                                if (!a || !b) return;
+
+                                const pa = latLngToXY(a.center.lat, a.center.lng);
+                                const pb = latLngToXY(b.center.lat, b.center.lng);
+                                const midX = (pa.x + pb.x) / 2;
+                                const midY = (pa.y + pb.y) / 2;
+
+                                const colors = { high: '#ef4444', medium: '#f97316', low: '#3b82f6' };
+                                const color = colors[conflict.severity] || '#ef4444';
+
+                                content += `
+                                    <g transform="translate(${midX}, ${midY - 45})" class="conflict-layer">
+                                        <rect x="-70" y="-20" width="140" height="40" rx="8"
+                                              fill="white" stroke="${color}" stroke-width="2" stroke-opacity="0.9"/>
+                                        <text x="0" y="-5" text-anchor="middle" font-size="11" font-weight="600" fill="${color}">
+                                            ⚠️ 冲突警告
+                                        </text>
+                                        <text x="0" y="11" text-anchor="middle" font-size="10" fill="#64748b">
+                                            ${conflict.overlap_area_sqm.toFixed(0)}㎡ 重叠 · ${conflict.severity === 'high' ? '严重' : conflict.severity === 'medium' ? '中度' : '轻度'}
+                                        </text>
+                                    </g>
+                                `;
+                            });
+                        }
+
+                        svg.innerHTML = content;
+                    },
+
+                    setLayerVisible(layer, visible) {
+                        layerVisibility[layer] = visible;
+                        this.redraw();
+                    },
+
+                    applyLayerVisibility() {
+                        this.redraw();
+                    },
+
+                    flyTo(lat, lng, zoom) {
+                        // SVG 模式下不做飞行动画，高亮对应领地即可
+                    },
+                };
+            },
+        };
+
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
             }
-        }
-
-        function showFallbackMap() {
-            if (!allData || !allData.clusters) return;
-
-            const mapContainer = document.getElementById('map');
-            mapContainer.innerHTML = `
-                <div style="width:100%;height:100%;background:linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 50%, #fff8e1 100%);
-                            position:relative;overflow:hidden;">
-                    <div style="position:absolute;top:20px;left:20px;background:white;padding:10px 14px;
-                                border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);font-size:13px;color:#666;">
-                        🗺️ 示意图模式（配置 Mapbox Token 可启用真实地图）
-                    </div>
-                    <svg id="fallbackSvg" width="100%" height="100%" style="position:absolute;top:0;left:0;"></svg>
-                </div>
-            `;
-
-            renderFallbackMap();
-        }
-
-        function renderFallbackMap() {
-            if (!allData || !allData.clusters) return;
-
-            const svg = document.getElementById('fallbackSvg');
-            if (!svg) return;
-
-            const clusters = allData.clusters;
-            const conflicts = allData.conflicts || [];
-            const videos = allData.videos || [];
-
-            const width = svg.clientWidth || 800;
-            const height = svg.clientHeight || 600;
-            const padding = 80;
-
-            const lats = clusters.map(c => c.center.lat);
-            const lngs = clusters.map(c => c.center.lng);
-            const minLat = Math.min(...lats) - 0.005;
-            const maxLat = Math.max(...lats) + 0.005;
-            const minLng = Math.min(...lngs) - 0.005;
-            const maxLng = Math.max(...lngs) + 0.005;
-
-            const latRange = maxLat - minLat;
-            const lngRange = maxLng - minLng;
-
-            const scaleX = (width - 2 * padding) / lngRange;
-            const scaleY = (height - 2 * padding) / latRange;
-            const scale = Math.min(scaleX, scaleY);
-
-            const offsetX = (width - lngRange * scale) / 2;
-            const offsetY = (height - latRange * scale) / 2;
-
-            function latLngToXY(lat, lng) {
-                const x = offsetX + (lng - minLng) * scale;
-                const y = height - offsetY - (lat - minLat) * scale;
-                return { x, y };
-            }
-
-            let svgContent = '';
-
-            conflicts.forEach(conflict => {
-                const clusterA = clusters.find(c => c.cluster_id === conflict.cluster_a_id);
-                const clusterB = clusters.find(c => c.cluster_id === conflict.cluster_b_id);
-                if (!clusterA || !clusterB) return;
-
-                const posA = latLngToXY(clusterA.center.lat, clusterA.center.lng);
-                const posB = latLngToXY(clusterB.center.lat, clusterB.center.lng);
-
-                const midX = (posA.x + posB.x) / 2;
-                const midY = (posA.y + posB.y) / 2;
-
-                const rA = clusterA.radius_meters / 111000 * Math.cos(clusterA.center.lat * Math.PI / 180) * scale;
-                const rB = clusterB.radius_meters / 111000 * Math.cos(clusterB.center.lat * Math.PI / 180) * scale;
-
-                const overlapRadius = Math.min(rA, rB) * 0.7;
-
-                const patternId = 'stripe-' + conflict.conflict_id;
-                svgContent += `
-                    <defs>
-                        <pattern id="${patternId}" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
-                            <rect width="4" height="8" fill="#e74c3c" opacity="0.6"/>
-                        </pattern>
-                    </defs>
-                    <circle cx="${midX}" cy="${midY}" r="${overlapRadius}"
-                            fill="url(#${patternId})"
-                            stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,5">
-                        <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite"/>
-                    </circle>
-                `;
-            });
-
-            clusters.forEach(cluster => {
-                const pos = latLngToXY(cluster.center.lat, cluster.center.lng);
-                const radiusPx = cluster.radius_meters / 111000 * Math.cos(cluster.center.lat * Math.PI / 180) * scale;
-
-                svgContent += `
-                    <circle cx="${pos.x}" cy="${pos.y}" r="${radiusPx}"
-                            fill="${cluster.color}" fill-opacity="0.25"
-                            stroke="${cluster.color}" stroke-width="2.5"/>
-                    <circle cx="${pos.x}" cy="${pos.y}" r="6" fill="${cluster.color}" stroke="white" stroke-width="2"/>
-                    <text x="${pos.x}" y="${pos.y - radiusPx - 8}" text-anchor="middle"
-                          font-size="13" font-weight="600" fill="#2c3e50">
-                        ${cluster.name}
-                    </text>
-                    <text x="${pos.x}" y="${pos.y - radiusPx + 8}" text-anchor="middle"
-                          font-size="11" fill="#7f8c8d">
-                        ${cluster.video_count}个视频 · ${cluster.radius_meters}米
-                    </text>
-                `;
-            });
-
-            videos.slice(0, 50).forEach(video => {
-                const pos = latLngToXY(video.lat, video.lng);
-                svgContent += `
-                    <circle cx="${pos.x}" cy="${pos.y}" r="3" fill="#e74c3c" opacity="0.6"/>
-                `;
-            });
-
-            conflicts.forEach(conflict => {
-                const clusterA = clusters.find(c => c.cluster_id === conflict.cluster_a_id);
-                const clusterB = clusters.find(c => c.cluster_id === conflict.cluster_b_id);
-                if (!clusterA || !clusterB) return;
-
-                const posA = latLngToXY(clusterA.center.lat, clusterA.center.lng);
-                const posB = latLngToXY(clusterB.center.lat, clusterB.center.lng);
-                const midX = (posA.x + posB.x) / 2;
-                const midY = (posA.y + posB.y) / 2;
-
-                const severityColors = { high: '#e74c3c', medium: '#f39c12', low: '#3498db' };
-                const color = severityColors[conflict.severity] || '#e74c3c';
-
-                svgContent += `
-                    <g transform="translate(${midX}, ${midY - 40})">
-                        <rect x="-60" y="-18" width="120" height="36" rx="6"
-                              fill="white" stroke="${color}" stroke-width="2"/>
-                        <text x="0" y="-4" text-anchor="middle" font-size="11" font-weight="600" fill="${color}">
-                            ⚠️ 冲突警告
-                        </text>
-                        <text x="0" y="10" text-anchor="middle" font-size="10" fill="#7f8c8d">
-                            ${conflict.overlap_area_sqm.toFixed(0)}㎡ 重叠
-                        </text>
-                    </g>
-                `;
-            });
-
-            svg.innerHTML = svgContent;
         }
 
         async function loadData() {
             try {
                 const response = await fetch('/api/territories');
-                if (!response.ok) {
-                    throw new Error('数据加载失败');
-                }
+                if (!response.ok) throw new Error('数据加载失败');
                 const data = await response.json();
                 allData = data;
                 renderData(data);
-
-                if (!map || !mapLoaded) {
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                    showFallbackMap();
-                }
+                hideLoading();
             } catch (error) {
                 console.error('加载数据失败:', error);
-                document.getElementById('loadingOverlay').innerHTML = `
+                const overlay = document.getElementById('loadingOverlay');
+                overlay.innerHTML = `
                     <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
                     <div style="font-size: 16px; color: #2c3e50; margin-bottom: 8px;">暂无数据</div>
                     <div style="font-size: 12px; color: #7f8c8d; margin-bottom: 16px;">请先生成模拟数据</div>
@@ -661,11 +1119,12 @@
         }
 
         async function generateMockData() {
-            document.getElementById('loadingOverlay').innerHTML = `
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.innerHTML = `
                 <div class="loading-spinner"></div>
                 <div class="loading-text">正在生成模拟数据...</div>
             `;
-            document.getElementById('loadingOverlay').style.display = 'flex';
+            overlay.style.display = 'flex';
 
             try {
                 const response = await fetch('/api/generate-mock', { method: 'POST' });
@@ -676,7 +1135,7 @@
                 }
             } catch (error) {
                 alert('数据生成失败: ' + error.message);
-                document.getElementById('loadingOverlay').style.display = 'none';
+                hideLoading();
             }
         }
 
@@ -685,8 +1144,9 @@
             renderTeamList(data.clusters);
             renderConflictList(data.conflicts);
 
-            if (map && mapLoaded) {
-                renderMap(data);
+            if (mapManager && mapManager.render) {
+                mapManager.render(data);
+                mapManager.applyLayerVisibility();
             }
         }
 
@@ -699,23 +1159,15 @@
 
         function renderTeamList(clusters) {
             const container = document.getElementById('teamListContainer');
-
             if (!clusters || clusters.length === 0) {
-                container.innerHTML = `
-                    <div class="no-data">
-                        <div class="no-data-icon">💃</div>
-                        <div class="no-data-text">暂无舞队数据</div>
-                    </div>
-                `;
+                container.innerHTML = `<div class="no-data"><div class="no-data-icon">💃</div><div class="no-data-text">暂无舞队数据</div></div>`;
                 return;
             }
 
             clusters.sort((a, b) => b.video_count - a.video_count);
-
             container.innerHTML = clusters.map(c => `
                 <div class="team-card ${activeClusterId === c.cluster_id ? 'active' : ''}"
-                     data-id="${c.cluster_id}"
-                     onclick="focusOnCluster(${c.cluster_id})">
+                     onclick="focusOnCluster(${c.cluster_id})" style="cursor:pointer;">
                     <div class="team-card-header">
                         <div class="team-color-dot" style="background:${c.color};"></div>
                         <div class="team-name">${c.name}</div>
@@ -731,23 +1183,15 @@
 
         function renderConflictList(conflicts) {
             const container = document.getElementById('conflictListContainer');
-
             if (!conflicts || conflicts.length === 0) {
-                container.innerHTML = `
-                    <div class="no-data" style="padding: 20px 0;">
-                        <div class="no-data-text" style="font-size: 12px;">✅ 目前无明显领地冲突</div>
-                    </div>
-                `;
+                container.innerHTML = `<div class="no-data" style="padding:20px 0;"><div class="no-data-text" style="font-size:12px;">✅ 目前无明显领地冲突</div></div>`;
                 return;
             }
 
-            const severityOrder = { high: 0, medium: 1, low: 2 };
-            conflicts.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
-
+            const order = { high: 0, medium: 1, low: 2 };
+            conflicts.sort((a, b) => order[a.severity] - order[b.severity]);
             container.innerHTML = conflicts.map(c => `
-                <div class="conflict-card ${c.severity}"
-                     onclick="focusOnConflict('${c.conflict_id}')"
-                     style="cursor:pointer;">
+                <div class="conflict-card ${c.severity}" onclick="focusOnConflict('${c.conflict_id}')" style="cursor:pointer;">
                     <div class="conflict-title">${c.warning_label}</div>
                     <div class="conflict-detail">
                         ${c.cluster_a_name} ↔ ${c.cluster_b_name}<br>
@@ -757,305 +1201,52 @@
             `).join('');
         }
 
-        function renderMap(data) {
-            if (!map || !map.loaded()) {
-                setTimeout(() => renderMap(data), 500);
-                return;
-            }
-
-            if (data.clusters && data.clusters.length > 0) {
-                const first = data.clusters[0];
-                if (first && first.center) {
-                    map.flyTo({
-                        center: [first.center.lng, first.center.lat],
-                        zoom: 13.5,
-                        speed: 1.2,
-                    });
-                }
-            }
-
-            clearMapLayers();
-            addTerritoryLayers(data.clusters);
-            addConflictLayers(data.conflicts);
-            addVideoMarkers(data.videos);
-        }
-
-        function clearMapLayers() {
-            videoMarkers.forEach(m => m.remove());
-            videoMarkers = [];
-
-            if (map.getSource('conflict-fill')) map.removeSource('conflict-fill');
-            if (map.getLayer('conflict-fill')) map.removeLayer('conflict-fill');
-            if (map.getSource('conflict-outline')) map.removeSource('conflict-outline');
-            if (map.getLayer('conflict-outline')) map.removeLayer('conflict-outline');
-
-            territoryLayers.forEach(id => {
-                if (map.getSource(id + '-fill')) map.removeSource(id + '-fill');
-                if (map.getLayer(id + '-fill')) map.removeLayer(id + '-fill');
-                if (map.getSource(id + '-outline')) map.removeSource(id + '-outline');
-                if (map.getLayer(id + '-outline')) map.removeLayer(id + '-outline');
-            });
-            territoryLayers = [];
-        }
-
-        function addTerritoryLayers(clusters) {
-            if (!clusters) return;
-
-            clusters.forEach(cluster => {
-                const id = 'territory-' + cluster.cluster_id;
-                territoryLayers.push(id);
-
-                const coordinates = cluster.boundary.map(p => [p.lng, p.lat]);
-                coordinates.push(coordinates[0]);
-
-                const geojson = {
-                    type: 'Feature',
-                    geometry: {
-                        type: 'Polygon',
-                        coordinates: [coordinates]
-                    },
-                    properties: {
-                        name: cluster.name,
-                        count: cluster.video_count,
-                        color: cluster.color,
-                        clusterId: cluster.cluster_id
-                    }
-                };
-
-                map.addSource(id + '-fill', { type: 'geojson', data: geojson });
-                map.addLayer({
-                    id: id + '-fill',
-                    type: 'fill',
-                    source: id + '-fill',
-                    paint: {
-                        'fill-color': cluster.color,
-                        'fill-opacity': 0.25,
-                    }
-                });
-
-                map.addLayer({
-                    id: id + '-outline',
-                    type: 'line',
-                    source: id + '-fill',
-                    paint: {
-                        'line-color': cluster.color,
-                        'line-width': 2.5,
-                        'line-opacity': 0.9,
-                    }
-                });
-
-                const centerMarker = new mapboxgl.Marker({ color: cluster.color })
-                    .setLngLat([cluster.center.lng, cluster.center.lat])
-                    .setPopup(new mapboxgl.Popup({ offset: 15 }).setHTML(`
-                        <div class="popup-content">
-                            <div class="popup-title">${cluster.name}</div>
-                            <div class="popup-row">🎥 视频数量: ${cluster.video_count}</div>
-                            <div class="popup-row">❤️ 总点赞数: ${cluster.total_likes.toLocaleString()}</div>
-                            <div class="popup-row">📏 活动半径: ${cluster.radius_meters} 米</div>
-                            <div class="popup-tag">领地范围</div>
-                        </div>
-                    `))
-                    .addTo(map);
-
-                map.on('click', id + '-fill', (e) => {
-                    focusOnCluster(cluster.cluster_id);
-                });
-            });
-        }
-
-        function addConflictLayers(conflicts) {
-            if (!conflicts || conflicts.length === 0) return;
-
-            const conflictPolygons = conflicts.map(c => {
-                const clusterA = allData.clusters.find(cl => cl.cluster_id === c.cluster_a_id);
-                const clusterB = allData.clusters.find(cl => cl.cluster_id === c.cluster_b_id);
-
-                if (!clusterA || !clusterB) return null;
-
-                const centerA = clusterA.center;
-                const centerB = clusterB.center;
-                const rA = clusterA.radius_meters;
-                const rB = clusterB.radius_meters;
-
-                const overlapCenter = {
-                    lat: (centerA.lat + centerB.lat) / 2,
-                    lng: (centerA.lng + centerB.lng) / 2
-                };
-
-                const dx = (centerB.lng - centerA.lng) * Math.cos(centerA.lat * Math.PI / 180) * 111000;
-                const dy = (centerB.lat - centerA.lat) * 111000;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                const overlapRadius = Math.min(rA, rB) * 0.6;
-
-                const coordinates = [];
-                for (let i = 0; i < 36; i++) {
-                    const angle = 2 * Math.PI * i / 36;
-                    const r = overlapRadius;
-                    const dLat = (r * Math.sin(angle)) / 111000;
-                    const dLng = (r * Math.cos(angle)) / (111000 * Math.cos(overlapCenter.lat * Math.PI / 180));
-                    coordinates.push([overlapCenter.lng + dLng, overlapCenter.lat + dLat]);
-                }
-                coordinates.push(coordinates[0]);
-
-                return {
-                    type: 'Feature',
-                    geometry: { type: 'Polygon', coordinates: [coordinates] },
-                    properties: {
-                        conflictId: c.conflict_id,
-                        severity: c.severity,
-                        label: c.warning_label
-                    }
-                };
-            }).filter(Boolean);
-
-            if (conflictPolygons.length === 0) return;
-
-            map.addSource('conflict-fill', {
-                type: 'geojson',
-                data: { type: 'FeatureCollection', features: conflictPolygons }
-            });
-
-            map.addLayer({
-                id: 'conflict-fill',
-                type: 'fill',
-                source: 'conflict-fill',
-                paint: {
-                    'fill-pattern': 'pattern',
-                    'fill-color': '#e74c3c',
-                    'fill-opacity': 0.4,
-                }
-            });
-
-            map.addLayer({
-                id: 'conflict-outline',
-                type: 'line',
-                source: 'conflict-fill',
-                paint: {
-                    'line-color': '#e74c3c',
-                    'line-width': 3,
-                    'line-dasharray': [2, 2],
-                }
-            });
-
-            conflicts.forEach(c => {
-                if (c.intersection_points && c.intersection_points.length >= 2) {
-                    const midIdx = Math.floor(c.intersection_points.length / 2);
-                    const midPoint = c.intersection_points[midIdx];
-                    if (midPoint) {
-                        new mapboxgl.Marker({ color: '#e74c3c', scale: 0.8 })
-                            .setLngLat([midPoint.lng, midPoint.lat])
-                            .setPopup(new mapboxgl.Popup().setHTML(`
-                                <div class="popup-content">
-                                    <div class="popup-title" style="color:#e74c3c;">⚠️ ${c.warning_label}</div>
-                                    <div class="popup-row">${c.cluster_a_name} ↔ ${c.cluster_b_name}</div>
-                                    <div class="popup-row">重叠面积: ${c.overlap_area_sqm.toFixed(1)} ㎡</div>
-                                    <div class="popup-row">重叠比例: ${c.overlap_percentage_a}% / ${c.overlap_percentage_b}%</div>
-                                </div>
-                            `))
-                            .addTo(map);
-                    }
-                }
-            });
-        }
-
-        function addVideoMarkers(videos) {
-            if (!videos) return;
-
-            videos.forEach(video => {
-                const el = document.createElement('div');
-                el.style.width = '8px';
-                el.style.height = '8px';
-                el.style.borderRadius = '50%';
-                el.style.backgroundColor = '#e74c3c';
-                el.style.border = '2px solid white';
-                el.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
-                el.style.cursor = 'pointer';
-
-                const marker = new mapboxgl.Marker({ element: el })
-                    .setLngLat([video.lng, video.lat])
-                    .setPopup(new mapboxgl.Popup({ offset: 10 }).setHTML(`
-                        <div class="popup-content">
-                            <div class="popup-title">${video.title || '广场舞视频'}</div>
-                            <div class="popup-row">📍 ${video.poi_name || '未知地点'}</div>
-                            <div class="popup-row">📱 ${video.platform || '未知平台'}</div>
-                            <div class="popup-row">❤️ ${video.likes || 0} 赞</div>
-                            <div class="popup-tag">${video.platform}</div>
-                        </div>
-                    `))
-                    .addTo(map);
-
-                videoMarkers.push(marker);
-            });
-        }
-
         function focusOnCluster(clusterId) {
             activeClusterId = clusterId;
             renderTeamList(allData.clusters);
-
             const cluster = allData.clusters.find(c => c.cluster_id === clusterId);
-            if (cluster && map) {
-                map.flyTo({
-                    center: [cluster.center.lng, cluster.center.lat],
-                    zoom: 15,
-                    speed: 1.0,
-                });
+            if (cluster && mapManager && mapManager.flyTo) {
+                mapManager.flyTo(cluster.center.lat, cluster.center.lng, 15);
             }
         }
 
         function focusOnConflict(conflictId) {
             const conflict = allData.conflicts.find(c => c.conflict_id === conflictId);
-            if (conflict && map) {
-                const clusterA = allData.clusters.find(cl => cl.cluster_id === conflict.cluster_a_id);
-                const clusterB = allData.clusters.find(cl => cl.cluster_id === conflict.cluster_b_id);
-
-                if (clusterA && clusterB) {
-                    const center = {
-                        lng: (clusterA.center.lng + clusterB.center.lng) / 2,
-                        lat: (clusterA.center.lat + clusterB.center.lat) / 2
-                    };
-                    map.flyTo({
-                        center: [center.lng, center.lat],
-                        zoom: 14.5,
-                        speed: 1.0,
-                    });
+            if (conflict && mapManager && mapManager.flyTo) {
+                const a = allData.clusters.find(cl => cl.cluster_id === conflict.cluster_a_id);
+                const b = allData.clusters.find(cl => cl.cluster_id === conflict.cluster_b_id);
+                if (a && b) {
+                    mapManager.flyTo(
+                        (a.center.lat + b.center.lat) / 2,
+                        (a.center.lng + b.center.lng) / 2,
+                        14.5
+                    );
                 }
             }
         }
 
         document.getElementById('showVideos').addEventListener('change', (e) => {
-            const visible = e.target.checked;
-            videoMarkers.forEach(m => {
-                if (visible) m.addTo(map);
-                else m.remove();
-            });
+            layerVisibility.videos = e.target.checked;
+            if (mapManager && mapManager.setLayerVisible) {
+                mapManager.setLayerVisible('videos', e.target.checked);
+            }
         });
 
         document.getElementById('showTerritories').addEventListener('change', (e) => {
-            const visible = e.target.checked;
-            const visibility = visible ? 'visible' : 'none';
-            territoryLayers.forEach(id => {
-                if (map.getLayer(id + '-fill')) {
-                    map.setLayoutProperty(id + '-fill', 'visibility', visibility);
-                }
-                if (map.getLayer(id + '-outline')) {
-                    map.setLayoutProperty(id + '-outline', 'visibility', visibility);
-                }
-            });
+            layerVisibility.territories = e.target.checked;
+            if (mapManager && mapManager.setLayerVisible) {
+                mapManager.setLayerVisible('territories', e.target.checked);
+            }
         });
 
         document.getElementById('showConflicts').addEventListener('change', (e) => {
-            const visible = e.target.checked;
-            const visibility = visible ? 'visible' : 'none';
-            if (map.getLayer('conflict-fill')) {
-                map.setLayoutProperty('conflict-fill', 'visibility', visibility);
-            }
-            if (map.getLayer('conflict-outline')) {
-                map.setLayoutProperty('conflict-outline', 'visibility', visibility);
+            layerVisibility.conflicts = e.target.checked;
+            if (mapManager && mapManager.setLayerVisible) {
+                mapManager.setLayerVisible('conflicts', e.target.checked);
             }
         });
 
-        initMap();
+        MapManager.init();
     </script>
 </body>
 </html>

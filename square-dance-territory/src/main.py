@@ -19,6 +19,36 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
+ENV_FILE = os.path.join(BASE_DIR, ".env")
+
+
+def _load_env():
+    if not os.path.exists(ENV_FILE):
+        return {}
+    env_vars = {}
+    with open(ENV_FILE, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if "=" in line:
+                key, value = line.split("=", 1)
+                key = key.strip()
+                value = value.strip().strip('"').strip("'")
+                env_vars[key] = value
+                os.environ[key] = value
+    return env_vars
+
+
+_load_env()
+
+
+def _get_map_config() -> dict:
+    return {
+        "mapbox_token": os.environ.get("MAPBOX_TOKEN", ""),
+        "gaode_js_key": os.environ.get("GAODE_JS_API_KEY", ""),
+        "gaode_web_key": os.environ.get("GAODE_WEB_API_KEY", ""),
+    }
 
 app = FastAPI(title="广场舞领地分析系统",
               description="分析广场舞视频地理标签，识别舞队活动范围与领地冲突")
@@ -50,9 +80,11 @@ def _get_data_status() -> dict:
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     status = _get_data_status()
+    map_config = _get_map_config()
     return templates.TemplateResponse("index.html", {
         "request": request,
         "data_status": status,
+        "map_config": map_config,
     })
 
 

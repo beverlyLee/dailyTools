@@ -1,8 +1,8 @@
 {
   "city": "北京",
-  "total_videos": 112,
-  "total_clusters": 6,
-  "total_conflicts": 2,
+  "total_videos": 128,
+  "total_clusters": 4,
+  "total_conflicts": 3,
   "video_file": "/Users/liboyang/trae/dailyTools/square-dance-territory/data/square_dance_videos.json",
   "cluster_file": "/Users/liboyang/trae/dailyTools/square-dance-territory/data/territory_clusters.json",
   "conflict_file": "/Users/liboyang/trae/dailyTools/square-dance-territory/data/conflicts.json"
