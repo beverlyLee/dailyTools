@@ -113,6 +113,21 @@
         #mapChart {
             width: 100%;
             height: 540px;
+            position: relative;
+        }
+
+        .amap-tooltip {
+            position: absolute;
+            z-index: 1000;
+            pointer-events: none;
+            min-width: 280px;
+            background: rgba(15, 23, 42, 0.98);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 14px 16px 16px 16px;
+            color: #fff;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            display: none;
         }
 
         #rankingChart {
@@ -338,6 +353,7 @@
                     <span>区域加班指数分布图</span>
                 </div>
                 <div id="mapChart"></div>
+                <div id="amapTooltip" class="amap-tooltip"></div>
                 <div class="legend-panel">
                     <span class="label">低</span>
                     <div class="gradient-bar"></div>
@@ -470,6 +486,11 @@
                 let mapChart = null;
                 let pieChart = null;
                 let rankingChart = null;
+
+                const useAmap = ref(false);
+                let amapInstance = null;
+                let amapPolygons = [];
+                let amapScriptLoaded = false;
 
                 const getIndexColor = (value) => {
                     const v = Math.max(0, Math.min(100, value)) / 100;
@@ -631,7 +652,7 @@
                                             </div>
                                             <div>
                                                 <span style="color: #64748b;">深夜营业:</span>
-                                                <span style="color: #ffd700; margin-left: 4px;">${idx.late_night_shops}家 (${(idx.late_night_ratio * 100).toFixed(0)}%)</span>
+                                                <span style="color: #ffd700; margin-left: 4px;">${idx.late_night_shops}家 (${idx.late_night_ratio.toFixed(0)}%)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -696,6 +717,217 @@
                     };
 
                     mapChart.setOption(option);
+                };
+
+                const buildTooltipHtml = (districtData) => {
+                    const dist = districtData.district;
+                    const idx = districtData.overtime_index;
+                    const brandDist = idx.brand_distribution || {};
+                    const brands = Object.entries(brandDist)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 5);
+
+                    const total = brands.reduce((s, b) => s + b[1], 0) || 1;
+
+                    let pieSvg = '';
+                    let cumulativeAngle = -Math.PI / 2;
+                    const cx = 50, cy = 50, r = 35;
+
+                    brands.forEach(([key, count]) => {
+                        const angle = (count / total) * Math.PI * 2;
+                        const startAngle = cumulativeAngle;
+                        const endAngle = cumulativeAngle + angle;
+                        cumulativeAngle = endAngle;
+
+                        const x1 = cx + r * Math.cos(startAngle);
+                        const y1 = cy + r * Math.sin(startAngle);
+                        const x2 = cx + r * Math.cos(endAngle);
+                        const y2 = cy + r * Math.sin(endAngle);
+                        const largeArc = angle > Math.PI ? 1 : 0;
+
+                        const color = BRAND_COLORS[key] || '#888';
+                        pieSvg += `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${largeArc},1 ${x2},${y2} Z" fill="${color}"/>`;
+                    });
+
+                    const indexValue = idx.overtime_index;
+                    const indexColor = getIndexColor(indexValue);
+
+                    return `
+                        <div style="min-width: 280px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div>
+                                    <div style="font-size: 15px; font-weight: 600;">${dist.name}</div>
+                                    <div style="font-size: 11px; color: #64748b; margin-top: 2px;">${dist.description || ''}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 24px; font-weight: 700; color: ${indexColor};">${indexValue.toFixed(1)}</div>
+                                    <div style="font-size: 11px; color: #64748b;">加班指数</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <svg width="100" height="100" viewBox="0 0 100 100">
+                                    ${pieSvg}
+                                </svg>
+                                <div style="flex: 1; font-size: 12px;">
+                                    ${brands.map(([key, count]) => `
+                                        <div style="display: flex; justify-content: space-between; padding: 2px 0;">
+                                            <span style="display: flex; align-items: center; gap: 6px;">
+                                                <span style="width: 8px; height: 8px; border-radius: 50%; background: ${BRAND_COLORS[key] || '#888'};"></span>
+                                                <span style="color: #94a3b8;">${BRAND_NAMES[key] || key}</span>
+                                            </span>
+                                            <span style="color: #e2e8f0; font-weight: 500;">${count}家</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
+                                <div>
+                                    <span style="color: #64748b;">咖啡馆总数:</span>
+                                    <span style="color: #e2e8f0; margin-left: 4px;">${idx.total_shops}家</span>
+                                </div>
+                                <div>
+                                    <span style="color: #64748b;">深夜营业:</span>
+                                    <span style="color: #ffd700; margin-left: 4px;">${idx.late_night_shops}家 (${idx.late_night_ratio.toFixed(0)}%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                };
+
+                const showAmapTooltip = (districtData, pixel) => {
+                    const tooltip = document.getElementById('amapTooltip');
+                    if (!tooltip) return;
+                    tooltip.innerHTML = buildTooltipHtml(districtData);
+                    tooltip.style.display = 'block';
+
+                    const mapEl = document.getElementById('mapChart');
+                    const rect = mapEl.getBoundingClientRect();
+                    let left = pixel.x + 15;
+                    let top = pixel.y - 10;
+
+                    if (left + 300 > rect.width) {
+                        left = pixel.x - 310;
+                    }
+                    if (top + 200 > rect.height) {
+                        top = pixel.y - 200;
+                    }
+
+                    tooltip.style.left = left + 'px';
+                    tooltip.style.top = top + 'px';
+                };
+
+                const hideAmapTooltip = () => {
+                    const tooltip = document.getElementById('amapTooltip');
+                    if (tooltip) {
+                        tooltip.style.display = 'none';
+                    }
+                };
+
+                const loadAmapScript = (key) => {
+                    return new Promise((resolve, reject) => {
+                        if (amapScriptLoaded) {
+                            resolve();
+                            return;
+                        }
+                        if (window.AMap) {
+                            amapScriptLoaded = true;
+                            resolve();
+                            return;
+                        }
+                        const script = document.createElement('script');
+                        script.type = 'text/javascript';
+                        script.src = `https://webapi.amap.com/maps?v=2.0&key=${key}`;
+                        script.onload = () => {
+                            amapScriptLoaded = true;
+                            resolve();
+                        };
+                        script.onerror = reject;
+                        document.head.appendChild(script);
+                    });
+                };
+
+                const renderAmapChart = () => {
+                    const el = document.getElementById('mapChart');
+                    if (!el || districts.value.length === 0 || !window.AMap) return;
+
+                    if (!amapInstance) {
+                        amapInstance = new AMap.Map(el, {
+                            viewMode: '2D',
+                            mapStyle: 'amap://styles/darkblue',
+                            features: ['bg', 'road', 'building'],
+                            zooms: [10, 18]
+                        });
+                    }
+
+                    amapPolygons.forEach(p => p.setMap(null));
+                    amapPolygons = [];
+
+                    const districtMap = {};
+                    districts.value.forEach(d => {
+                        districtMap[d.district.name] = d;
+                    });
+
+                    const bounds = [];
+
+                    districts.value.forEach(d => {
+                        const polygonPath = d.district.polygon || [];
+                        const path = polygonPath.map(p => [p[0], p[1]]);
+
+                        const indexValue = d.overtime_index.overtime_index;
+                        const fillColor = getIndexColor(indexValue);
+
+                        const polygon = new AMap.Polygon({
+                            path: path,
+                            strokeColor: 'rgba(255,255,255,0.5)',
+                            strokeWeight: 2,
+                            fillColor: fillColor,
+                            fillOpacity: 0.7,
+                            cursor: 'pointer',
+                            extData: d
+                        });
+
+                        polygon.on('mouseover', (e) => {
+                            polygon.setOptions({
+                                strokeColor: '#ffd700',
+                                strokeWeight: 3,
+                                fillOpacity: 0.85
+                            });
+                            const pixel = amapInstance.lngLatToContainer(e.lnglat);
+                            showAmapTooltip(d, pixel);
+                        });
+
+                        polygon.on('mousemove', (e) => {
+                            const pixel = amapInstance.lngLatToContainer(e.lnglat);
+                            showAmapTooltip(d, pixel);
+                        });
+
+                        polygon.on('mouseout', () => {
+                            polygon.setOptions({
+                                strokeColor: 'rgba(255,255,255,0.5)',
+                                strokeWeight: 2,
+                                fillOpacity: 0.7
+                            });
+                            hideAmapTooltip();
+                        });
+
+                        polygon.on('click', () => {
+                            selectedDistrict.value = d;
+                        });
+
+                        polygon.setMap(amapInstance);
+                        amapPolygons.push(polygon);
+
+                        path.forEach(p => bounds.push(p));
+                    });
+
+                    if (bounds.length > 0) {
+                        const sw = [Math.min(...bounds.map(p => p[0])), Math.min(...bounds.map(p => p[1]))];
+                        const ne = [Math.max(...bounds.map(p => p[0])), Math.max(...bounds.map(p => p[1]))];
+                        amapInstance.setBounds(new AMap.Bounds(sw, ne), true, [50, 50, 50, 50]);
+                    }
+
+                    amapInstance.on('moveend', hideAmapTooltip);
+                    amapInstance.on('zoomend', hideAmapTooltip);
                 };
 
                 const renderPieChart = () => {
@@ -865,6 +1097,27 @@
                     }
                 };
 
+                const fetchAmapConfig = async () => {
+                    try {
+                        const res = await fetch('/api/amap-config');
+                        const data = await res.json();
+                        if (data.has_amap_key && data.amap_key) {
+                            await loadAmapScript(data.amap_key);
+                            useAmap.value = true;
+                        }
+                    } catch (e) {
+                        console.warn('Failed to load amap config:', e);
+                    }
+                };
+
+                const renderMap = () => {
+                    if (useAmap.value) {
+                        renderAmapChart();
+                    } else {
+                        renderMapChart();
+                    }
+                };
+
                 const fetchDistricts = async () => {
                     try {
                         const res = await fetch(`/api/overtime?city=${encodeURIComponent(selectedCity.value)}`);
@@ -873,7 +1126,7 @@
                             selectedDistrict.value = districts.value[0];
                         }
                         await nextTick();
-                        renderMapChart();
+                        renderMap();
                         renderRankingChart();
                     } catch (e) {
                         console.error('Failed to fetch districts:', e);
@@ -906,6 +1159,7 @@
 
                 onMounted(async () => {
                     await fetchCities();
+                    await fetchAmapConfig();
                     await fetchDistricts();
                     window.addEventListener('resize', handleResize);
                 });

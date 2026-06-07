@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from src.poi.coffee_shop_spider import CoffeeShop, GAODE_POI_KEY, grid_search_coffee_shops
+from src.poi.coffee_shop_spider import CoffeeShop, GAODE_POI_KEY, GAODE_WEB_API_KEY, grid_search_coffee_shops
 from src.index.overtime_calculator import OvertimeIndexResult
 from src.spatial.office_district_match import (
     OfficeDistrict,
@@ -208,6 +208,14 @@ async def get_district_shops(
 @app.get("/api/has_gaode_key")
 async def has_gaode_key() -> Dict[str, bool]:
     return {"has_key": bool(GAODE_POI_KEY)}
+
+
+@app.get("/api/amap-config")
+async def get_amap_config() -> Dict[str, Any]:
+    return {
+        "has_amap_key": bool(GAODE_WEB_API_KEY),
+        "amap_key": GAODE_WEB_API_KEY
+    }
 
 
 if __name__ == "__main__":

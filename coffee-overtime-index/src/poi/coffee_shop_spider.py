@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 GAODE_POI_KEY = os.getenv("GAODE_POI_KEY", "")
+GAODE_WEB_API_KEY = os.getenv("GAODE_WEB_API_KEY", "")
 POI_AROUND_URL = "https://restapi.amap.com/v3/place/around"
 POI_TEXT_URL = "https://restapi.amap.com/v3/place/text"
 COFFEE_CATEGORY = "050900"
