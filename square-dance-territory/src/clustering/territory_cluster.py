@@ -89,8 +89,8 @@ class TerritoryClusterer:
                                              cluster_lats[i], cluster_lngs[i])
                 distances.append(d)
 
-            radius_meters = float(np.percentile(distances, 85)) if distances else 50.0
-            radius_meters = max(radius_meters, 30.0)
+            radius_meters = float(np.percentile(distances, 90)) if distances else 50.0
+            radius_meters = max(radius_meters * 2.0, 250.0)
 
             total_likes = sum(v.get("likes", 0) for v in cluster_videos)
 

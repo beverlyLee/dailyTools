@@ -64,12 +64,12 @@ class DanceVideoSpider:
         center_lat, center_lng = city_centers.get(city, (39.9042, 116.4074))
 
         hotspots = [
-            {"name": "人民广场", "offset_lat": 0.003, "offset_lng": 0.002, "density": 25},
-            {"name": "文化广场", "offset_lat": 0.004, "offset_lng": 0.005, "density": 22},
-            {"name": "中山公园", "offset_lat": -0.005, "offset_lng": 0.003, "density": 20},
-            {"name": "朝阳公园南门", "offset_lat": 0.008, "offset_lng": -0.003, "density": 18},
-            {"name": "世纪公园", "offset_lat": -0.003, "offset_lng": -0.006, "density": 15},
-            {"name": "滨河公园", "offset_lat": -0.008, "offset_lng": -0.002, "density": 12},
+            {"name": "人民广场", "offset_lat": 0.003, "offset_lng": 0.0025, "density": 30, "spread": 0.001},
+            {"name": "世纪公园", "offset_lat": 0.005, "offset_lng": 0.0035, "density": 26, "spread": 0.001},
+            {"name": "文化广场", "offset_lat": 0.004, "offset_lng": 0.0055, "density": 22, "spread": 0.001},
+            {"name": "中山公园", "offset_lat": -0.006, "offset_lng": 0.004, "density": 18, "spread": 0.0015},
+            {"name": "朝阳公园南门", "offset_lat": 0.009, "offset_lng": -0.004, "density": 15, "spread": 0.0015},
+            {"name": "滨河公园", "offset_lat": -0.009, "offset_lng": -0.003, "density": 12, "spread": 0.0015},
         ]
 
         platforms = ["抖音", "快手"]
@@ -100,8 +100,9 @@ class DanceVideoSpider:
             base_lng = center_lng + hotspot["offset_lng"]
 
             for i in range(count):
-                lat = base_lat + random.uniform(-0.003, 0.003)
-                lng = base_lng + random.uniform(-0.003, 0.003)
+                spread = hotspot.get("spread", 0.003)
+                lat = base_lat + random.uniform(-spread, spread)
+                lng = base_lng + random.uniform(-spread, spread)
 
                 video = DanceVideo(
                     video_id=self._generate_mock_id(),
@@ -123,9 +124,183 @@ class DanceVideoSpider:
         return videos
 
     def _real_search(self, keyword: str, city: str, max_count: int) -> List[DanceVideo]:
-        print("注意：真实爬虫需要配置短视频平台的API接口和反爬策略")
-        print("当前使用 mock 数据模式")
-        return self._mock_search(keyword, city, max_count)
+        platform = self.config.get("platform", "douyin")
+
+        if platform == "douyin":
+            return self._search_douyin(keyword, city, max_count)
+        elif platform == "kuaishou":
+            return self._search_kuaishou(keyword, city, max_count)
+        else:
+            print(f"未知平台: {platform}，使用 mock 数据")
+            return self._mock_search(keyword, city, max_count)
+
+    def _search_douyin(self, keyword: str, city: str, max_count: int) -> List[DanceVideo]:
+        cookie = self.config.get("douyin_cookie", "")
+        if not cookie:
+            print("抖音 Cookie 未配置，使用 mock 数据")
+            return self._mock_search(keyword, city, max_count)
+
+        try:
+            import requests
+
+            headers = {
+                "User-Agent": random.choice(self.user_agents),
+                "Cookie": cookie,
+                "Referer": "https://www.douyin.com/",
+            }
+
+            params = {
+                "keyword": keyword,
+                "count": min(max_count, 50),
+                "offset": 0,
+            }
+
+            videos = []
+            seen_ids = set()
+
+            for page in range(3):
+                if len(videos) >= max_count:
+                    break
+
+                params["offset"] = page * 50
+                try:
+                    resp = requests.get(
+                        "https://www.douyin.com/aweme/v1/web/search/item/",
+                        headers=headers,
+                        params=params,
+                        timeout=10
+                    )
+                    if resp.status_code != 200:
+                        break
+
+                    data = resp.json()
+                    for item in data.get("data", []):
+                        aweme = item.get("aweme_info", {})
+                        aweme_id = aweme.get("aweme_id", "")
+
+                        if aweme_id in seen_ids:
+                            continue
+                        seen_ids.add(aweme_id)
+
+                        poi_info = aweme.get("poi_info", {})
+                        if not poi_info:
+                            continue
+
+                        video = DanceVideo(
+                            video_id=aweme_id,
+                            platform="抖音",
+                            title=aweme.get("desc", "")[:50],
+                            author=aweme.get("author", {}).get("nickname", ""),
+                            poi_name=poi_info.get("poi_name", ""),
+                            latitude=float(poi_info.get("lat", 0)) if poi_info.get("lat") else 0.0,
+                            longitude=float(poi_info.get("lng", 0)) if poi_info.get("lng") else 0.0,
+                            publish_time=time.strftime("%Y-%m-%d %H:%M:%S",
+                                                       time.localtime(aweme.get("create_time", 0))),
+                            likes=int(aweme.get("statistics", {}).get("digg_count", 0)),
+                            comments=int(aweme.get("statistics", {}).get("comment_count", 0)),
+                            shares=int(aweme.get("statistics", {}).get("share_count", 0)),
+                        )
+
+                        if video.latitude and video.longitude:
+                            videos.append(video)
+
+                    time.sleep(random.uniform(1, 2))
+
+                except Exception as e:
+                    print(f"抖音搜索第 {page+1} 页失败: {e}")
+                    break
+
+            if videos:
+                self.video_list = videos
+                return videos[:max_count]
+            else:
+                print("抖音搜索无结果，使用 mock 数据")
+                return self._mock_search(keyword, city, max_count)
+
+        except ImportError:
+            print("requests 库未安装，使用 mock 数据")
+            return self._mock_search(keyword, city, max_count)
+        except Exception as e:
+            print(f"抖音搜索失败: {e}，使用 mock 数据")
+            return self._mock_search(keyword, city, max_count)
+
+    def _search_kuaishou(self, keyword: str, city: str, max_count: int) -> List[DanceVideo]:
+        cookie = self.config.get("kuaishou_cookie", "")
+        if not cookie:
+            print("快手 Cookie 未配置，使用 mock 数据")
+            return self._mock_search(keyword, city, max_count)
+
+        try:
+            import requests
+
+            headers = {
+                "User-Agent": random.choice(self.user_agents),
+                "Cookie": cookie,
+                "Referer": "https://www.kuaishou.com/",
+            }
+
+            videos = []
+            seen_ids = set()
+
+            payload = {
+                "keyword": keyword,
+                "page": 1,
+                "pageSize": min(max_count, 50),
+            }
+
+            try:
+                resp = requests.post(
+                    "https://www.kuaishou.com/rest/n/search/photoSearch",
+                    headers=headers,
+                    json=payload,
+                    timeout=10
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    for item in data.get("data", {}).get("list", []):
+                        photo_id = item.get("photoId", "")
+                        if photo_id in seen_ids:
+                            continue
+                        seen_ids.add(photo_id)
+
+                        poi_name = item.get("poiName", "")
+                        if not poi_name:
+                            continue
+
+                        video = DanceVideo(
+                            video_id=photo_id,
+                            platform="快手",
+                            title=item.get("caption", "")[:50],
+                            author=item.get("userName", ""),
+                            poi_name=poi_name,
+                            latitude=float(item.get("latitude", 0)) if item.get("latitude") else 0.0,
+                            longitude=float(item.get("longitude", 0)) if item.get("longitude") else 0.0,
+                            publish_time=time.strftime("%Y-%m-%d %H:%M:%S",
+                                                       time.localtime(item.get("timestamp", 0) / 1000)),
+                            likes=int(item.get("likeCount", 0)),
+                            comments=int(item.get("commentCount", 0)),
+                            shares=int(item.get("shareCount", 0)),
+                        )
+
+                        if video.latitude and video.longitude:
+                            videos.append(video)
+
+            except Exception as e:
+                print(f"快手搜索失败: {e}")
+
+            if videos:
+                self.video_list = videos
+                return videos[:max_count]
+            else:
+                print("快手搜索无结果，使用 mock 数据")
+                return self._mock_search(keyword, city, max_count)
+
+        except ImportError:
+            print("requests 库未安装，使用 mock 数据")
+            return self._mock_search(keyword, city, max_count)
+        except Exception as e:
+            print(f"快手搜索失败: {e}，使用 mock 数据")
+            return self._mock_search(keyword, city, max_count)
 
     def filter_with_poi(self, videos: Optional[List[DanceVideo]] = None) -> List[DanceVideo]:
         target = videos if videos is not None else self.video_list

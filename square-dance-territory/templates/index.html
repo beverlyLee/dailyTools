@@ -87,6 +87,65 @@
         .stat-item.conflict .num { color: #e74c3c; }
         .stat-item.team .num { color: #27ae60; }
 
+        .data-source-section {
+            padding: 12px 20px;
+            border-bottom: 1px solid #eee;
+            background: #fafbfc;
+        }
+        .data-source-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .data-source-btn {
+            flex: 1;
+            padding: 6px 8px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #666;
+        }
+        .data-source-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        .data-source-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        .data-source-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .crawl-btn {
+            width: 100%;
+            padding: 7px;
+            font-size: 12px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .crawl-btn:hover {
+            background: #229954;
+        }
+        .crawl-btn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+        .data-source-hint {
+            font-size: 11px;
+            color: #999;
+            margin-top: 6px;
+            text-align: center;
+        }
+
         .team-list {
             flex: 1;
             overflow-y: auto;
@@ -274,7 +333,14 @@
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            z-index: 20;
+            z-index: 9999;
+            transition: opacity 0.2s;
+        }
+        .loading-overlay.loading-hidden {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
         }
         .loading-spinner {
             width: 40px;
@@ -384,6 +450,17 @@
                 </div>
             </div>
 
+            <div class="data-source-section">
+                <div class="stats-title" style="margin-bottom:10px;">🔄 数据源</div>
+                <div class="data-source-row">
+                    <button class="data-source-btn active" id="sourceMock" onclick="switchDataSource('mock')">模拟数据</button>
+                    <button class="data-source-btn" id="sourceDouyin" onclick="switchDataSource('douyin')">抖音</button>
+                    <button class="data-source-btn" id="sourceKuaishou" onclick="switchDataSource('kuaishou')">快手</button>
+                </div>
+                <button class="crawl-btn" id="crawlBtn" onclick="crawlRealData()">📥 爬取真实数据</button>
+                <div class="data-source-hint" id="dataSourceHint">当前使用模拟演示数据</div>
+            </div>
+
             <div class="team-list">
                 <div class="team-list-title">
                     <span>🎯 舞队领地</span>
@@ -465,12 +542,27 @@
 
         const MapManager = {
             init() {
+                loadDataSourceStatus();
                 loadData();
-                this.tryMapbox();
+                const urlParams = new URLSearchParams(window.location.search);
+                const forceMap = urlParams.get('map');
+                if (forceMap === 'svg') {
+                    console.log('[Debug] 强制 SVG 模式');
+                    this.showSvgFallback();
+                } else if (forceMap === 'gaode') {
+                    console.log('[Debug] 强制高德地图模式');
+                    this.tryGaode();
+                } else if (forceMap === 'mapbox') {
+                    console.log('[Debug] 强制 Mapbox 模式');
+                    this.tryMapbox();
+                } else {
+                    this.tryMapbox();
+                }
             },
 
             tryMapbox() {
                 if (!mapConfig.mapboxToken || typeof mapboxgl === 'undefined') {
+                    console.warn('Mapbox not available, falling back to Gaode');
                     this.tryGaode();
                     return;
                 }
@@ -522,6 +614,10 @@
 
                     setTimeout(() => {
                         if (!hasError && currentMapType !== 'mapbox') {
+                            console.warn('Mapbox load timeout, falling back to Gaode');
+                            hasError = true;
+                            try { map.remove(); } catch (_) {}
+                            this.tryGaode();
                         }
                     }, 8000);
 
@@ -545,7 +641,10 @@
                         mapStyle: 'amap://styles/light',
                     });
 
+                    let hasError = false;
+
                     map.on('complete', () => {
+                        if (hasError) return;
                         console.log('Gaode map loaded successfully');
                         currentMapType = 'gaode';
                         mapManager = this.createGaodeManager(map);
@@ -557,9 +656,19 @@
                     });
 
                     map.on('error', (e) => {
+                        if (hasError) return;
+                        hasError = true;
                         console.warn('Gaode map error, falling back to SVG:', e);
                         this.showSvgFallback();
                     });
+
+                    setTimeout(() => {
+                        if (!hasError && currentMapType !== 'gaode') {
+                            console.warn('Gaode load timeout, falling back to SVG');
+                            hasError = true;
+                            this.showSvgFallback();
+                        }
+                    }, 8000);
 
                 } catch (e) {
                     console.error('Gaode init failed, falling back to SVG:', e);
@@ -568,6 +677,7 @@
             },
 
             showSvgFallback() {
+                console.log('Showing SVG fallback');
                 currentMapType = 'svg';
                 mapManager = this.createSvgManager();
                 if (allData) {
@@ -1091,30 +1201,63 @@
             },
         };
 
+        let loadingHidden = false;
+
         function hideLoading() {
+            if (loadingHidden) return;
+            loadingHidden = true;
             const overlay = document.getElementById('loadingOverlay');
             if (overlay) {
+                overlay.classList.add('loading-hidden');
                 overlay.style.display = 'none';
+                overlay.style.opacity = '0';
+                overlay.style.visibility = 'hidden';
             }
+            setTimeout(() => {
+                const o = document.getElementById('loadingOverlay');
+                if (o) {
+                    o.classList.add('loading-hidden');
+                    o.style.display = 'none';
+                }
+            }, 100);
+            setTimeout(() => {
+                const o = document.getElementById('loadingOverlay');
+                if (o) {
+                    o.classList.add('loading-hidden');
+                    o.style.display = 'none';
+                }
+            }, 500);
         }
 
-        async function loadData() {
+        let currentDataSource = 'mock';
+        let dataSourceStatus = null;
+
+        async function loadData(source) {
+            const src = source || currentDataSource;
+            const apiSource = src === 'mock' ? 'mock' : 'real';
+
             try {
-                const response = await fetch('/api/territories');
+                const response = await fetch(`/api/territories?source=${apiSource}`);
                 if (!response.ok) throw new Error('数据加载失败');
                 const data = await response.json();
                 allData = data;
                 renderData(data);
                 hideLoading();
+                updateDataSourceUI();
             } catch (error) {
                 console.error('加载数据失败:', error);
-                const overlay = document.getElementById('loadingOverlay');
-                overlay.innerHTML = `
-                    <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
-                    <div style="font-size: 16px; color: #2c3e50; margin-bottom: 8px;">暂无数据</div>
-                    <div style="font-size: 12px; color: #7f8c8d; margin-bottom: 16px;">请先生成模拟数据</div>
-                    <button class="btn" onclick="generateMockData()">生成演示数据</button>
-                `;
+                if (src === 'mock') {
+                    const overlay = document.getElementById('loadingOverlay');
+                    overlay.innerHTML = `
+                        <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+                        <div style="font-size: 16px; color: #2c3e50; margin-bottom: 8px;">暂无数据</div>
+                        <div style="font-size: 12px; color: #7f8c8d; margin-bottom: 16px;">请先生成模拟数据</div>
+                        <button class="btn" onclick="generateMockData()">生成演示数据</button>
+                    `;
+                } else {
+                    alert('真实数据加载失败，请先爬取数据');
+                    switchDataSource('mock');
+                }
             }
         }
 
@@ -1125,11 +1268,13 @@
                 <div class="loading-text">正在生成模拟数据...</div>
             `;
             overlay.style.display = 'flex';
+            loadingHidden = false;
 
             try {
                 const response = await fetch('/api/generate-mock', { method: 'POST' });
                 if (response.ok) {
-                    loadData();
+                    currentDataSource = 'mock';
+                    loadData('mock');
                 } else {
                     throw new Error('生成失败');
                 }
@@ -1137,6 +1282,103 @@
                 alert('数据生成失败: ' + error.message);
                 hideLoading();
             }
+        }
+
+        function switchDataSource(source) {
+            currentDataSource = source;
+            updateDataSourceButtons();
+
+            if (source === 'mock') {
+                loadData('mock');
+            } else {
+                loadData(source);
+            }
+        }
+
+        async function crawlRealData() {
+            const platform = currentDataSource === 'douyin' ? 'douyin' :
+                           currentDataSource === 'kuaishou' ? 'kuaishou' : 'douyin';
+
+            if (platform === 'douyin' && !dataSourceStatus?.douyin_configured) {
+                alert('请先在 .env 文件中配置 DOUYIN_COOKIE');
+                return;
+            }
+            if (platform === 'kuaishou' && !dataSourceStatus?.kuaishou_configured) {
+                alert('请先在 .env 文件中配置 KUAISHOU_COOKIE');
+                return;
+            }
+
+            const btn = document.getElementById('crawlBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ 正在爬取...';
+
+            try {
+                const response = await fetch(
+                    `/api/crawl-real?platform=${platform}&city=北京&max_count=50`,
+                    { method: 'POST' }
+                );
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(`爬取成功！\n视频: ${result.videos}个\n舞队: ${result.clusters}个\n冲突: ${result.conflicts}处`);
+                    currentDataSource = platform;
+                    loadData(platform);
+                } else {
+                    throw new Error(result.detail || '爬取失败');
+                }
+            } catch (error) {
+                alert('爬取失败: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📥 爬取真实数据';
+            }
+        }
+
+        function updateDataSourceButtons() {
+            const sources = ['mock', 'douyin', 'kuaishou'];
+            sources.forEach(src => {
+                const btn = document.getElementById('source' + src.charAt(0).toUpperCase() + src.slice(1));
+                if (btn) {
+                    btn.classList.toggle('active', currentDataSource === src);
+                }
+            });
+
+            const hint = document.getElementById('dataSourceHint');
+            const crawlBtn = document.getElementById('crawlBtn');
+
+            if (currentDataSource === 'mock') {
+                hint.textContent = '当前使用模拟演示数据';
+                crawlBtn.style.display = 'none';
+            } else {
+                const platformName = currentDataSource === 'douyin' ? '抖音' : '快手';
+                hint.textContent = `当前使用${platformName}真实数据`;
+                crawlBtn.style.display = 'block';
+            }
+        }
+
+        async function loadDataSourceStatus() {
+            try {
+                const response = await fetch('/api/data-source');
+                if (response.ok) {
+                    dataSourceStatus = await response.json();
+
+                    const douyinBtn = document.getElementById('sourceDouyin');
+                    const kuaishouBtn = document.getElementById('sourceKuaishou');
+
+                    if (!dataSourceStatus.douyin_configured) {
+                        douyinBtn.title = '需配置 DOUYIN_COOKIE';
+                    }
+                    if (!dataSourceStatus.kuaishou_configured) {
+                        kuaishouBtn.title = '需配置 KUAISHOU_COOKIE';
+                    }
+                }
+            } catch (e) {
+                console.warn('获取数据源状态失败:', e);
+            }
+        }
+
+        function updateDataSourceUI() {
+            updateDataSourceButtons();
         }
 
         function renderData(data) {

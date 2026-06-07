@@ -1,9 +1,9 @@
 {
   "summary": {
-    "total_conflicts": 2,
-    "high_severity": 1,
-    "medium_severity": 1,
-    "low_severity": 0
+    "total_conflicts": 6,
+    "high_severity": 2,
+    "medium_severity": 2,
+    "low_severity": 2
   },
   "conflicts": [
     {
@@ -11,39 +11,135 @@
       "cluster_a_id": 0,
       "cluster_b_id": 1,
       "cluster_a_name": "人民广场舞队",
-      "cluster_b_name": "滨河公园舞队",
-      "overlap_area_sqm": 32013.46,
-      "overlap_percentage_a": 1.91,
-      "overlap_percentage_b": 38.12,
-      "center_distance_meters": 755.76,
-      "severity": "medium",
-      "severity_color": "#FF8C00",
-      "intersection_points": [
-        {
-          "lat": 39.901816,
-          "lng": 116.400411
-        },
-        {
-          "lat": 39.904541,
-          "lng": 116.399358
-        }
-      ],
-      "warning_label": "⚡ 中度冲突，建议错峰活动"
+      "cluster_b_name": "中山公园舞队",
+      "overlap_area_sqm": 196349.54,
+      "overlap_percentage_a": 31.39,
+      "overlap_percentage_b": 100.0,
+      "center_distance_meters": 174.05,
+      "severity": "high",
+      "severity_color": "#FF0000",
+      "intersection_points": [],
+      "warning_label": "⚠️ 严重冲突！两舞队活动范围高度重叠"
     },
     {
       "conflict_id": "conflict_0_2",
       "cluster_a_id": 0,
       "cluster_b_id": 2,
       "cluster_a_name": "人民广场舞队",
-      "cluster_b_name": "世纪公园舞队",
-      "overlap_area_sqm": 50352.06,
-      "overlap_percentage_a": 3.0,
-      "overlap_percentage_b": 100.0,
-      "center_distance_meters": 446.47,
+      "cluster_b_name": "朝阳公园南门舞队",
+      "overlap_area_sqm": 152062.6,
+      "overlap_percentage_a": 24.31,
+      "overlap_percentage_b": 77.44,
+      "center_distance_meters": 313.29,
       "severity": "high",
       "severity_color": "#FF0000",
-      "intersection_points": [],
+      "intersection_points": [
+        {
+          "lat": 39.908282,
+          "lng": 116.416241
+        },
+        {
+          "lat": 39.904507,
+          "lng": 116.413399
+        }
+      ],
       "warning_label": "⚠️ 严重冲突！两舞队活动范围高度重叠"
+    },
+    {
+      "conflict_id": "conflict_0_3",
+      "cluster_a_id": 0,
+      "cluster_b_id": 3,
+      "cluster_a_name": "人民广场舞队",
+      "cluster_b_name": "滨河公园舞队",
+      "overlap_area_sqm": 100254.64,
+      "overlap_percentage_a": 16.03,
+      "overlap_percentage_b": 51.06,
+      "center_distance_meters": 417.72,
+      "severity": "medium",
+      "severity_color": "#FF8C00",
+      "intersection_points": [
+        {
+          "lat": 39.907839,
+          "lng": 116.405794
+        },
+        {
+          "lat": 39.911668,
+          "lng": 116.408677
+        }
+      ],
+      "warning_label": "⚡ 中度冲突，建议错峰活动"
+    },
+    {
+      "conflict_id": "conflict_0_4",
+      "cluster_a_id": 0,
+      "cluster_b_id": 4,
+      "cluster_a_name": "人民广场舞队",
+      "cluster_b_name": "朝阳公园南门2队",
+      "overlap_area_sqm": 67144.32,
+      "overlap_percentage_a": 10.73,
+      "overlap_percentage_b": 34.2,
+      "center_distance_meters": 487.33,
+      "severity": "low",
+      "severity_color": "#FFD700",
+      "intersection_points": [
+        {
+          "lat": 39.906113,
+          "lng": 116.415576
+        },
+        {
+          "lat": 39.904066,
+          "lng": 116.410956
+        }
+      ],
+      "warning_label": "注意：领地存在部分重叠"
+    },
+    {
+      "conflict_id": "conflict_1_2",
+      "cluster_a_id": 1,
+      "cluster_b_id": 2,
+      "cluster_a_name": "中山公园舞队",
+      "cluster_b_name": "朝阳公园南门舞队",
+      "overlap_area_sqm": 33978.43,
+      "overlap_percentage_a": 17.31,
+      "overlap_percentage_b": 17.31,
+      "center_distance_meters": 358.38,
+      "severity": "low",
+      "severity_color": "#FFD700",
+      "intersection_points": [
+        {
+          "lat": 39.908286,
+          "lng": 116.415616
+        },
+        {
+          "lat": 39.906673,
+          "lng": 116.412111
+        }
+      ],
+      "warning_label": "注意：领地存在部分重叠"
+    },
+    {
+      "conflict_id": "conflict_2_4",
+      "cluster_a_id": 2,
+      "cluster_b_id": 4,
+      "cluster_a_name": "朝阳公园南门舞队",
+      "cluster_b_name": "朝阳公园南门2队",
+      "overlap_area_sqm": 69569.33,
+      "overlap_percentage_a": 35.43,
+      "overlap_percentage_b": 35.43,
+      "center_distance_meters": 266.83,
+      "severity": "medium",
+      "severity_color": "#FF8C00",
+      "intersection_points": [
+        {
+          "lat": 39.909129,
+          "lng": 116.411483
+        },
+        {
+          "lat": 39.909523,
+          "lng": 116.406552
+        }
+      ],
+      "warning_label": "⚡ 中度冲突，建议错峰活动"
     }
   ]
 }
