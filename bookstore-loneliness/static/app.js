@@ -1,4 +1,5 @@
 let currentData = null;
+let currentCity = "上海";
 let svg = null;
 let simulation = null;
 let nodeScale = 2.5;
@@ -25,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function initControls() {
     document.getElementById("citySelect").addEventListener("change", function () {
+        currentCity = this.value;
         loadData();
     });
 
@@ -174,7 +176,7 @@ function renderGraph() {
             resetHighlight();
         })
         .on("click", function (event, d) {
-            showDetail(d);
+            loadAndShowDetail(d.id);
         });
 
     nodeGroup.append("text")
@@ -336,24 +338,56 @@ function updateTypeStats() {
     });
 }
 
-function showDetail(d) {
+async function loadAndShowDetail(bookstoreId) {
     const panel = document.getElementById("detailPanel");
     panel.classList.remove("hidden");
 
-    document.getElementById("detailName").textContent = d.name;
-    document.getElementById("detailType").textContent = TYPE_NAMES[d.type];
-    document.getElementById("detailType").style.color = COLORS[d.type];
-    document.getElementById("detailSolitude").textContent = (d.solitude_score * 100).toFixed(1) + "%";
-    document.getElementById("detailRating").textContent = d.rating + " 分";
-    document.getElementById("detailAddress").textContent = d.address;
+    document.getElementById("detailName").textContent = "加载中...";
 
-    const totalScore = d.solitude_score + d.family_score + d.student_score + d.internet_famous_score;
+    try {
+        const response = await fetch(`/api/bookstore/${bookstoreId}?city=${encodeURIComponent(currentCity)}`);
+        const detail = await response.json();
+        showDetail(detail);
+    } catch (error) {
+        console.error("加载详情失败:", error);
+        document.getElementById("detailName").textContent = "加载失败";
+    }
+}
+
+function showDetail(detail) {
+    const panel = document.getElementById("detailPanel");
+    panel.classList.remove("hidden");
+
+    document.getElementById("detailName").textContent = detail.name || detail.bookstore_name;
+    document.getElementById("detailType").textContent = detail.type_name_cn || TYPE_NAMES[detail.type];
+    document.getElementById("detailType").style.color = COLORS[detail.type] || "#fff";
+    document.getElementById("detailSolitude").textContent =
+        ((detail.solitude_index !== undefined ? detail.solitude_index : detail.solitude_score) * 100).toFixed(1) + "%";
+    document.getElementById("detailRating").textContent = detail.rating + " 分";
+    document.getElementById("detailAddress").textContent = detail.address;
+
+    let composition = detail.score_composition;
+    if (!composition) {
+        const raw = detail.raw_scores || {
+            solitude: detail.solitude_raw || detail.solitude_score,
+            family: detail.family_score,
+            student: detail.student_score,
+            internet_famous: detail.internet_famous_score
+        };
+        const total = raw.solitude + raw.family + raw.student + raw.internet_famous;
+        composition = {
+            solitude: total > 0 ? raw.solitude / total : 0,
+            family: total > 0 ? raw.family / total : 0,
+            student: total > 0 ? raw.student / total : 0,
+            internet_famous: total > 0 ? raw.internet_famous / total : 0
+        };
+    }
 
     const scores = {
-        solitude: totalScore > 0 ? (d.solitude_score / totalScore * 100).toFixed(1) : 0,
-        family: totalScore > 0 ? (d.family_score / totalScore * 100).toFixed(1) : 0,
-        student: totalScore > 0 ? (d.student_score / totalScore * 100).toFixed(1) : 0,
-        internet: totalScore > 0 ? (d.internet_famous_score / totalScore * 100).toFixed(1) : 0
+        solitude: (composition.solitude * 100).toFixed(1),
+        family: (composition.family * 100).toFixed(1),
+        student: (composition.student * 100).toFixed(1),
+        internet: (composition.internet_famous * 100).toFixed(1)
     };
 
     setTimeout(() => {

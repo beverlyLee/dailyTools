@@ -39,10 +39,10 @@ class BookstoreClassification:
 class BookstoreClassifier:
     def __init__(self):
         self.type_weights = {
-            "deep_reading": {"solitude": 0.7, "student": 0.2, "family": 0.05, "internet_famous": 0.05},
+            "deep_reading": {"solitude": 0.75, "student": 0.1, "family": 0.05, "internet_famous": 0.1},
             "family_friendly": {"family": 0.7, "internet_famous": 0.15, "solitude": 0.05, "student": 0.1},
-            "internet_famous": {"internet_famous": 0.7, "family": 0.1, "solitude": 0.1, "student": 0.1},
-            "study_oriented": {"student": 0.7, "solitude": 0.2, "family": 0.05, "internet_famous": 0.05}
+            "internet_famous": {"internet_famous": 0.7, "family": 0.15, "solitude": 0.05, "student": 0.1},
+            "study_oriented": {"student": 0.75, "solitude": 0.1, "family": 0.1, "internet_famous": 0.05}
         }
 
     def _normalize_scores(self, solitude_score: float, family_score: float,
