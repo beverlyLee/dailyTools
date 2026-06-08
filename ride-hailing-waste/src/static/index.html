@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网约车空驶浪费分析系统</title>
+    <script src="https://unpkg.com/deck.gl@9.0.0/dist.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0a0e1a;
+            color: #e0e6f0;
+            overflow: hidden;
+        }
+
+        #map-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #0a0e1a 0%, #141b2d 100%);
+        }
+
+        .deck-tooltip {
+            position: absolute;
+            background: rgba(20, 27, 45, 0.95);
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: linear-gradient(180deg, rgba(10, 14, 26, 0.95) 0%, rgba(10, 14, 26, 0) 100%);
+            padding: 20px 30px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            background: linear-gradient(90deg, #4fc3f7, #7c4dff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: #8892b0;
+            margin-top: 4px;
+        }
+
+        .control-panel {
+            position: absolute;
+            top: 90px;
+            right: 20px;
+            width: 320px;
+            background: rgba(20, 27, 45, 0.9);
+            border: 1px solid rgba(100, 150, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-section {
+            margin-bottom: 20px;
+        }
+
+        .control-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-label {
+            font-size: 12px;
+            color: #8892b0;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .control-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #4fc3f7;
+        }
+
+        .slider-container {
+            width: 100%;
+        }
+
+        .slider-container input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 4px;
+            background: rgba(100, 150, 255, 0.2);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #4fc3f7;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 8px 12px;
+            background: rgba(79, 195, 247, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 6px;
+            color: #4fc3f7;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: rgba(79, 195, 247, 0.2);
+            border-color: rgba(79, 195, 247, 0.5);
+        }
+
+        .btn.active {
+            background: #4fc3f7;
+            color: #0a0e1a;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(90deg, #4fc3f7, #7c4dff);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(79, 195, 247, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: rgba(79, 195, 247, 0.05);
+            border: 1px solid rgba(79, 195, 247, 0.15);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #8892b0;
+            margin-top: 4px;
+        }
+
+        .stat-highlight {
+            color: #ff6b6b;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(20, 27, 45, 0.9);
+            border: 1px solid rgba(100, 150, 255, 0.2);
+            border-radius: 10px;
+            padding: 16px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .legend-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #e0e6f0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 4px;
+            border-radius: 2px;
+            margin-right: 10px;
+        }
+
+        .area-list {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .area-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(100, 150, 255, 0.1);
+            font-size: 12px;
+        }
+
+        .area-item:last-child {
+            border-bottom: none;
+        }
+
+        .area-name {
+            color: #a0aec0;
+        }
+
+        .area-count {
+            color: #4fc3f7;
+            font-weight: 600;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 26, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(79, 195, 247, 0.2);
+            border-top-color: #4fc3f7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .view-toggle {
+            position: absolute;
+            top: 90px;
+            left: 20px;
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .view-toggle .btn {
+            flex: none;
+            padding: 8px 16px;
+        }
+
+        .area-marker-label {
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="map-container"></div>
+
+    <div class="header">
+        <h1>网约车空驶浪费分析系统</h1>
+        <p>基于高德路况数据的空驶轨迹模拟与碳排放计算</p>
+    </div>
+
+    <div class="view-toggle">
+        <button class="btn active" onclick="setViewMode('empty')">空驶轨迹</button>
+        <button class="btn" onclick="setViewMode('occupied')">载客轨迹</button>
+        <button class="btn" onclick="setViewMode('both')">全部轨迹</button>
+    </div>
+
+    <div class="control-panel">
+        <div class="control-section">
+            <div class="control-label">模拟车辆数</div>
+            <div class="slider-container">
+                <input type="range" id="vehicleRange" min="50" max="500" value="200" step="50" oninput="updateVehicleCount()">
+                <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+                    <span style="font-size: 11px; color: #8892b0;">50</span>
+                    <span id="vehicleCount" class="control-value">200 辆</span>
+                    <span style="font-size: 11px; color: #8892b0;">500</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-section">
+            <div class="control-label">车型</div>
+            <div class="btn-group">
+                <button class="btn active" onclick="setVehicleType('gasoline')">燃油车</button>
+                <button class="btn" onclick="setVehicleType('hybrid')">混动</button>
+                <button class="btn" onclick="setVehicleType('electric')">电动车</button>
+            </div>
+        </div>
+
+        <div class="control-section">
+            <div class="control-label">重点区域</div>
+            <div class="btn-group" id="focusAreas">
+                <button class="btn" data-area="capital_airport" onclick="toggleFocusArea(this)">首都机场</button>
+                <button class="btn" data-area="beijing_south" onclick="toggleFocusArea(this)">北京南站</button>
+                <button class="btn" data-area="cbd" onclick="toggleFocusArea(this)">CBD</button>
+                <button class="btn" data-area="all" onclick="selectAllAreas(this)">全选</button>
+            </div>
+        </div>
+
+        <div class="control-section">
+            <button class="btn-primary" onclick="refreshData()" id="refreshBtn">
+                重新模拟
+            </button>
+        </div>
+
+        <div class="control-section">
+            <div class="control-label">数据概览</div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="statEmptyRatio">--%</div>
+                    <div class="stat-label">空驶率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value stat-highlight" id="statCarbon">-- kg</div>
+                    <div class="stat-label">无效碳排放</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statTotalKm">-- km</div>
+                    <div class="stat-label">总里程</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value stat-highlight" id="statEmptyKm">-- km</div>
+                    <div class="stat-label">空驶里程</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-section">
+            <div class="control-label">热点区域排行</div>
+            <div class="area-list" id="areaList">
+                <div class="area-item">
+                    <span class="area-name">加载中...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-title">图例</div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff6b6b;"></div>
+            <span>空驶轨迹（高密度）</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #4fc3f7;"></div>
+            <span>空驶轨迹（低密度）</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #52c41a;"></div>
+            <span>载客轨迹</span>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        const { DeckGL, PathLayer, TextLayer, ScatterplotLayer, MapView } = deck;
+
+        let deckgl = null;
+        let viewMode = 'empty';
+        let vehicleType = 'gasoline';
+        let currentData = null;
+        let focusAreas = new Set();
+
+        const INITIAL_VIEW_STATE = {
+            longitude: 116.45,
+            latitude: 39.92,
+            zoom: 10.5,
+            pitch: 30,
+            bearing: 0,
+        };
+
+        const AREA_NAMES = {
+            'capital_airport': '首都机场',
+            'daxing_airport': '大兴机场',
+            'beijing_station': '北京站',
+            'beijing_south': '北京南站',
+            'beijing_west': '北京西站',
+            'wangjing': '望京',
+            'cbd': 'CBD',
+            'zhongguancun': '中关村',
+        };
+
+        function initMap() {
+            deckgl = new DeckGL({
+                container: 'map-container',
+                initialViewState: INITIAL_VIEW_STATE,
+                controller: true,
+                layers: [],
+                getTooltip: getTooltip,
+            });
+
+            refreshData();
+        }
+
+        function getTooltip({ object, layer }) {
+            if (!object) return null;
+
+            if (layer.id === 'area-markers') {
+                const name = AREA_NAMES[object.name] || object.name;
+                const stats = currentData?.area_breakdown?.[object.name];
+                if (stats) {
+                    return `
+                        <div style="font-weight: 600; margin-bottom: 6px;">${name}</div>
+                        <div>车辆数: ${stats.vehicle_count} 辆</div>
+                        <div>空驶里程: ${stats.empty_distance_km} km</div>
+                        <div>空驶率: ${stats.empty_ratio}%</div>
+                        <div>浪费碳排: ${stats.wasted_carbon_kg} kg</div>
+                    `;
+                }
+                return name;
+            }
+
+            return null;
+        }
+
+        function updateLayers() {
+            if (!currentData) return;
+
+            const layers = [];
+
+            if (viewMode === 'empty' || viewMode === 'both') {
+                layers.push(new PathLayer({
+                    id: 'empty-paths',
+                    data: currentData.empty_segments || [],
+                    getPath: d => d.path,
+                    getColor: d => {
+                        const len = d.path.length;
+                        const intensity = Math.min(1, len / 20);
+                        return [79 + intensity * 180, 195 - intensity * 100, 247 - intensity * 150, 180];
+                    },
+                    getWidth: 2,
+                    widthMinPixels: 1,
+                    widthMaxPixels: 4,
+                    opacity: 0.6,
+                    rounded: true,
+                }));
+            }
+
+            if (viewMode === 'occupied' || viewMode === 'both') {
+                layers.push(new PathLayer({
+                    id: 'occupied-paths',
+                    data: currentData.occupied_segments || [],
+                    getPath: d => d.path,
+                    getColor: [82, 196, 26, 180],
+                    getWidth: 2,
+                    widthMinPixels: 1,
+                    widthMaxPixels: 3,
+                    opacity: 0.4,
+                    rounded: true,
+                }));
+            }
+
+            const areaMarkers = Object.entries(currentData.area_breakdown || {}).map(([name, stats]) => ({
+                name,
+                position: getAreaCenter(name),
+                count: stats.vehicle_count,
+            }));
+
+            layers.push(new ScatterplotLayer({
+                id: 'area-markers',
+                data: areaMarkers,
+                getPosition: d => d.position,
+                getRadius: d => Math.max(800, Math.min(3000, d.count * 50)),
+                getFillColor: [255, 107, 107, 80],
+                getLineColor: [255, 107, 107, 200],
+                getLineWidth: 2,
+                radiusMinPixels: 15,
+                radiusMaxPixels: 80,
+                stroked: true,
+                pickable: true,
+            }));
+
+            const areaLabels = Object.entries(AREA_NAMES).map(([key, name]) => ({
+                name,
+                position: getAreaCenter(key),
+            }));
+
+            layers.push(new TextLayer({
+                id: 'area-labels',
+                data: areaLabels,
+                getPosition: d => d.position,
+                getText: d => d.name,
+                getSize: 12,
+                getColor: [224, 230, 240, 200],
+                getTextAnchor: 'middle',
+                getAlignmentBaseline: 'bottom',
+                getPixelOffset: [0, -10],
+                sizeUnits: 'points',
+                billboard: true,
+            }));
+
+            deckgl.setProps({ layers });
+        }
+
+        function getAreaCenter(name) {
+            const centers = {
+                'capital_airport': [116.6056, 40.0801],
+                'daxing_airport': [116.4107, 39.5207],
+                'beijing_station': [116.4273, 39.9084],
+                'beijing_south': [116.3783, 39.8653],
+                'beijing_west': [116.3219, 39.8948],
+                'wangjing': [116.4707, 39.9986],
+                'cbd': [116.4606, 39.9145],
+                'zhongguancun': [116.3108, 39.9847],
+            };
+            return centers[name] || [116.4, 39.9];
+        }
+
+        async function refreshData() {
+            const numVehicles = document.getElementById('vehicleRange').value;
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const refreshBtn = document.getElementById('refreshBtn');
+
+            loadingOverlay.classList.add('active');
+            refreshBtn.disabled = true;
+
+            try {
+                let url = `/api/visualization?num_vehicles=${numVehicles}&vehicle_type=${vehicleType}`;
+                if (focusAreas.size > 0) {
+                    url += `&focus_areas=${Array.from(focusAreas).join(',')}`;
+                }
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                currentData = data;
+                updateStats(data);
+                updateAreaList(data);
+                updateLayers();
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+                useMockData();
+            } finally {
+                loadingOverlay.classList.remove('active');
+                refreshBtn.disabled = false;
+            }
+        }
+
+        function useMockData() {
+            currentData = {
+                empty_segments: generateMockPaths(150, true),
+                occupied_segments: generateMockPaths(100, false),
+                summary: {
+                    total_vehicles: 200,
+                    total_distance_km: 856.42,
+                    empty_distance_km: 312.18,
+                    empty_ratio: 36.45,
+                },
+                waste_metrics: {
+                    vehicle_count: 200,
+                    vehicle_type: 'gasoline',
+                    total_distance_km: 856.42,
+                    empty_distance_km: 312.18,
+                    empty_ratio_percent: 36.45,
+                    carbon_emission: {
+                        empty_kg: 612.5,
+                    },
+                },
+                area_breakdown: {
+                    'capital_airport': { vehicle_count: 85, empty_ratio: 42.3, empty_distance_km: 125.6, wasted_carbon_kg: 245.3, density_score: 9500 },
+                    'beijing_south': { vehicle_count: 72, empty_ratio: 38.5, empty_distance_km: 98.2, wasted_carbon_kg: 191.7, density_score: 8200 },
+                    'cbd': { vehicle_count: 65, empty_ratio: 35.2, empty_distance_km: 85.4, wasted_carbon_kg: 166.9, density_score: 7800 },
+                    'beijing_station': { vehicle_count: 58, empty_ratio: 33.8, empty_distance_km: 72.1, wasted_carbon_kg: 140.8, density_score: 7100 },
+                    'wangjing': { vehicle_count: 45, empty_ratio: 31.2, empty_distance_km: 58.7, wasted_carbon_kg: 114.7, density_score: 5600 },
+                    'beijing_west': { vehicle_count: 42, empty_ratio: 29.8, empty_distance_km: 52.3, wasted_carbon_kg: 102.2, density_score: 5200 },
+                    'zhongguancun': { vehicle_count: 38, empty_ratio: 28.5, empty_distance_km: 45.8, wasted_carbon_kg: 89.5, density_score: 4700 },
+                    'daxing_airport': { vehicle_count: 35, empty_ratio: 30.1, empty_distance_km: 54.2, wasted_carbon_kg: 105.9, density_score: 4200 },
+                },
+            };
+
+            updateStats(currentData);
+            updateAreaList(currentData);
+            updateLayers();
+        }
+
+        function generateMockPaths(count, isEmpty) {
+            const paths = [];
+            const centers = [
+                [116.6056, 40.0801],
+                [116.4606, 39.9145],
+                [116.3783, 39.8653],
+                [116.4273, 39.9084],
+                [116.4707, 39.9986],
+            ];
+
+            for (let i = 0; i < count; i++) {
+                const startCenter = centers[Math.floor(Math.random() * centers.length)];
+                const endCenter = centers[Math.floor(Math.random() * centers.length)];
+                const path = [];
+                const steps = 10 + Math.floor(Math.random() * 20);
+
+                for (let j = 0; j <= steps; j++) {
+                    const t = j / steps;
+                    const lng = startCenter[0] + (endCenter[0] - startCenter[0]) * t + (Math.random() - 0.5) * 0.02;
+                    const lat = startCenter[1] + (endCenter[1] - startCenter[1]) * t + (Math.random() - 0.5) * 0.015;
+                    path.push([lng, lat]);
+                }
+
+                paths.push({
+                    vehicle_id: `mock_${i}`,
+                    path: path,
+                });
+            }
+
+            return paths;
+        }
+
+        function updateStats(data) {
+            const summary = data.summary || data.waste_metrics || {};
+            const waste = data.waste_metrics || {};
+
+            document.getElementById('statEmptyRatio').textContent =
+                (summary.empty_ratio || waste.empty_ratio_percent || 0).toFixed(1) + '%';
+            document.getElementById('statCarbon').textContent =
+                (waste.carbon_emission?.empty_kg || 0).toFixed(1) + ' kg';
+            document.getElementById('statTotalKm').textContent =
+                (summary.total_distance_km || waste.total_distance_km || 0).toFixed(0) + ' km';
+            document.getElementById('statEmptyKm').textContent =
+                (summary.empty_distance_km || waste.empty_distance_km || 0).toFixed(0) + ' km';
+        }
+
+        function updateAreaList(data) {
+            const areas = data.area_breakdown || {};
+            const sorted = Object.entries(areas)
+                .sort((a, b) => b[1].vehicle_count - a[1].vehicle_count);
+
+            const listEl = document.getElementById('areaList');
+            listEl.innerHTML = sorted.map(([key, stats]) => `
+                <div class="area-item">
+                    <span class="area-name">${AREA_NAMES[key] || key}</span>
+                    <span class="area-count">${stats.vehicle_count} 辆</span>
+                </div>
+            `).join('');
+        }
+
+        function updateVehicleCount() {
+            const value = document.getElementById('vehicleRange').value;
+            document.getElementById('vehicleCount').textContent = value + ' 辆';
+        }
+
+        function setViewMode(mode) {
+            viewMode = mode;
+            document.querySelectorAll('.view-toggle .btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            updateLayers();
+        }
+
+        function setVehicleType(type) {
+            vehicleType = type;
+            document.querySelectorAll('.control-section:nth-child(2) .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function toggleFocusArea(btn) {
+            const area = btn.dataset.area;
+            if (focusAreas.has(area)) {
+                focusAreas.delete(area);
+                btn.classList.remove('active');
+            } else {
+                focusAreas.add(area);
+                btn.classList.add('active');
+            }
+        }
+
+        function selectAllAreas(btn) {
+            const areaBtns = document.querySelectorAll('#focusAreas .btn:not([data-area="all"])');
+            const allActive = Array.from(areaBtns).every(b => b.classList.contains('active'));
+
+            areaBtns.forEach(b => {
+                const area = b.dataset.area;
+                if (allActive) {
+                    focusAreas.delete(area);
+                    b.classList.remove('active');
+                } else {
+                    focusAreas.add(area);
+                    b.classList.add('active');
+                }
+            });
+
+            btn.classList.toggle('active', !allActive);
+        }
+
+        window.onload = initMap;
+    </script>
+</body>
+</html>
