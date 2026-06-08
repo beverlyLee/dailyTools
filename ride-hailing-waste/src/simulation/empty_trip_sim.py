@@ -146,6 +146,7 @@ class EmptyTripSimulator:
 
             base_speed = random.uniform(25, 55) if is_empty else random.uniform(15, 40)
             base_speed *= self._params["speed_multiplier"]
+            base_speed *= self._time_params["speed_multiplier"]
             seg_speeds = []
             for p in seg_path:
                 speed_variation = random.uniform(-8, 8)
@@ -294,7 +295,10 @@ class EmptyTripSimulator:
                     start_center, wander_radius
                 )
                 wander_path = wander_path_points
-                wander_speeds = [random.uniform(25, 50) for _ in wander_path]
+                wander_speed_base = random.uniform(25, 50)
+                wander_speed_base *= self._params["speed_multiplier"]
+                wander_speed_base *= self._time_params["speed_multiplier"]
+                wander_speeds = [max(5, wander_speed_base + random.uniform(-5, 5)) for _ in wander_path]
                 wander_ts = []
                 current_ts = 0.0
                 for i in range(len(wander_path)):
@@ -352,7 +356,10 @@ class EmptyTripSimulator:
                 (mid_lng, mid_lat), end_point, is_empty=False
             )
             start_to_mid = self._generate_radial_empty_path(start_center, radial_dist, direction)
-            start_to_mid_speeds = [random.uniform(20, 45) for _ in start_to_mid]
+            start_mid_speed_base = random.uniform(20, 45)
+            start_mid_speed_base *= self._params["speed_multiplier"]
+            start_mid_speed_base *= self._time_params["speed_multiplier"]
+            start_to_mid_speeds = [max(5, start_mid_speed_base + random.uniform(-5, 5)) for _ in start_to_mid]
             start_to_mid_ts = []
             current_ts = 0.0
             for i in range(len(start_to_mid)):
@@ -414,7 +421,10 @@ class EmptyTripSimulator:
                     wander_path_points[0],
                     is_empty=True
                 )
-                wander_speeds = [random.uniform(25, 50) for _ in wander_path_points]
+                end_wander_speed_base = random.uniform(25, 50)
+                end_wander_speed_base *= self._params["speed_multiplier"]
+                end_wander_speed_base *= self._time_params["speed_multiplier"]
+                wander_speeds = [max(5, end_wander_speed_base + random.uniform(-5, 5)) for _ in wander_path_points]
                 wander_ts = []
                 current_ts = 0.0
                 for i in range(len(wander_path_points)):
@@ -448,7 +458,10 @@ class EmptyTripSimulator:
                 radial_intensity = self._time_params["cbd_radial_intensity"]
                 radial_dist = end_info["radius"] * random.uniform(1.0, 2.0) * radial_intensity
                 radial_path = self._generate_radial_empty_path(end_center, radial_dist, direction)
-                radial_speeds = [random.uniform(30, 55) for _ in radial_path]
+                end_radial_speed_base = random.uniform(30, 55)
+                end_radial_speed_base *= self._params["speed_multiplier"]
+                end_radial_speed_base *= self._time_params["speed_multiplier"]
+                radial_speeds = [max(5, end_radial_speed_base + random.uniform(-5, 5)) for _ in radial_path]
                 radial_ts = []
                 current_ts = 0.0
                 for i in range(len(radial_path)):

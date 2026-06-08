@@ -493,6 +493,7 @@
         let deckgl = null;
         let viewMode = 'empty';
         let vehicleType = 'gasoline';
+        let timeMode = 'off_peak';
         let currentData = null;
         let focusAreas = new Set();
         let refreshTimeout = null;
@@ -744,7 +745,6 @@
                     widthMinPixels: 1,
                     widthMaxPixels: 4,
                     opacity: 0.6,
-                    rounded: true,
                 }));
             }
 
@@ -758,7 +758,6 @@
                     widthMinPixels: 1,
                     widthMaxPixels: 3,
                     opacity: 0.4,
-                    rounded: true,
                 }));
             }
 
@@ -801,7 +800,7 @@
             loadingOverlay.classList.add('active');
 
             try {
-                let url = `/api/visualization?num_vehicles=${numVehicles}&vehicle_type=${vehicleType}`;
+                let url = `/api/visualization?num_vehicles=${numVehicles}&vehicle_type=${vehicleType}&time_mode=${timeMode}`;
                 if (focusAreas.size > 0) {
                     url += `&focus_areas=${Array.from(focusAreas).join(',')}`;
                 }
@@ -942,6 +941,25 @@
                 b.classList.remove('active');
             });
             btn.classList.add('active');
+
+            debouncedRefresh();
+        }
+
+        function setTimeMode(btn) {
+            const mode = btn.dataset.mode;
+            timeMode = mode;
+
+            document.querySelectorAll('#timeModeBtns .btn').forEach(b => {
+                b.classList.remove('active');
+            });
+            btn.classList.add('active');
+
+            const hints = {
+                'morning_peak': '早高峰时段：7:00-9:00，机场→市区流向为主',
+                'off_peak': '平峰时段：10:00-16:00，流量均衡',
+                'evening_peak': '晚高峰时段：17:00-20:00，CBD放射扩散最明显',
+            };
+            document.getElementById('timeModeHint').textContent = hints[mode] || '';
 
             debouncedRefresh();
         }
