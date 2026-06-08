@@ -9,13 +9,19 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+_src_dir = Path(__file__).parent
+if str(_src_dir) not in sys.path:
+    sys.path.insert(0, str(_src_dir))
 
-load_dotenv()
+_env_path = _src_dir.parent / ".env"
+if _env_path.exists():
+    load_dotenv(dotenv_path=str(_env_path))
+else:
+    load_dotenv()
 
-from .traffic.road_status_spider import RoadStatusSpider, BEIJING_KEY_AREAS
-from .simulation.empty_trip_sim import EmptyTripSimulator
-from .metric.waste_calculator import WasteCalculator
+from traffic.road_status_spider import RoadStatusSpider, BEIJING_KEY_AREAS
+from simulation.empty_trip_sim import EmptyTripSimulator
+from metric.waste_calculator import WasteCalculator
 
 app = FastAPI(title="网约车空驶浪费分析系统", version="1.0.0")
 
@@ -169,10 +175,13 @@ async def get_visualization_data(
     if focus_areas:
         focus_list = [a.strip() for a in focus_areas.split(",") if a.strip()]
 
-    viz_data = simulator.get_trajectories_for_visualization(num_vehicles=num_vehicles)
+    viz_data = simulator.get_trajectories_for_visualization(
+        num_vehicles=num_vehicles,
+        focus_areas=focus_list
+    )
+    calc = WasteCalculator(vehicle_type)
 
     sim_result = simulator.simulate_batch(num_vehicles=num_vehicles, focus_areas=focus_list)
-    calc = WasteCalculator(vehicle_type)
     metrics = calc.calculate_from_simulation(sim_result)
     area_breakdown = calc.calculate_area_breakdown(sim_result.trajectories, BEIJING_KEY_AREAS)
 
@@ -205,6 +214,15 @@ def _get_area_type(name: str) -> str:
     if "wangjing" in name or "zhongguancun" in name:
         return "tech_park"
     return "other"
+
+
+@app.get("/api/config")
+async def get_config():
+    return {
+        "gaode_web_key": os.getenv("GAODE_WEB_API_KEY", os.getenv("GAODE_TRAFFIC_KEY", "")),
+        "center": [float(os.getenv("CENTER_LNG", 116.4074)), float(os.getenv("CENTER_LAT", 39.9042))],
+        "city": os.getenv("CITY", "beijing"),
+    }
 
 
 @app.get("/api/health")

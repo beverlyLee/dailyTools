@@ -1,0 +1,119 @@
+{
+  "1": {
+    "name": "依赖安装",
+    "status": "FAIL",
+    "error": "module 'dotenv' has no attribute '__version__'"
+  },
+  "2": {
+    "name": "模块导入",
+    "status": "PASS",
+    "data": {
+      "empty_trip_sim": true,
+      "road_status_spider": true,
+      "waste_calculator": true,
+      "beijing_key_areas_count": 8,
+      "beijing_key_areas": [
+        "capital_airport",
+        "daxing_airport",
+        "beijing_station",
+        "beijing_south",
+        "beijing_west",
+        "wangjing",
+        "cbd",
+        "zhongguancun"
+      ]
+    }
+  },
+  "3": {
+    "name": "50辆车模拟测试",
+    "status": "PASS",
+    "data": {
+      "total_vehicles": 50,
+      "total_distance_km": 3522.57,
+      "total_empty_distance_km": 2004.42,
+      "empty_ratio_percent": 56.9,
+      "no_index_error": true,
+      "all_lengths_consistent": true,
+      "inconsistent_count": 0,
+      "inconsistent_samples": [],
+      "density_correlation": 0.2396,
+      "area_stats": [
+        {
+          "area": "capital_airport",
+          "density": 50,
+          "vehicles": 14
+        },
+        {
+          "area": "daxing_airport",
+          "density": 30,
+          "vehicles": 10
+        },
+        {
+          "area": "beijing_station",
+          "density": 40,
+          "vehicles": 30
+        },
+        {
+          "area": "beijing_south",
+          "density": 45,
+          "vehicles": 20
+        },
+        {
+          "area": "beijing_west",
+          "density": 35,
+          "vehicles": 17
+        },
+        {
+          "area": "wangjing",
+          "density": 25,
+          "vehicles": 19
+        },
+        {
+          "area": "cbd",
+          "density": 35,
+          "vehicles": 30
+        },
+        {
+          "area": "zhongguancun",
+          "density": 20,
+          "vehicles": 13
+        }
+      ]
+    }
+  },
+  "4": {
+    "name": "API接口测试",
+    "status": "PASS",
+    "data": {
+      "health": {
+        "status_code": 200,
+        "response": {
+          "status": "ok",
+          "api_key_loaded": true
+        }
+      },
+      "visualization": {
+        "status_code": 200,
+        "empty_segments": 130,
+        "occupied_segments": 100,
+        "density_heatmap_points": 956,
+        "has_waste_metrics": true,
+        "has_area_breakdown": true
+      },
+      "areas": {
+        "status_code": 200,
+        "count": 8,
+        "areas": [
+          "capital_airport",
+          "daxing_airport",
+          "beijing_station",
+          "beijing_south",
+          "beijing_west",
+          "wangjing",
+          "cbd",
+          "zhongguancun"
+        ]
+      }
+    }
+  }
+}

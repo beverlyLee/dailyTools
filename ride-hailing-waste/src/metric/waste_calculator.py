@@ -1,8 +1,14 @@
 import math
+import sys
+from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass, field
 
-from ..simulation.empty_trip_sim import VehicleTrajectory, SimulationResult
+_src_dir = Path(__file__).parent.parent
+if str(_src_dir) not in sys.path:
+    sys.path.insert(0, str(_src_dir))
+
+from simulation.empty_trip_sim import VehicleTrajectory, SimulationResult
 
 
 FUEL_CONSUMPTION = {

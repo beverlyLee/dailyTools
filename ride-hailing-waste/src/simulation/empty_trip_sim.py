@@ -1,9 +1,15 @@
 import random
 import math
+import sys
+from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass, field
 
-from ..traffic.road_status_spider import RoadStatusSpider, BEIJING_KEY_AREAS
+_src_dir = Path(__file__).parent.parent
+if str(_src_dir) not in sys.path:
+    sys.path.insert(0, str(_src_dir))
+
+from traffic.road_status_spider import RoadStatusSpider, BEIJING_KEY_AREAS
 
 
 @dataclass
@@ -79,22 +85,26 @@ class EmptyTripSimulator:
         for i in range(len(waypoints) - 1):
             seg_start = waypoints[i]
             seg_end = waypoints[i+1]
-            seg_points = max(3, num_points // len(waypoints))
+            seg_points = max(3, num_points // max(1, len(waypoints) - 1))
             seg_path = self._interpolate_path(seg_start, seg_end, seg_points, jitter * 0.5)
 
             base_speed = random.uniform(25, 55) if is_empty else random.uniform(15, 40)
+            seg_speeds = []
             for p in seg_path:
                 speed_variation = random.uniform(-8, 8)
-                speeds.append(max(5, base_speed + speed_variation))
+                seg_speeds.append(max(5, base_speed + speed_variation))
 
             if i == 0:
                 full_path.extend(seg_path)
+                speeds.extend(seg_speeds)
             else:
                 full_path.extend(seg_path[1:])
+                speeds.extend(seg_speeds[1:])
 
         timestamps = []
         current_time = 0.0
-        for i in range(len(full_path)):
+        min_len = min(len(full_path), len(speeds))
+        for i in range(min_len):
             if i == 0:
                 timestamps.append(current_time)
             else:
@@ -103,6 +113,11 @@ class EmptyTripSimulator:
                 if speed > 0:
                     current_time += dist / speed
                 timestamps.append(current_time)
+
+        actual_len = min(len(full_path), len(speeds), len(timestamps))
+        full_path = full_path[:actual_len]
+        speeds = speeds[:actual_len]
+        timestamps = timestamps[:actual_len]
 
         return full_path, speeds, timestamps
 
@@ -123,7 +138,48 @@ class EmptyTripSimulator:
 
         return is_empty
 
-    def simulate_single_vehicle(self, start_area: str, end_area: Optional[str] = None) -> VehicleTrajectory:
+    def _get_area_type(self, area_name: str) -> str:
+        if "airport" in area_name:
+            return "airport"
+        if "station" in area_name or "south" in area_name or "west" in area_name:
+            return "station"
+        if "cbd" in area_name:
+            return "cbd"
+        return "normal"
+
+    def _generate_radial_empty_path(self, center: Tuple[float, float],
+                                      radius: float, direction: float) -> List[Tuple[float, float]]:
+        path = []
+        num_points = random.randint(8, 20)
+        for i in range(num_points):
+            t = i / (num_points - 1)
+            r = radius * t
+            angle = direction + random.uniform(-0.15, 0.15)
+            lng = center[0] + r * math.cos(angle) * 0.85
+            lat = center[1] + r * math.sin(angle) * 0.85
+            lng += random.uniform(-0.002, 0.002) * (1 - t)
+            lat += random.uniform(-0.002, 0.002) * (1 - t)
+            path.append((round(lng, 6), round(lat, 6)))
+        return path
+
+    def _generate_airport_wander_path(self, center: Tuple[float, float],
+                                       radius: float) -> List[Tuple[float, float]]:
+        path = []
+        num_points = random.randint(15, 30)
+        angle_start = random.uniform(0, 2 * math.pi)
+        angle_range = random.uniform(math.pi * 0.8, math.pi * 1.5)
+
+        for i in range(num_points):
+            t = i / (num_points - 1)
+            angle = angle_start + angle_range * t
+            r = radius * (0.4 + 0.6 * abs(math.sin(t * math.pi)))
+            lng = center[0] + r * math.cos(angle) * 0.9
+            lat = center[1] + r * math.sin(angle) * 0.9
+            path.append((round(lng, 6), round(lat, 6)))
+        return path
+
+    def simulate_single_vehicle(self, start_area: str, end_area: Optional[str] = None,
+                                 start_point_hint: Optional[Tuple[float, float]] = None) -> VehicleTrajectory:
         self._vehicle_counter += 1
         vehicle_id = f"veh_{self._vehicle_counter:06d}"
 
@@ -139,20 +195,34 @@ class EmptyTripSimulator:
         start_center = start_info["center"]
         end_center = end_info["center"]
 
+        start_type = self._get_area_type(start_area)
+        end_type = self._get_area_type(end_area)
+
         start_radius = start_info["radius"] * 0.6
         end_radius = end_info["radius"] * 0.6
 
-        start_point = (
-            start_center[0] + random.uniform(-start_radius, start_radius),
-            start_center[1] + random.uniform(-start_radius, start_radius),
-        )
+        if start_point_hint:
+            start_point = start_point_hint
+        else:
+            start_point = (
+                start_center[0] + random.uniform(-start_radius, start_radius),
+                start_center[1] + random.uniform(-start_radius, start_radius),
+            )
         end_point = (
             end_center[0] + random.uniform(-end_radius, end_radius),
             end_center[1] + random.uniform(-end_radius, end_radius),
         )
 
-        empty_before = random.random() < 0.7
-        empty_after = random.random() < 0.6
+        empty_before_prob = 0.7
+        empty_after_prob = 0.6
+
+        if start_type in ["airport", "station"]:
+            empty_before_prob = 0.85
+        if end_type in ["airport", "station"]:
+            empty_after_prob = 0.8
+
+        empty_before = random.random() < empty_before_prob
+        empty_after = random.random() < empty_after_prob
 
         full_path = []
         full_speeds = []
@@ -160,52 +230,210 @@ class EmptyTripSimulator:
         is_empty_flags = []
 
         if empty_before:
-            wander_center = (
-                start_center[0] + random.uniform(-start_info["radius"], start_info["radius"]),
-                start_center[1] + random.uniform(-start_info["radius"], start_info["radius"]),
-            )
-            wander_path, wander_speeds, wander_ts = self._generate_ride_path(
-                (wander_center[0] + random.uniform(-0.01, 0.01),
-                 wander_center[1] + random.uniform(-0.008, 0.008)),
-                start_point,
-                is_empty=True
-            )
-            full_path.extend(wander_path)
-            full_speeds.extend(wander_speeds)
-            full_timestamps.extend(wander_ts)
-            is_empty_flags.extend([True] * len(wander_path))
+            if start_type in ["airport", "station"]:
+                wander_radius = start_info["radius"] * random.uniform(0.8, 1.5)
+                wander_path_points = self._generate_airport_wander_path(
+                    start_center, wander_radius
+                )
+                wander_path = wander_path_points
+                wander_speeds = [random.uniform(25, 50) for _ in wander_path]
+                wander_ts = []
+                current_ts = 0.0
+                for i in range(len(wander_path)):
+                    if i == 0:
+                        wander_ts.append(current_ts)
+                    else:
+                        dist = self._haversine_distance(wander_path[i-1], wander_path[i])
+                        speed = wander_speeds[i] / 3.6
+                        if speed > 0:
+                            current_ts += dist / speed
+                        wander_ts.append(current_ts)
 
-        ride_path, ride_speeds, ride_ts = self._generate_ride_path(
-            start_point, end_point, is_empty=False
-        )
+                approach_path, approach_speeds, approach_ts = self._generate_ride_path(
+                    wander_path[-1],
+                    start_point,
+                    is_empty=True
+                )
+                if wander_ts:
+                    last_ts = wander_ts[-1]
+                    approach_ts = [t + last_ts + random.uniform(10, 60) for t in approach_ts]
 
-        if full_timestamps:
-            last_ts = full_timestamps[-1]
-            ride_ts = [t + last_ts + random.uniform(30, 120) for t in ride_ts]
+                full_path.extend(wander_path)
+                full_speeds.extend(wander_speeds)
+                full_timestamps.extend(wander_ts)
+                is_empty_flags.extend([True] * len(wander_path))
 
-        full_path.extend(ride_path[1:] if full_path else ride_path)
-        full_speeds.extend(ride_speeds[1:] if full_path else ride_speeds)
-        full_timestamps.extend(ride_ts[1:] if full_path else ride_ts)
-        is_empty_flags.extend([False] * (len(ride_path) - (1 if full_path else 0)))
+                if approach_path and len(approach_path) > 1:
+                    full_path.extend(approach_path[1:])
+                    full_speeds.extend(approach_speeds[1:])
+                    full_timestamps.extend(approach_ts[1:])
+                    is_empty_flags.extend([True] * (len(approach_path) - 1))
+            else:
+                wander_center = (
+                    start_center[0] + random.uniform(-start_info["radius"], start_info["radius"]),
+                    start_center[1] + random.uniform(-start_info["radius"], start_info["radius"]),
+                )
+                wander_path, wander_speeds, wander_ts = self._generate_ride_path(
+                    (wander_center[0] + random.uniform(-0.01, 0.01),
+                     wander_center[1] + random.uniform(-0.008, 0.008)),
+                    start_point,
+                    is_empty=True
+                )
+                full_path.extend(wander_path)
+                full_speeds.extend(wander_speeds)
+                full_timestamps.extend(wander_ts)
+                is_empty_flags.extend([True] * len(wander_path))
 
-        if empty_after:
-            wander2_center = (
-                end_center[0] + random.uniform(-end_info["radius"] * 1.5, end_info["radius"] * 1.5),
-                end_center[1] + random.uniform(-end_info["radius"] * 1.2, end_info["radius"] * 1.2),
+        if start_type == "cbd" and end_type != "cbd":
+            direction = math.atan2(end_point[1] - start_center[1], end_point[0] - start_center[0])
+            radial_dist = start_info["radius"] * random.uniform(0.3, 0.8)
+            mid_lng = start_center[0] + radial_dist * math.cos(direction)
+            mid_lat = start_center[1] + radial_dist * math.sin(direction)
+            ride_path, ride_speeds, ride_ts = self._generate_ride_path(
+                (mid_lng, mid_lat), end_point, is_empty=False
             )
-            wander2_path, wander2_speeds, wander2_ts = self._generate_ride_path(
-                end_point,
-                wander2_center,
-                is_empty=True
-            )
+            start_to_mid = self._generate_radial_empty_path(start_center, radial_dist, direction)
+            start_to_mid_speeds = [random.uniform(20, 45) for _ in start_to_mid]
+            start_to_mid_ts = []
+            current_ts = 0.0
+            for i in range(len(start_to_mid)):
+                if i == 0:
+                    start_to_mid_ts.append(current_ts)
+                else:
+                    dist = self._haversine_distance(start_to_mid[i-1], start_to_mid[i])
+                    speed = start_to_mid_speeds[i] / 3.6
+                    if speed > 0:
+                        current_ts += dist / speed
+                    start_to_mid_ts.append(current_ts)
+
             if full_timestamps:
                 last_ts = full_timestamps[-1]
-                wander2_ts = [t + last_ts + random.uniform(60, 300) for t in wander2_ts]
+                start_to_mid_ts = [t + last_ts + random.uniform(20, 90) for t in start_to_mid_ts]
 
-            full_path.extend(wander2_path[1:])
-            full_speeds.extend(wander2_speeds[1:])
-            full_timestamps.extend(wander2_ts[1:])
-            is_empty_flags.extend([True] * (len(wander2_path) - 1))
+            if start_to_mid and len(start_to_mid) > 1:
+                if full_path:
+                    full_path.extend(start_to_mid[1:])
+                    full_speeds.extend(start_to_mid_speeds[1:])
+                    full_timestamps.extend(start_to_mid_ts[1:])
+                    is_empty_flags.extend([True] * (len(start_to_mid) - 1))
+                else:
+                    full_path.extend(start_to_mid)
+                    full_speeds.extend(start_to_mid_speeds)
+                    full_timestamps.extend(start_to_mid_ts)
+                    is_empty_flags.extend([True] * len(start_to_mid))
+
+            if full_timestamps:
+                last_ts = full_timestamps[-1]
+                ride_ts = [t + last_ts + random.uniform(30, 120) for t in ride_ts]
+
+            full_path.extend(ride_path[1:] if full_path else ride_path)
+            full_speeds.extend(ride_speeds[1:] if full_path else ride_speeds)
+            full_timestamps.extend(ride_ts[1:] if full_path else ride_ts)
+            is_empty_flags.extend([False] * (len(ride_path) - (1 if full_path else 0)))
+        else:
+            ride_path, ride_speeds, ride_ts = self._generate_ride_path(
+                start_point, end_point, is_empty=False
+            )
+
+            if full_timestamps:
+                last_ts = full_timestamps[-1]
+                ride_ts = [t + last_ts + random.uniform(30, 120) for t in ride_ts]
+
+            full_path.extend(ride_path[1:] if full_path else ride_path)
+            full_speeds.extend(ride_speeds[1:] if full_path else ride_speeds)
+            full_timestamps.extend(ride_ts[1:] if full_path else ride_ts)
+            is_empty_flags.extend([False] * (len(ride_path) - (1 if full_path else 0)))
+
+        if empty_after:
+            if end_type in ["airport", "station"]:
+                wander_radius = end_info["radius"] * random.uniform(0.8, 1.8)
+                wander_path_points = self._generate_airport_wander_path(
+                    end_center, wander_radius
+                )
+                approach_path, approach_speeds, approach_ts = self._generate_ride_path(
+                    end_point,
+                    wander_path_points[0],
+                    is_empty=True
+                )
+                wander_speeds = [random.uniform(25, 50) for _ in wander_path_points]
+                wander_ts = []
+                current_ts = 0.0
+                for i in range(len(wander_path_points)):
+                    if i == 0:
+                        wander_ts.append(current_ts)
+                    else:
+                        dist = self._haversine_distance(wander_path_points[i-1], wander_path_points[i])
+                        speed = wander_speeds[i] / 3.6
+                        if speed > 0:
+                            current_ts += dist / speed
+                        wander_ts.append(current_ts)
+
+                if full_timestamps:
+                    last_ts = full_timestamps[-1]
+                    approach_ts = [t + last_ts + random.uniform(60, 300) for t in approach_ts]
+                    wander_ts = [t + approach_ts[-1] + random.uniform(10, 60) for t in wander_ts]
+
+                if approach_path and len(approach_path) > 1:
+                    full_path.extend(approach_path[1:])
+                    full_speeds.extend(approach_speeds[1:])
+                    full_timestamps.extend(approach_ts[1:])
+                    is_empty_flags.extend([True] * (len(approach_path) - 1))
+
+                if wander_path_points and len(wander_path_points) > 1:
+                    full_path.extend(wander_path_points[1:])
+                    full_speeds.extend(wander_speeds[1:])
+                    full_timestamps.extend(wander_ts[1:])
+                    is_empty_flags.extend([True] * (len(wander_path_points) - 1))
+            elif end_type == "cbd":
+                direction = random.uniform(0, 2 * math.pi)
+                radial_dist = end_info["radius"] * random.uniform(1.0, 2.0)
+                radial_path = self._generate_radial_empty_path(end_center, radial_dist, direction)
+                radial_speeds = [random.uniform(30, 55) for _ in radial_path]
+                radial_ts = []
+                current_ts = 0.0
+                for i in range(len(radial_path)):
+                    if i == 0:
+                        radial_ts.append(current_ts)
+                    else:
+                        dist = self._haversine_distance(radial_path[i-1], radial_path[i])
+                        speed = radial_speeds[i] / 3.6
+                        if speed > 0:
+                            current_ts += dist / speed
+                        radial_ts.append(current_ts)
+
+                if full_timestamps:
+                    last_ts = full_timestamps[-1]
+                    radial_ts = [t + last_ts + random.uniform(60, 300) for t in radial_ts]
+
+                if radial_path and len(radial_path) > 1:
+                    full_path.extend(radial_path[1:])
+                    full_speeds.extend(radial_speeds[1:])
+                    full_timestamps.extend(radial_ts[1:])
+                    is_empty_flags.extend([True] * (len(radial_path) - 1))
+            else:
+                wander2_center = (
+                    end_center[0] + random.uniform(-end_info["radius"] * 1.5, end_info["radius"] * 1.5),
+                    end_center[1] + random.uniform(-end_info["radius"] * 1.2, end_info["radius"] * 1.2),
+                )
+                wander2_path, wander2_speeds, wander2_ts = self._generate_ride_path(
+                    end_point,
+                    wander2_center,
+                    is_empty=True
+                )
+                if full_timestamps:
+                    last_ts = full_timestamps[-1]
+                    wander2_ts = [t + last_ts + random.uniform(60, 300) for t in wander2_ts]
+
+                full_path.extend(wander2_path[1:])
+                full_speeds.extend(wander2_speeds[1:])
+                full_timestamps.extend(wander2_ts[1:])
+                is_empty_flags.extend([True] * (len(wander2_path) - 1))
+
+        min_len = min(len(full_path), len(full_speeds), len(full_timestamps), len(is_empty_flags))
+        full_path = full_path[:min_len]
+        full_speeds = full_speeds[:min_len]
+        full_timestamps = full_timestamps[:min_len]
+        is_empty_flags = is_empty_flags[:min_len]
 
         total_dist = self._path_length(full_path)
         empty_dist = 0.0
@@ -225,20 +453,54 @@ class EmptyTripSimulator:
             dropoff_point=end_point,
         )
 
+    def _get_weighted_start_areas(self, focus_areas: Optional[List[str]] = None) -> List[str]:
+        weighted = []
+        for area_name, area_info in BEIJING_KEY_AREAS.items():
+            density = area_info.get("density", 10)
+            weight = max(1, int(density / 5))
+            if focus_areas and area_name in focus_areas:
+                weight *= 3
+            weighted.extend([area_name] * weight)
+        return weighted
+
+    def _weighted_random_end_area(self, start_area: str) -> str:
+        areas = list(BEIJING_KEY_AREAS.keys())
+        weights = []
+        for area_name in areas:
+            if area_name == start_area:
+                weights.append(1)
+                continue
+            area_info = BEIJING_KEY_AREAS[area_name]
+            density = area_info.get("density", 10)
+            start_info = BEIJING_KEY_AREAS[start_area]
+            start_type = self._get_area_type(start_area)
+            end_type = self._get_area_type(area_name)
+            weight = density / 10
+            if start_type == "cbd" and end_type in ["airport", "station"]:
+                weight *= 1.5
+            if start_type in ["airport", "station"] and end_type in ["cbd", "normal"]:
+                weight *= 1.3
+            weights.append(weight)
+
+        total_weight = sum(weights)
+        r = random.uniform(0, total_weight)
+        cumulative = 0
+        for i, area_name in enumerate(areas):
+            cumulative += weights[i]
+            if r <= cumulative:
+                return area_name
+        return areas[-1]
+
     def simulate_batch(self, num_vehicles: int = 100, focus_areas: Optional[List[str]] = None) -> SimulationResult:
         trajectories = []
         total_dist = 0.0
         total_empty_dist = 0.0
 
-        areas = list(BEIJING_KEY_AREAS.keys())
-        if focus_areas:
-            weighted_areas = focus_areas * 3 + [a for a in areas if a not in focus_areas]
-        else:
-            weighted_areas = areas
+        weighted_start_areas = self._get_weighted_start_areas(focus_areas)
 
         for i in range(num_vehicles):
-            start_area = random.choice(weighted_areas)
-            end_area = random.choice(areas)
+            start_area = random.choice(weighted_start_areas)
+            end_area = self._weighted_random_end_area(start_area)
 
             traj = self.simulate_single_vehicle(start_area, end_area)
             trajectories.append(traj)
@@ -280,8 +542,8 @@ class EmptyTripSimulator:
             key_area_stats=key_area_stats,
         )
 
-    def get_trajectories_for_visualization(self, num_vehicles: int = 200) -> Dict:
-        result = self.simulate_batch(num_vehicles=num_vehicles)
+    def get_trajectories_for_visualization(self, num_vehicles: int = 200, focus_areas: Optional[List[str]] = None) -> Dict:
+        result = self.simulate_batch(num_vehicles=num_vehicles, focus_areas=focus_areas)
 
         all_empty_segments = []
         all_occupied_segments = []
