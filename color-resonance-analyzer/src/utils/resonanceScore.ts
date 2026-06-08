@@ -8,10 +8,9 @@ export interface ResonanceScore {
   hueDiff: number
   contrastRatio: number
   label: '和谐' | '平庸' | '冲突'
+  title: string
   description: string
   details: string[]
-  mode?: 'single' | 'pillows' | 'overall'
-  targetName?: string
 }
 
 function normalizeHueDiff(h1: number, h2: number): number {
@@ -22,7 +21,8 @@ function normalizeHueDiff(h1: number, h2: number): number {
 
 export function calculateResonance(
   baseColor: ColorInfo,
-  accentColor: ColorInfo
+  accentColor: ColorInfo,
+  title: string = ''
 ): ResonanceScore {
   const base = chroma(baseColor.hex)
   const accent = chroma(accentColor.hex)
@@ -59,6 +59,7 @@ export function calculateResonance(
     hueDiff: Math.round(hueDiff),
     contrastRatio: Math.round(contrastRatio * 100) / 100,
     label,
+    title,
     description,
     details,
   }
@@ -224,6 +225,7 @@ export function calculateOverallResonance(
     hueDiff: Math.round(avgHueDiff),
     contrastRatio: Math.round(avgContrast * 100) / 100,
     label,
+    title: '沙发 + 抱枕 + 窗帘 · 综合评分',
     description,
     details,
   }
@@ -266,6 +268,7 @@ export function calculateSchemeResonance(
     hueDiff: 0,
     contrastRatio: 0,
     label,
+    title: '方案共振度',
     description,
     details: [`方案平均共振度: ${Math.round(avgScore)} 分`],
   }
