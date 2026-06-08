@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { vertexShader, fragmentShader } from '../shaders/materialSwapShader';
-import { MaterialItem } from '../types/material';
+import { MaterialItem, PBRMaterialTextures } from '../types/material';
 
 interface MaterialSwapperProps {
   material: MaterialItem;
@@ -21,7 +21,10 @@ interface MaterialSwapperProps {
     clearcoat?: number;
     clearcoatRoughness?: number;
     reflectivity?: number;
+    normalStrength?: number;
   };
+  customTextures?: PBRMaterialTextures;
+  geometryType?: 'plane' | 'cylinder' | 'box' | 'custom';
 }
 
 const materialTypeMap: Record<string, number> = {
@@ -37,13 +40,18 @@ export function MaterialSwapper({
   material, 
   children,
   uvOptions = {},
-  physicsOverrides = {}
+  physicsOverrides = {},
+  customTextures = {},
+  geometryType = 'plane'
 }: MaterialSwapperProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const materialRef = useRef<THREE.ShaderMaterial | null>(null);
+  const texturesRef = useRef<Record<string, THREE.Texture | null>>({});
+
+  const type = material.isCustom ? 5 : (materialTypeMap[material.category] ?? 0);
+  const hasCustomTextures = type === 5 && Object.keys(customTextures).length > 0;
 
   const uniforms = useMemo(() => {
-    const type = material.isCustom ? 5 : (materialTypeMap[material.category] ?? 0);
     const uv = { ...material.uv, ...uvOptions };
     const physics = { ...material.physics, ...physicsOverrides };
 
@@ -56,6 +64,7 @@ export function MaterialSwapper({
       clearcoat: { value: physics.clearcoat ?? 0.0 },
       clearcoatRoughness: { value: physics.clearcoatRoughness ?? 0.0 },
       reflectivity: { value: physics.reflectivity ?? 0.5 },
+      normalStrength: { value: physics.normalStrength ?? 0.5 },
       uvRepeat: { value: new THREE.Vector2(uv.repeatX ?? 1, uv.repeatY ?? 1) },
       uvOffset: { value: new THREE.Vector2(uv.offsetX ?? 0, uv.offsetY ?? 0) },
       uvRotation: { value: uv.rotation ?? 0 },
@@ -64,14 +73,18 @@ export function MaterialSwapper({
       lightColor: { value: new THREE.Color(0xffffff) },
       lightIntensity: { value: 1.5 },
       ambientColor: { value: new THREE.Color(0xffffff) },
-      ambientIntensity: { value: 0.3 }
+      ambientIntensity: { value: 0.5 },
+      useCustomTextures: { value: hasCustomTextures },
+      customMap: { value: null as THREE.Texture | null },
+      customNormalMap: { value: null as THREE.Texture | null },
+      customRoughnessMap: { value: null as THREE.Texture | null },
+      customAOMap: { value: null as THREE.Texture | null }
     };
   }, []);
 
   useEffect(() => {
     if (!materialRef.current) return;
 
-    const type = material.isCustom ? 5 : (materialTypeMap[material.category] ?? 0);
     const uv = { ...material.uv, ...uvOptions };
     const physics = { ...material.physics, ...physicsOverrides };
 
@@ -83,12 +96,51 @@ export function MaterialSwapper({
     materialRef.current.uniforms.clearcoat.value = physics.clearcoat ?? 0.0;
     materialRef.current.uniforms.clearcoatRoughness.value = physics.clearcoatRoughness ?? 0.0;
     materialRef.current.uniforms.reflectivity.value = physics.reflectivity ?? 0.5;
+    materialRef.current.uniforms.normalStrength.value = physics.normalStrength ?? 0.5;
     materialRef.current.uniforms.uvRepeat.value.set(uv.repeatX ?? 1, uv.repeatY ?? 1);
     materialRef.current.uniforms.uvOffset.value.set(uv.offsetX ?? 0, uv.offsetY ?? 0);
     materialRef.current.uniforms.uvRotation.value = uv.rotation ?? 0;
+    materialRef.current.uniforms.useCustomTextures.value = hasCustomTextures;
+  }, [material, uvOptions, physicsOverrides, type, hasCustomTextures]);
 
-    materialRef.current.needsUpdate = true;
-  }, [material, uvOptions, physicsOverrides]);
+  useEffect(() => {
+    if (!materialRef.current) return;
+    
+    const loader = new THREE.TextureLoader();
+    
+    const loadTexture = (url: string | undefined, key: string) => {
+      if (!url) {
+        if (texturesRef.current[key]) {
+          texturesRef.current[key]?.dispose();
+          texturesRef.current[key] = null;
+        }
+        return;
+      }
+      
+      if (texturesRef.current[key]) {
+        texturesRef.current[key]?.dispose();
+      }
+      
+      const texture = loader.load(url);
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texturesRef.current[key] = texture;
+      
+      if (materialRef.current) {
+        materialRef.current.uniforms[key as keyof typeof materialRef.current.uniforms].value = texture;
+      }
+    };
+
+    loadTexture(customTextures.map, 'customMap');
+    loadTexture(customTextures.normalMap, 'customNormalMap');
+    loadTexture(customTextures.roughnessMap, 'customRoughnessMap');
+    loadTexture(customTextures.aoMap, 'customAOMap');
+
+    return () => {
+      Object.values(texturesRef.current).forEach(tex => tex?.dispose());
+      texturesRef.current = {};
+    };
+  }, [customTextures]);
 
   useFrame((state) => {
     if (materialRef.current) {

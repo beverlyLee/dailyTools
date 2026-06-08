@@ -33,11 +33,14 @@ export interface MaterialItem {
   category: 'wood' | 'stone' | 'fabric' | 'metal' | 'concrete' | 'custom';
   color: string;
   textures: PBRMaterialTextures;
+  textureUrls?: PBRMaterialTextures;
   physics: MaterialPhysicsProps;
   uv: Partial<UVOptions>;
   description?: string;
   isCustom?: boolean;
 }
+
+export type SceneObjectType = 'floor' | 'backWall' | 'sideWall' | 'leftPillar' | 'rightPillar';
 
 export type MaterialCategory = MaterialItem['category'];
 

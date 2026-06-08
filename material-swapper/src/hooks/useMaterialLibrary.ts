@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { MaterialItem, MaterialCategory } from '../types/material';
+import { MaterialItem, MaterialCategory, PBRMaterialTextures } from '../types/material';
 import { presetMaterials } from '../materials/presetMaterials';
 
 export function useMaterialLibrary() {
@@ -27,11 +27,12 @@ export function useMaterialLibrary() {
     setActiveMaterialId(id);
   }, []);
 
-  const addCustomMaterial = useCallback((material: Omit<MaterialItem, 'id' | 'isCustom'>) => {
+  const addCustomMaterial = useCallback((material: Omit<MaterialItem, 'id' | 'isCustom'> & { textureUrls?: PBRMaterialTextures }) => {
     const newMaterial: MaterialItem = {
       ...material,
       id: `custom-${Date.now()}`,
-      isCustom: true
+      isCustom: true,
+      textureUrls: material.textureUrls
     };
     setMaterials(prev => [...prev, newMaterial]);
     return newMaterial.id;

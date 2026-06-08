@@ -65,7 +65,7 @@ export function UVEditor({ uv, onChange, disabled = false }: UVEditorProps) {
             onChange={e => handleChange('offsetX', parseFloat(e.target.value))}
             disabled={disabled}
           />
-          <span>{uv.offsetX?.toFixed(2)}</span>
+          <span>{(uv.offsetX ?? 0).toFixed(2)}</span>
         </label>
       </div>
 
@@ -81,7 +81,7 @@ export function UVEditor({ uv, onChange, disabled = false }: UVEditorProps) {
             onChange={e => handleChange('offsetY', parseFloat(e.target.value))}
             disabled={disabled}
           />
-          <span>{uv.offsetY?.toFixed(2)}</span>
+          <span>{(uv.offsetY ?? 0).toFixed(2)}</span>
         </label>
       </div>
 

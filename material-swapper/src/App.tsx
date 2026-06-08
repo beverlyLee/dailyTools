@@ -1,17 +1,18 @@
-import { useState, useRef, useCallback } from 'react';
-import { useThree } from '@react-three/fiber';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { ThreeScene } from './components/ThreeScene';
 import { MaterialPanel } from './components/MaterialPanel';
 import { UVEditor } from './components/UVEditor';
 import { PhysicsPanel } from './components/PhysicsPanel';
+import { ObjectSelector } from './components/ObjectSelector';
+import { MaterialUploader } from './components/MaterialUploader';
 import { useMaterialLibrary } from './hooks/useMaterialLibrary';
 import { exportSnapshot } from './utils/snapshot';
-import { MaterialPhysicsProps } from './types/material';
+import { MaterialPhysicsProps, SceneObjectType, MaterialItem } from './types/material';
 import './App.css';
 
-function SnapshotButton({ onExport }: { onExport: () => void }) {
+function SnapshotButton({ onExport, isExporting }: { onExport: () => void; isExporting: boolean }) {
   return (
-    <button className="snapshot-btn" onClick={onExport}>
+    <button className="snapshot-btn" onClick={onExport} disabled={isExporting}>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
         <circle cx="12" cy="12" r="3"></circle>
@@ -24,7 +25,7 @@ function SnapshotButton({ onExport }: { onExport: () => void }) {
         <path d="M21 8h-3"></path>
         <path d="M21 16h-3"></path>
       </svg>
-      导出快照
+      {isExporting ? '导出中...' : '导出快照'}
     </button>
   );
 }
@@ -33,6 +34,7 @@ function App() {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const {
     materials,
+    allMaterials,
     activeMaterial,
     activeMaterialId,
     selectedCategory,
@@ -40,33 +42,78 @@ function App() {
     selectMaterial,
     setSelectedCategory,
     addCustomMaterial,
+    removeCustomMaterial,
     updateMaterialPhysics,
     updateMaterialUV
   } = useMaterialLibrary();
 
+  const [selectedObject, setSelectedObject] = useState<SceneObjectType>('floor');
   const [activeTab, setActiveTab] = useState<'materials' | 'uv' | 'physics'>('materials');
-  const [uvOverrides, setUvOverrides] = useState<Record<string, any>>({});
-  const [physicsOverrides, setPhysicsOverrides] = useState<Record<string, Partial<MaterialPhysicsProps>>>({});
+  const [showUploader, setShowUploader] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
-  const currentUV = activeMaterial ? { ...activeMaterial.uv, ...uvOverrides[activeMaterial.id] } : {};
-  const currentPhysics = activeMaterial ? { ...activeMaterial.physics, ...physicsOverrides[activeMaterial.id] } : {} as MaterialPhysicsProps;
+  const [objectMaterials, setObjectMaterials] = useState<Record<SceneObjectType, string>>({
+    floor: 'wood-floor-oak',
+    backWall: 'concrete-polished',
+    sideWall: 'concrete-polished',
+    leftPillar: 'marble-white',
+    rightPillar: 'marble-white'
+  });
+
+  const [uvOverrides, setUvOverrides] = useState<Record<string, Record<string, any>>>({});
+  const [physicsOverrides, setPhysicsOverrides] = useState<Record<string, Record<string, any>>>({});
+
+  const currentObjectMaterialId = objectMaterials[selectedObject];
+  const currentObjectMaterial = allMaterials.find(m => m.id === currentObjectMaterialId) || allMaterials[0];
+
+  const sceneMaterials = useMemo(() => {
+    const result: Record<string, MaterialItem> = {};
+    (['floor', 'backWall', 'sideWall', 'leftPillar', 'rightPillar'] as SceneObjectType[]).forEach(obj => {
+      const matId = objectMaterials[obj];
+      result[obj] = allMaterials.find(m => m.id === matId) || allMaterials[0];
+    });
+    return result as Record<SceneObjectType, MaterialItem>;
+  }, [objectMaterials, allMaterials]);
+
+  const customTextures = useMemo(() => {
+    const result: Record<string, any> = {};
+    (['floor', 'backWall', 'sideWall', 'leftPillar', 'rightPillar'] as SceneObjectType[]).forEach(obj => {
+      const mat = sceneMaterials[obj];
+      if (mat?.isCustom && mat.textureUrls) {
+        result[obj] = mat.textureUrls;
+      }
+    });
+    return result;
+  }, [sceneMaterials]);
+
+  const currentUV = currentObjectMaterial 
+    ? { ...currentObjectMaterial.uv, ...uvOverrides[selectedObject] }
+    : {};
+
+  const currentPhysics = currentObjectMaterial
+    ? { ...currentObjectMaterial.physics, ...physicsOverrides[selectedObject] }
+    : {} as MaterialPhysicsProps;
+
+  const handleSelectMaterial = useCallback((materialId: string) => {
+    setObjectMaterials(prev => ({
+      ...prev,
+      [selectedObject]: materialId
+    }));
+  }, [selectedObject]);
 
   const handleUVChange = useCallback((uvChanges: any) => {
-    if (!activeMaterial) return;
     setUvOverrides(prev => ({
       ...prev,
-      [activeMaterial.id]: { ...prev[activeMaterial.id], ...uvChanges }
+      [selectedObject]: { ...prev[selectedObject], ...uvChanges }
     }));
-  }, [activeMaterial]);
+  }, [selectedObject]);
 
   const handlePhysicsChange = useCallback((physicsChanges: Partial<MaterialPhysicsProps>) => {
-    if (!activeMaterial) return;
     setPhysicsOverrides(prev => ({
       ...prev,
-      [activeMaterial.id]: { ...prev[activeMaterial.id], ...physicsChanges }
+      [selectedObject]: { ...prev[selectedObject], ...physicsChanges }
     }));
-  }, [activeMaterial]);
+  }, [selectedObject]);
 
   const handleExportSnapshot = useCallback(async () => {
     if (!canvasContainerRef.current) return;
@@ -76,24 +123,31 @@ function App() {
 
     setIsExporting(true);
     try {
-      await exportSnapshot(canvas, 1920, 1080, `material-${activeMaterial?.name || 'snapshot'}.png`);
+      await exportSnapshot(canvas, 2560, 1440, `material-${selectedObject}-${Date.now()}.png`);
     } catch (error) {
       console.error('导出快照失败:', error);
       alert('导出快照失败，请重试');
     } finally {
       setIsExporting(false);
     }
-  }, [activeMaterial]);
+  }, [selectedObject]);
 
   const handleUploadCustom = useCallback(() => {
-    const name = prompt('请输入材质名称:');
-    if (!name) return;
+    setShowUploader(true);
+  }, []);
 
+  const handleUploadComplete = useCallback((data: {
+    name: string;
+    color: string;
+    textures: any;
+    textureUrls: any;
+  }) => {
     const id = addCustomMaterial({
-      name,
+      name: data.name,
       category: 'custom',
-      color: '#a0a0a0',
-      textures: {},
+      color: data.color,
+      textures: data.textures,
+      textureUrls: data.textureUrls,
       physics: {
         roughness: 0.5,
         metalness: 0.0,
@@ -106,8 +160,15 @@ function App() {
       },
       description: '用户自定义材质'
     });
-    selectMaterial(id);
-  }, [addCustomMaterial, selectMaterial]);
+    
+    setObjectMaterials(prev => ({
+      ...prev,
+      [selectedObject]: id
+    }));
+    
+    setShowUploader(false);
+    setSelectedCategory('custom');
+  }, [addCustomMaterial, selectedObject, setSelectedCategory]);
 
   return (
     <div className="app">
@@ -126,28 +187,41 @@ function App() {
             <span>高性能材质替换工具</span>
           </div>
         </div>
-        <SnapshotButton onExport={handleExportSnapshot} />
+        <SnapshotButton onExport={handleExportSnapshot} isExporting={isExporting} />
       </header>
 
       <div className="app-main">
         <div className="canvas-container" ref={canvasContainerRef}>
-          {activeMaterial && (
-            <ThreeScene
-              floorMaterial={activeMaterial}
-              uvOptions={uvOverrides[activeMaterial.id]}
-              physicsOverrides={physicsOverrides[activeMaterial.id]}
-            />
-          )}
+          <ThreeScene
+            materials={sceneMaterials}
+            uvOverrides={uvOverrides}
+            physicsOverrides={physicsOverrides}
+            customTextures={customTextures}
+          />
           
-          {activeMaterial && (
-            <div className="material-info-overlay">
-              <span className="current-material-label">当前材质:</span>
-              <span className="current-material-name">{activeMaterial.name}</span>
-            </div>
-          )}
+          <div className="material-info-overlay">
+            <span className="current-material-label">当前对象:</span>
+            <span className="current-material-name">
+              {{
+                floor: '地面',
+                backWall: '后墙',
+                sideWall: '侧墙',
+                leftPillar: '左柱',
+                rightPillar: '右柱'
+              }[selectedObject]}
+            </span>
+            <span className="material-divider">|</span>
+            <span className="current-material-label">材质:</span>
+            <span className="current-material-name">{currentObjectMaterial?.name || '-'}</span>
+          </div>
         </div>
 
         <aside className="sidebar">
+          <ObjectSelector 
+            selectedObject={selectedObject} 
+            onChange={setSelectedObject} 
+          />
+
           <div className="sidebar-tabs">
             <button
               className={`tab-btn ${activeTab === 'materials' ? 'active' : ''}`}
@@ -170,31 +244,38 @@ function App() {
           </div>
 
           <div className="sidebar-content">
-            {activeTab === 'materials' && (
+            {activeTab === 'materials' && !showUploader && (
               <MaterialPanel
                 materials={materials}
-                activeMaterialId={activeMaterialId}
+                activeMaterialId={currentObjectMaterialId}
                 selectedCategory={selectedCategory}
                 categories={categories}
-                onSelectMaterial={selectMaterial}
+                onSelectMaterial={handleSelectMaterial}
                 onCategoryChange={setSelectedCategory}
                 onUploadCustom={handleUploadCustom}
               />
             )}
 
-            {activeTab === 'uv' && activeMaterial && (
-              <UVEditor
-                uv={currentUV}
-                onChange={handleUVChange}
-                disabled={!activeMaterial}
+            {activeTab === 'materials' && showUploader && (
+              <MaterialUploader
+                onUpload={handleUploadComplete}
+                onCancel={() => setShowUploader(false)}
               />
             )}
 
-            {activeTab === 'physics' && activeMaterial && (
+            {activeTab === 'uv' && currentObjectMaterial && (
+              <UVEditor
+                uv={currentUV}
+                onChange={handleUVChange}
+                disabled={!currentObjectMaterial}
+              />
+            )}
+
+            {activeTab === 'physics' && currentObjectMaterial && (
               <PhysicsPanel
                 physics={currentPhysics}
                 onChange={handlePhysicsChange}
-                disabled={!activeMaterial}
+                disabled={!currentObjectMaterial}
               />
             )}
           </div>
@@ -202,8 +283,8 @@ function App() {
           <div className="sidebar-footer">
             <div className="stats">
               <div className="stat-item">
-                <span className="stat-label">材质数量</span>
-                <span className="stat-value">{materials.length}</span>
+                <span className="stat-label">材质总数</span>
+                <span className="stat-value">{allMaterials.length}</span>
               </div>
               <div className="stat-item">
                 <span className="stat-label">渲染引擎</span>

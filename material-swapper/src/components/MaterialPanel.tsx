@@ -1,4 +1,6 @@
+import { useState, useEffect, useRef } from 'react';
 import { MaterialItem, MaterialCategory } from '../types/material';
+import { generateMaterialThumbnail } from '../utils/thumbnailGenerator';
 
 interface MaterialPanelProps {
   materials: MaterialItem[];
@@ -19,6 +21,35 @@ const categoryNames: Record<string, string> = {
   concrete: '混凝土',
   custom: '自定义'
 };
+
+function MaterialThumbnail({ material }: { material: MaterialItem }) {
+  const [thumbnail, setThumbnail] = useState<string>('');
+  const hasGenerated = useRef(false);
+
+  useEffect(() => {
+    if (hasGenerated.current) return;
+    hasGenerated.current = true;
+    
+    const url = generateMaterialThumbnail(
+      material.category,
+      material.color,
+      128,
+      128
+    );
+    setThumbnail(url);
+  }, [material]);
+
+  return (
+    <div 
+      className="material-thumbnail"
+      style={{ 
+        backgroundColor: material.color,
+        backgroundImage: thumbnail ? `url(${thumbnail})` : 'none',
+        backgroundSize: 'cover'
+      }}
+    />
+  );
+}
 
 export function MaterialPanel({
   materials,
@@ -51,20 +82,14 @@ export function MaterialPanel({
             key={material.id}
             className={`material-item ${activeMaterialId === material.id ? 'active' : ''}`}
             onClick={() => onSelectMaterial(material.id)}
+            title={material.description}
           >
-            <div 
-              className="material-preview"
-              style={{ backgroundColor: material.color }}
-            >
+            <MaterialThumbnail material={material} />
+            <div className="material-info">
+              <span className="material-name">{material.name}</span>
               <span className="material-category-tag">
                 {categoryNames[material.category]}
               </span>
-            </div>
-            <div className="material-info">
-              <span className="material-name">{material.name}</span>
-              {material.description && (
-                <span className="material-desc">{material.description}</span>
-              )}
             </div>
           </div>
         ))}
