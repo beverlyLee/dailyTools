@@ -159,21 +159,41 @@ const currentScore = computed<ResonanceScore>(() => {
       label: '平庸',
       description: '等待选择颜色',
       details: ['请点击沙发、抱枕或窗帘开始分析'],
+      mode: 'overall',
     }
   }
   
   if (selectedPillowIndex.value >= 0 && selectedPillowColor.value) {
-    return calculateResonance(sofaColor, selectedPillowColor.value)
+    const score = calculateResonance(sofaColor, selectedPillowColor.value)
+    const pillowName = `抱枕${selectedPillowIndex.value + 1}`
+    return {
+      ...score,
+      description: `沙发 vs ${pillowName}的色彩搭配${score.label === '和谐' ? '和谐舒适' : score.label === '平庸' ? '中规中矩' : '冲突感强'}`,
+      mode: 'single',
+      targetName: pillowName,
+    }
   }
   
   if (selectedCurtainIndex.value >= 0 && selectedCurtainColor.value) {
-    return calculateResonance(sofaColor, selectedCurtainColor.value)
+    const score = calculateResonance(sofaColor, selectedCurtainColor.value)
+    const curtainName = selectedCurtainIndex.value === 0 ? '左窗帘' : '右窗帘'
+    return {
+      ...score,
+      description: `沙发 vs ${curtainName}的色彩搭配${score.label === '和谐' ? '和谐舒适' : score.label === '平庸' ? '中规中矩' : '冲突感强'}`,
+      mode: 'single',
+      targetName: curtainName,
+    }
   }
   
   const pillowColors = pillowObjects.value.map(p => createColorInfo(p.currentColor, p.name))
   
   if (curtainColor) {
-    return calculateOverallResonance(sofaColor, pillowColors, curtainColor)
+    const score = calculateOverallResonance(sofaColor, pillowColors, curtainColor)
+    return {
+      ...score,
+      mode: 'overall',
+      targetName: '沙发+抱枕+窗帘',
+    }
   }
   
   let totalScore = 0
@@ -184,7 +204,7 @@ const currentScore = computed<ResonanceScore>(() => {
     const score = calculateResonance(sofaColor, color)
     totalScore += score.overall
     count++
-    allDetails.push(`抱枕${index + 1}: ${score.overall}分 - ${score.label}`)
+    allDetails.push(`沙发-抱枕${index + 1}: ${score.overall}分 - ${score.label}`)
   })
   
   const avgScore = count > 0 ? Math.round(totalScore / count) : 0
@@ -194,13 +214,13 @@ const currentScore = computed<ResonanceScore>(() => {
   
   if (avgScore >= 80) {
     label = '和谐'
-    description = '整体抱枕配色和谐舒适，视觉感受愉悦'
+    description = '沙发与抱枕整体配色和谐舒适，视觉感受愉悦'
   } else if (avgScore >= 60) {
     label = '平庸'
-    description = '整体配色中规中矩，有提升空间'
+    description = '沙发与抱枕整体配色中规中矩，有提升空间'
   } else {
     label = '冲突'
-    description = '整体配色冲突感较强，建议调整'
+    description = '沙发与抱枕整体配色冲突感较强，建议调整'
   }
   
   const firstPillow = pillowColors[0]
@@ -215,6 +235,8 @@ const currentScore = computed<ResonanceScore>(() => {
     label,
     description,
     details: allDetails,
+    mode: 'pillows',
+    targetName: '沙发+抱枕',
   }
 })
 
@@ -226,15 +248,6 @@ watch(
     }
   },
   { immediate: true }
-)
-
-watch(
-  () => selectedObject.value,
-  (obj) => {
-    if (obj?.type === 'sofa' || obj?.type === 'curtain') {
-      colorSchemes.value = generateAllSchemes(obj.currentColor)
-    }
-  }
 )
 
 function onSchemeSelect(scheme: ColorScheme) {

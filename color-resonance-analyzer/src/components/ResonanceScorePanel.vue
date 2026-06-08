@@ -1,6 +1,17 @@
 <template>
   <div class="resonance-score-panel">
-    <h3 class="panel-title">共振度评分</h3>
+    <div class="panel-header">
+      <h3 class="panel-title">共振度评分</h3>
+      <span v-if="score.mode === 'single'" class="mode-badge single">
+        沙发 vs {{ score.targetName }}
+      </span>
+      <span v-else-if="score.mode === 'pillows'" class="mode-badge pillows">
+        沙发+抱枕
+      </span>
+      <span v-else class="mode-badge overall">
+        整体评分
+      </span>
+    </div>
     
     <div class="score-overview">
       <div class="score-circle" :class="score.label">
@@ -95,11 +106,40 @@ defineProps<{
   backdrop-filter: blur(10px);
 }
 
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
 .panel-title {
   font-size: 14px;
   font-weight: 600;
   color: #333;
-  margin: 0 0 16px 0;
+  margin: 0;
+}
+
+.mode-badge {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.mode-badge.single {
+  background: rgba(74, 158, 255, 0.15);
+  color: #2d7dcc;
+}
+
+.mode-badge.pillows {
+  background: rgba(156, 39, 176, 0.15);
+  color: #7b1fa2;
+}
+
+.mode-badge.overall {
+  background: rgba(76, 175, 80, 0.15);
+  color: #2e7d32;
 }
 
 .score-overview {

@@ -52,85 +52,98 @@ function getColorName(hex: string): string {
 
 function getDetailedColorName(h: number, s: number, v: number): string {
   if (h < 15 || h >= 345) {
-    if (v < 0.35) return '酒红'
-    if (v < 0.55) return '深红'
-    if (s < 0.4) return '灰红'
-    if (v > 0.85) return '粉红'
+    if (v < 0.3) return '酒红'
+    if (v < 0.5) return '深红'
+    if (s < 0.25) return '灰粉'
+    if (v > 0.88 && s < 0.5) return '樱花粉'
+    if (v > 0.85) return '蜜桃粉'
+    if (s < 0.5) return '豆沙'
     return '红色'
   }
   if (h < 35) {
-    if (v < 0.35) return '棕橙'
-    if (s < 0.35) return '驼色'
-    if (v > 0.8) return '浅橙'
+    if (v < 0.35) return '焦糖'
+    if (s < 0.25) return '驼色'
+    if (v > 0.85 && s < 0.4) return '杏色'
+    if (v > 0.8) return '南瓜橙'
+    if (s < 0.5) return '暖棕'
     return '橙色'
   }
   if (h < 55) {
-    if (s < 0.3) return '米黄'
-    if (v < 0.5) return '土黄'
+    if (s < 0.2) return '奶油白'
+    if (v < 0.4) return '土黄'
+    if (v > 0.9 && s < 0.3) return '米黄'
     if (v > 0.85) return '鹅黄'
     if (s > 0.7) return '金黄'
     return '姜黄'
   }
   if (h < 75) {
-    if (s < 0.3) return '浅黄'
+    if (s < 0.2) return '象牙白'
     if (v > 0.85) return '柠檬黄'
+    if (s < 0.4) return '浅黄'
     return '黄色'
   }
   if (h < 100) {
-    if (v < 0.35) return '墨绿'
-    if (v < 0.55) return '深绿'
-    if (s < 0.35) return '灰绿'
-    if (v > 0.85) return '嫩绿'
+    if (v < 0.3) return '墨绿'
+    if (v < 0.5) return '深绿'
+    if (s < 0.25) return '灰绿'
+    if (v > 0.85 && s < 0.4) return '薄荷绿'
+    if (v > 0.8) return '嫩绿'
+    if (s < 0.5) return '抹茶绿'
     return '草绿'
   }
   if (h < 145) {
-    if (v < 0.4) return '深翠绿'
-    if (s < 0.4) return '薄荷绿'
+    if (v < 0.35) return '翡翠绿'
+    if (s < 0.3) return '薄荷绿'
     if (v > 0.85) return '翠绿'
     return '绿色'
   }
-  if (h < 180) {
-    if (s < 0.3) return '浅青'
-    if (v < 0.4) return '深青'
+  if (h < 170) {
+    if (s < 0.25) return '薄荷青'
+    if (v < 0.35) return '深青'
+    if (v > 0.85) return '水青绿'
     return '青色'
   }
   if (h < 200) {
-    if (v < 0.4) return '深湖蓝'
-    if (s < 0.35) return '灰青'
-    if (v > 0.8) return '水蓝'
+    if (v < 0.35) return '藏青'
+    if (s < 0.3) return '雾霾蓝'
+    if (v > 0.85) return '天空蓝'
     return '湖蓝'
   }
   if (h < 225) {
-    if (v < 0.35) return '藏青'
-    if (s < 0.3) return '灰蓝'
-    if (v > 0.8) return '天蓝'
+    if (v < 0.3) return '藏蓝'
+    if (s < 0.25) return '灰蓝'
+    if (v > 0.85) return '天蓝'
     return '宝蓝'
   }
-  if (h < 255) {
-    if (v < 0.35) return '深蓝'
-    if (s < 0.4) return '灰蓝'
-    if (v > 0.8) return '浅蓝'
+  if (h < 250) {
+    if (v < 0.3) return '深蓝'
+    if (s < 0.3) return '灰蓝'
+    if (v > 0.85) return '淡蓝'
     return '蓝色'
   }
   if (h < 275) {
-    if (v < 0.4) return '深紫'
-    if (s < 0.4) return '灰紫'
-    if (v > 0.85) return '淡紫'
+    if (v < 0.35) return '深紫'
+    if (s < 0.3) return '灰紫'
+    if (v > 0.85) return '薰衣草'
+    if (s < 0.5) return '淡紫'
     return '紫色'
   }
   if (h < 295) {
-    if (v < 0.4) return '深紫'
+    if (v < 0.35) return '深紫'
     if (s < 0.35) return '藕荷'
+    if (v > 0.85) return '丁香紫'
     return '蓝紫'
   }
   if (h < 320) {
-    if (s < 0.4) return '灰粉'
-    if (v > 0.85) return '粉色'
+    if (s < 0.3) return '灰粉'
+    if (v > 0.85) return '樱花粉'
+    if (s < 0.5) return '豆沙粉'
     return '品红'
   }
   if (h < 345) {
-    if (v < 0.4) return '深玫红'
-    if (s < 0.4) return '灰玫红'
+    if (v < 0.35) return '深玫红'
+    if (s < 0.35) return '灰玫红'
+    if (v > 0.85) return '玫瑰粉'
     return '玫红'
   }
   return '彩色'
@@ -145,6 +158,22 @@ function getHueName(h: number): string {
   if (h < 255) return '蓝色'
   if (h < 290) return '紫色'
   return '品红'
+}
+
+function isWarmTone(h: number): boolean {
+  return h < 60 || h >= 330
+}
+
+function getToneLabel(h: number): string {
+  if (h < 30 || h >= 345) return '暖红'
+  if (h < 60) return '暖黄'
+  if (h < 90) return '暖绿'
+  if (h < 180) return '冷绿'
+  if (h < 210) return '冷青'
+  if (h < 260) return '冷蓝'
+  if (h < 290) return '冷紫'
+  if (h < 330) return '暖紫'
+  return '暖红'
 }
 
 export function generateComplementaryScheme(baseHex: string): ColorScheme {
@@ -169,11 +198,22 @@ export function generateComplementaryScheme(baseHex: string): ColorScheme {
   const compColorName = getColorName(primaryHex)
   const baseColorName = getColorName(baseHex)
   
+  const warmBase = isWarmTone(h)
+  const warmComp = isWarmTone(compH)
+  let styleDesc = ''
+  if (warmBase && !warmComp) {
+    styleDesc = '冷暖碰撞'
+  } else if (!warmBase && warmComp) {
+    styleDesc = '冷暖碰撞'
+  } else {
+    styleDesc = '强烈对比'
+  }
+  
   return {
     id: 'complementary',
-    name: `${compColorName}互补`,
+    name: `${compColorName}撞色`,
     type: 'complementary',
-    description: `以${baseColorName}为主色，搭配${compColorName}互补色，创造强烈视觉对比`,
+    description: `${baseColorName}搭配${compColorName}互补色，${styleDesc}，活力十足`,
     colors: [base, primary, lightComp, darkBase, accent],
     baseColor: base,
   }
@@ -203,13 +243,14 @@ export function generateAnalogousScheme(baseHex: string): ColorScheme {
   const rightName = getColorName(rightHex)
   const baseName = getColorName(baseHex)
   
-  const schemeName = `${leftName}${rightName}邻近`
+  const toneLabel = getToneLabel(h)
+  const schemeName = `${toneLabel}搭配`
   
   return {
     id: 'analogous',
     name: schemeName,
     type: 'analogous',
-    description: `${baseName}搭配${leftName}与${rightName}邻近色，柔和协调富有层次`,
+    description: `${baseName}为中心，融合${leftName}与${rightName}邻近色调，柔和过渡富有层次感`,
     colors: [leftAnalog, base, rightAnalog, lightLeft, darkRight],
     baseColor: base,
   }

@@ -10,6 +10,8 @@ export interface ResonanceScore {
   label: '和谐' | '平庸' | '冲突'
   description: string
   details: string[]
+  mode?: 'single' | 'pillows' | 'overall'
+  targetName?: string
 }
 
 function normalizeHueDiff(h1: number, h2: number): number {
