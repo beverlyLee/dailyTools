@@ -37,18 +37,16 @@ def _generate_city_bookstores(city: str) -> list:
         "教辅新华书店", "学而优书店",
     ]
 
-    if city in CITY_LOCATIONS:
-        locs = CITY_LOCATIONS[city]
-        all_locations = (locs.get("family_friendly", []) + locs.get("internet_famous", []) +
-                        locs.get("deep_reading", []) + locs.get("study_oriented", []) + locs.get("mixed", []))
-    else:
+    locs = CITY_LOCATIONS.get(city, DEFAULT_LOCATIONS)
+    all_locations = (locs.get("family_friendly", []) + locs.get("internet_famous", []) +
+                    locs.get("deep_reading", []) + locs.get("study_oriented", []) + locs.get("mixed", []))
+
+    if not all_locations:
         all_locations = ["中心店", "旗舰店", "一号店", "二号店"]
 
     selected = []
     num_shops = rng.randint(10, 14)
     used_names = set()
-
-    chain_loc_map = {}
 
     for chain in base_chains:
         if len(selected) >= num_shops:
@@ -58,12 +56,13 @@ def _generate_city_bookstores(city: str) -> list:
 
         if all_locations:
             if is_family_brand and locs.get("family_friendly") and rng.random() < 0.6:
-                branch_loc = rng.choice(locs["family_friendly"])
+                branch_location = rng.choice(locs["family_friendly"])
             else:
-                branch_loc = rng.choice(all_locations)
-            branch_name = _location_to_branch_name(branch_loc)
+                branch_location = rng.choice(all_locations)
+            branch_name = _location_to_branch_name(branch_location)
         else:
-            branch_name = f"中心店"
+            branch_location = "市中心"
+            branch_name = "中心"
 
         full_name = f"{chain}({branch_name}店)"
         if full_name not in used_names:
@@ -72,6 +71,7 @@ def _generate_city_bookstores(city: str) -> list:
                 "name": full_name,
                 "chain": chain,
                 "branch": branch_name,
+                "branch_location": branch_location,
                 "rating": round(rng.uniform(3.8, 4.9), 1),
                 "review_count": rng.randint(800, 9000)
             })
@@ -79,35 +79,116 @@ def _generate_city_bookstores(city: str) -> list:
     for i in range(max(0, num_shops - len(selected))):
         names = ["独立书店", "人文书店", "街角书店", "旧书店", "新知书店", "光影书店"]
         if all_locations:
-            branch_loc = rng.choice(all_locations)
-            branch_name = _location_to_branch_name(branch_loc)
+            branch_location = rng.choice(all_locations)
+            branch_name = _location_to_branch_name(branch_location)
         else:
-            branch_name = f"第{i+1}分店"
+            branch_location = "市区"
+            branch_name = f"第{i+1}分"
         name = rng.choice(names) + f"({branch_name}店)"
         selected.append({
             "name": name,
             "chain": "独立",
             "branch": branch_name,
+            "branch_location": branch_location,
             "rating": round(rng.uniform(4.0, 4.8), 1),
             "review_count": rng.randint(500, 3000)
         })
 
     rng.shuffle(selected)
-    return selected[:num_shops]
+    shops = selected[:num_shops]
+
+    present_types = set()
+    for bs in shops:
+        t = _infer_bookstore_type(bs["name"], bs.get("branch_location", ""))
+        if t != "mixed":
+            present_types.add(t)
+
+    all_types = ["deep_reading", "family_friendly", "internet_famous", "study_oriented"]
+    missing_types = [t for t in all_types if t not in present_types]
+
+    if missing_types:
+        for missing_type in missing_types:
+            if missing_type == "family_friendly":
+                brands = BRAND_TYPE_MAP.get("family_brand", ["大众书局"])
+                raw_loc_pool = locs.get("family_friendly", locs.get("mixed", []))
+                test_brand = brands[0]
+                loc_pool = [loc for loc in raw_loc_pool
+                            if _infer_bookstore_type(f"{test_brand}(店)", loc) == "family_friendly"]
+                if not loc_pool:
+                    loc_pool = [loc for loc in raw_loc_pool
+                                if any(kw in loc for kw in LOCATION_FAMILY_KW)]
+            elif missing_type == "study_oriented":
+                brands = BRAND_TYPE_MAP.get("study_oriented", ["考试教材书店"])
+                loc_pool = locs.get("study_oriented", locs.get("deep_reading", []))
+            elif missing_type == "internet_famous":
+                brands = BRAND_TYPE_MAP.get("internet_famous", ["钟书阁"])
+                loc_pool = locs.get("internet_famous", locs.get("mixed", []))
+            else:
+                brands = BRAND_TYPE_MAP.get("deep_reading", ["先锋书店"])
+                loc_pool = locs.get("deep_reading", locs.get("mixed", []))
+
+            if not brands or not loc_pool:
+                continue
+
+            brand = rng.choice(brands)
+            location = rng.choice(loc_pool)
+            branch_name = _location_to_branch_name(location)
+            full_name = f"{brand}({branch_name}店)"
+
+            if full_name not in [s["name"] for s in shops]:
+                shops.append({
+                    "name": full_name,
+                    "chain": brand,
+                    "branch": branch_name,
+                    "branch_location": location,
+                    "rating": round(rng.uniform(4.0, 4.8), 1),
+                    "review_count": rng.randint(600, 6000),
+                    "_type_guaranteed": True
+                })
+
+    rng.shuffle(shops)
+    return shops
+
+
+AMBIGUOUS_ROAD_PREFIXES = ["北京", "南京", "上海", "广州", "成都", "杭州", "天津", "重庆",
+    "武汉", "西安", "苏州", "无锡", "常州", "宁波", "温州", "厦门", "福州",
+    "四川", "河南", "河北", "山东", "山西", "湖南", "湖北", "广东", "广西",
+    "云南", "贵州", "西藏", "新疆", "内蒙", "辽宁", "吉林", "黑龙江",
+    "中山", "东莞", "佛山", "珠海", "青岛", "大连", "厦门", "深圳"]
+
+STREET_SUFFIXES = ["路", "街", "大道", "大街", "巷", "弄", "胡同", "里"]
+PLACE_SUFFIXES = ["购物中心", "购物广场", "商业广场", "创意园", "文创园", "文化街",
+    "步行街", "历史街区", "大学城", "校区旁", "校区", "附近", "地铁站",
+    "广场", "商城", "商业中心", "艺术区", "创意仓库"]
 
 
 def _location_to_branch_name(location: str) -> str:
-    short = location
-    suffixes = ["购物中心", "创意园", "文创园", "文化街", "步行街", "历史街区",
-                "大学城", "校区旁", "校区", "附近", "地铁站", "购物广场",
-                "广场", "商城", "大街", "路", "街", "区", "巷", "胡同", "里"]
-    for suffix in suffixes:
+    if not location:
+        return location
+
+    for suffix in PLACE_SUFFIXES:
         if location.endswith(suffix):
-            short = location[:-len(suffix)]
-            break
-    if len(short) > 8:
-        short = short[:8]
-    return short if short else location
+            prefix = location[:-len(suffix)]
+            if len(prefix) <= 2:
+                return location
+            if len(prefix) <= 8:
+                return prefix
+            return prefix[:8]
+
+    for suffix in STREET_SUFFIXES:
+        if location.endswith(suffix):
+            prefix = location[:-len(suffix)]
+            if prefix in AMBIGUOUS_ROAD_PREFIXES:
+                if len(location) <= 8:
+                    return location
+                return location[:6] + suffix
+            if len(prefix) <= 8:
+                return prefix
+            return prefix[:8]
+
+    if len(location) <= 8:
+        return location
+    return location[:8]
 
 
 BRAND_TYPE_MAP = {
@@ -424,12 +505,19 @@ def build_city_data(city: str) -> dict:
 
     for idx, bs in enumerate(raw_bookstores):
         bookstore_id = f"bs_{idx:03d}"
-        bs_type = _infer_bookstore_type(bs["name"], "")
+        bs_type = _infer_bookstore_type(bs["name"], bs.get("branch_location", ""))
 
         if bs_type == "mixed":
             bs_type = rng.choice(["family_friendly", "internet_famous", "deep_reading", "study_oriented"])
 
-        address = _generate_address(rng, city, bs_type)
+        if bs.get("branch_location"):
+            location = bs["branch_location"]
+            suffixes = ["", "B1层", "1楼", "2楼", "3楼", "负一层", "L2层", "L3层"]
+            suffix = rng.choice(suffixes) if bs_type == "family_friendly" else ""
+            address = f"{city}市{location}{suffix}"
+        else:
+            address = _generate_address(rng, city, bs_type)
+
         reviews = _generate_typed_reviews(bookstore_id, bs_type, city, count=30)
 
         class BookstoreInfo:
