@@ -154,6 +154,79 @@ function generateScoreDescription(
   return { label, description, details }
 }
 
+export function calculateOverallResonance(
+  sofaColor: ColorInfo,
+  pillowColors: ColorInfo[],
+  curtainColor: ColorInfo
+): ResonanceScore {
+  const allScores: number[] = []
+  const details: string[] = []
+  
+  pillowColors.forEach((pillow, index) => {
+    const score = calculateResonance(sofaColor, pillow)
+    allScores.push(score.overall)
+    details.push(`沙发-抱枕${index + 1}: ${score.overall}分 - ${score.label}`)
+  })
+  
+  const sofaCurtainScore = calculateResonance(sofaColor, curtainColor)
+  allScores.push(sofaCurtainScore.overall)
+  details.push(`沙发-窗帘: ${sofaCurtainScore.overall}分 - ${sofaCurtainScore.label}`)
+  
+  if (pillowColors.length > 0) {
+    const pillowCurtainScore = calculateResonance(pillowColors[0], curtainColor)
+    allScores.push(pillowCurtainScore.overall)
+    details.push(`抱枕1-窗帘: ${pillowCurtainScore.overall}分 - ${pillowCurtainScore.label}`)
+  }
+  
+  const avgScore = allScores.length > 0 
+    ? allScores.reduce((sum, s) => sum + s, 0) / allScores.length 
+    : 0
+  
+  const weightedScore = Math.round(
+    avgScore * 0.6 + 
+    (sofaCurtainScore.overall || 0) * 0.2 + 
+    (allScores[0] || 0) * 0.2
+  )
+  
+  let label: '和谐' | '平庸' | '冲突'
+  let description: string
+  
+  if (weightedScore >= 80) {
+    label = '和谐'
+    description = '沙发、抱枕、窗帘整体色彩和谐统一，空间氛围舒适'
+  } else if (weightedScore >= 60) {
+    label = '平庸'
+    description = '整体配色中规中矩，部分色彩搭配有优化空间'
+  } else {
+    label = '冲突'
+    description = '整体色彩冲突感较强，建议调整部分配色'
+  }
+  
+  const avgHueDiff = pillowColors.length > 0 
+    ? Math.abs(sofaColor.hsv.h - pillowColors[0].hsv.h) 
+    : 0
+  const avgSatDiff = pillowColors.length > 0 
+    ? Math.abs(sofaColor.hsv.s - pillowColors[0].hsv.s) * 100 
+    : 0
+  const avgValDiff = pillowColors.length > 0 
+    ? Math.abs(sofaColor.hsv.v - pillowColors[0].hsv.v) * 100 
+    : 0
+  const avgContrast = pillowColors.length > 0 
+    ? chroma.contrast(sofaColor.hex, pillowColors[0].hex) 
+    : 0
+  
+  return {
+    overall: weightedScore,
+    saturationDiff: Math.round(avgSatDiff),
+    valueDiff: Math.round(avgValDiff),
+    hueDiff: Math.round(avgHueDiff),
+    contrastRatio: Math.round(avgContrast * 100) / 100,
+    label,
+    description,
+    details,
+  }
+}
+
 export function calculateSchemeResonance(
   baseColor: ColorInfo,
   scheme: ColorScheme

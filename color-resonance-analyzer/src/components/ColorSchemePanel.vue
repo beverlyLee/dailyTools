@@ -29,12 +29,20 @@
         
         <p class="scheme-description">{{ scheme.description }}</p>
         
-        <button 
-          class="apply-btn"
-          @click.stop="$emit('apply', scheme)"
-        >
-          应用到抱枕
-        </button>
+        <div class="apply-buttons">
+          <button 
+            class="apply-btn pillow-btn"
+            @click.stop="$emit('apply', scheme)"
+          >
+            抱枕
+          </button>
+          <button 
+            class="apply-btn curtain-btn"
+            @click.stop="$emit('applyCurtain', scheme)"
+          >
+            窗帘
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -51,6 +59,7 @@ defineProps<{
 defineEmits<{
   select: [scheme: ColorScheme]
   apply: [scheme: ColorScheme]
+  applyCurtain: [scheme: ColorScheme]
 }>()
 
 const typeLabels: Record<string, string> = {
@@ -156,10 +165,14 @@ const typeLabels: Record<string, string> = {
   line-height: 1.4;
 }
 
+.apply-buttons {
+  display: flex;
+  gap: 8px;
+}
+
 .apply-btn {
-  width: 100%;
+  flex: 1;
   padding: 8px;
-  background: linear-gradient(135deg, #4a9eff 0%, #2d7dcc 100%);
   color: white;
   border: none;
   border-radius: 6px;
@@ -169,8 +182,21 @@ const typeLabels: Record<string, string> = {
   transition: all 0.2s ease;
 }
 
-.apply-btn:hover {
+.pillow-btn {
+  background: linear-gradient(135deg, #4a9eff 0%, #2d7dcc 100%);
+}
+
+.pillow-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(45, 125, 204, 0.3);
+}
+
+.curtain-btn {
+  background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+}
+
+.curtain-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(67, 160, 71, 0.3);
 }
 </style>

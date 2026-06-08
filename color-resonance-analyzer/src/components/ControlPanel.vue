@@ -37,6 +37,21 @@
     </div>
     
     <div class="control-section">
+      <label class="control-label">窗帘颜色</label>
+      <div class="color-picker-row">
+        <div 
+          v-for="color in curtainPresets" 
+          :key="color.hex"
+          class="color-preset"
+          :class="{ active: currentCurtainColor === color.hex }"
+          :style="{ backgroundColor: color.hex }"
+          :title="color.name"
+          @click="$emit('curtainColorChange', color.hex)"
+        ></div>
+      </div>
+    </div>
+    
+    <div class="control-section">
       <button class="reset-btn" @click="$emit('reset')">
         重置为默认
       </button>
@@ -58,11 +73,13 @@
 defineProps<{
   ambientOcclusion: number
   currentSofaColor: string
+  currentCurtainColor: string
 }>()
 
 const emit = defineEmits<{
   ambientOcclusionChange: [value: number]
   sofaColorChange: [hex: string]
+  curtainColorChange: [hex: string]
   reset: []
 }>()
 
@@ -75,6 +92,17 @@ const sofaPresets = [
   { hex: '#4a0080', name: '深紫色' },
   { hex: '#8b0000', name: '暗红色' },
   { hex: '#2e2e2e', name: '深灰色' },
+]
+
+const curtainPresets = [
+  { hex: '#f5f0e8', name: '米白色' },
+  { hex: '#e8ddd0', name: '米色' },
+  { hex: '#d4c8b8', name: '浅咖色' },
+  { hex: '#c9b896', name: '卡其色' },
+  { hex: '#a8c5e6', name: '淡蓝色' },
+  { hex: '#b8d4b8', name: '淡绿色' },
+  { hex: '#e6c8c8', name: '淡粉色' },
+  { hex: '#d0c8e0', name: '淡紫色' },
 ]
 
 function onAoChange(event: Event) {

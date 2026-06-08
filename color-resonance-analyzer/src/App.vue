@@ -20,6 +20,7 @@
         <div class="scene-hint" v-if="!selectedObject">
           <p>👆 点击沙发提取主色调</p>
           <p>🎯 点击抱枕进行配色</p>
+          <p>🪟 点击窗帘查看效果</p>
         </div>
       </div>
       
@@ -31,9 +32,21 @@
         />
         
         <ColorInfoPanel 
+          v-if="curtainColorInfo && !selectedCurtainColor"
+          title="窗帘主色"
+          :color-info="curtainColorInfo"
+        />
+        
+        <ColorInfoPanel 
           v-if="selectedPillowColor"
           title="选中抱枕"
           :color-info="selectedPillowColor"
+        />
+        
+        <ColorInfoPanel 
+          v-if="selectedCurtainColor"
+          title="选中窗帘"
+          :color-info="selectedCurtainColor"
         />
         
         <ResonanceScorePanel 
@@ -48,13 +61,16 @@
           :selected-scheme-id="selectedSchemeId"
           @select="onSchemeSelect"
           @apply="onSchemeApply"
+          @apply-curtain="onSchemeApplyToCurtain"
         />
         
         <ControlPanel
           :ambient-occlusion="ambientOcclusionIntensity"
           :current-sofa-color="currentSofaColorHex"
+          :current-curtain-color="currentCurtainColorHex"
           @ambient-occlusion-change="onAoChange"
           @sofa-color-change="onSofaColorChange"
+          @curtain-color-change="onCurtainColorChange"
           @reset="onReset"
         />
       </aside>
@@ -66,7 +82,7 @@
 import { ref, computed, watch } from 'vue'
 import { useThreeScene } from './composables/useThreeScene'
 import { generateAllSchemes, createColorInfo } from './utils/colorTheory'
-import { calculateResonance, calculateSchemeResonance } from './utils/resonanceScore'
+import { calculateResonance, calculateOverallResonance } from './utils/resonanceScore'
 import type { ColorScheme, ColorInfo } from './utils/colorTheory'
 import type { ResonanceScore } from './utils/resonanceScore'
 import ColorInfoPanel from './components/ColorInfoPanel.vue'
@@ -79,13 +95,18 @@ const sceneContainerRef = ref<HTMLElement | null>(null)
 const {
   sofaObjects,
   pillowObjects,
+  curtainObjects,
   selectedObject,
   selectedPillowIndex,
+  selectedCurtainIndex,
   ambientOcclusionIntensity,
   getSofaColorInfo,
   getPillowColorInfo,
+  getCurtainColorInfo,
   setPillowColor,
   setAllPillowColors,
+  setCurtainColor,
+  setAllCurtainColors,
   setSofaColor,
   setAmbientOcclusionIntensity,
   resetToOriginal,
@@ -105,12 +126,29 @@ const selectedPillowColor = computed<ColorInfo | null>(() => {
   return null
 })
 
+const selectedCurtainColor = computed<ColorInfo | null>(() => {
+  if (selectedCurtainIndex.value >= 0) {
+    return getCurtainColorInfo(selectedCurtainIndex.value)
+  }
+  return null
+})
+
+const curtainColorInfo = computed<ColorInfo | null>(() => {
+  return getCurtainColorInfo(0)
+})
+
 const currentSofaColorHex = computed(() => {
   return sofaObjects.value[0]?.currentColor || '#1e3a5f'
 })
 
+const currentCurtainColorHex = computed(() => {
+  return curtainObjects.value[0]?.currentColor || '#f5f0e8'
+})
+
 const currentScore = computed<ResonanceScore>(() => {
   const sofaColor = sofaColorInfo.value
+  const curtainColor = curtainColorInfo.value
+  
   if (!sofaColor) {
     return {
       overall: 0,
@@ -120,7 +158,7 @@ const currentScore = computed<ResonanceScore>(() => {
       contrastRatio: 0,
       label: '平庸',
       description: '等待选择颜色',
-      details: ['请点击沙发或抱枕开始分析'],
+      details: ['请点击沙发、抱枕或窗帘开始分析'],
     }
   }
   
@@ -128,7 +166,16 @@ const currentScore = computed<ResonanceScore>(() => {
     return calculateResonance(sofaColor, selectedPillowColor.value)
   }
   
+  if (selectedCurtainIndex.value >= 0 && selectedCurtainColor.value) {
+    return calculateResonance(sofaColor, selectedCurtainColor.value)
+  }
+  
   const pillowColors = pillowObjects.value.map(p => createColorInfo(p.currentColor, p.name))
+  
+  if (curtainColor) {
+    return calculateOverallResonance(sofaColor, pillowColors, curtainColor)
+  }
+  
   let totalScore = 0
   let count = 0
   const allDetails: string[] = []
@@ -184,7 +231,7 @@ watch(
 watch(
   () => selectedObject.value,
   (obj) => {
-    if (obj?.type === 'sofa') {
+    if (obj?.type === 'sofa' || obj?.type === 'curtain') {
       colorSchemes.value = generateAllSchemes(obj.currentColor)
     }
   }
@@ -195,21 +242,34 @@ function onSchemeSelect(scheme: ColorScheme) {
 }
 
 function onSchemeApply(scheme: ColorScheme) {
+  const baseColor = sofaColorInfo.value
+  
   const pillowCount = pillowObjects.value.length
   const schemeColors = scheme.colors
-    .filter(c => c.hex.toLowerCase() !== currentSofaColorHex.value.toLowerCase())
+    .filter(c => baseColor && c.hex.toLowerCase() !== baseColor.hex.toLowerCase())
     .slice(0, pillowCount)
     .map(c => c.hex)
   
   while (schemeColors.length < pillowCount) {
     const colorIndex = schemeColors.length % (scheme.colors.length - 1)
     const availableColors = scheme.colors.filter(
-      c => c.hex.toLowerCase() !== currentSofaColorHex.value.toLowerCase()
+      c => baseColor && c.hex.toLowerCase() !== baseColor.hex.toLowerCase()
     )
     schemeColors.push(availableColors[colorIndex].hex)
   }
   
   setAllPillowColors(schemeColors)
+}
+
+function onSchemeApplyToCurtain(scheme: ColorScheme) {
+  const accentColors = scheme.colors.filter(
+    c => c.hex.toLowerCase() !== scheme.baseColor.hex.toLowerCase()
+  )
+  
+  if (accentColors.length > 0) {
+    const targetColor = accentColors[Math.floor(accentColors.length / 2)]
+    setAllCurtainColors(targetColor.hex)
+  }
 }
 
 function onAoChange(value: number) {
@@ -220,9 +280,16 @@ function onSofaColorChange(hex: string) {
   setSofaColor(hex)
 }
 
+function onCurtainColorChange(hex: string) {
+  setAllCurtainColors(hex)
+}
+
 function onReset() {
   resetToOriginal()
   selectedSchemeId.value = 'monochromatic'
+  
+  const defaultSofaColor = '#1e3a5f'
+  colorSchemes.value = generateAllSchemes(defaultSofaColor)
 }
 </script>
 

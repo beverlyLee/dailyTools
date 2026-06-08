@@ -25,6 +25,7 @@ export function useThreeScene(containerRef: { value: HTMLElement | null }) {
   
   const selectedObject = ref<SceneObject | null>(null)
   const selectedPillowIndex = ref<number>(-1)
+  const selectedCurtainIndex = ref<number>(-1)
   
   const ambientOcclusionIntensity = ref(0.5)
   
@@ -276,6 +277,7 @@ export function useThreeScene(containerRef: { value: HTMLElement | null }) {
     leftCurtain.castShadow = true
     leftCurtain.userData.objectId = 'curtain-left'
     leftCurtain.userData.objectType = 'curtain'
+    leftCurtain.userData.curtainIndex = 0
     scene.value.add(leftCurtain)
     
     const rightCurtain = new THREE.Mesh(curtainGeometry, curtainMaterial.clone())
@@ -285,6 +287,7 @@ export function useThreeScene(containerRef: { value: HTMLElement | null }) {
     rightCurtain.castShadow = true
     rightCurtain.userData.objectId = 'curtain-right'
     rightCurtain.userData.objectType = 'curtain'
+    rightCurtain.userData.curtainIndex = 1
     scene.value.add(rightCurtain)
     
     curtainObjects.value = [
@@ -305,6 +308,7 @@ export function useThreeScene(containerRef: { value: HTMLElement | null }) {
     const allMeshes: THREE.Mesh[] = [
       ...sofaObjects.value.map(o => o.mesh),
       ...pillowObjects.value.map(o => o.mesh),
+      ...curtainObjects.value.map(o => o.mesh),
     ]
     
     const intersects = raycaster.intersectObjects(allMeshes)
@@ -318,6 +322,7 @@ export function useThreeScene(containerRef: { value: HTMLElement | null }) {
         if (sofaObj) {
           selectedObject.value = sofaObj
           selectedPillowIndex.value = -1
+          selectedCurtainIndex.value = -1
         }
       } else if (objectType === 'pillow') {
         const pillowIndex = clickedMesh.userData.pillowIndex
@@ -325,6 +330,15 @@ export function useThreeScene(containerRef: { value: HTMLElement | null }) {
         if (pillowObj) {
           selectedObject.value = pillowObj
           selectedPillowIndex.value = pillowIndex
+          selectedCurtainIndex.value = -1
+        }
+      } else if (objectType === 'curtain') {
+        const curtainIndex = clickedMesh.userData.curtainIndex
+        const curtainObj = curtainObjects.value[curtainIndex]
+        if (curtainObj) {
+          selectedObject.value = curtainObj
+          selectedCurtainIndex.value = curtainIndex
+          selectedPillowIndex.value = -1
         }
       }
     }
@@ -355,10 +369,31 @@ export function useThreeScene(containerRef: { value: HTMLElement | null }) {
     return createColorInfo(sofaObjects.value[0]?.currentColor || defaultSofaColor, '沙发主色')
   }
   
+  function getCurtainColorInfo(index: number): ColorInfo | null {
+    const curtain = curtainObjects.value[index]
+    if (!curtain) return null
+    return createColorInfo(curtain.currentColor, curtain.name)
+  }
+  
   function getPillowColorInfo(index: number): ColorInfo | null {
     const pillow = pillowObjects.value[index]
     if (!pillow) return null
     return createColorInfo(pillow.currentColor, pillow.name)
+  }
+  
+  function setCurtainColor(index: number, hexColor: string) {
+    const curtain = curtainObjects.value[index]
+    if (!curtain) return
+    
+    const material = curtain.mesh.material as THREE.MeshStandardMaterial
+    material.color.set(hexColor)
+    curtain.currentColor = hexColor
+  }
+  
+  function setAllCurtainColors(hexColor: string) {
+    curtainObjects.value.forEach((_, index) => {
+      setCurtainColor(index, hexColor)
+    })
   }
   
   function setPillowColor(index: number, hexColor: string) {
@@ -430,6 +465,19 @@ export function useThreeScene(containerRef: { value: HTMLElement | null }) {
       material.color.set(obj.originalColor)
       obj.currentColor = obj.originalColor
     })
+    
+    curtainObjects.value.forEach(obj => {
+      const material = obj.mesh.material as THREE.MeshStandardMaterial
+      material.color.set(obj.originalColor)
+      obj.currentColor = obj.originalColor
+    })
+    
+    selectedObject.value = null
+    selectedPillowIndex.value = -1
+    selectedCurtainIndex.value = -1
+    ambientOcclusionIntensity.value = 0.5
+    
+    updateAmbientOcclusion()
   }
   
   function dispose() {
@@ -474,11 +522,15 @@ export function useThreeScene(containerRef: { value: HTMLElement | null }) {
     curtainObjects,
     selectedObject,
     selectedPillowIndex,
+    selectedCurtainIndex,
     ambientOcclusionIntensity,
     getSofaColorInfo,
     getPillowColorInfo,
+    getCurtainColorInfo,
     setPillowColor,
     setAllPillowColors,
+    setCurtainColor,
+    setAllCurtainColors,
     setSofaColor,
     setAmbientOcclusionIntensity,
     resetToOriginal,

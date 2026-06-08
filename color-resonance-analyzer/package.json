@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "build": "vue-tsc --noEmit && vite build",
+    "typecheck": "vue-tsc --noEmit",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -15,6 +16,7 @@
   },
   "devDependencies": {
     "@types/chroma-js": "^2.4.4",
+    "@types/node": "^25.9.2",
     "@types/three": "^0.170.0",
     "@vitejs/plugin-vue": "^5.0.3",
     "typescript": "~5.3.3",
