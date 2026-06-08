@@ -19,7 +19,7 @@ FUEL_CONSUMPTION = {
 
 CARBON_FACTOR = {
     "gasoline": 2.31,
-    "hybrid": 1.41,
+    "hybrid": 2.31,
     "electric": 0.5,
 }
 
@@ -96,7 +96,8 @@ class WasteCalculator:
 
     def _calc_carbon(self, distance_km: float) -> float:
         if self.vehicle_type == "electric":
-            return distance_km * self.carbon_factor
+            kwh = (distance_km / 100) * self.fuel_consumption
+            return kwh * self.carbon_factor
         else:
             fuel_liters = (distance_km / 100) * self.fuel_consumption
             return fuel_liters * self.carbon_factor

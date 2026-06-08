@@ -35,9 +35,33 @@ class SimulationResult:
     key_area_stats: Dict[str, Dict] = field(default_factory=dict)
 
 
+VEHICLE_TYPE_PARAMS = {
+    "gasoline": {
+        "empty_before_base": 0.5,
+        "empty_after_base": 0.4,
+        "speed_multiplier": 1.15,
+        "distance_multiplier": 1.0,
+    },
+    "hybrid": {
+        "empty_before_base": 0.65,
+        "empty_after_base": 0.55,
+        "speed_multiplier": 1.0,
+        "distance_multiplier": 1.05,
+    },
+    "electric": {
+        "empty_before_base": 0.8,
+        "empty_after_base": 0.7,
+        "speed_multiplier": 0.85,
+        "distance_multiplier": 0.9,
+    },
+}
+
+
 class EmptyTripSimulator:
-    def __init__(self, spider: Optional[RoadStatusSpider] = None):
+    def __init__(self, spider: Optional[RoadStatusSpider] = None, vehicle_type: str = "gasoline"):
         self.spider = spider or RoadStatusSpider()
+        self.vehicle_type = vehicle_type if vehicle_type in VEHICLE_TYPE_PARAMS else "gasoline"
+        self._params = VEHICLE_TYPE_PARAMS[self.vehicle_type]
         self._segments_cache = None
         self._vehicle_counter = 0
 
@@ -89,6 +113,7 @@ class EmptyTripSimulator:
             seg_path = self._interpolate_path(seg_start, seg_end, seg_points, jitter * 0.5)
 
             base_speed = random.uniform(25, 55) if is_empty else random.uniform(15, 40)
+            base_speed *= self._params["speed_multiplier"]
             seg_speeds = []
             for p in seg_path:
                 speed_variation = random.uniform(-8, 8)
@@ -213,13 +238,13 @@ class EmptyTripSimulator:
             end_center[1] + random.uniform(-end_radius, end_radius),
         )
 
-        empty_before_prob = 0.7
-        empty_after_prob = 0.6
+        empty_before_prob = self._params["empty_before_base"]
+        empty_after_prob = self._params["empty_after_base"]
 
         if start_type in ["airport", "station"]:
-            empty_before_prob = 0.85
+            empty_before_prob = min(0.95, empty_before_prob + 0.15)
         if end_type in ["airport", "station"]:
-            empty_after_prob = 0.8
+            empty_after_prob = min(0.95, empty_after_prob + 0.15)
 
         empty_before = random.random() < empty_before_prob
         empty_after = random.random() < empty_after_prob
@@ -542,8 +567,39 @@ class EmptyTripSimulator:
             key_area_stats=key_area_stats,
         )
 
-    def get_trajectories_for_visualization(self, num_vehicles: int = 200, focus_areas: Optional[List[str]] = None) -> Dict:
-        result = self.simulate_batch(num_vehicles=num_vehicles, focus_areas=focus_areas)
+    def _is_point_in_areas(self, lng: float, lat: float, area_names: List[str]) -> bool:
+        for area_name in area_names:
+            if area_name not in BEIJING_KEY_AREAS:
+                continue
+            area_info = BEIJING_KEY_AREAS[area_name]
+            center = area_info["center"]
+            radius = area_info["radius"] * 1.5
+            dist = math.sqrt((lng - center[0])**2 + (lat - center[1])**2)
+            if dist < radius:
+                return True
+        return False
+
+    def _filter_segments_by_areas(self, segments: List[Dict], focus_areas: List[str]) -> List[Dict]:
+        if not focus_areas:
+            return segments
+        filtered = []
+        for seg in segments:
+            has_point_in_area = False
+            for lng, lat in seg["path"]:
+                if self._is_point_in_areas(lng, lat, focus_areas):
+                    has_point_in_area = True
+                    break
+            if has_point_in_area:
+                filtered.append(seg)
+        return filtered
+
+    def get_trajectories_for_visualization(self, num_vehicles: int = 200,
+                                            focus_areas: Optional[List[str]] = None,
+                                            sim_result: Optional[SimulationResult] = None) -> Dict:
+        if sim_result is None:
+            result = self.simulate_batch(num_vehicles=num_vehicles, focus_areas=focus_areas)
+        else:
+            result = sim_result
 
         all_empty_segments = []
         all_occupied_segments = []
@@ -583,6 +639,10 @@ class EmptyTripSimulator:
                     "vehicle_id": traj.vehicle_id,
                     "path": occupied_seg,
                 })
+
+        if focus_areas:
+            all_empty_segments = self._filter_segments_by_areas(all_empty_segments, focus_areas)
+            all_occupied_segments = self._filter_segments_by_areas(all_occupied_segments, focus_areas)
 
         grid_bounds = {
             "min_lng": 116.2,
@@ -625,6 +685,7 @@ class EmptyTripSimulator:
                 "empty_distance_km": round(result.total_empty_distance / 1000, 2),
                 "empty_ratio": round(result.empty_ratio * 100, 2),
                 "key_area_stats": result.key_area_stats,
+                "vehicle_type": self.vehicle_type,
             }
         }
 

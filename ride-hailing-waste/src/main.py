@@ -39,6 +39,7 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 _traffic_spider = None
 _simulator = None
+_simulator_vehicle_type = None
 
 
 def get_spider():
@@ -48,10 +49,11 @@ def get_spider():
     return _traffic_spider
 
 
-def get_simulator():
-    global _simulator
-    if _simulator is None:
-        _simulator = EmptyTripSimulator(get_spider())
+def get_simulator(vehicle_type: str = "gasoline"):
+    global _simulator, _simulator_vehicle_type
+    if _simulator is None or _simulator_vehicle_type != vehicle_type:
+        _simulator = EmptyTripSimulator(get_spider(), vehicle_type=vehicle_type)
+        _simulator_vehicle_type = vehicle_type
     return _simulator
 
 
@@ -116,7 +118,7 @@ async def simulate_trips(
     focus_areas: Optional[str] = Query(None, description="重点区域，逗号分隔"),
     vehicle_type: str = Query("gasoline", description="车型: gasoline/hybrid/electric"),
 ):
-    simulator = get_simulator()
+    simulator = get_simulator(vehicle_type)
 
     focus_list = None
     if focus_areas:
@@ -145,7 +147,7 @@ async def get_waste_metrics(
     vehicle_type: str = Query("gasoline", description="车型: gasoline/hybrid/electric"),
     compare: bool = Query(False, description="是否对比不同车型"),
 ):
-    simulator = get_simulator()
+    simulator = get_simulator(vehicle_type)
     sim_result = simulator.simulate_batch(num_vehicles=num_vehicles)
 
     calc = WasteCalculator(vehicle_type)
@@ -169,24 +171,26 @@ async def get_visualization_data(
     focus_areas: Optional[str] = Query(None, description="重点区域，逗号分隔"),
     vehicle_type: str = Query("gasoline", description="车型"),
 ):
-    simulator = get_simulator()
+    simulator = get_simulator(vehicle_type)
 
     focus_list = None
     if focus_areas:
         focus_list = [a.strip() for a in focus_areas.split(",") if a.strip()]
 
+    sim_result = simulator.simulate_batch(num_vehicles=num_vehicles, focus_areas=focus_list)
     viz_data = simulator.get_trajectories_for_visualization(
         num_vehicles=num_vehicles,
-        focus_areas=focus_list
+        focus_areas=focus_list,
+        sim_result=sim_result
     )
     calc = WasteCalculator(vehicle_type)
 
-    sim_result = simulator.simulate_batch(num_vehicles=num_vehicles, focus_areas=focus_list)
     metrics = calc.calculate_from_simulation(sim_result)
     area_breakdown = calc.calculate_area_breakdown(sim_result.trajectories, BEIJING_KEY_AREAS)
 
     viz_data["waste_metrics"] = calc.to_dict(metrics)
     viz_data["area_breakdown"] = area_breakdown
+    viz_data["vehicle_type"] = vehicle_type
 
     return viz_data
 
