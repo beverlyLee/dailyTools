@@ -81,25 +81,110 @@ def _generate_city_bookstores(city: str):
     return selected[:num_shops]
 
 
-def _infer_bookstore_type(name: str, address: str) -> str:
-    deep_reading_kw = ["先锋", "三联", "独立", "人文", "旧书", "新知", "学术", "高校店", "大学路", "学院路"]
-    family_kw = ["万象城", "万达", "大悦城", "SM广场", "商场", "购物中心", "银泰", "龙湖天街", "万象天地", "国贸"]
-    internet_kw = ["钟书阁", "言几又", "方所", "PAGE ONE", "猫的天空", "十点", "网红", "打卡", "光影"]
-    study_kw = ["考试教材", "考研之家", "教辅", "学而优", "华师", "师大", "教育学院", "附中", "考研基地", "科教园"]
+BRAND_TYPE_MAP = {
+    "deep_reading": ["先锋书店", "三联韬奋书店", "独立书店", "人文书店", "旧书店", "新知书店"],
+    "internet_famous": ["钟书阁", "言几又", "方所", "PAGE ONE", "猫的天空之城", "十点书店", "光影书店"],
+    "study_oriented": ["考试教材书店", "考研之家书店", "教辅新华书店", "学而优书店"],
+    "family_brand": ["西西弗书店", "大众书局"]
+}
 
-    for kw in study_kw:
-        if kw in name or kw in address:
-            return "student"
-    for kw in deep_reading_kw:
-        if kw in name or kw in address:
+LOCATION_FAMILY_KW = ["万象城", "万达", "大悦城", "SM广场", "商场", "购物中心", "银泰", "龙湖天街", "万象天地", "国贸", "广场"]
+
+LOCATION_DEEP_READING_KW = ["大学城", "高校", "大学路", "学院路", "老门店", "文创园", "老街", "文教区"]
+
+LOCATION_STUDY_KW = ["教育学院", "师大", "华师", "附中", "考研基地", "科教园区", "考研一条街", "大学城西区", "东区"]
+
+LOCATION_INTERNET_KW = ["太古里", "三里屯", "南锣鼓巷", "平江路", "宽窄巷子", "湖滨", "星光大道", "历史街区", "步行街"]
+
+
+def _infer_bookstore_type(name: str, address: str) -> str:
+    """
+    类型推断优先级：
+    1. 教辅型品牌（明确的教辅类书店品牌）
+    2. 深度阅读型品牌（独立/人文/学术品牌）
+    3. 网红品牌（网红打卡品牌，即使在商场里也按网红算）
+    4. 亲子型品牌 + 商场位置 = 亲子型
+    5. 位置特征推断（教辅区、文教区、网红街区、商场）
+    """
+
+    for btype, brands in BRAND_TYPE_MAP.items():
+        for brand in brands:
+            if brand in name:
+                if btype == "family_brand":
+                    for loc_kw in LOCATION_FAMILY_KW:
+                        if loc_kw in name or loc_kw in address:
+                            return "family_friendly"
+                    return "internet_famous"
+                return btype
+
+    for loc_kw in LOCATION_STUDY_KW:
+        if loc_kw in name or loc_kw in address:
+            return "study_oriented"
+
+    for loc_kw in LOCATION_DEEP_READING_KW:
+        if loc_kw in name or loc_kw in address:
             return "deep_reading"
-    for kw in family_kw:
-        if kw in name or kw in address:
-            return "family"
-    for kw in internet_kw:
-        if kw in name:
+
+    for loc_kw in LOCATION_INTERNET_KW:
+        if loc_kw in name or loc_kw in address:
             return "internet_famous"
+
+    for loc_kw in LOCATION_FAMILY_KW:
+        if loc_kw in name or loc_kw in address:
+            return "family_friendly"
+
     return "mixed"
+
+
+def _validate_bookstore_classification(name: str, address: str, classified_type: str) -> dict:
+    """
+    分类合理性校验：确保典型品牌与类型的对应关系正确。
+    返回校验结果字典。
+    """
+    expected_type = None
+    brand_found = None
+
+    for btype, brands in BRAND_TYPE_MAP.items():
+        for brand in brands:
+            if brand in name:
+                if btype == "family_brand":
+                    has_mall = any(kw in name or kw in address for kw in LOCATION_FAMILY_KW)
+                    expected_type = "family_friendly" if has_mall else "internet_famous"
+                else:
+                    expected_type = btype
+                brand_found = brand
+                break
+        if expected_type:
+            break
+
+    is_valid = True
+    if expected_type and expected_type != classified_type:
+        is_valid = False
+
+    return {
+        "valid": is_valid,
+        "brand_found": brand_found,
+        "expected_type": expected_type,
+        "actual_type": classified_type
+    }
+
+
+def _force_correct_classification(name: str, address: str, node: dict) -> dict:
+    """
+    如果品牌对应的分类与算法分类不一致，强制修正为品牌对应的类型。
+    确保典型品牌归类正确。
+    """
+    validation = _validate_bookstore_classification(name, address, node["type"])
+
+    if not validation["valid"] and validation["expected_type"]:
+        expected = validation["expected_type"]
+        node["type"] = expected
+        node["type_name_cn"] = TYPE_NAMES_CN.get(expected, node["type_name_cn"])
+        node["type_color"] = TYPE_COLORS.get(expected, node["type_color"])
+        node["group"] = expected
+        node["_classification_corrected"] = True
+
+    return node
 
 
 def _generate_typed_reviews(bookstore_id: str, bookstore_type: str, city: str, count: int = 30) -> list:
@@ -117,7 +202,7 @@ def _generate_typed_reviews(bookstore_id: str, bookstore_type: str, city: str, c
             "周末常独自来这里打发时间，看看书发发呆，很治愈。",
             "一个人逛书店是最好的放松方式，这里的氛围很适合独处。",
         ],
-        "family": [
+        "family_friendly": [
             "带孩子过来的，亲子阅读区很不错，小朋友很喜欢。绘本种类也很多。",
             "周末全家一起来的，孩子在儿童区看书，大人在旁边也能看看自己的书。",
             "带娃打卡，里面有专门的儿童绘本区，小朋友玩得很开心。适合亲子活动。",
@@ -126,7 +211,7 @@ def _generate_typed_reviews(bookstore_id: str, bookstore_type: str, city: str, c
             "周末带孩子来这里看书，儿童区很大，孩子玩得很开心。",
             "适合带小朋友来，有很多绘本和儿童读物。亲子时光的好去处。",
         ],
-        "student": [
+        "study_oriented": [
             "学生党常来写作业，环境安静，适合学习。复习备考的好去处。",
             "在这里上自习，看书学习效率很高。写论文写作业都很合适。",
             "考研党表示很喜欢这里，安静有学习氛围。做功课复习都不错。",
@@ -195,9 +280,9 @@ def _generate_typed_reviews(bookstore_id: str, bookstore_type: str, city: str, c
 def _generate_address(rng, city, bookstore_type):
     if bookstore_type == "deep_reading":
         locations = ["大学城文教区", "老城区巷子里", "大学路12号", "学院路88号", "文创园B区", "老街36号"]
-    elif bookstore_type == "family":
+    elif bookstore_type == "family_friendly":
         locations = ["万象城购物中心B1层", "万达广场3楼", "大悦城4楼", "银泰百货2层", "万象天地负一楼"]
-    elif bookstore_type == "student":
+    elif bookstore_type == "study_oriented":
         locations = ["教育学院旁", "师大附中对面", "大学城西区", "华师东门", "考研一条街", "科教园区"]
     elif bookstore_type == "internet_famous":
         locations = ["太古里负一楼", "三里屯太古里", "南锣鼓巷", "平江路历史街区", "宽窄巷子", "湖滨步行街"]
@@ -226,7 +311,7 @@ def build_city_data(city: str) -> dict:
         bs_type = _infer_bookstore_type(bs["name"], "")
 
         if bs_type == "mixed":
-            bs_type = rng.choice(["family", "internet_famous", "deep_reading", "student"])
+            bs_type = rng.choice(["family_friendly", "internet_famous", "deep_reading", "study_oriented"])
 
         address = _generate_address(rng, city, bs_type)
         reviews = _generate_typed_reviews(bookstore_id, bs_type, city, count=30)
@@ -293,6 +378,25 @@ def build_city_data(city: str) -> dict:
             "group": cls.primary_type
         })
 
+    for i, node in enumerate(nodes):
+        corrected = _force_correct_classification(
+            node["name"], node["address"], node
+        )
+        nodes[i] = corrected
+
+    type_counts = {}
+    for node in nodes:
+        t = node["type"]
+        type_counts[t] = type_counts.get(t, 0) + 1
+    total_nodes = len(nodes)
+    type_stats = {
+        "total": total_nodes,
+        "by_type": {
+            t: {"count": c, "percentage": round(c / total_nodes * 100, 1) if total_nodes > 0 else 0}
+            for t, c in type_counts.items()
+        }
+    }
+
     result = {
         "nodes": nodes,
         "links": edges,
@@ -324,7 +428,13 @@ def get_bookstore_detail(city: str, bookstore_id: str) -> dict:
     solitude = data["_solitude_map"].get(bookstore_id)
     classification = data["_classification_map"].get(bookstore_id)
 
-    if not review_entry or not solitude:
+    node_data = None
+    for node in data["nodes"]:
+        if node["id"] == bookstore_id:
+            node_data = node
+            break
+
+    if not review_entry or not solitude or not node_data:
         return None
 
     total_raw = (solitude.solitude_score + solitude.family_score +
@@ -350,8 +460,8 @@ def get_bookstore_detail(city: str, bookstore_id: str) -> dict:
             "internet_famous": solitude.internet_famous_score
         },
         "score_composition": score_composition,
-        "type": classification.primary_type if classification else "unknown",
-        "type_name_cn": TYPE_NAMES_CN.get(classification.primary_type, "未知") if classification else "未知",
+        "type": node_data["type"],
+        "type_name_cn": node_data["type_name_cn"],
         "type_scores": classification.type_scores if classification else {},
         "keyword_counts": solitude.keyword_counts,
         "total_reviews": solitude.total_reviews,
@@ -365,6 +475,16 @@ def get_bookstore_detail(city: str, bookstore_id: str) -> dict:
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.route("/favicon.ico")
+def favicon():
+    from flask import Response
+    svg = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <rect width="100" height="100" fill="#1a365d" rx="15"/>
+        <text x="50" y="65" font-size="50" text-anchor="middle" fill="#fff">📚</text>
+    </svg>'''
+    return Response(svg, mimetype="image/svg+xml")
 
 
 @app.route("/api/bookstores")
