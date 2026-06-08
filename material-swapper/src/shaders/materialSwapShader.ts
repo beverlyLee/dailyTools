@@ -227,7 +227,7 @@ export const fragmentShader = /* glsl */ `
     base *= 0.95 + poreNoise * 0.1;
     
     float dustNoise = fbm(uv * 30.0) * 0.05;
-    base += dustNoise;
+    base += vec3(dustNoise);
     
     return clamp(base, 0.0, 1.0);
   }
@@ -277,10 +277,10 @@ export const fragmentShader = /* glsl */ `
     
     float crystalSparkle = fbm(uv * 60.0);
     crystalSparkle = pow(crystalSparkle, 3.0) * 0.15;
-    color += crystalSparkle;
+    color += vec3(crystalSparkle);
     
     float surfaceVariation = fbm(uv * 8.0) * 0.03;
-    color += surfaceVariation;
+    color += vec3(surfaceVariation);
     
     float microDetail = fbm(uv * 120.0) * 0.05;
     color *= 0.97 + microDetail;
@@ -338,10 +338,10 @@ export const fragmentShader = /* glsl */ `
     color *= 0.85 + shadowNoise * 0.3;
     
     float microShadows = fbm(uv * 80.0) * 0.1;
-    color -= microShadows;
+    color -= vec3(microShadows);
     
     float sheen = pow(fiber, 3.0) * 0.1;
-    color += sheen;
+    color += vec3(sheen);
     
     return clamp(color, 0.0, 1.0);
   }
@@ -392,11 +392,11 @@ export const fragmentShader = /* glsl */ `
     color = mix(color, brightMetal, smoothstep(0.6, 0.95, brush) * 0.5);
     
     float grainDetail = fbm(uv * 60.0) * 0.1;
-    color += grainDetail;
+    color += vec3(grainDetail);
     
     float microScratch = fbm(uv * 400.0);
     microScratch = pow(microScratch, 5.0) * 0.15;
-    color += microScratch;
+    color += vec3(microScratch);
     
     float tarnish = fbm(uv * 5.0) * 0.05;
     color *= 0.95 + tarnish;
@@ -447,13 +447,13 @@ export const fragmentShader = /* glsl */ `
     
     float aggregate = fbm(uv * 40.0);
     aggregate = pow(aggregate, 3.0) * 0.1;
-    color += aggregate;
+    color += vec3(aggregate);
     
     float fineGrain = fbm(uv * 200.0) * 0.05;
-    color += fineGrain;
+    color += vec3(fineGrain);
     
     float wearPattern = fbm(uv * 2.0) * 0.05;
-    color += wearPattern;
+    color += vec3(wearPattern);
     
     return clamp(color, 0.0, 1.0);
   }
@@ -519,6 +519,25 @@ export const fragmentShader = /* glsl */ `
     return clamp(rough, 0.0, 1.0);
   }
 
+  float getMaterialHeight(vec2 uv) {
+    if (materialType == MATERIAL_WOOD) {
+      return woodGrain(uv) * 0.3;
+    }
+    else if (materialType == MATERIAL_STONE) {
+      return marbleVeins(uv) * 0.15;
+    }
+    else if (materialType == MATERIAL_FABRIC) {
+      return carpetHeight(uv);
+    }
+    else if (materialType == MATERIAL_METAL) {
+      return brushedMetal(uv) * 0.1;
+    }
+    else if (materialType == MATERIAL_CONCRETE) {
+      return concreteTexture(uv) * 0.2;
+    }
+    return 0.0;
+  }
+
   vec3 getMaterialNormal(vec2 uv, vec3 surfNormal) {
     vec3 normal = surfNormal;
     
@@ -572,25 +591,6 @@ export const fragmentShader = /* glsl */ `
     normal = normalize(TBN * bumpNormal);
     
     return normal;
-  }
-
-  float getMaterialHeight(vec2 uv) {
-    if (materialType == MATERIAL_WOOD) {
-      return woodGrain(uv) * 0.3;
-    }
-    else if (materialType == MATERIAL_STONE) {
-      return marbleVeins(uv) * 0.15;
-    }
-    else if (materialType == MATERIAL_FABRIC) {
-      return carpetHeight(uv);
-    }
-    else if (materialType == MATERIAL_METAL) {
-      return brushedMetal(uv) * 0.1;
-    }
-    else if (materialType == MATERIAL_CONCRETE) {
-      return concreteTexture(uv) * 0.2;
-    }
-    return 0.0;
   }
 
   float getAmbientOcclusion(vec2 uv) {
