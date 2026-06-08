@@ -26,59 +26,88 @@ def _city_seed(city: str) -> int:
     return int(h[:8], 16)
 
 
-def _generate_city_bookstores(city: str):
+def _generate_city_bookstores(city: str) -> list:
     seed = _city_seed(city)
     rng = random.Random(seed)
 
     base_chains = [
-        ("西西弗书店", ["万象城店", "万达店", "大悦城店", "银泰店"]),
-        ("钟书阁", ["星光大道店", "湖滨店", "西溪店"]),
-        ("言几又", ["来福士店", "龙湖天街店"]),
-        ("方所", ["太古里店", "万象天地店"]),
-        ("先锋书店", ["大学城店", "高校店", "老门店"]),
-        ("三联韬奋书店", ["大学路店", "学院路店"]),
-        ("PAGE ONE", ["三里屯店", "国贸店"]),
-        ("猫的天空之城", ["平江路店", "南锣鼓巷店", "宽窄巷子店"]),
-        ("大众书局", ["新街口店", "南京路店"]),
-        ("十点书店", ["SM广场店", "万象城店"]),
-        ("考试教材书店", ["教育学院店", "师大附中店"]),
-        ("考研之家书店", ["大学城一店", "高校西门分店"]),
-        ("教辅新华书店", ["科教园区店", "附中旁店"]),
-        ("学而优书店", ["华师店", "考研基地店"]),
+        "西西弗书店", "钟书阁", "言几又", "方所",
+        "先锋书店", "三联韬奋书店", "PAGE ONE", "猫的天空之城",
+        "大众书局", "十点书店", "考试教材书店", "考研之家书店",
+        "教辅新华书店", "学而优书店",
     ]
+
+    if city in CITY_LOCATIONS:
+        locs = CITY_LOCATIONS[city]
+        all_locations = (locs.get("family_friendly", []) + locs.get("internet_famous", []) +
+                        locs.get("deep_reading", []) + locs.get("study_oriented", []) + locs.get("mixed", []))
+    else:
+        all_locations = ["中心店", "旗舰店", "一号店", "二号店"]
 
     selected = []
     num_shops = rng.randint(10, 14)
     used_names = set()
 
-    for chain, branches in base_chains:
+    chain_loc_map = {}
+
+    for chain in base_chains:
         if len(selected) >= num_shops:
             break
-        branch = rng.choice(branches)
-        full_name = f"{chain}({branch})"
+
+        is_family_brand = chain in BRAND_TYPE_MAP.get("family_brand", [])
+
+        if all_locations:
+            if is_family_brand and locs.get("family_friendly") and rng.random() < 0.6:
+                branch_loc = rng.choice(locs["family_friendly"])
+            else:
+                branch_loc = rng.choice(all_locations)
+            branch_name = _location_to_branch_name(branch_loc)
+        else:
+            branch_name = f"中心店"
+
+        full_name = f"{chain}({branch_name}店)"
         if full_name not in used_names:
             used_names.add(full_name)
             selected.append({
                 "name": full_name,
                 "chain": chain,
-                "branch": branch,
+                "branch": branch_name,
                 "rating": round(rng.uniform(3.8, 4.9), 1),
                 "review_count": rng.randint(800, 9000)
             })
 
     for i in range(max(0, num_shops - len(selected))):
         names = ["独立书店", "人文书店", "街角书店", "旧书店", "新知书店", "光影书店"]
-        name = rng.choice(names) + f"(第{i+1}分店)"
+        if all_locations:
+            branch_loc = rng.choice(all_locations)
+            branch_name = _location_to_branch_name(branch_loc)
+        else:
+            branch_name = f"第{i+1}分店"
+        name = rng.choice(names) + f"({branch_name}店)"
         selected.append({
             "name": name,
             "chain": "独立",
-            "branch": f"分店{i+1}",
+            "branch": branch_name,
             "rating": round(rng.uniform(4.0, 4.8), 1),
             "review_count": rng.randint(500, 3000)
         })
 
     rng.shuffle(selected)
     return selected[:num_shops]
+
+
+def _location_to_branch_name(location: str) -> str:
+    short = location
+    suffixes = ["购物中心", "创意园", "文创园", "文化街", "步行街", "历史街区",
+                "大学城", "校区旁", "校区", "附近", "地铁站", "购物广场",
+                "广场", "商城", "大街", "路", "街", "区", "巷", "胡同", "里"]
+    for suffix in suffixes:
+        if location.endswith(suffix):
+            short = location[:-len(suffix)]
+            break
+    if len(short) > 8:
+        short = short[:8]
+    return short if short else location
 
 
 BRAND_TYPE_MAP = {
@@ -88,13 +117,70 @@ BRAND_TYPE_MAP = {
     "family_brand": ["西西弗书店", "大众书局"]
 }
 
-LOCATION_FAMILY_KW = ["万象城", "万达", "大悦城", "SM广场", "商场", "购物中心", "银泰", "龙湖天街", "万象天地", "国贸", "广场"]
+NEGATIVE_TYPE_RULES = {
+    "西西弗书店": ["internet_famous"],
+    "大众书局": ["internet_famous"],
+    "考试教材书店": ["family_friendly", "internet_famous"],
+    "考研之家书店": ["family_friendly", "internet_famous"],
+    "学而优书店": ["family_friendly", "internet_famous"],
+    "教辅新华书店": ["family_friendly", "internet_famous"],
+    "先锋书店": ["internet_famous", "family_friendly"],
+    "三联韬奋书店": ["internet_famous", "family_friendly"],
+}
 
-LOCATION_DEEP_READING_KW = ["大学城", "高校", "大学路", "学院路", "老门店", "文创园", "老街", "文教区"]
+CITY_LOCATIONS = {
+    "上海": {
+        "family_friendly": ["万象城购物中心", "陆家嘴正大广场", "徐家汇港汇恒隆", "静安嘉里中心", "长宁龙之梦", "五角场万达广场"],
+        "deep_reading": ["复旦大学城", "同济大学附近", "华山路老洋房区", "多伦路文化街", "M50创意园", "1933老场坊"],
+        "study_oriented": ["复旦南区", "交大闵行校区旁", "华师大东门", "同济赤峰路", "松江大学城"],
+        "internet_famous": ["新天地", "田子坊", "武康路", "愚园路", "思南公馆", "外滩源"],
+        "mixed": ["南京东路", "淮海中路", "四川北路", "曹杨新村"]
+    },
+    "北京": {
+        "family_friendly": ["朝阳大悦城", "西单大悦城", "国贸商城", "三里屯太古里", "万达广场", "合生汇购物中心"],
+        "deep_reading": ["海淀大学城", "五道口", "学院路", "北大东门附近", "清华西门", "国子监街"],
+        "study_oriented": ["海淀黄庄", "北师大东门", "人大西门", "学院路考研一条街", "五道口华清嘉园"],
+        "internet_famous": ["南锣鼓巷", "什刹海", "798艺术区", "三里屯", "杨梅竹斜街", "五道营胡同"],
+        "mixed": ["王府井大街", "西单北大街", "东单", "中关村大街"]
+    },
+    "广州": {
+        "family_friendly": ["天河城", "正佳广场", "太古汇", "万菱汇", "万达广场", "白云汇"],
+        "deep_reading": ["天河五山大学城", "中山大学南校区", "小洲村", "红专厂创意园", "TIT创意园"],
+        "study_oriented": ["华师地铁站", "中大西门", "华工五山", "广外北门", "大学城北"],
+        "internet_famous": ["沙面", "永庆坊", "北京路", "上下九", "珠江新城", "太古仓"],
+        "mixed": ["天河路", "中山五路", "农林下路", "江南西"]
+    },
+    "成都": {
+        "family_friendly": ["春熙路IFS", "太古里", "万象城", "大悦城", "万达广场", "凯德广场"],
+        "deep_reading": ["川大望江校区", "电子科大沙河", "宽窄巷子旁", "东郊记忆", "U37创意仓库"],
+        "study_oriented": ["川大南门", "川师北门", "财大南门", "犀浦大学城", "温江大学城"],
+        "internet_famous": ["宽窄巷子", "锦里", "春熙路", "太古里", "九眼桥", "玉林路"],
+        "mixed": ["总府路", "人民南路", "建设路", "光华村"]
+    },
+    "杭州": {
+        "family_friendly": ["万象城", "湖滨银泰in77", "西湖银泰", "大悦城", "万达广场", "西溪印象城"],
+        "deep_reading": ["浙大紫金港", "中国美院象山", "文三路", "小河直街", "馒头山社区"],
+        "study_oriented": ["浙大玉泉", "杭师大仓前", "下沙大学城", "滨江高教园", "小和山高教园"],
+        "internet_famous": ["西湖湖滨", "河坊街", "南宋御街", "武林路", "南山路", "龙井村"],
+        "mixed": ["延安路", "庆春路", "凤起路", "文一路"]
+    }
+}
 
-LOCATION_STUDY_KW = ["教育学院", "师大", "华师", "附中", "考研基地", "科教园区", "考研一条街", "大学城西区", "东区"]
+DEFAULT_LOCATIONS = {
+    "family_friendly": ["市中心商场", "商业综合体", "购物中心"],
+    "deep_reading": ["老城区", "文化街", "大学旁"],
+    "study_oriented": ["教育区", "高校旁", "考研街"],
+    "internet_famous": ["历史街区", "文创园", "网红打卡地"],
+    "mixed": ["市区沿街", "社区底商"]
+}
 
-LOCATION_INTERNET_KW = ["太古里", "三里屯", "南锣鼓巷", "平江路", "宽窄巷子", "湖滨", "星光大道", "历史街区", "步行街"]
+LOCATION_FAMILY_KW = ["万象城", "万达", "大悦城", "SM广场", "商场", "购物中心", "银泰", "龙湖天街", "万象天地", "国贸", "广场", "正大广场", "港汇", "嘉里", "龙之梦", "合生汇", "天河城", "正佳", "太古汇", "万菱汇", "凯德", "IFS", "印象城"]
+
+LOCATION_DEEP_READING_KW = ["大学城", "高校", "大学路", "学院路", "老门店", "文创园", "老街", "文教区", "M50", "1933", "红专厂", "TIT", "东郊记忆", "U37", "小河直街", "馒头山"]
+
+LOCATION_STUDY_KW = ["教育学院", "师大", "华师", "附中", "考研基地", "科教园区", "考研一条街", "大学城西区", "东区", "华工", "广外", "北师大", "人大", "同济", "复旦", "交大"]
+
+LOCATION_INTERNET_KW = ["太古里", "三里屯", "南锣鼓巷", "平江路", "宽窄巷子", "湖滨", "星光大道", "历史街区", "步行街", "新天地", "田子坊", "武康路", "愚园路", "思南公馆", "外滩源", "什刹海", "798", "杨梅竹斜街", "五道营", "沙面", "永庆坊", "北京路", "上下九", "珠江新城", "太古仓", "锦里", "九眼桥", "玉林路", "西湖湖滨", "河坊街", "南宋御街", "武林路", "南山路", "龙井村"]
 
 
 def _infer_bookstore_type(name: str, address: str) -> str:
@@ -103,7 +189,7 @@ def _infer_bookstore_type(name: str, address: str) -> str:
     1. 教辅型品牌（明确的教辅类书店品牌）
     2. 深度阅读型品牌（独立/人文/学术品牌）
     3. 网红品牌（网红打卡品牌，即使在商场里也按网红算）
-    4. 亲子型品牌 + 商场位置 = 亲子型
+    4. 亲子型品牌 + 商场位置 = 亲子型；不在商场 = 深度阅读型（大众向）
     5. 位置特征推断（教辅区、文教区、网红街区、商场）
     """
 
@@ -114,7 +200,7 @@ def _infer_bookstore_type(name: str, address: str) -> str:
                     for loc_kw in LOCATION_FAMILY_KW:
                         if loc_kw in name or loc_kw in address:
                             return "family_friendly"
-                    return "internet_famous"
+                    return "deep_reading"
                 return btype
 
     for loc_kw in LOCATION_STUDY_KW:
@@ -138,18 +224,21 @@ def _infer_bookstore_type(name: str, address: str) -> str:
 
 def _validate_bookstore_classification(name: str, address: str, classified_type: str) -> dict:
     """
-    分类合理性校验：确保典型品牌与类型的对应关系正确。
+    分类合理性校验：
+    1. 正向映射：典型品牌应归类为对应的类型
+    2. 反向排除：某些品牌不应是某些类型
     返回校验结果字典。
     """
     expected_type = None
     brand_found = None
+    reasons = []
 
     for btype, brands in BRAND_TYPE_MAP.items():
         for brand in brands:
             if brand in name:
                 if btype == "family_brand":
                     has_mall = any(kw in name or kw in address for kw in LOCATION_FAMILY_KW)
-                    expected_type = "family_friendly" if has_mall else "internet_famous"
+                    expected_type = "family_friendly" if has_mall else "deep_reading"
                 else:
                     expected_type = btype
                 brand_found = brand
@@ -157,15 +246,24 @@ def _validate_bookstore_classification(name: str, address: str, classified_type:
         if expected_type:
             break
 
+    if brand_found and brand_found in NEGATIVE_TYPE_RULES:
+        forbidden_types = NEGATIVE_TYPE_RULES[brand_found]
+        if classified_type in forbidden_types:
+            reasons.append(f"反向规则不匹配：{brand_found} 不应是 {classified_type}")
+
     is_valid = True
     if expected_type and expected_type != classified_type:
+        is_valid = False
+        reasons.append(f"正向映射不匹配：期望 {expected_type}，实际 {classified_type}")
+    if reasons:
         is_valid = False
 
     return {
         "valid": is_valid,
         "brand_found": brand_found,
         "expected_type": expected_type,
-        "actual_type": classified_type
+        "actual_type": classified_type,
+        "reasons": reasons
     }
 
 
@@ -176,13 +274,30 @@ def _force_correct_classification(name: str, address: str, node: dict) -> dict:
     """
     validation = _validate_bookstore_classification(name, address, node["type"])
 
-    if not validation["valid"] and validation["expected_type"]:
-        expected = validation["expected_type"]
-        node["type"] = expected
-        node["type_name_cn"] = TYPE_NAMES_CN.get(expected, node["type_name_cn"])
-        node["type_color"] = TYPE_COLORS.get(expected, node["type_color"])
-        node["group"] = expected
-        node["_classification_corrected"] = True
+    if not validation["valid"]:
+        if validation["expected_type"]:
+            expected = validation["expected_type"]
+            node["type"] = expected
+            node["type_name_cn"] = TYPE_NAMES_CN.get(expected, node["type_name_cn"])
+            node["type_color"] = TYPE_COLORS.get(expected, node["type_color"])
+            node["group"] = expected
+            node["_classification_corrected"] = True
+            node["_correction_reason"] = "正向映射"
+        else:
+            brand = validation["brand_found"]
+            if brand and brand in NEGATIVE_TYPE_RULES:
+                forbidden = NEGATIVE_TYPE_RULES[brand]
+                if node["type"] in forbidden:
+                    fallback_types = [t for t in ["deep_reading", "family_friendly", "study_oriented", "internet_famous"]
+                                      if t not in forbidden]
+                    if fallback_types:
+                        best_type = fallback_types[0]
+                        node["type"] = best_type
+                        node["type_name_cn"] = TYPE_NAMES_CN.get(best_type, node.get("type_name_cn", ""))
+                        node["type_color"] = TYPE_COLORS.get(best_type, node.get("type_color", "#666"))
+                        node["group"] = best_type
+                        node["_classification_corrected"] = True
+                        node["_correction_reason"] = "反向排除"
 
     return node
 
@@ -278,18 +393,19 @@ def _generate_typed_reviews(bookstore_id: str, bookstore_type: str, city: str, c
 
 
 def _generate_address(rng, city, bookstore_type):
-    if bookstore_type == "deep_reading":
-        locations = ["大学城文教区", "老城区巷子里", "大学路12号", "学院路88号", "文创园B区", "老街36号"]
-    elif bookstore_type == "family_friendly":
-        locations = ["万象城购物中心B1层", "万达广场3楼", "大悦城4楼", "银泰百货2层", "万象天地负一楼"]
-    elif bookstore_type == "study_oriented":
-        locations = ["教育学院旁", "师大附中对面", "大学城西区", "华师东门", "考研一条街", "科教园区"]
-    elif bookstore_type == "internet_famous":
-        locations = ["太古里负一楼", "三里屯太古里", "南锣鼓巷", "平江路历史街区", "宽窄巷子", "湖滨步行街"]
-    else:
-        locations = ["市中心商圈", "步行街沿街", "社区底商"]
+    type_key = bookstore_type if bookstore_type != "mixed" else "mixed"
 
-    return f"{city}市{rng.choice(locations)}"
+    if city in CITY_LOCATIONS and type_key in CITY_LOCATIONS[city]:
+        locations = CITY_LOCATIONS[city][type_key]
+    else:
+        type_map_key = bookstore_type if bookstore_type in DEFAULT_LOCATIONS else "mixed"
+        locations = DEFAULT_LOCATIONS.get(type_map_key, DEFAULT_LOCATIONS["mixed"])
+
+    location = rng.choice(locations)
+    suffixes = ["", "B1层", "1楼", "2楼", "3楼", "负一层", "L2层", "L3层"]
+    suffix = rng.choice(suffixes) if bookstore_type == "family_friendly" else ""
+
+    return f"{city}市{location}{suffix}"
 
 
 def build_city_data(city: str) -> dict:
