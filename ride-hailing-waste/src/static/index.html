@@ -411,6 +411,18 @@
         </div>
 
         <div class="control-section">
+            <div class="control-label">时间模式</div>
+            <div class="btn-group" id="timeModeBtns">
+                <button class="btn" data-mode="morning_peak" onclick="setTimeMode(this)">早高峰</button>
+                <button class="btn active" data-mode="off_peak" onclick="setTimeMode(this)">平峰</button>
+                <button class="btn" data-mode="evening_peak" onclick="setTimeMode(this)">晚高峰</button>
+            </div>
+            <div style="font-size: 11px; color: #8892b0; margin-top: 6px;" id="timeModeHint">
+                平峰时段：10:00-16:00
+            </div>
+        </div>
+
+        <div class="control-section">
             <div class="control-label">重点区域</div>
             <div class="btn-group" id="focusAreas">
                 <button class="btn" data-area="capital_airport" onclick="toggleFocusArea(this)">首都机场</button>
@@ -732,8 +744,7 @@
                     widthMinPixels: 1,
                     widthMaxPixels: 4,
                     opacity: 0.6,
-                    jointRounded: true,
-                    capRounded: true,
+                    rounded: true,
                 }));
             }
 
@@ -747,8 +758,7 @@
                     widthMinPixels: 1,
                     widthMaxPixels: 3,
                     opacity: 0.4,
-                    jointRounded: true,
-                    capRounded: true,
+                    rounded: true,
                 }));
             }
 

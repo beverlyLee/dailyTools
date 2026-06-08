@@ -40,6 +40,7 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 _traffic_spider = None
 _simulator = None
 _simulator_vehicle_type = None
+_simulator_time_mode = None
 
 
 def get_spider():
@@ -49,11 +50,12 @@ def get_spider():
     return _traffic_spider
 
 
-def get_simulator(vehicle_type: str = "gasoline"):
-    global _simulator, _simulator_vehicle_type
-    if _simulator is None or _simulator_vehicle_type != vehicle_type:
-        _simulator = EmptyTripSimulator(get_spider(), vehicle_type=vehicle_type)
+def get_simulator(vehicle_type: str = "gasoline", time_mode: str = "off_peak"):
+    global _simulator, _simulator_vehicle_type, _simulator_time_mode
+    if _simulator is None or _simulator_vehicle_type != vehicle_type or _simulator_time_mode != time_mode:
+        _simulator = EmptyTripSimulator(get_spider(), vehicle_type=vehicle_type, time_mode=time_mode)
         _simulator_vehicle_type = vehicle_type
+        _simulator_time_mode = time_mode
     return _simulator
 
 
@@ -117,8 +119,9 @@ async def simulate_trips(
     num_vehicles: int = Query(100, ge=1, le=1000, description="模拟车辆数"),
     focus_areas: Optional[str] = Query(None, description="重点区域，逗号分隔"),
     vehicle_type: str = Query("gasoline", description="车型: gasoline/hybrid/electric"),
+    time_mode: str = Query("off_peak", description="时间模式: morning_peak/off_peak/evening_peak"),
 ):
-    simulator = get_simulator(vehicle_type)
+    simulator = get_simulator(vehicle_type, time_mode)
 
     focus_list = None
     if focus_areas:
@@ -136,6 +139,7 @@ async def simulate_trips(
             "total_distance_km": round(sim_result.total_distance / 1000, 2),
             "empty_distance_km": round(sim_result.total_empty_distance / 1000, 2),
             "empty_ratio_percent": round(sim_result.empty_ratio * 100, 2),
+            "time_mode": time_mode,
         },
         "waste_metrics": calc.to_dict(metrics),
     }
@@ -145,9 +149,10 @@ async def simulate_trips(
 async def get_waste_metrics(
     num_vehicles: int = Query(200, ge=1, le=2000, description="模拟车辆数"),
     vehicle_type: str = Query("gasoline", description="车型: gasoline/hybrid/electric"),
+    time_mode: str = Query("off_peak", description="时间模式"),
     compare: bool = Query(False, description="是否对比不同车型"),
 ):
-    simulator = get_simulator(vehicle_type)
+    simulator = get_simulator(vehicle_type, time_mode)
     sim_result = simulator.simulate_batch(num_vehicles=num_vehicles)
 
     calc = WasteCalculator(vehicle_type)
@@ -156,6 +161,7 @@ async def get_waste_metrics(
 
     result = {
         "vehicle_type": vehicle_type,
+        "time_mode": time_mode,
         "waste_metrics": calc.to_dict(metrics),
     }
 
@@ -170,8 +176,9 @@ async def get_visualization_data(
     num_vehicles: int = Query(200, ge=1, le=1000, description="模拟车辆数"),
     focus_areas: Optional[str] = Query(None, description="重点区域，逗号分隔"),
     vehicle_type: str = Query("gasoline", description="车型"),
+    time_mode: str = Query("off_peak", description="时间模式: morning_peak/off_peak/evening_peak"),
 ):
-    simulator = get_simulator(vehicle_type)
+    simulator = get_simulator(vehicle_type, time_mode)
 
     focus_list = None
     if focus_areas:
@@ -191,6 +198,7 @@ async def get_visualization_data(
     viz_data["waste_metrics"] = calc.to_dict(metrics)
     viz_data["area_breakdown"] = area_breakdown
     viz_data["vehicle_type"] = vehicle_type
+    viz_data["time_mode"] = time_mode
 
     return viz_data
 

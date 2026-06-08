@@ -57,11 +57,43 @@ VEHICLE_TYPE_PARAMS = {
 }
 
 
+TIME_MODE_PARAMS = {
+    "morning_peak": {
+        "density_multiplier": 1.5,
+        "airport_station_empty_boost": 0.15,
+        "cbd_radial_intensity": 0.5,
+        "direction_bias": "to_city",
+        "speed_multiplier": 0.7,
+        "label": "早高峰 7:00-9:00",
+    },
+    "off_peak": {
+        "density_multiplier": 1.0,
+        "airport_station_empty_boost": 0.0,
+        "cbd_radial_intensity": 0.5,
+        "direction_bias": "none",
+        "speed_multiplier": 1.0,
+        "label": "平峰 10:00-16:00",
+    },
+    "evening_peak": {
+        "density_multiplier": 1.8,
+        "airport_station_empty_boost": 0.2,
+        "cbd_radial_intensity": 1.5,
+        "direction_bias": "from_city",
+        "speed_multiplier": 0.6,
+        "label": "晚高峰 17:00-20:00",
+    },
+}
+
+
 class EmptyTripSimulator:
-    def __init__(self, spider: Optional[RoadStatusSpider] = None, vehicle_type: str = "gasoline"):
+    def __init__(self, spider: Optional[RoadStatusSpider] = None,
+                 vehicle_type: str = "gasoline",
+                 time_mode: str = "off_peak"):
         self.spider = spider or RoadStatusSpider()
         self.vehicle_type = vehicle_type if vehicle_type in VEHICLE_TYPE_PARAMS else "gasoline"
+        self.time_mode = time_mode if time_mode in TIME_MODE_PARAMS else "off_peak"
         self._params = VEHICLE_TYPE_PARAMS[self.vehicle_type]
+        self._time_params = TIME_MODE_PARAMS[self.time_mode]
         self._segments_cache = None
         self._vehicle_counter = 0
 
@@ -241,10 +273,11 @@ class EmptyTripSimulator:
         empty_before_prob = self._params["empty_before_base"]
         empty_after_prob = self._params["empty_after_base"]
 
+        time_airport_boost = self._time_params["airport_station_empty_boost"]
         if start_type in ["airport", "station"]:
-            empty_before_prob = min(0.95, empty_before_prob + 0.15)
+            empty_before_prob = min(0.97, empty_before_prob + 0.15 + time_airport_boost)
         if end_type in ["airport", "station"]:
-            empty_after_prob = min(0.95, empty_after_prob + 0.15)
+            empty_after_prob = min(0.95, empty_after_prob + 0.15 + time_airport_boost)
 
         empty_before = random.random() < empty_before_prob
         empty_after = random.random() < empty_after_prob
@@ -311,7 +344,8 @@ class EmptyTripSimulator:
 
         if start_type == "cbd" and end_type != "cbd":
             direction = math.atan2(end_point[1] - start_center[1], end_point[0] - start_center[0])
-            radial_dist = start_info["radius"] * random.uniform(0.3, 0.8)
+            radial_intensity = self._time_params["cbd_radial_intensity"]
+            radial_dist = start_info["radius"] * random.uniform(0.3, 0.8) * radial_intensity
             mid_lng = start_center[0] + radial_dist * math.cos(direction)
             mid_lat = start_center[1] + radial_dist * math.sin(direction)
             ride_path, ride_speeds, ride_ts = self._generate_ride_path(
@@ -411,7 +445,8 @@ class EmptyTripSimulator:
                     is_empty_flags.extend([True] * (len(wander_path_points) - 1))
             elif end_type == "cbd":
                 direction = random.uniform(0, 2 * math.pi)
-                radial_dist = end_info["radius"] * random.uniform(1.0, 2.0)
+                radial_intensity = self._time_params["cbd_radial_intensity"]
+                radial_dist = end_info["radius"] * random.uniform(1.0, 2.0) * radial_intensity
                 radial_path = self._generate_radial_empty_path(end_center, radial_dist, direction)
                 radial_speeds = [random.uniform(30, 55) for _ in radial_path]
                 radial_ts = []
@@ -480,31 +515,59 @@ class EmptyTripSimulator:
 
     def _get_weighted_start_areas(self, focus_areas: Optional[List[str]] = None) -> List[str]:
         weighted = []
+        time_density_mult = self._time_params["density_multiplier"]
+        dir_bias = self._time_params["direction_bias"]
+
         for area_name, area_info in BEIJING_KEY_AREAS.items():
             density = area_info.get("density", 10)
-            weight = max(1, int(density / 5))
+            base_weight = max(1, int(density / 5))
+
+            area_type = self._get_area_type(area_name)
+            if dir_bias == "from_city":
+                if area_type in ["cbd", "normal", "tech_park"]:
+                    base_weight = int(base_weight * time_density_mult)
+            elif dir_bias == "to_city":
+                if area_type in ["airport", "station"]:
+                    base_weight = int(base_weight * time_density_mult)
+            else:
+                base_weight = int(base_weight * time_density_mult)
+
             if focus_areas and area_name in focus_areas:
-                weight *= 3
-            weighted.extend([area_name] * weight)
+                base_weight *= 3
+            weighted.extend([area_name] * base_weight)
         return weighted
 
     def _weighted_random_end_area(self, start_area: str) -> str:
         areas = list(BEIJING_KEY_AREAS.keys())
         weights = []
+        dir_bias = self._time_params["direction_bias"]
+
         for area_name in areas:
             if area_name == start_area:
                 weights.append(1)
                 continue
             area_info = BEIJING_KEY_AREAS[area_name]
             density = area_info.get("density", 10)
-            start_info = BEIJING_KEY_AREAS[start_area]
             start_type = self._get_area_type(start_area)
             end_type = self._get_area_type(area_name)
             weight = density / 10
+
             if start_type == "cbd" and end_type in ["airport", "station"]:
                 weight *= 1.5
             if start_type in ["airport", "station"] and end_type in ["cbd", "normal"]:
                 weight *= 1.3
+
+            if dir_bias == "from_city":
+                if start_type in ["cbd", "normal", "tech_park"] and end_type in ["airport", "station"]:
+                    weight *= 2.0
+                if start_type in ["airport", "station"] and end_type in ["cbd", "normal"]:
+                    weight *= 0.5
+            elif dir_bias == "to_city":
+                if start_type in ["airport", "station"] and end_type in ["cbd", "normal"]:
+                    weight *= 2.0
+                if start_type in ["cbd", "normal"] and end_type in ["airport", "station"]:
+                    weight *= 0.5
+
             weights.append(weight)
 
         total_weight = sum(weights)
