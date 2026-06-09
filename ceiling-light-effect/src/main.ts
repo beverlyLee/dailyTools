@@ -76,7 +76,7 @@ class CeilingLightPreviewer {
       0.1,
       100
     );
-    this.camera.position.set(0, 3, 7);
+    this.camera.position.set(5, 3.5, 6);
 
     this.container = document.body;
 
@@ -89,16 +89,16 @@ class CeilingLightPreviewer {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.0;
+    this.renderer.toneMappingExposure = 1.1;
     this.container.appendChild(this.renderer.domElement);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
-    this.controls.maxPolarAngle = Math.PI / 2 - 0.1;
+    this.controls.maxPolarAngle = Math.PI / 2 - 0.05;
     this.controls.minDistance = 2;
     this.controls.maxDistance = 20;
-    this.controls.target.set(0, 1.2, 0);
+    this.controls.target.set(0, 1.0, 0);
 
     this.ceilingGenerator = new CeilingGenerator(
       this.scene,

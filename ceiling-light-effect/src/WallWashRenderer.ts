@@ -208,8 +208,9 @@ export class WallWashRenderer {
 
   public updateLightIntensity(intensity: number): void {
     const normalizedIntensity = intensity / 500;
+    const baseMultiplier = 1.5;
     this.wallWashMaterials.forEach((material) => {
-      material.uniforms.uIntensity.value = this.config.intensity * normalizedIntensity;
+      material.uniforms.uIntensity.value = this.config.intensity * normalizedIntensity * baseMultiplier;
     });
   }
 

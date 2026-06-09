@@ -119,6 +119,7 @@ export class IndirectLightSimulator {
 
   private calculateFirstBounce(sources: LightSourceData[]): void {
     const allPoints = [...this.wallSamplePoints, ...this.ceilingSamplePoints];
+    const intensityScale = 2.5;
 
     for (const point of allPoints) {
       let totalIntensity = 0;
@@ -138,7 +139,7 @@ export class IndirectLightSimulator {
         const beamAngleRad = (source.type === 'area' ? Math.PI / 3 : Math.PI / 4);
         const beamFactor = this.beamDistribution(cosAngle, beamAngleRad);
 
-        const intensity = source.intensity * directFactor * beamFactor * 0.1;
+        const intensity = source.intensity * directFactor * beamFactor * intensityScale;
 
         if (intensity > 0.001) {
           totalIntensity += intensity;
@@ -269,7 +270,7 @@ export class IndirectLightSimulator {
   }
 
   private createBounceLights(): void {
-    const maxLights = 50;
+    const maxLights = 40;
     const sortedPoints = [...this.bouncePoints]
       .sort((a, b) => b.intensity - a.intensity)
       .slice(0, maxLights);
@@ -277,8 +278,8 @@ export class IndirectLightSimulator {
     for (const point of sortedPoints) {
       const light = new THREE.PointLight(
         point.color,
-        point.intensity * 5,
-        10,
+        point.intensity * 8,
+        15,
         2
       );
       light.position.copy(point.position);
@@ -313,6 +314,7 @@ export class IndirectLightSimulator {
     let sampleCount = 0;
 
     const wallPoints = this.wallSamplePoints;
+    const luxConversionFactor = 150;
 
     for (const point of wallPoints) {
       let brightness = 0;
@@ -327,7 +329,7 @@ export class IndirectLightSimulator {
         if (cosAngle <= 0) continue;
 
         const directFactor = cosAngle / (distance * distance + 0.1);
-        brightness += source.intensity * directFactor * 0.05;
+        brightness += source.intensity * directFactor * 0.08;
       }
 
       for (const bouncePoint of this.bouncePoints) {
@@ -342,14 +344,15 @@ export class IndirectLightSimulator {
         if (cosIncoming <= 0) continue;
 
         const factor = cosIncoming / (distance * distance + 0.5);
-        brightness += bouncePoint.intensity * factor * 0.3;
+        brightness += bouncePoint.intensity * factor * 0.5;
       }
 
       totalBrightness += brightness;
       sampleCount++;
     }
 
-    return sampleCount > 0 ? totalBrightness / sampleCount : 0;
+    const avgBrightness = sampleCount > 0 ? totalBrightness / sampleCount : 0;
+    return avgBrightness * luxConversionFactor;
   }
 
   public getIndirectContributionRatio(sources: LightSourceData[]): number {
@@ -369,7 +372,7 @@ export class IndirectLightSimulator {
         if (cosAngle <= 0) continue;
 
         const directFactor = cosAngle / (distance * distance + 0.1);
-        directBrightness += source.intensity * directFactor * 0.05;
+        directBrightness += source.intensity * directFactor * 0.08;
       }
 
       for (const bouncePoint of this.bouncePoints) {
@@ -384,7 +387,7 @@ export class IndirectLightSimulator {
         if (cosIncoming <= 0) continue;
 
         const factor = cosIncoming / (distance * distance + 0.5);
-        indirectBrightness += bouncePoint.intensity * factor * 0.3;
+        indirectBrightness += bouncePoint.intensity * factor * 0.5;
       }
     }
 

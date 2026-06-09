@@ -53,11 +53,13 @@ export class LightEditor {
     width: number,
     _height: number
   ): void {
+    const tiltAngle = Math.PI / 4;
+
     const createAreaLight = (
       position: THREE.Vector3,
       length: number,
       lightWidth: number,
-      rotationY: number
+      wallSide: 'front' | 'back' | 'left' | 'right'
     ) => {
       const areaLight = new THREE.RectAreaLight(
         this.config.color,
@@ -66,19 +68,49 @@ export class LightEditor {
         lightWidth
       );
       areaLight.position.copy(position);
-      areaLight.lookAt(
-        position.x,
-        position.y - 1,
-        position.z
-      );
-      areaLight.rotation.x = -Math.PI / 2;
+
+      let targetX = position.x;
+      let targetY = position.y - Math.cos(tiltAngle);
+      let targetZ = position.z;
+
+      switch (wallSide) {
+        case 'front':
+          targetZ = position.z - Math.sin(tiltAngle);
+          break;
+        case 'back':
+          targetZ = position.z + Math.sin(tiltAngle);
+          break;
+        case 'left':
+          targetX = position.x - Math.sin(tiltAngle);
+          break;
+        case 'right':
+          targetX = position.x + Math.sin(tiltAngle);
+          break;
+      }
+
+      areaLight.lookAt(targetX, targetY, targetZ);
       this.areaLights.push(areaLight);
       this.lightGroup.add(areaLight);
 
       const meshGeo = new THREE.PlaneGeometry(length, lightWidth);
       const mesh = new THREE.Mesh(meshGeo, this.lightEmissiveMaterial.clone());
       mesh.position.copy(position);
-      mesh.rotation.x = -Math.PI / 2;
+
+      switch (wallSide) {
+        case 'front':
+          mesh.rotation.x = -tiltAngle;
+          break;
+        case 'back':
+          mesh.rotation.x = tiltAngle;
+          break;
+        case 'left':
+          mesh.rotation.z = tiltAngle;
+          break;
+        case 'right':
+          mesh.rotation.z = -tiltAngle;
+          break;
+      }
+
       mesh.position.y -= 0.005;
       this.lightMeshes.push(mesh);
       this.lightGroup.add(mesh);
@@ -86,13 +118,13 @@ export class LightEditor {
       for (let i = 0; i < 5; i++) {
         const pointLight = new THREE.PointLight(
           this.config.color,
-          (this.config.intensity / 4) * 0.1,
+          (this.config.intensity / 4) * 0.15,
           10,
           2
         );
         pointLight.position.copy(position);
 
-        if (rotationY === 0 || rotationY === Math.PI) {
+        if (wallSide === 'front' || wallSide === 'back') {
           pointLight.position.x = position.x - length / 2 + (length / 4) * i;
         } else {
           pointLight.position.z = position.z - length / 2 + (length / 4) * i;
@@ -103,10 +135,10 @@ export class LightEditor {
       }
     };
 
-    createAreaLight(positions.front, lengths.front, width, Math.PI);
-    createAreaLight(positions.back, lengths.back, width, 0);
-    createAreaLight(positions.left, lengths.left, width, Math.PI / 2);
-    createAreaLight(positions.right, lengths.right, width, -Math.PI / 2);
+    createAreaLight(positions.front, lengths.front, width, 'front');
+    createAreaLight(positions.back, lengths.back, width, 'back');
+    createAreaLight(positions.left, lengths.left, width, 'left');
+    createAreaLight(positions.right, lengths.right, width, 'right');
   }
 
   private buildTubeLights(
@@ -115,17 +147,33 @@ export class LightEditor {
     width: number
   ): void {
     const tubeRadius = width * 0.3;
+    const tiltAngle = Math.PI / 4;
 
     const createTubeLight = (
       position: THREE.Vector3,
       length: number,
-      rotationY: number
+      wallSide: 'front' | 'back' | 'left' | 'right'
     ) => {
       const tubeGeo = new THREE.CylinderGeometry(tubeRadius, tubeRadius, length, 16, 1);
       const tubeMesh = new THREE.Mesh(tubeGeo, this.lightEmissiveMaterial.clone());
       tubeMesh.position.copy(position);
-      tubeMesh.rotation.z = Math.PI / 2;
-      tubeMesh.rotation.y = rotationY;
+
+      if (wallSide === 'front' || wallSide === 'back') {
+        tubeMesh.rotation.z = Math.PI / 2;
+        if (wallSide === 'front') {
+          tubeMesh.rotation.x = tiltAngle;
+        } else {
+          tubeMesh.rotation.x = -tiltAngle;
+        }
+      } else {
+        tubeMesh.rotation.x = Math.PI / 2;
+        if (wallSide === 'left') {
+          tubeMesh.rotation.z = -tiltAngle;
+        } else {
+          tubeMesh.rotation.z = tiltAngle;
+        }
+      }
+
       this.lightMeshes.push(tubeMesh);
       this.lightGroup.add(tubeMesh);
 
@@ -133,13 +181,13 @@ export class LightEditor {
       for (let i = 0; i <= segments; i++) {
         const pointLight = new THREE.PointLight(
           this.config.color,
-          (this.config.intensity / 4) * (1 / segments),
+          (this.config.intensity / 4) * (1 / segments) * 0.8,
           8,
           2
         );
         pointLight.position.copy(position);
 
-        if (rotationY === 0 || rotationY === Math.PI) {
+        if (wallSide === 'front' || wallSide === 'back') {
           pointLight.position.x = position.x - length / 2 + (length / segments) * i;
         } else {
           pointLight.position.z = position.z - length / 2 + (length / segments) * i;
@@ -151,21 +199,41 @@ export class LightEditor {
 
       const areaLight = new THREE.RectAreaLight(
         this.config.color,
-        (this.config.intensity / 4) * 0.5,
+        (this.config.intensity / 4) * 0.6,
         length,
         tubeRadius * 2
       );
       areaLight.position.copy(position);
       areaLight.position.y -= tubeRadius + 0.01;
-      areaLight.rotation.x = -Math.PI / 2;
+
+      let targetX = position.x;
+      let targetY = position.y - Math.cos(tiltAngle);
+      let targetZ = position.z;
+
+      switch (wallSide) {
+        case 'front':
+          targetZ = position.z - Math.sin(tiltAngle);
+          break;
+        case 'back':
+          targetZ = position.z + Math.sin(tiltAngle);
+          break;
+        case 'left':
+          targetX = position.x - Math.sin(tiltAngle);
+          break;
+        case 'right':
+          targetX = position.x + Math.sin(tiltAngle);
+          break;
+      }
+
+      areaLight.lookAt(targetX, targetY, targetZ);
       this.areaLights.push(areaLight);
       this.lightGroup.add(areaLight);
     };
 
-    createTubeLight(positions.front, lengths.front, Math.PI);
-    createTubeLight(positions.back, lengths.back, 0);
-    createTubeLight(positions.left, lengths.left, Math.PI / 2);
-    createTubeLight(positions.right, lengths.right, -Math.PI / 2);
+    createTubeLight(positions.front, lengths.front, 'front');
+    createTubeLight(positions.back, lengths.back, 'back');
+    createTubeLight(positions.left, lengths.left, 'left');
+    createTubeLight(positions.right, lengths.right, 'right');
   }
 
   private clearLights(): void {
@@ -235,6 +303,8 @@ export class LightEditor {
     const trenchLengths = this.ceilingGenerator.getTrenchLengths();
     const { trenchWidth } = this.ceilingGenerator.getCeilingConfig();
 
+    const tiltAngle = Math.PI / 4;
+
     const addSource = (
       pos: THREE.Vector3,
       length: number,
@@ -251,10 +321,15 @@ export class LightEditor {
       });
     };
 
-    addSource(trenchPositions.front, trenchLengths.front, new THREE.Vector3(0, -1, 0));
-    addSource(trenchPositions.back, trenchLengths.back, new THREE.Vector3(0, -1, 0));
-    addSource(trenchPositions.left, trenchLengths.left, new THREE.Vector3(0, -1, 0));
-    addSource(trenchPositions.right, trenchLengths.right, new THREE.Vector3(0, -1, 0));
+    const frontDir = new THREE.Vector3(0, -Math.cos(tiltAngle), -Math.sin(tiltAngle));
+    const backDir = new THREE.Vector3(0, -Math.cos(tiltAngle), Math.sin(tiltAngle));
+    const leftDir = new THREE.Vector3(-Math.sin(tiltAngle), -Math.cos(tiltAngle), 0);
+    const rightDir = new THREE.Vector3(Math.sin(tiltAngle), -Math.cos(tiltAngle), 0);
+
+    addSource(trenchPositions.front, trenchLengths.front, frontDir);
+    addSource(trenchPositions.back, trenchLengths.back, backDir);
+    addSource(trenchPositions.left, trenchLengths.left, leftDir);
+    addSource(trenchPositions.right, trenchLengths.right, rightDir);
 
     return sources;
   }
