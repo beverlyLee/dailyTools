@@ -23,10 +23,10 @@ export class RangeHoodSuction {
     this.hoodSize = new THREE.Vector2(0.9, 0.5);
     this.suctionStrength = config.suctionPower;
     this.isActive = true;
-    this.intakeRadius = 0.55;
-    this.suctionHeight = 1.8;
-    this.suctionForceMultiplier = 8.0;
-    this.captureRadiusMultiplier = 1.2;
+    this.intakeRadius = 0.75;
+    this.suctionHeight = 2.8;
+    this.suctionForceMultiplier = 0.3;
+    this.captureRadiusMultiplier = 3.0;
 
     this.createHoodModel();
   }
@@ -122,26 +122,26 @@ export class RangeHoodSuction {
   private calculateSingleForce(particle: SmokeParticle): THREE.Vector3 {
     const hoodBottomY = this.hoodPosition.y - 0.15;
     const particleY = particle.position.y;
-    const distToHoodBottom = hoodBottomY - particleY;
+    const distBelowHood = hoodBottomY - particleY;
 
-    if (particleY > hoodBottomY + this.suctionHeight) {
+    if (distBelowHood < -0.3) {
+      return new THREE.Vector3();
+    }
+    if (distBelowHood > this.suctionHeight) {
       return new THREE.Vector3();
     }
 
-    const horizontalDist = Math.sqrt(
-      Math.pow(particle.position.x - this.hoodPosition.x, 2) +
-      Math.pow(particle.position.z - this.hoodPosition.z, 2)
-    );
+    const dx = particle.position.x - this.hoodPosition.x;
+    const dz = particle.position.z - this.hoodPosition.z;
+    const horizontalDist = Math.sqrt(dx * dx + dz * dz);
 
-    const maxHorizontalRadius = this.intakeRadius + (this.suctionHeight - Math.max(0, distToHoodBottom)) * 1.2;
-    if (horizontalDist > maxHorizontalRadius * 1.2) {
+    const radiusAtHeight = this.intakeRadius + distBelowHood * 1.0;
+    if (horizontalDist > radiusAtHeight * 1.5) {
       return new THREE.Vector3();
     }
 
-    if (particleY >= hoodBottomY - 0.05) {
-      const distToIntake = particle.position.distanceTo(
-        new THREE.Vector3(this.hoodPosition.x, hoodBottomY, this.hoodPosition.z)
-      );
+    if (particleY >= hoodBottomY - 0.3 && particleY <= hoodBottomY + 0.15) {
+      const distToIntake = Math.sqrt(dx * dx + dz * dz);
       if (distToIntake < this.intakeRadius * this.captureRadiusMultiplier) {
         particle.captured = true;
         this.capturedCount++;
@@ -149,36 +149,39 @@ export class RangeHoodSuction {
       }
     }
 
-    const heightFactor = Math.max(0, 1 - distToHoodBottom / this.suctionHeight);
-    const heightFactorPow = Math.pow(heightFactor, 1.5);
+    const heightFactor = Math.max(0, 1 - distBelowHood / this.suctionHeight);
+    const heightFactorPow = Math.pow(heightFactor, 0.8);
 
-    const horizontalFactor = Math.max(0, 1 - horizontalDist / maxHorizontalRadius);
-    const horizontalFactorPow = Math.pow(horizontalFactor, 1.2);
+    const horizontalFactor = Math.max(0, 1 - horizontalDist / radiusAtHeight);
+    const horizontalFactorPow = Math.pow(horizontalFactor, 0.6);
 
     const baseStrength = this.suctionStrength * this.suctionForceMultiplier;
     const strength = baseStrength * heightFactorPow * horizontalFactorPow;
 
-    const dirX = this.hoodPosition.x - particle.position.x;
-    const dirY = hoodBottomY - particle.position.y;
-    const dirZ = this.hoodPosition.z - particle.position.z;
-    const dirLen = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
-    
+    const dirLen = Math.sqrt(dx * dx + distBelowHood * distBelowHood + dz * dz);
     if (dirLen < 0.001) {
-      return new THREE.Vector3();
+      return new THREE.Vector3(0, -strength, 0);
     }
 
-    const pullUpBias = 0.4;
-    const direction = new THREE.Vector3(
-      dirX / dirLen,
-      dirY / dirLen + pullUpBias * heightFactor,
-      dirZ / dirLen
-    ).normalize();
+    const inwardPull = 0.8;
+    const verticalPull = 0.6;
+    const horizontalFactor2 = Math.min(1, horizontalDist / 0.3);
+    
+    const dirX = -dx / dirLen;
+    const dirY = distBelowHood / dirLen;
+    const dirZ = -dz / dirLen;
+    
+    const adjDirX = dirX * (1 + inwardPull * heightFactor * horizontalFactor2);
+    const adjDirY = dirY * (1 + verticalPull * heightFactor);
+    const adjDirZ = dirZ * (1 + inwardPull * heightFactor * horizontalFactor2);
+    
+    const direction = new THREE.Vector3(adjDirX, adjDirY, adjDirZ).normalize();
 
-    const swirlStrength = strength * 0.25;
+    const swirlStrength = strength * 0.1;
     const swirlDir = new THREE.Vector3(
-      -(particle.position.z - this.hoodPosition.z),
+      dz,
       0,
-      particle.position.x - this.hoodPosition.x
+      -dx
     ).normalize();
 
     const totalForce = direction.multiplyScalar(strength).add(swirlDir.multiplyScalar(swirlStrength));

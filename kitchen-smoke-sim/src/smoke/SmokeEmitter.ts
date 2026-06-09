@@ -37,11 +37,11 @@ export class SmokeEmitter {
     const smokeTexture = this.createSmokeTexture();
 
     const particleMaterial = new THREE.PointsMaterial({
-      size: 0.18,
+      size: 0.25,
       vertexColors: true,
       transparent: true,
-      opacity: 0.85,
-      blending: THREE.AdditiveBlending,
+      opacity: 0.7,
+      blending: THREE.NormalBlending,
       depthWrite: false,
       map: smokeTexture,
       sizeAttenuation: true,
@@ -58,11 +58,12 @@ export class SmokeEmitter {
     const ctx = canvas.getContext('2d')!;
     
     const gradient = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
-    gradient.addColorStop(0, 'rgba(255, 245, 230, 1)');
-    gradient.addColorStop(0.2, 'rgba(230, 210, 185, 0.85)');
-    gradient.addColorStop(0.4, 'rgba(200, 175, 145, 0.6)');
-    gradient.addColorStop(0.6, 'rgba(170, 145, 115, 0.35)');
-    gradient.addColorStop(0.8, 'rgba(140, 115, 90, 0.15)');
+    gradient.addColorStop(0, 'rgba(255, 250, 240, 0.95)');
+    gradient.addColorStop(0.15, 'rgba(240, 220, 195, 0.85)');
+    gradient.addColorStop(0.3, 'rgba(220, 195, 165, 0.7)');
+    gradient.addColorStop(0.5, 'rgba(190, 160, 125, 0.5)');
+    gradient.addColorStop(0.7, 'rgba(160, 130, 100, 0.3)');
+    gradient.addColorStop(0.85, 'rgba(130, 105, 75, 0.12)');
     gradient.addColorStop(1, 'rgba(100, 80, 60, 0)');
     
     ctx.fillStyle = gradient;
@@ -93,8 +94,8 @@ export class SmokeEmitter {
       this.emitterPosition.z + offsetZ
     );
 
-    const upwardSpeed = 1.2 + Math.random() * 1.0;
-    const horizontalSpeed = (Math.random() - 0.5) * 0.3;
+    const upwardSpeed = 0.4 + Math.random() * 0.4;
+    const horizontalSpeed = (Math.random() - 0.5) * 0.08;
     
     const velocity = new THREE.Vector3(
       horizontalSpeed,
@@ -102,17 +103,17 @@ export class SmokeEmitter {
       horizontalSpeed * 0.5
     );
 
-    const baseLife = 5 + Math.random() * 3;
+    const baseLife = 8 + Math.random() * 5;
     
     return {
       id: this.nextId++,
       position,
       velocity,
-      size: 0.07 + Math.random() * 0.06,
+      size: 0.05 + Math.random() * 0.04,
       life: baseLife,
       maxLife: baseLife,
-      opacity: 0.85,
-      mass: 0.002 + Math.random() * 0.002,
+      opacity: 0.9,
+      mass: 0.008 + Math.random() * 0.006,
       temperature: 90 + Math.random() * 30,
       captured: false,
       escaped: false,
@@ -122,7 +123,7 @@ export class SmokeEmitter {
 
   public update(deltaTime: number, forces: THREE.Vector3[]): void {
     this.emitTimer += deltaTime;
-    const emitInterval = 0.02 / this.config.firePower;
+    const emitInterval = 0.015 / this.config.firePower;
     
     while (this.emitTimer >= emitInterval && this.particles.length < this.maxParticles) {
       this.emit(1);
@@ -143,36 +144,45 @@ export class SmokeEmitter {
         continue;
       }
 
-      const buoyancyForce = new THREE.Vector3(0, this.config.buoyancy * (p.temperature / 100) * this.config.firePower, 0);
+      const tempFactor = (p.temperature - 20) / 100;
+      const buoyancyAccel = this.config.buoyancy * tempFactor * this.config.firePower;
       
-      const gravityForce = new THREE.Vector3(0, -this.config.gravity * p.mass, 0);
+      const gravityAccel = -this.config.gravity;
       
-      const dragForce = p.velocity.clone().multiplyScalar(-this.config.airResistance);
+      const dragAccel = p.velocity.clone().multiplyScalar(-this.config.airResistance);
       
-      const totalForce = new THREE.Vector3();
-      totalForce.add(buoyancyForce);
-      totalForce.add(gravityForce);
-      totalForce.add(dragForce);
-      totalForce.add(forces[i] || new THREE.Vector3());
+      const externalForce = forces[i] || new THREE.Vector3();
+      const externalAccel = externalForce.divideScalar(p.mass);
 
-      const acceleration = totalForce.divideScalar(p.mass);
-      p.velocity.add(acceleration.multiplyScalar(deltaTime));
+      const totalAccel = new THREE.Vector3();
+      totalAccel.x = dragAccel.x + externalAccel.x;
+      totalAccel.y = buoyancyAccel + gravityAccel + dragAccel.y + externalAccel.y;
+      totalAccel.z = dragAccel.z + externalAccel.z;
+
+      p.velocity.add(totalAccel.multiplyScalar(deltaTime));
+      
+      if (p.velocity.y > 3.0) {
+        p.velocity.y = 3.0;
+      }
+      if (p.velocity.y < -1.0) {
+        p.velocity.y = -1.0;
+      }
       
       const diffusionVec = new THREE.Vector3(
-        (Math.random() - 0.5) * this.config.diffusion,
-        (Math.random() - 0.5) * this.config.diffusion * 0.3,
-        (Math.random() - 0.5) * this.config.diffusion
+        (Math.random() - 0.5) * this.config.diffusion * deltaTime * 60,
+        (Math.random() - 0.5) * this.config.diffusion * 0.3 * deltaTime * 60,
+        (Math.random() - 0.5) * this.config.diffusion * deltaTime * 60
       );
       p.velocity.add(diffusionVec);
 
       p.position.add(p.velocity.clone().multiplyScalar(deltaTime));
 
-      p.temperature = Math.max(20, p.temperature - deltaTime * 15);
+      p.temperature = Math.max(20, p.temperature - deltaTime * 10);
 
-      p.size += deltaTime * 0.05;
+      p.size += deltaTime * 0.06;
 
       const lifeRatio = p.life / p.maxLife;
-      p.opacity = Math.max(0, 0.8 * lifeRatio * (1 - lifeRatio * 0.3));
+      p.opacity = Math.max(0, 0.8 * lifeRatio * (1 - lifeRatio * 0.25));
     }
 
     this.updateBuffers();
@@ -192,10 +202,10 @@ export class SmokeEmitter {
         const lifeRatio = p.life / p.maxLife;
         const ageFactor = 1 - lifeRatio;
         
-        const r = 0.55 + tempRatio * 0.25 - ageFactor * 0.15;
-        const g = 0.42 + tempRatio * 0.18 - ageFactor * 0.2;
-        const b = 0.28 + tempRatio * 0.05 - ageFactor * 0.15;
-        colorAttr.setXYZ(i, Math.max(0.2, r), Math.max(0.15, g), Math.max(0.08, b));
+        const r = 0.6 + tempRatio * 0.2 - ageFactor * 0.2;
+        const g = 0.45 + tempRatio * 0.15 - ageFactor * 0.25;
+        const b = 0.28 + tempRatio * 0.05 - ageFactor * 0.18;
+        colorAttr.setXYZ(i, Math.max(0.15, r), Math.max(0.1, g), Math.max(0.05, b));
         
         sizeAttr.setX(i, p.size);
       } else {
