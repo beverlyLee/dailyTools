@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>中式厨房油烟扩散模拟器</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <canvas id="kitchen-canvas"></canvas>
+  <div id="ui-panel">
+    <h2>厨房油烟模拟控制台</h2>
+    
+    <div class="control-group">
+      <label>
+        <input type="checkbox" id="range-hood-toggle" checked />
+        开启油烟机
+      </label>
+    </div>
+
+    <div class="control-group">
+      <label>油烟机吸力强度</label>
+      <input type="range" id="suction-power" min="0.1" max="3" step="0.1" value="1.5" />
+      <span id="suction-value">1.5</span>
+    </div>
+
+    <div class="control-group">
+      <label>油烟机安装高度 (m)</label>
+      <input type="range" id="hood-height" min="0.4" max="1.5" step="0.05" value="0.75" />
+      <span id="hood-height-value">0.75</span>
+    </div>
+
+    <div class="control-group">
+      <label>
+        <input type="checkbox" id="window-toggle" />
+        开窗通风
+      </label>
+    </div>
+
+    <div class="control-group">
+      <label>火力强度</label>
+      <input type="range" id="fire-power" min="0.3" max="2" step="0.1" value="1" />
+      <span id="fire-value">1.0</span>
+    </div>
+
+    <div class="control-group">
+      <label>
+        <input type="checkbox" id="deposition-toggle" checked />
+        显示油污沉积
+      </label>
+    </div>
+
+    <div class="stats-group">
+      <h3>实时数据</h3>
+      <p>油烟逃逸率: <span id="escape-rate">0%</span></p>
+      <p>已吸入粒子: <span id="captured-count">0</span></p>
+      <p>逃逸粒子: <span id="escaped-count">0</span></p>
+      <p>油污沉积点: <span id="deposit-count">0</span></p>
+    </div>
+
+    <div class="advice-group" id="advice-panel">
+      <h3>净化建议</h3>
+      <p id="advice-text">等待数据收集...</p>
+    </div>
+
+    <button id="reset-btn">重置模拟</button>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
