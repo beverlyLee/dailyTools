@@ -84,7 +84,7 @@ const emit = defineEmits<{
 }>()
 
 const sofaPresets = [
-  { hex: '#1e3a5f', name: '深蓝色' },
+  { hex: '#1e3a5f', name: '深钴蓝' },
   { hex: '#3d5c8a', name: '灰蓝色' },
   { hex: '#8b4513', name: '棕色' },
   { hex: '#704214', name: '深褐色' },
@@ -92,6 +92,14 @@ const sofaPresets = [
   { hex: '#4a0080', name: '深紫色' },
   { hex: '#8b0000', name: '暗红色' },
   { hex: '#2e2e2e', name: '深灰色' },
+  { hex: '#c9b99a', name: '米灰色' },
+  { hex: '#b8a082', name: '卡其色' },
+  { hex: '#a67c52', name: '浅棕色' },
+  { hex: '#d4c4a8', name: '燕麦色' },
+  { hex: '#b0a090', name: '灰褐色' },
+  { hex: '#9c8b7a', name: '摩卡色' },
+  { hex: '#c4b8a8', name: '奶咖色' },
+  { hex: '#a89078', name: '焦糖色' },
 ]
 
 const curtainPresets = [

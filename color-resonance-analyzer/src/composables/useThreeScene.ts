@@ -262,37 +262,114 @@ export function useThreeScene(containerRef: { value: HTMLElement | null }) {
   function createCurtains() {
     if (!scene.value) return
     
-    const curtainGeometry = new THREE.PlaneGeometry(1.5, 2.5)
-    const curtainMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(defaultCurtainColor),
-      roughness: 0.9,
-      metalness: 0.05,
-      side: THREE.DoubleSide,
+    const foldCount = 8
+    const curtainWidth = 1.5
+    const curtainHeight = 2.5
+    const foldDepth = 0.12
+    const foldWidth = curtainWidth / foldCount
+    
+    function createCurtainGroup(isLeft: boolean): THREE.Group {
+      const group = new THREE.Group()
+      const curtainMaterial = new THREE.MeshStandardMaterial({
+        color: new THREE.Color(defaultCurtainColor),
+        roughness: 0.85,
+        metalness: 0.05,
+        side: THREE.DoubleSide,
+      })
+      
+      const folds: THREE.Mesh[] = []
+      
+      for (let i = 0; i < foldCount; i++) {
+        const foldGeometry = new THREE.PlaneGeometry(foldWidth * 1.15, curtainHeight, 4, 10)
+        
+        const positions = foldGeometry.attributes.position
+        for (let j = 0; j < positions.count; j++) {
+          const x = positions.getX(j)
+          const y = positions.getY(j)
+          
+          const waveX = Math.sin((x / foldWidth) * Math.PI * 2) * foldDepth * 0.5
+          const waveY = Math.sin(y * 0.8 + i * 0.5) * foldDepth * 0.3
+          
+          positions.setZ(j, waveX + waveY)
+        }
+        foldGeometry.computeVertexNormals()
+        
+        const fold = new THREE.Mesh(foldGeometry, curtainMaterial.clone())
+        
+        const offsetX = (i - foldCount / 2 + 0.5) * foldWidth * 0.85
+        const offsetZ = Math.sin(i * 0.6) * foldDepth * 0.8
+        const rotation = Math.sin(i * 0.8) * 0.12
+        
+        fold.position.set(offsetX, 0, offsetZ)
+        fold.rotation.y = rotation
+        
+        fold.castShadow = true
+        fold.receiveShadow = true
+        
+        folds.push(fold)
+        group.add(fold)
+      }
+      
+      const hitGeometry = new THREE.PlaneGeometry(curtainWidth * 0.9, curtainHeight * 0.95)
+      const hitMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0,
+        side: THREE.DoubleSide,
+      })
+      const hitPlane = new THREE.Mesh(hitGeometry, hitMaterial)
+      hitPlane.position.z = foldDepth * 0.3
+      group.add(hitPlane)
+      
+      const rodGeometry = new THREE.CylinderGeometry(0.04, 0.04, curtainWidth * 1.1, 16)
+      const rodMaterial = new THREE.MeshStandardMaterial({
+        color: 0x8b7355,
+        roughness: 0.6,
+        metalness: 0.3,
+      })
+      const rod = new THREE.Mesh(rodGeometry, rodMaterial)
+      rod.rotation.z = Math.PI / 2
+      rod.position.y = curtainHeight / 2 + 0.05
+      rod.position.z = foldDepth * 0.5
+      rod.castShadow = true
+      group.add(rod)
+      
+      group.userData.hitPlane = hitPlane
+      group.userData.folds = folds
+      group.userData.curtainMaterial = curtainMaterial
+      
+      return group
+    }
+    
+    const leftCurtainGroup = createCurtainGroup(true)
+    leftCurtainGroup.position.set(-2.5, 1.25, -2)
+    leftCurtainGroup.rotation.y = Math.PI / 8
+    leftCurtainGroup.userData.objectId = 'curtain-left'
+    leftCurtainGroup.userData.objectType = 'curtain'
+    leftCurtainGroup.userData.curtainIndex = 0
+    leftCurtainGroup.userData.hitPlane?.userData && Object.assign(leftCurtainGroup.userData.hitPlane?.userData || {}, {
+      objectId: 'curtain-left',
+      objectType: 'curtain',
+      curtainIndex: 0,
     })
+    scene.value.add(leftCurtainGroup)
     
-    const leftCurtain = new THREE.Mesh(curtainGeometry, curtainMaterial.clone())
-    leftCurtain.position.set(-2.5, 1.5, -2)
-    leftCurtain.rotation.y = Math.PI / 6
-    leftCurtain.receiveShadow = true
-    leftCurtain.castShadow = true
-    leftCurtain.userData.objectId = 'curtain-left'
-    leftCurtain.userData.objectType = 'curtain'
-    leftCurtain.userData.curtainIndex = 0
-    scene.value.add(leftCurtain)
-    
-    const rightCurtain = new THREE.Mesh(curtainGeometry, curtainMaterial.clone())
-    rightCurtain.position.set(2.5, 1.5, -2)
-    rightCurtain.rotation.y = -Math.PI / 6
-    rightCurtain.receiveShadow = true
-    rightCurtain.castShadow = true
-    rightCurtain.userData.objectId = 'curtain-right'
-    rightCurtain.userData.objectType = 'curtain'
-    rightCurtain.userData.curtainIndex = 1
-    scene.value.add(rightCurtain)
+    const rightCurtainGroup = createCurtainGroup(false)
+    rightCurtainGroup.position.set(2.5, 1.25, -2)
+    rightCurtainGroup.rotation.y = -Math.PI / 8
+    rightCurtainGroup.userData.objectId = 'curtain-right'
+    rightCurtainGroup.userData.objectType = 'curtain'
+    rightCurtainGroup.userData.curtainIndex = 1
+    rightCurtainGroup.userData.hitPlane?.userData && Object.assign(rightCurtainGroup.userData.hitPlane?.userData || {}, {
+      objectId: 'curtain-right',
+      objectType: 'curtain',
+      curtainIndex: 1,
+    })
+    scene.value.add(rightCurtainGroup)
     
     curtainObjects.value = [
-      { id: 'curtain-left', name: '左窗帘', type: 'curtain', mesh: leftCurtain, originalColor: defaultCurtainColor, currentColor: defaultCurtainColor },
-      { id: 'curtain-right', name: '右窗帘', type: 'curtain', mesh: rightCurtain, originalColor: defaultCurtainColor, currentColor: defaultCurtainColor },
+      { id: 'curtain-left', name: '左窗帘', type: 'curtain', mesh: leftCurtainGroup as unknown as THREE.Mesh, originalColor: defaultCurtainColor, currentColor: defaultCurtainColor },
+      { id: 'curtain-right', name: '右窗帘', type: 'curtain', mesh: rightCurtainGroup as unknown as THREE.Mesh, originalColor: defaultCurtainColor, currentColor: defaultCurtainColor },
     ]
   }
   
@@ -385,8 +462,20 @@ export function useThreeScene(containerRef: { value: HTMLElement | null }) {
     const curtain = curtainObjects.value[index]
     if (!curtain) return
     
-    const material = curtain.mesh.material as THREE.MeshStandardMaterial
-    material.color.set(hexColor)
+    const mesh = curtain.mesh
+    
+    if (mesh instanceof THREE.Group) {
+      mesh.traverse((child) => {
+        if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+          if (child !== mesh.userData.rod) {
+            child.material.color.set(hexColor)
+          }
+        }
+      })
+    } else if (mesh.material instanceof THREE.MeshStandardMaterial) {
+      mesh.material.color.set(hexColor)
+    }
+    
     curtain.currentColor = hexColor
   }
   
@@ -467,8 +556,19 @@ export function useThreeScene(containerRef: { value: HTMLElement | null }) {
     })
     
     curtainObjects.value.forEach(obj => {
-      const material = obj.mesh.material as THREE.MeshStandardMaterial
-      material.color.set(obj.originalColor)
+      const mesh = obj.mesh
+      if (mesh instanceof THREE.Group) {
+        mesh.traverse((child) => {
+          if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+            const isRod = child.geometry instanceof THREE.CylinderGeometry
+            if (!isRod) {
+              child.material.color.set(obj.originalColor)
+            }
+          }
+        })
+      } else if (mesh.material instanceof THREE.MeshStandardMaterial) {
+        mesh.material.color.set(obj.originalColor)
+      }
       obj.currentColor = obj.originalColor
     })
     

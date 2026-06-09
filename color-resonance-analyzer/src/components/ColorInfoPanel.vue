@@ -4,14 +4,10 @@
     
     <div class="color-preview-row">
       <div class="color-preview" :style="{ backgroundColor: colorInfo.hex }"></div>
-      <div class="color-name">{{ colorInfo.name }}</div>
+      <div class="color-hex-main">{{ colorInfo.hex.toUpperCase() }}</div>
     </div>
     
     <div class="color-values">
-      <div class="value-row">
-        <span class="label">HEX</span>
-        <span class="value">{{ colorInfo.hex.toUpperCase() }}</span>
-      </div>
       <div class="value-row">
         <span class="label">RGB</span>
         <span class="value">{{ colorInfo.rgb.r }}, {{ colorInfo.rgb.g }}, {{ colorInfo.rgb.b }}</span>
@@ -66,12 +62,15 @@ defineProps<{
   border-radius: 8px;
   border: 2px solid #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
 }
 
-.color-name {
-  font-size: 16px;
-  font-weight: 500;
+.color-hex-main {
+  font-size: 18px;
+  font-weight: 600;
   color: #222;
+  font-family: 'SF Mono', Monaco, monospace;
+  letter-spacing: 1px;
 }
 
 .color-values {
