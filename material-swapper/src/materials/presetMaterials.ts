@@ -87,7 +87,9 @@ export const presetMaterials: MaterialItem[] = [
       roughness: 0.95,
       metalness: 0.0,
       envMapIntensity: 0.1,
-      reflectivity: 0.0
+      reflectivity: 0.0,
+      normalStrength: 0.5,
+      fabricPlush: 0.3
     },
     uv: {
       repeatX: 1,
@@ -105,7 +107,9 @@ export const presetMaterials: MaterialItem[] = [
       roughness: 0.98,
       metalness: 0.0,
       envMapIntensity: 0.05,
-      reflectivity: 0.0
+      reflectivity: 0.0,
+      normalStrength: 0.8,
+      fabricPlush: 0.9
     },
     uv: {
       repeatX: 1,

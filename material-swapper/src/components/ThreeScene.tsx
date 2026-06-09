@@ -288,10 +288,11 @@ interface ThreeSceneProps {
 export function ThreeScene({ materials, uvOverrides, physicsOverrides, customTextures }: ThreeSceneProps) {
   return (
     <Canvas
-      shadows
+      shadows="soft"
       camera={{ position: [12, 8, 12], fov: 50 }}
       gl={{ antialias: true, preserveDrawingBuffer: true }}
       dpr={[1, 2]}
+      frameloop="demand"
     >
       <color attach="background" args={['#e8e8e8']} />
       <fog attach="fog" args={['#e8e8e8', 20, 50]} />

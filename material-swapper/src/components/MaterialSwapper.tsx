@@ -65,6 +65,7 @@ export function MaterialSwapper({
       clearcoatRoughness: { value: physics.clearcoatRoughness ?? 0.0 },
       reflectivity: { value: physics.reflectivity ?? 0.5 },
       normalStrength: { value: physics.normalStrength ?? 0.5 },
+      fabricPlush: { value: physics.fabricPlush ?? 0.5 },
       uvRepeat: { value: new THREE.Vector2(uv.repeatX ?? 1, uv.repeatY ?? 1) },
       uvOffset: { value: new THREE.Vector2(uv.offsetX ?? 0, uv.offsetY ?? 0) },
       uvRotation: { value: uv.rotation ?? 0 },
@@ -97,6 +98,7 @@ export function MaterialSwapper({
     materialRef.current.uniforms.clearcoatRoughness.value = physics.clearcoatRoughness ?? 0.0;
     materialRef.current.uniforms.reflectivity.value = physics.reflectivity ?? 0.5;
     materialRef.current.uniforms.normalStrength.value = physics.normalStrength ?? 0.5;
+    materialRef.current.uniforms.fabricPlush.value = physics.fabricPlush ?? 0.5;
     materialRef.current.uniforms.uvRepeat.value.set(uv.repeatX ?? 1, uv.repeatY ?? 1);
     materialRef.current.uniforms.uvOffset.value.set(uv.offsetX ?? 0, uv.offsetY ?? 0);
     materialRef.current.uniforms.uvRotation.value = uv.rotation ?? 0;

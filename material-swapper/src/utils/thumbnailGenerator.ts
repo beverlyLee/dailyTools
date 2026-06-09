@@ -111,63 +111,81 @@ function woodKnots(u: number, v: number): { knots: number; mask: number } {
 }
 
 function marbleVeins(u: number, v: number): number {
-  const p = [u * 1.8, v * 1.8];
-  const warp1 = fbm(p[0] * 1.2, p[1] * 1.2, 5) * 1.2;
-  const warp2 = fbm(p[0] * 2.5 + 5, p[1] * 2.5 + 5, 5) * 0.6;
-  const wu = p[0] + warp1;
-  const wv = p[1] + warp2 * 0.6;
+  const p = [u * 1.5, v * 1.5];
   
-  const mainVein = Math.pow(Math.sin(wu * 1.8 + wv * 0.8 + fbm(p[0] * 1.5, p[1] * 1.5, 5) * 1.5) * 0.5 + 0.5, 3);
-  const secVein1 = Math.pow(Math.sin(wu * 4 + wv * 2 + fbm(p[0] * 3, p[1] * 3, 5) * 2.5) * 0.5 + 0.5, 5) * 0.7;
-  const secVein2 = Math.pow(Math.sin(wu * 9 + wv * 4 + fbm(p[0] * 6, p[1] * 6, 5) * 3.5) * 0.5 + 0.5, 7) * 0.4;
+  const largeWarp = fbm(p[0] * 0.8, p[1] * 0.8, 5) * 2.0;
+  const medWarp = fbm(p[0] * 2.0 + 3, p[1] * 2.0 + 3, 5) * 1.0;
+  const smallWarp = fbm(p[0] * 4.0 + 7, p[1] * 4.0 + 7, 5) * 0.4;
   
-  const crackNoise = fbm(p[0] * 15, p[1] * 15, 5);
-  const cracks = smoothstep(0.5, 0.62, crackNoise) * 0.25;
+  const flowDir = [1.0, 0.3];
+  const warpedU = p[0] + flowDir[0] * largeWarp + medWarp;
+  const warpedV = p[1] + flowDir[1] * largeWarp + smallWarp;
   
-  const edgeDetail = fbm(p[0] * 40, p[1] * 40, 4) * 0.2;
+  const mainVein = Math.sin(warpedU * 1.2 + warpedV * 0.4 + fbm(p[0] * 0.6, p[1] * 0.6, 5) * 3.0) * 0.5 + 0.5;
+  const mainVeinPow = smoothstep(0.3, 0.8, Math.pow(mainVein, 2.2));
   
-  return Math.max(0, Math.min(1, mainVein + secVein1 + secVein2 + cracks + edgeDetail * mainVein));
+  const secVein = Math.sin(warpedU * 3.5 + warpedV * 1.2 + fbm(p[0] * 1.5, p[1] * 1.5, 5) * 2.5 + 1.0) * 0.5 + 0.5;
+  const secVeinPow = smoothstep(0.2, 0.9, Math.pow(secVein, 4.0) * 0.8) * 0.7;
+  
+  const fineVein = Math.sin(warpedU * 8.0 + warpedV * 3.0 + fbm(p[0] * 3.0, p[1] * 3.0, 5) * 2.0 + 2.5) * 0.5 + 0.5;
+  const fineVeinPow = Math.pow(fineVein, 6.0) * 0.5;
+  
+  return Math.max(0, Math.min(1, mainVeinPow + secVeinPow + fineVeinPow));
 }
 
-function carpetFiber(u: number, v: number): number {
-  const dirNoise = fbm(u * 2, v * 2, 5) * Math.PI * 1.5;
+function carpetFiber(u: number, v: number, plush: number = 0.5): number {
+  const dirNoise = fbm(u * 1.5, v * 1.5, 5) * Math.PI * 2.0;
   const cosDir = Math.cos(dirNoise);
   const sinDir = Math.sin(dirNoise);
   
-  const su = (u * cosDir - v * sinDir) * 60;
-  const sv = (u * sinDir + v * cosDir) * 60;
+  const fiberScale = 80 - (plush * 30);
   
-  const fiberLines = Math.pow(Math.sin(su + fbm(u * 15, v * 15, 5) * 6) * 0.5 + 0.5, 1.8);
+  const su = (u * cosDir - v * sinDir) * fiberScale;
   
-  let fiber = fiberLines * 0.35;
-  fiber += fbm(u * 40, v * 40, 5) * 0.25;
-  fiber += fbm(u * 80, v * 80, 5) * 0.2;
-  fiber += fbm(u * 160, v * 160, 4) * 0.15;
-  fiber += fbm(u * 320, v * 320, 3) * 0.1;
-  
-  const clumps = Math.pow(fbm(u * 8, v * 8, 5), 2);
-  fiber += clumps * 0.2;
-  
-  const tuft = Math.pow(
-    Math.sin(u * 20 + fbm(u * 5, v * 5, 5) * 3) * 
-    Math.sin(v * 20 + fbm(u * 5 + 1, v * 5 + 1, 5) * 3) * 0.5 + 0.5, 
-    3
+  const fiberLines = Math.pow(
+    Math.sin(su + fbm(u * 12, v * 12, 5) * 8.0) * 0.5 + 0.5,
+    2.0 - plush * 0.5
   );
-  fiber += tuft * 0.15;
+  
+  let fiber = fiberLines * (0.3 + plush * 0.15);
+  
+  const n1 = 50 - plush * 15;
+  const n2 = 100 - plush * 30;
+  const n3 = 200 - plush * 60;
+  const n4 = 400 - plush * 120;
+  
+  fiber += fbm(u * n1, v * n1, 5) * 0.25;
+  fiber += fbm(u * n2, v * n2, 5) * 0.2;
+  fiber += fbm(u * n3, v * n3, 4) * 0.15;
+  fiber += fbm(u * n4, v * n4, 3) * 0.1;
+  
+  const clumpScale = 10 - plush * 3;
+  const clumps = Math.pow(fbm(u * clumpScale, v * clumpScale, 5), 2);
+  fiber += clumps * (0.15 + plush * 0.1);
+  
+  const tuftScale = 25 - plush * 7;
+  const tuft = Math.pow(
+    Math.sin(u * tuftScale + fbm(u * 4, v * 4, 5) * 4.0) * 
+    Math.sin(v * tuftScale + fbm(u * 4 + 1, v * 4 + 1, 5) * 4.0) * 0.5 + 0.5, 
+    3.0 - plush
+  );
+  fiber += tuft * (0.1 + plush * 0.1);
   
   return Math.max(0, Math.min(1, fiber));
 }
 
 function brushedMetal(u: number, v: number): number {
-  const mainBrush = Math.pow(fbm(u * 25, v * 0.2, 6), 1.3) * 0.55;
-  let brush = mainBrush;
-  brush += fbm(u * 80, v * 0.8, 5) * 0.25;
-  brush += fbm(u * 250, v * 1.5, 4) * 0.15;
+  const coarseBrush = Math.pow(fbm(u * 15, v * 0.15, 5), 1.1) * 0.5;
+  const mainBrush = Math.pow(fbm(u * 40, v * 0.3, 6), 1.4) * 0.35;
+  const fineBrush = Math.pow(fbm(u * 120, v * 0.8, 5), 1.8) * 0.2;
+  const microBrush = Math.pow(fbm(u * 300, v * 2.0, 4), 2.5) * 0.12;
   
-  const scratches = Math.pow(fbm(u * 400, v * 8, 3), 3.5) * 0.12;
+  let brush = coarseBrush + mainBrush + fineBrush + microBrush;
+  
+  const scratches = Math.pow(fbm(u * 500, v * 8, 3), 4.0) * 0.15;
   brush += scratches;
   
-  brush += fbm(u * 15, v * 15, 4) * 0.08;
+  brush += fbm(u * 15, v * 15, 4) * 0.06;
   
   return Math.max(0, Math.min(1, brush));
 }
@@ -268,18 +286,22 @@ export function generateMaterialThumbnail(
       }
       else if (type === 1) {
         const veins = marbleVeins(u, v);
-        const darkVein = scaleColor(baseColor, 0.3);
-        const midVein = scaleColor(baseColor, 0.55);
+        const lightVein = scaleColor(baseColor, 1.25);
+        const mediumVein = scaleColor(baseColor, 0.7);
+        const darkVein = scaleColor(baseColor, 0.35);
         
         let col = [...baseColor] as [number, number, number];
         
-        const midT = smoothstep(0.08, 0.35, veins) * 0.6;
-        col = mixColor(col, midVein, midT);
+        const lightT = smoothstep(0.0, 0.15, veins) * 0.3;
+        col = mixColor(col, lightVein, lightT);
         
-        const darkT = smoothstep(0.4, 0.85, veins) * 0.9;
+        const midT = smoothstep(0.15, 0.45, veins) * 0.7;
+        col = mixColor(col, mediumVein, midT);
+        
+        const darkT = smoothstep(0.5, 0.9, veins) * 0.95;
         col = mixColor(col, darkVein, darkT);
         
-        const sparkle = Math.pow(fbm(u * 50, v * 50, 4), 3) * 0.2;
+        const sparkle = Math.pow(fbm(u * 50, v * 50, 4), 3) * 0.15;
         col = addColor(col, sparkle);
         
         const surfVar = fbm(u * 6, v * 6, 5) * 0.04;
@@ -293,25 +315,26 @@ export function generateMaterialThumbnail(
         b = col[2];
       }
       else if (type === 2) {
-        const fiber = carpetFiber(u, v);
-        const darkRoot = scaleColor(baseColor, 0.6);
-        const baseFiber = scaleColor(baseColor, 0.85);
-        const lightTip = scaleColor(baseColor, 1.25);
+        const plush = 0.5;
+        const fiber = carpetFiber(u, v, plush);
+        const darkRoot = scaleColor(baseColor, 0.7 - plush * 0.2);
+        const baseFiber = scaleColor(baseColor, 0.9 - plush * 0.1);
+        const lightTip = scaleColor(baseColor, 1.2 + plush * 0.15);
         
-        let col = mixColor(darkRoot, baseFiber, smoothstep(0.15, 0.55, fiber));
-        col = mixColor(col, lightTip, smoothstep(0.55, 0.95, fiber) * 0.7);
+        let col = mixColor(darkRoot, baseFiber, smoothstep(0.1, 0.5, fiber));
+        col = mixColor(col, lightTip, smoothstep(0.5, 0.95, fiber) * (0.5 + plush * 0.3));
         
-        const colorVar = fbm(u * 4, v * 4, 5);
-        const varColor = scaleColor(baseColor, 0.85 + colorVar * 0.3);
-        col = mixColor(col, varColor, 0.35);
+        const colorVar = fbm(u * 3.5, v * 3.5, 5);
+        const varColor = scaleColor(baseColor, (0.9 - plush * 0.1) + colorVar * (0.2 + plush * 0.2));
+        col = mixColor(col, varColor, 0.3 + plush * 0.15);
         
-        const shadowNoise = fbm(u * 12, v * 12, 5);
-        col = scaleColor(col, 0.8 + shadowNoise * 0.4);
+        const shadowNoise = fbm(u * 10, v * 10, 5);
+        col = scaleColor(col, (0.85 - plush * 0.1) + shadowNoise * (0.3 + plush * 0.2));
         
-        const microShadows = fbm(u * 60, v * 60, 4) * 0.12;
+        const microShadows = fbm(u * (60 - plush * 15), v * (60 - plush * 15), 4) * (0.1 + plush * 0.05);
         col = addColor(col, -microShadows);
         
-        const sheen = Math.pow(fiber, 4) * 0.15;
+        const sheen = Math.pow(fiber, 3 + plush * 2) * (0.1 + plush * 0.1);
         col = addColor(col, sheen);
         
         r = col[0];
@@ -320,20 +343,22 @@ export function generateMaterialThumbnail(
       }
       else if (type === 3) {
         const brush = brushedMetal(u, v);
-        const darkMetal = scaleColor(baseColor, 0.7);
-        const brightMetal = scaleColor(baseColor, 1.4);
+        const darkMetal = scaleColor(baseColor, 0.6);
+        const brightMetal = scaleColor(baseColor, 1.5);
+        const highlightMetal = scaleColor(baseColor, 1.8);
         
-        let col = mixColor(darkMetal, baseColor, brush * 0.55);
-        col = mixColor(col, brightMetal, smoothstep(0.55, 0.95, brush) * 0.6);
+        let col = mixColor(darkMetal, baseColor, brush * 0.5);
+        col = mixColor(col, brightMetal, smoothstep(0.5, 0.85, brush) * 0.7);
+        col = mixColor(col, highlightMetal, smoothstep(0.85, 1.0, brush) * 0.5);
         
-        const grainDetail = fbm(u * 50, v * 50, 4) * 0.12;
+        const grainDetail = fbm(u * 50, v * 50, 4) * 0.1;
         col = addColor(col, grainDetail);
         
-        const microScratch = Math.pow(fbm(u * 350, v * 350, 3), 4.5) * 0.18;
+        const microScratch = Math.pow(fbm(u * 400, v * 400, 3), 5) * 0.2;
         col = addColor(col, microScratch);
         
-        const tarnish = fbm(u * 4, v * 4, 5) * 0.06;
-        col = scaleColor(col, 0.94 + tarnish);
+        const tarnish = fbm(u * 4, v * 4, 5) * 0.08;
+        col = scaleColor(col, 0.92 + tarnish);
         
         r = col[0];
         g = col[1];

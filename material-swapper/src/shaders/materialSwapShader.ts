@@ -56,6 +56,7 @@ export const fragmentShader = /* glsl */ `
   uniform vec3 ambientColor;
   uniform float ambientIntensity;
   uniform float normalStrength;
+  uniform float fabricPlush;
   uniform sampler2D customMap;
   uniform sampler2D customNormalMap;
   uniform sampler2D customRoughnessMap;
@@ -235,30 +236,37 @@ export const fragmentShader = /* glsl */ `
   }
 
   float marbleVeins(vec2 uv) {
-    vec2 p = uv * 1.8;
+    vec2 p = uv * 1.2;
     
-    float warp1 = fbm(p * 1.2) * 1.2;
-    float warp2 = fbm(p * 2.5 + 5.0) * 0.6;
-    vec2 warped = p + vec2(warp1, warp2 * 0.6);
+    float largeWarp = fbm(p * 0.8) * 2.0;
+    float medWarp = fbm(p * 2.0 + 3.0) * 1.0;
+    float smallWarp = fbm(p * 4.0 + 7.0) * 0.4;
+    vec2 flowDir = vec2(1.0, 0.3);
+    vec2 warped = p + flowDir * largeWarp + vec2(medWarp, smallWarp);
     
     float veins = 0.0;
     
-    float mainVein = sin(warped.x * 1.8 + warped.y * 0.8 + fbm(p * 1.5) * 1.5) * 0.5 + 0.5;
-    mainVein = pow(mainVein, 3.0);
+    float mainVein = sin(warped.x * 1.2 + warped.y * 0.4 + fbm(p * 0.6) * 3.0) * 0.5 + 0.5;
+    mainVein = pow(mainVein, 2.2);
+    mainVein = smoothstep(0.3, 0.8, mainVein);
     
-    float secVein1 = sin(warped.x * 4.0 + warped.y * 2.0 + fbm(p * 3.0) * 2.5) * 0.5 + 0.5;
-    secVein1 = pow(secVein1, 5.0) * 0.7;
+    float secVein = sin(warped.x * 3.5 + warped.y * 1.2 + fbm(p * 1.5) * 2.5 + 1.0) * 0.5 + 0.5;
+    secVein = pow(secVein, 4.0) * 0.8;
+    secVein = smoothstep(0.2, 0.9, secVein) * 0.7;
     
-    float secVein2 = sin(warped.x * 9.0 + warped.y * 4.0 + fbm(p * 6.0) * 3.5) * 0.5 + 0.5;
-    secVein2 = pow(secVein2, 7.0) * 0.4;
+    float fineVein = sin(warped.x * 8.0 + warped.y * 3.0 + fbm(p * 3.0) * 2.0 + 2.5) * 0.5 + 0.5;
+    fineVein = pow(fineVein, 6.0) * 0.5;
     
-    float crackNoise = fbm(p * 15.0);
-    float cracks = smoothstep(0.5, 0.62, crackNoise) * 0.25;
+    float crackNoise = fbm(p * 12.0 + fbm(p * 6.0) * 2.0);
+    float cracks = smoothstep(0.48, 0.58, crackNoise) * 0.3;
     
-    veins = mainVein + secVein1 + secVein2 + cracks;
+    veins = mainVein * 0.9 + secVein * 0.5 + fineVein * 0.3 + cracks * 0.2;
     
-    float edgeDetail = fbm(p * 40.0) * 0.2;
+    float edgeDetail = fbm(p * 30.0) * 0.25;
     veins += edgeDetail * mainVein;
+    
+    float microDetail = fbm(p * 80.0) * 0.08;
+    veins += microDetail;
     
     return clamp(veins, 0.0, 1.0);
   }
@@ -268,24 +276,27 @@ export const fragmentShader = /* glsl */ `
     
     vec3 baseStone = baseColor;
     
-    vec3 darkVein = baseColor * 0.3;
-    vec3 mediumVein = baseColor * 0.55;
+    vec3 darkVein = baseColor * 0.25;
+    vec3 mediumVein = baseColor * 0.5;
+    vec3 lightVein = baseColor * 0.85;
     
     vec3 color = baseStone;
     
-    color = mix(color, mediumVein, smoothstep(0.08, 0.35, veins) * 0.6);
+    color = mix(color, lightVein, smoothstep(0.0, 0.15, veins) * 0.3);
     
-    color = mix(color, darkVein, smoothstep(0.4, 0.85, veins) * 0.9);
+    color = mix(color, mediumVein, smoothstep(0.15, 0.45, veins) * 0.7);
     
-    float crystalSparkle = fbm(uv * 50.0);
-    crystalSparkle = pow(crystalSparkle, 3.0) * 0.2;
+    color = mix(color, darkVein, smoothstep(0.5, 0.9, veins) * 0.95);
+    
+    float crystalSparkle = fbm(uv * 50.0 + fbm(uv * 20.0));
+    crystalSparkle = pow(crystalSparkle, 3.0) * 0.25;
     color += vec3(crystalSparkle);
     
-    float surfaceVariation = fbm(uv * 6.0) * 0.04;
+    float surfaceVariation = fbm(uv * 5.0) * 0.05;
     color += vec3(surfaceVariation);
     
-    float microDetail = fbm(uv * 100.0) * 0.06;
-    color *= 0.96 + microDetail;
+    float microDetail = fbm(uv * 90.0) * 0.07;
+    color *= 0.95 + microDetail;
     
     return clamp(color, 0.0, 1.0);
   }
@@ -293,33 +304,42 @@ export const fragmentShader = /* glsl */ `
   float carpetFiber(vec2 uv) {
     float fiber = 0.0;
     
-    float directionNoise = fbm(uv * 2.0) * PI * 1.5;
+    float directionNoise = fbm(uv * 1.5) * PI * 2.0;
     float cosDir = cos(directionNoise);
     float sinDir = sin(directionNoise);
+    
+    float fiberScale = mix(80.0, 50.0, fabricPlush);
     
     vec2 stretchedUv = vec2(
       uv.x * cosDir - uv.y * sinDir,
       uv.x * sinDir + uv.y * cosDir
-    ) * 60.0;
+    ) * fiberScale;
     
-    float fiberLines = sin(stretchedUv.x + fbm(uv * 15.0) * 6.0) * 0.5 + 0.5;
-    fiberLines = pow(fiberLines, 1.8);
+    float fiberLines = sin(stretchedUv.x + fbm(uv * 12.0) * 8.0) * 0.5 + 0.5;
+    fiberLines = pow(fiberLines, mix(2.0, 1.5, fabricPlush));
     
-    fiber += fiberLines * 0.35;
+    fiber += fiberLines * mix(0.3, 0.45, fabricPlush);
     
-    fiber += fbm(uv * 40.0) * 0.25;
-    fiber += fbm(uv * 80.0) * 0.2;
-    fiber += fbm(uv * 160.0) * 0.15;
-    fiber += fbm(uv * 320.0) * 0.1;
+    float noiseScale1 = mix(50.0, 35.0, fabricPlush);
+    float noiseScale2 = mix(100.0, 70.0, fabricPlush);
+    float noiseScale3 = mix(200.0, 140.0, fabricPlush);
+    float noiseScale4 = mix(400.0, 280.0, fabricPlush);
     
-    float clumps = fbm(uv * 8.0);
+    fiber += fbm(uv * noiseScale1) * 0.25;
+    fiber += fbm(uv * noiseScale2) * 0.2;
+    fiber += fbm(uv * noiseScale3) * 0.15;
+    fiber += fbm(uv * noiseScale4) * 0.1;
+    
+    float clumpScale = mix(10.0, 7.0, fabricPlush);
+    float clumps = fbm(uv * clumpScale);
     clumps = pow(clumps, 2.0);
-    fiber += clumps * 0.2;
+    fiber += clumps * mix(0.15, 0.25, fabricPlush);
     
-    float tuftPattern = sin(uv.x * 20.0 + fbm(uv * 5.0) * 3.0) * 
-                       sin(uv.y * 20.0 + fbm(uv * 5.0 + 1.0) * 3.0) * 0.5 + 0.5;
-    tuftPattern = pow(tuftPattern, 3.0);
-    fiber += tuftPattern * 0.15;
+    float tuftScale = mix(25.0, 18.0, fabricPlush);
+    float tuftPattern = sin(uv.x * tuftScale + fbm(uv * 4.0) * 4.0) * 
+                       sin(uv.y * tuftScale + fbm(uv * 4.0 + 1.0) * 4.0) * 0.5 + 0.5;
+    tuftPattern = pow(tuftPattern, mix(3.0, 2.0, fabricPlush));
+    fiber += tuftPattern * mix(0.1, 0.2, fabricPlush);
     
     return clamp(fiber, 0.0, 1.0);
   }
@@ -327,24 +347,24 @@ export const fragmentShader = /* glsl */ `
   vec3 carpetColor(vec2 uv) {
     float fiber = carpetFiber(uv);
     
-    vec3 baseFiber = baseColor * 0.85;
-    vec3 lightTip = baseColor * 1.25;
-    vec3 darkRoot = baseColor * 0.6;
+    vec3 baseFiber = baseColor * mix(0.9, 0.8, fabricPlush);
+    vec3 lightTip = baseColor * mix(1.2, 1.35, fabricPlush);
+    vec3 darkRoot = baseColor * mix(0.7, 0.5, fabricPlush);
     
-    vec3 color = mix(darkRoot, baseFiber, smoothstep(0.15, 0.55, fiber));
-    color = mix(color, lightTip, smoothstep(0.55, 0.95, fiber) * 0.7);
+    vec3 color = mix(darkRoot, baseFiber, smoothstep(0.1, 0.5, fiber));
+    color = mix(color, lightTip, smoothstep(0.5, 0.95, fiber) * mix(0.5, 0.8, fabricPlush));
     
-    float colorVariation = fbm(uv * 4.0);
-    vec3 varColor = baseColor * (0.85 + colorVariation * 0.3);
-    color = mix(color, varColor, 0.35);
+    float colorVariation = fbm(uv * 3.5);
+    vec3 varColor = baseColor * (mix(0.9, 0.8, fabricPlush) + colorVariation * mix(0.2, 0.4, fabricPlush));
+    color = mix(color, varColor, mix(0.3, 0.45, fabricPlush));
     
-    float shadowNoise = fbm(uv * 12.0);
-    color *= 0.8 + shadowNoise * 0.4;
+    float shadowNoise = fbm(uv * 10.0);
+    color *= mix(0.85, 0.75, fabricPlush) + shadowNoise * mix(0.3, 0.5, fabricPlush);
     
-    float microShadows = fbm(uv * 60.0) * 0.12;
+    float microShadows = fbm(uv * mix(60.0, 45.0, fabricPlush)) * mix(0.1, 0.15, fabricPlush);
     color -= vec3(microShadows);
     
-    float sheen = pow(fiber, 4.0) * 0.15;
+    float sheen = pow(fiber, mix(3.0, 5.0, fabricPlush)) * mix(0.1, 0.2, fabricPlush);
     color += vec3(sheen);
     
     return clamp(color, 0.0, 1.0);
@@ -353,14 +373,17 @@ export const fragmentShader = /* glsl */ `
   float carpetHeight(vec2 uv) {
     float height = 0.0;
     
-    height += fbm(uv * 40.0) * 0.4;
-    height += fbm(uv * 100.0) * 0.3;
-    height += fbm(uv * 200.0) * 0.2;
+    float heightScale = mix(0.8, 1.5, fabricPlush);
     
-    float tufts = sin(uv.x * 25.0 + fbm(uv * 10.0) * 3.0) * 
-                  sin(uv.y * 25.0 + fbm(uv * 10.0 + 2.0) * 3.0);
-    tufts = pow(tufts * 0.5 + 0.5, 3.0);
-    height += tufts * 0.3;
+    height += fbm(uv * mix(40.0, 30.0, fabricPlush)) * 0.4 * heightScale;
+    height += fbm(uv * mix(100.0, 70.0, fabricPlush)) * 0.3 * heightScale;
+    height += fbm(uv * mix(200.0, 150.0, fabricPlush)) * 0.2 * heightScale;
+    
+    float tuftScale = mix(25.0, 18.0, fabricPlush);
+    float tufts = sin(uv.x * tuftScale + fbm(uv * 8.0) * 3.0) * 
+                  sin(uv.y * tuftScale + fbm(uv * 8.0 + 2.0) * 3.0);
+    tufts = pow(tufts * 0.5 + 0.5, mix(3.0, 2.0, fabricPlush));
+    height += tufts * mix(0.3, 0.5, fabricPlush) * heightScale;
     
     return clamp(height, 0.0, 1.0);
   }
@@ -368,18 +391,27 @@ export const fragmentShader = /* glsl */ `
   float brushedMetal(vec2 uv) {
     float brush = 0.0;
     
-    float mainBrush = fbm(vec2(uv.x * 25.0, uv.y * 0.2));
-    mainBrush = pow(mainBrush, 1.3);
-    brush += mainBrush * 0.55;
+    float coarseBrush = fbm(vec2(uv.x * 15.0, uv.y * 0.15));
+    coarseBrush = pow(coarseBrush, 1.1);
+    brush += coarseBrush * 0.5;
     
-    brush += fbm(vec2(uv.x * 80.0, uv.y * 0.8)) * 0.25;
-    brush += fbm(vec2(uv.x * 250.0, uv.y * 1.5)) * 0.15;
+    float mainBrush = fbm(vec2(uv.x * 40.0, uv.y * 0.3));
+    mainBrush = pow(mainBrush, 1.4);
+    brush += mainBrush * 0.35;
     
-    float scratches = fbm(vec2(uv.x * 400.0, uv.y * 8.0));
-    scratches = pow(scratches, 3.5) * 0.12;
+    float fineBrush = fbm(vec2(uv.x * 120.0, uv.y * 0.8));
+    fineBrush = pow(fineBrush, 1.8);
+    brush += fineBrush * 0.2;
+    
+    float microBrush = fbm(vec2(uv.x * 300.0, uv.y * 2.0));
+    microBrush = pow(microBrush, 2.5);
+    brush += microBrush * 0.12;
+    
+    float scratches = fbm(vec2(uv.x * 500.0, uv.y * 8.0));
+    scratches = pow(scratches, 4.0) * 0.15;
     brush += scratches;
     
-    float grainNoise = fbm(uv * 15.0) * 0.08;
+    float grainNoise = fbm(uv * 15.0) * 0.06;
     brush += grainNoise;
     
     return clamp(brush, 0.0, 1.0);
@@ -388,22 +420,24 @@ export const fragmentShader = /* glsl */ `
   vec3 metalColor(vec2 uv) {
     float brush = brushedMetal(uv);
     
-    vec3 darkMetal = baseColor * 0.7;
+    vec3 darkMetal = baseColor * 0.6;
     vec3 midMetal = baseColor;
-    vec3 brightMetal = baseColor * 1.4;
+    vec3 brightMetal = baseColor * 1.5;
+    vec3 highlightMetal = baseColor * 1.8;
     
-    vec3 color = mix(darkMetal, midMetal, brush * 0.55);
-    color = mix(color, brightMetal, smoothstep(0.55, 0.95, brush) * 0.6);
+    vec3 color = mix(darkMetal, midMetal, brush * 0.5);
+    color = mix(color, brightMetal, smoothstep(0.5, 0.85, brush) * 0.7);
+    color = mix(color, highlightMetal, smoothstep(0.85, 1.0, brush) * 0.5);
     
-    float grainDetail = fbm(uv * 50.0) * 0.12;
+    float grainDetail = fbm(uv * 50.0) * 0.1;
     color += vec3(grainDetail);
     
-    float microScratch = fbm(uv * 350.0);
-    microScratch = pow(microScratch, 4.5) * 0.18;
+    float microScratch = fbm(uv * 400.0);
+    microScratch = pow(microScratch, 5.0) * 0.2;
     color += vec3(microScratch);
     
-    float tarnish = fbm(uv * 4.0) * 0.06;
-    color *= 0.94 + tarnish;
+    float tarnish = fbm(uv * 4.0) * 0.08;
+    color *= 0.92 + tarnish;
     
     return clamp(color, 0.0, 1.0);
   }

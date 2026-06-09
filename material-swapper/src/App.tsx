@@ -51,6 +51,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<'materials' | 'uv' | 'physics'>('materials');
   const [showUploader, setShowUploader] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [exportMessage, setExportMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const [objectMaterials, setObjectMaterials] = useState<Record<SceneObjectType, string>>({
     floor: 'wood-floor-oak',
@@ -123,10 +124,14 @@ function App() {
 
     setIsExporting(true);
     try {
-      await exportSnapshot(canvas, 2560, 1440, `material-${selectedObject}-${Date.now()}.png`);
+      const filename = `material-${selectedObject}-${Date.now()}.png`;
+      await exportSnapshot(canvas, 2560, 1440, filename);
+      setExportMessage({ type: 'success', text: `快照导出成功：${filename}` });
+      setTimeout(() => setExportMessage(null), 3000);
     } catch (error) {
       console.error('导出快照失败:', error);
-      alert('导出快照失败，请重试');
+      setExportMessage({ type: 'error', text: '导出快照失败，请重试' });
+      setTimeout(() => setExportMessage(null), 3000);
     } finally {
       setIsExporting(false);
     }
@@ -214,6 +219,27 @@ function App() {
             <span className="current-material-label">材质:</span>
             <span className="current-material-name">{currentObjectMaterial?.name || '-'}</span>
           </div>
+          
+          {exportMessage && (
+            <div className={`export-toast ${exportMessage.type}`}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                {exportMessage.type === 'success' ? (
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                ) : (
+                  <circle cx="12" cy="12" r="10"></circle>
+                )}
+                {exportMessage.type === 'success' ? (
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                ) : (
+                  <>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </>
+                )}
+              </svg>
+              <span>{exportMessage.text}</span>
+            </div>
+          )}
         </div>
 
         <aside className="sidebar">

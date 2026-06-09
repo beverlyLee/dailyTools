@@ -15,6 +15,8 @@ export interface MaterialPhysicsProps {
   clearcoatRoughness?: number;
   reflectivity?: number;
   emissiveIntensity?: number;
+  normalStrength?: number;
+  fabricPlush?: number;
 }
 
 export interface UVOptions {
