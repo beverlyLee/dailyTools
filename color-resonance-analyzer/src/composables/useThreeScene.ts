@@ -366,19 +366,19 @@ export function useThreeScene(containerRef: { value: HTMLElement | null }) {
   }
   
   function getSofaColorInfo(): ColorInfo {
-    return createColorInfo(sofaObjects.value[0]?.currentColor || defaultSofaColor, '沙发主色')
+    return createColorInfo(sofaObjects.value[0]?.currentColor || defaultSofaColor)
   }
   
   function getCurtainColorInfo(index: number): ColorInfo | null {
     const curtain = curtainObjects.value[index]
     if (!curtain) return null
-    return createColorInfo(curtain.currentColor, curtain.name)
+    return createColorInfo(curtain.currentColor)
   }
   
   function getPillowColorInfo(index: number): ColorInfo | null {
     const pillow = pillowObjects.value[index]
     if (!pillow) return null
-    return createColorInfo(pillow.currentColor, pillow.name)
+    return createColorInfo(pillow.currentColor)
   }
   
   function setCurtainColor(index: number, hexColor: string) {
