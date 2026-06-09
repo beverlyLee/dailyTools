@@ -48,15 +48,15 @@ export class KitchenSmokeApp {
 
     this.config = {
       maxParticles: 2000,
-      emissionRate: 90,
+      emissionRate: 80,
       firePower: 1,
       suctionPower: 1.5,
       hoodHeight: 0.75,
       windowOpen: false,
-      gravity: 1.0,
-      buoyancy: 3.5,
-      diffusion: 0.18,
-      airResistance: 1.8,
+      gravity: 1.5,
+      buoyancy: 2.2,
+      diffusion: 0.22,
+      airResistance: 2.8,
     };
 
     this.scene = new THREE.Scene();

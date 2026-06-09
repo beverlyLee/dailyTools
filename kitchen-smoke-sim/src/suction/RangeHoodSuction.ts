@@ -23,10 +23,10 @@ export class RangeHoodSuction {
     this.hoodSize = new THREE.Vector2(0.9, 0.5);
     this.suctionStrength = config.suctionPower;
     this.isActive = true;
-    this.intakeRadius = 0.8;
-    this.suctionHeight = 3.0;
-    this.suctionForceMultiplier = 0.35;
-    this.captureRadiusMultiplier = 3.0;
+    this.intakeRadius = 0.65;
+    this.suctionHeight = 2.2;
+    this.suctionForceMultiplier = 0.28;
+    this.captureRadiusMultiplier = 2.5;
 
     this.createHoodModel();
   }
@@ -150,12 +150,12 @@ export class RangeHoodSuction {
     }
 
     const heightFactor = Math.max(0, 1 - distBelowHood / this.suctionHeight);
-    const heightFactorPow = Math.pow(heightFactor, 0.6);
+    const heightFactorPow = Math.pow(heightFactor, 1.2);
 
     const horizontalFactor = Math.max(0, 1 - horizontalDist / radiusAtHeight);
-    const horizontalFactorPow = Math.pow(horizontalFactor, 0.5);
+    const horizontalFactorPow = Math.pow(horizontalFactor, 0.8);
 
-    const proximityBoost = Math.pow(heightFactor, 2) * 0.8;
+    const proximityBoost = Math.pow(heightFactor, 3) * 0.6;
     const baseStrength = this.suctionStrength * this.suctionForceMultiplier;
     const strength = baseStrength * heightFactorPow * horizontalFactorPow * (1 + proximityBoost);
 
@@ -164,10 +164,10 @@ export class RangeHoodSuction {
       return new THREE.Vector3(0, -strength, 0);
     }
 
-    const inwardPull = 1.2;
-    const verticalPull = 1.0;
-    const horizontalFactor2 = Math.min(1, horizontalDist / 0.4);
-    const proximityFactor = Math.pow(heightFactor, 1.5);
+    const inwardPull = 0.7;
+    const verticalPull = 0.5;
+    const horizontalFactor2 = Math.min(1, horizontalDist / 0.5);
+    const proximityFactor = Math.pow(heightFactor, 2.5);
     
     const dirX = -dx / dirLen;
     const dirY = distBelowHood / dirLen;

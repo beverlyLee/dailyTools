@@ -94,8 +94,8 @@ export class SmokeEmitter {
       this.emitterPosition.z + offsetZ
     );
 
-    const upwardSpeed = 0.8 + Math.random() * 0.7;
-    const horizontalSpeed = (Math.random() - 0.5) * 0.12;
+    const upwardSpeed = 0.5 + Math.random() * 0.4;
+    const horizontalSpeed = (Math.random() - 0.5) * 0.1;
     
     const velocity = new THREE.Vector3(
       horizontalSpeed,
@@ -103,18 +103,18 @@ export class SmokeEmitter {
       horizontalSpeed * 0.5
     );
 
-    const baseLife = 10 + Math.random() * 6;
+    const baseLife = 12 + Math.random() * 6;
     
     return {
       id: this.nextId++,
       position,
       velocity,
-      size: 0.06 + Math.random() * 0.05,
+      size: 0.07 + Math.random() * 0.05,
       life: baseLife,
       maxLife: baseLife,
-      opacity: 0.92,
-      mass: 0.008 + Math.random() * 0.006,
-      temperature: 95 + Math.random() * 35,
+      opacity: 0.85,
+      mass: 0.01 + Math.random() * 0.008,
+      temperature: 85 + Math.random() * 25,
       captured: false,
       escaped: false,
       deposited: false,
@@ -161,12 +161,10 @@ export class SmokeEmitter {
 
       p.velocity.add(totalAccel.multiplyScalar(deltaTime));
       
-      if (p.velocity.y > 3.0) {
-        p.velocity.y = 3.0;
-      }
-      if (p.velocity.y < -1.0) {
-        p.velocity.y = -1.0;
-      }
+      if (p.velocity.y > 2.0) { p.velocity.y = 2.0; }
+      if (p.velocity.y < -0.5) { p.velocity.y = -0.5; }
+      if (Math.abs(p.velocity.x) > 1.5) { p.velocity.x = Math.sign(p.velocity.x) * 1.5; }
+      if (Math.abs(p.velocity.z) > 1.5) { p.velocity.z = Math.sign(p.velocity.z) * 1.5; }
       
       const diffusionVec = new THREE.Vector3(
         (Math.random() - 0.5) * this.config.diffusion * deltaTime * 60,
@@ -177,12 +175,14 @@ export class SmokeEmitter {
 
       p.position.add(p.velocity.clone().multiplyScalar(deltaTime));
 
-      p.temperature = Math.max(20, p.temperature - deltaTime * 8);
+      p.temperature = Math.max(20, p.temperature - deltaTime * 6);
 
-      p.size += deltaTime * 0.07;
+      const tempRatio = (p.temperature - 20) / 80;
+      p.size += deltaTime * (0.04 + tempRatio * 0.06);
 
       const lifeRatio = p.life / p.maxLife;
-      p.opacity = Math.max(0, 0.85 * lifeRatio * (1 - lifeRatio * 0.2));
+      const ageFactor = 1 - lifeRatio;
+      p.opacity = Math.max(0, 0.75 * lifeRatio * (1 - ageFactor * ageFactor * 0.5));
     }
 
     this.updateBuffers();
