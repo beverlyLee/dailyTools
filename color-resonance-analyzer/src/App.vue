@@ -81,7 +81,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useThreeScene } from './composables/useThreeScene'
-import { generateAllSchemes, createColorInfo, getSchemeAccentColor } from './utils/colorTheory'
+import { generateAllSchemes, createColorInfo } from './utils/colorTheory'
 import { calculateResonance, calculateOverallResonance } from './utils/resonanceScore'
 import type { ColorScheme, ColorInfo } from './utils/colorTheory'
 import type { ResonanceScore } from './utils/resonanceScore'
@@ -248,22 +248,24 @@ function onSchemeApply(scheme: ColorScheme) {
   const baseColor = sofaColorInfo.value
   
   const pillowCount = pillowObjects.value.length
-  const accentColors = scheme.colors.filter(
-    c => !baseColor || c.hex.toLowerCase() !== baseColor.hex.toLowerCase()
-  )
+  const schemeColors = scheme.colors
+    .filter(c => baseColor && c.hex.toLowerCase() !== baseColor.hex.toLowerCase())
+    .slice(0, pillowCount)
+    .map(c => c.hex)
   
-  const schemeColors: string[] = []
-  for (let i = 0; i < pillowCount; i++) {
-    const colorIndex = i % accentColors.length
-    schemeColors.push(accentColors[colorIndex].hex)
+  while (schemeColors.length < pillowCount) {
+    const colorIndex = schemeColors.length % (scheme.colors.length - 1)
+    const availableColors = scheme.colors.filter(
+      c => baseColor && c.hex.toLowerCase() !== baseColor.hex.toLowerCase()
+    )
+    schemeColors.push(availableColors[colorIndex].hex)
   }
   
   setAllPillowColors(schemeColors)
 }
 
 function onSchemeApplyToCurtain(scheme: ColorScheme) {
-  const accentColor = getSchemeAccentColor(scheme)
-  setAllCurtainColors(accentColor.hex)
+  setAllCurtainColors(scheme.accentColor.hex)
 }
 
 function onAoChange(value: number) {

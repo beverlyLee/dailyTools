@@ -15,6 +15,7 @@ export interface ColorScheme {
   description: string
   colors: ColorInfo[]
   baseColor: ColorInfo
+  accentColor: ColorInfo
 }
 
 function createColorInfo(hex: string, name: string = ''): ColorInfo {
@@ -43,147 +44,185 @@ function getColorName(hex: string): string {
     if (v > 0.88) return '米白'
     if (v > 0.78) return '奶白'
     if (v > 0.65) return '浅灰'
-    if (v > 0.45) return '中灰'
-    if (v > 0.25) return '深灰'
+    if (v > 0.5) return '中灰'
+    if (v > 0.35) return '深灰'
+    if (v > 0.2) return '炭灰'
     return '炭黑'
   }
   
-  if (v > 0.82 && s < 0.3) {
-    return getLightColorName(h)
+  if (v > 0.82 && s < 0.35) {
+    return getLightColorName(h, v, s)
   }
   
-  return getDetailedColorName(h, s, v)
+  return getCoreColorName(h, s, v)
 }
 
-function getLightColorName(h: number): string {
-  if (h < 15 || h >= 345) return '淡粉'
-  if (h < 35) return '杏色'
-  if (h < 55) return '米黄'
-  if (h < 75) return '鹅黄'
-  if (h < 100) return '嫩绿'
-  if (h < 145) return '薄荷绿'
-  if (h < 180) return '冰青'
-  if (h < 200) return '水蓝'
-  if (h < 225) return '天蓝'
-  if (h < 255) return '淡蓝'
-  if (h < 275) return '淡紫'
-  if (h < 295) return '藕荷'
-  if (h < 320) return '粉紫'
-  if (h < 345) return '粉色'
+function getColorNameWithShade(hex: string, shade: 'light' | 'medium' | 'dark' | 'veryLight' | 'veryDark' = 'medium'): string {
+  const baseName = getColorName(hex)
+  
+  if (shade === 'veryLight') return `亮${baseName}`
+  if (shade === 'light') return `浅${baseName}`
+  if (shade === 'dark') return `深${baseName}`
+  if (shade === 'veryDark') return `暗${baseName}`
+  return baseName
+}
+
+function getLightColorName(h: number, v: number, s: number = 0.2): string {
+  const isVeryLight = v > 0.9
+  const isPale = s < 0.15
+  
+  if (h < 12 || h >= 348) {
+    if (isVeryLight && isPale) return '粉白'
+    if (isPale) return '淡粉'
+    return '粉色'
+  }
+  if (h < 30) {
+    if (isVeryLight && isPale) return '米杏'
+    if (isPale) return '杏色'
+    return '浅橙'
+  }
+  if (h < 50) {
+    if (isVeryLight && isPale) return '奶黄'
+    if (isPale) return '米黄'
+    return '浅黄'
+  }
+  if (h < 72) {
+    if (isVeryLight && s > 0.2) return '鹅黄'
+    if (isPale) return '浅黄'
+    return '嫩黄'
+  }
+  if (h < 100) {
+    if (isVeryLight && isPale) return '嫩绿'
+    if (isPale) return '浅绿'
+    return '粉绿'
+  }
+  if (h < 150) {
+    if (isVeryLight && isPale) return '薄荷'
+    if (isPale) return '薄荷绿'
+    return '浅青绿'
+  }
+  if (h < 185) {
+    if (isVeryLight && isPale) return '冰青'
+    if (isPale) return '浅青'
+    return '水青色'
+  }
+  if (h < 205) {
+    if (isVeryLight && isPale) return '水蓝'
+    if (isPale) return '浅蓝'
+    return '粉蓝'
+  }
+  if (h < 230) {
+    if (isVeryLight && isPale) return '天蓝'
+    if (isPale) return '淡蓝'
+    return '浅天蓝'
+  }
+  if (h < 260) {
+    if (isVeryLight && isPale) return '淡蓝紫'
+    if (isPale) return '浅蓝紫'
+    return '蓝紫'
+  }
+  if (h < 285) {
+    if (isVeryLight && isPale) return '淡紫'
+    if (isPale) return '浅紫'
+    return '粉紫'
+  }
+  if (h < 310) {
+    if (isVeryLight && isPale) return '藕荷'
+    if (isPale) return '藕粉色'
+    return '粉紫'
+  }
+  if (h < 340) {
+    if (isVeryLight && isPale) return '粉白'
+    if (isPale) return '粉色'
+    return '桃粉'
+  }
   return '淡彩'
 }
 
-function getValueModifier(v: number): string {
-  if (v < 0.25) return '深墨'
-  if (v < 0.4) return '深'
-  if (v < 0.55) return '暗'
-  if (v < 0.7) return '中'
-  if (v < 0.85) return '浅'
-  return '明亮'
-}
-
-function getDetailedColorName(h: number, s: number, v: number): string {
-  if (h < 15 || h >= 345) {
-    if (v < 0.25) return '酒红'
-    if (v < 0.4) return '深红'
-    if (v < 0.55) return '暗红'
-    if (s < 0.35) return '灰红'
-    if (v > 0.85 && s > 0.6) return '正红'
-    if (v > 0.75 && s < 0.5) return '豆沙红'
-    if (v > 0.8) return '粉红'
+function getCoreColorName(h: number, s: number, v: number): string {
+  if (h < 12 || h >= 348) {
+    if (s < 0.3 && v < 0.5) return '棕红'
+    if (s < 0.4) return '灰红'
+    if (v < 0.35) return '酒红'
+    if (v > 0.8 && s > 0.6) return '正红'
     return '红色'
   }
-  if (h < 35) {
-    if (v < 0.25) return '深褐'
-    if (v < 0.45) return '深棕'
-    if (v < 0.6 && s > 0.5) return '棕色'
-    if (s < 0.25) return '驼色'
-    if (s < 0.4 && v > 0.6) return '卡其'
-    if (v > 0.75 && s > 0.55) return '橘色'
-    if (v < 0.65) return '棕橙'
+  if (h < 32) {
+    if (s < 0.3 && v > 0.5) return '驼色'
+    if (v < 0.4) return '棕褐'
+    if (v < 0.55) return '深棕'
+    if (v > 0.8) return '橘色'
     return '橙色'
   }
-  if (h < 55) {
-    if (s < 0.2) return '米黄'
-    if (v < 0.4) return '土黄'
-    if (v > 0.85 && s > 0.65) return '明黄'
-    if (s > 0.55) return '姜黄'
-    if (v > 0.7 && s < 0.4) return '奶黄'
+  if (h < 52) {
+    if (s < 0.25) return '米黄'
+    if (v < 0.45) return '土黄'
+    if (s > 0.65 && v > 0.8) return '明黄'
+    if (s > 0.5) return '姜黄'
     return '暖黄'
   }
   if (h < 75) {
-    if (s < 0.25) return '浅黄'
-    if (v > 0.85) return '柠檬黄'
-    if (v < 0.5) return '暗黄'
+    if (s < 0.3) return '浅黄'
+    if (v > 0.85) return '柠黄'
     return '黄色'
   }
   if (h < 100) {
-    if (v < 0.3) return '墨绿'
-    if (v < 0.5) return '深绿'
-    if (s < 0.3) return '灰绿'
-    if (v > 0.85 && s > 0.55) return '翠绿'
+    if (v < 0.35) return '墨绿'
+    if (s < 0.35) return '灰绿'
+    if (v > 0.8 && s > 0.55) return '翠绿'
     if (s > 0.45) return '草绿'
-    if (v > 0.7) return '浅绿'
-    return '橄榄绿'
+    return '橄榄'
   }
   if (h < 145) {
-    if (v < 0.35) return '深青绿'
-    if (s < 0.35) return '薄荷绿'
-    if (v > 0.85) return '青绿'
-    if (v > 0.7 && s < 0.45) return '豆绿'
+    if (v < 0.4) return '深绿'
+    if (s < 0.4) return '薄荷'
+    if (v > 0.8) return '青绿'
     return '绿色'
   }
   if (h < 180) {
-    if (s < 0.25) return '浅青'
-    if (v < 0.35) return '深青'
+    if (s < 0.3) return '浅青'
+    if (v < 0.4) return '深青'
     if (v > 0.8) return '青色'
-    if (v > 0.6 && s < 0.4) return '豆青'
     return '湖青'
   }
   if (h < 200) {
-    if (v < 0.35) return '深湖蓝'
-    if (s < 0.3) return '灰青'
+    if (v < 0.4) return '湖蓝'
+    if (s < 0.35) return '灰蓝'
     if (v > 0.8) return '水蓝'
     return '湖蓝'
   }
   if (h < 225) {
-    if (v < 0.3) return '藏青'
-    if (s < 0.28) return '灰蓝'
+    if (v < 0.35) return '藏青'
+    if (s < 0.3) return '灰蓝'
     if (v > 0.8) return '宝蓝'
-    if (v > 0.6 && s < 0.45) return '灰蓝色'
     return '钴蓝'
   }
   if (h < 255) {
-    if (v < 0.3) return '深蓝'
-    if (s < 0.35) return '灰蓝'
-    if (v > 0.8) return '浅蓝'
-    if (v > 0.65 && s < 0.5) return '天蓝色'
+    if (v < 0.35) return '深蓝'
+    if (s < 0.4) return '灰蓝'
+    if (v > 0.8) return '天蓝'
     return '蓝色'
   }
-  if (h < 275) {
-    if (v < 0.35) return '深紫'
-    if (s < 0.35) return '灰紫'
+  if (h < 280) {
+    if (v < 0.4) return '深紫'
+    if (s < 0.4) return '灰紫'
     if (v > 0.85) return '淡紫'
-    if (v > 0.65 && s < 0.5) return '薰衣草紫'
     return '紫色'
   }
-  if (h < 295) {
-    if (v < 0.35) return '深紫蓝'
-    if (s < 0.3) return '藕荷'
-    if (v > 0.75) return '蓝紫'
-    return '蓝紫色'
+  if (h < 305) {
+    if (v < 0.4) return '深紫'
+    if (s < 0.35) return '藕荷'
+    return '蓝紫'
   }
-  if (h < 320) {
-    if (s < 0.35) return '灰粉'
+  if (h < 325) {
+    if (s < 0.4) return '灰粉'
     if (v > 0.85) return '粉色'
-    if (v < 0.5) return '深玫红'
     return '品红'
   }
-  if (h < 345) {
-    if (v < 0.35) return '深玫红'
-    if (s < 0.35) return '灰玫红'
-    if (v > 0.75) return '玫红'
-    return '玫瑰红'
+  if (h < 348) {
+    if (v < 0.4) return '深玫红'
+    if (s < 0.4) return '灰玫红'
+    return '玫红'
   }
   return '彩色'
 }
@@ -215,11 +254,6 @@ function getSchemeStyleName(h: number): string {
   return '暖玫红'
 }
 
-function createColorInfoWithName(hex: string, customName: string): ColorInfo {
-  const info = createColorInfo(hex)
-  return { ...info, name: customName }
-}
-
 export function generateComplementaryScheme(baseHex: string): ColorScheme {
   const base = createColorInfo(baseHex)
   const baseColor = chroma(baseHex)
@@ -229,29 +263,29 @@ export function generateComplementaryScheme(baseHex: string): ColorScheme {
   
   const primaryHex = chroma(compH, s, v, 'hsv').hex()
   const primaryName = getColorName(primaryHex)
-  const primary = createColorInfoWithName(primaryHex, primaryName)
+  const primary = { ...createColorInfo(primaryHex), name: primaryName }
   
-  const lightCompHex = chroma(compH, Math.max(s * 0.55, 0.18), Math.min(v * 1.25, 0.95), 'hsv').hex()
-  const lightCompName = getColorName(lightCompHex)
-  const lightComp = createColorInfoWithName(lightCompHex, `浅${primaryName}`)
+  const lightCompHex = chroma(compH, Math.max(s * 0.5, 0.15), Math.min(v * 1.25, 1), 'hsv').hex()
+  const lightComp = { ...createColorInfo(lightCompHex), name: `浅${primaryName}` }
   
-  const darkBaseHex = chroma(h, Math.min(s * 1.1, 1), v * 0.7, 'hsv').hex()
-  const darkBaseName = getColorName(darkBaseHex)
-  const darkBase = createColorInfoWithName(darkBaseHex, `深${base.name}`)
+  const darkCompHex = chroma(compH, Math.min(s * 1.1, 1), v * 0.6, 'hsv').hex()
+  const darkComp = { ...createColorInfo(darkCompHex), name: `深${primaryName}` }
   
-  const accentHex = chroma(compH, Math.min(s * 1.25, 1), v * 0.82, 'hsv').hex()
-  const accentName = getColorName(accentHex)
-  const accent = createColorInfoWithName(accentHex, `艳${primaryName}`)
+  const darkBaseHex = chroma(h, s, v * 0.65, 'hsv').hex()
+  const baseName = getColorName(baseHex)
+  const darkBase = { ...createColorInfo(darkBaseHex), name: `深${baseName}` }
   
-  const baseColorName = getColorName(baseHex)
+  const compColorName = primaryName
+  const baseColorName = baseName
   
   return {
     id: 'complementary',
-    name: `${primaryName}撞色`,
+    name: `${compColorName}撞色`,
     type: 'complementary',
-    description: `${baseColorName}搭配${primaryName}互补色，撞色搭配活力十足`,
-    colors: [base, primary, lightComp, darkBase, accent],
+    description: `${baseColorName}搭配${compColorName}互补色，撞色搭配活力十足`,
+    colors: [base, primary, lightComp, darkBase, darkComp],
     baseColor: base,
+    accentColor: primary,
   }
 }
 
@@ -265,19 +299,17 @@ export function generateAnalogousScheme(baseHex: string): ColorScheme {
   
   const leftHex = chroma(h1, s, v, 'hsv').hex()
   const leftName = getColorName(leftHex)
-  const leftAnalog = createColorInfoWithName(leftHex, leftName)
+  const leftAnalog = { ...createColorInfo(leftHex), name: leftName }
   
   const rightHex = chroma(h2, s, v, 'hsv').hex()
   const rightName = getColorName(rightHex)
-  const rightAnalog = createColorInfoWithName(rightHex, rightName)
+  const rightAnalog = { ...createColorInfo(rightHex), name: rightName }
   
-  const lightLeftHex = chroma(h1, s * 0.65, Math.min(v * 1.2, 0.93), 'hsv').hex()
-  const lightLeftName = getColorName(lightLeftHex)
-  const lightLeft = createColorInfoWithName(lightLeftHex, `浅${leftName}`)
+  const lightLeftHex = chroma(h1, s * 0.6, Math.min(v * 1.2, 1), 'hsv').hex()
+  const lightLeft = { ...createColorInfo(lightLeftHex), name: `浅${leftName}` }
   
-  const darkRightHex = chroma(h2, Math.min(s * 1.1, 1), v * 0.72, 'hsv').hex()
-  const darkRightName = getColorName(darkRightHex)
-  const darkRight = createColorInfoWithName(darkRightHex, `深${rightName}`)
+  const darkRightHex = chroma(h2, s, v * 0.7, 'hsv').hex()
+  const darkRight = { ...createColorInfo(darkRightHex), name: `深${rightName}` }
   
   const baseName = getColorName(baseHex)
   const styleName = getSchemeStyleName(h)
@@ -288,9 +320,10 @@ export function generateAnalogousScheme(baseHex: string): ColorScheme {
     id: 'analogous',
     name: schemeName,
     type: 'analogous',
-    description: `${baseName}为主调，${leftName}与${rightName}邻近色柔和过渡，层次丰富`,
+    description: `${baseName}为主调，邻近色柔和过渡，层次丰富不单调`,
     colors: [leftAnalog, base, rightAnalog, lightLeft, darkRight],
     baseColor: base,
+    accentColor: rightAnalog,
   }
 }
 
@@ -299,42 +332,59 @@ export function generateMonochromaticScheme(baseHex: string): ColorScheme {
   const baseColor = chroma(baseHex)
   const [h, s, v] = baseColor.hsv()
   
-  const veryLightHex = chroma(h, Math.max(s * 0.28, 0.08), Math.min(v * 1.35, 0.95), 'hsv').hex()
-  const veryLightName = getColorName(veryLightHex)
-  const veryLight = createColorInfoWithName(veryLightHex, `亮${base.name}`)
+  const baseName = getColorName(baseHex)
   
-  const lightHex = chroma(h, s * 0.55, Math.min(v * 1.2, 0.88), 'hsv').hex()
+  const veryLightHex = chroma(h, Math.max(s * 0.3, 0.1), Math.min(v * 1.4, 0.95), 'hsv').hex()
+  const lightHex = chroma(h, s * 0.6, Math.min(v * 1.2, 0.85), 'hsv').hex()
+  const darkHex = chroma(h, Math.min(s * 1.1, 1), v * 0.7, 'hsv').hex()
+  const veryDarkHex = chroma(h, Math.min(s * 0.9, 1), v * 0.45, 'hsv').hex()
+  
+  const vLightName = getColorName(veryLightHex)
   const lightName = getColorName(lightHex)
-  const light = createColorInfoWithName(lightHex, `浅${base.name}`)
-  
-  const darkHex = chroma(h, Math.min(s * 1.15, 1), v * 0.68, 'hsv').hex()
   const darkName = getColorName(darkHex)
-  const dark = createColorInfoWithName(darkHex, `深${base.name}`)
+  const vDarkName = getColorName(veryDarkHex)
   
-  const veryDarkHex = chroma(h, Math.min(s * 0.95, 1), v * 0.42, 'hsv').hex()
-  const veryDarkName = getColorName(veryDarkHex)
-  const veryDark = createColorInfoWithName(veryDarkHex, `暗${base.name}`)
+  const veryLight = { ...createColorInfo(veryLightHex), name: vLightName }
+  const light = { ...createColorInfo(lightHex), name: lightName }
+  const dark = { ...createColorInfo(darkHex), name: darkName }
+  const veryDark = { ...createColorInfo(veryDarkHex), name: vDarkName }
+  
+  const usedNames = new Set([baseName])
+  const colorItems = [
+    { color: veryLight, shade: 'veryLight' },
+    { color: light, shade: 'light' },
+    { color: base, shade: 'medium' },
+    { color: dark, shade: 'dark' },
+    { color: veryDark, shade: 'veryDark' },
+  ]
+  
+  for (const item of colorItems) {
+    if (item.shade === 'medium') continue
+    const name = item.color.name
+    if (usedNames.has(name)) {
+      if (item.shade === 'veryLight') item.color.name = `亮${baseName}`
+      else if (item.shade === 'light') item.color.name = `浅${baseName}`
+      else if (item.shade === 'dark') item.color.name = `深${baseName}`
+      else if (item.shade === 'veryDark') item.color.name = `暗${baseName}`
+    }
+    usedNames.add(item.color.name)
+  }
+  
+  const midLightHex = chroma(h, s * 0.8, v * 0.9, 'hsv').hex()
+  const midLightName = getColorName(midLightHex)
+  const midLight = { 
+    ...createColorInfo(midLightHex), 
+    name: usedNames.has(midLightName) ? `浅${baseName}` : midLightName 
+  }
   
   return {
     id: 'monochromatic',
-    name: `${base.name}同调`,
+    name: `${baseName}同调`,
     type: 'monochromatic',
-    description: `${base.name}色系五档明暗渐变，统一和谐，高级有质感`,
+    description: `${baseName}色系明暗渐变，统一和谐，高级有质感`,
     colors: [veryLight, light, base, dark, veryDark],
     baseColor: base,
-  }
-}
-
-export function getSchemeAccentColor(scheme: ColorScheme): ColorInfo {
-  switch (scheme.type) {
-    case 'complementary':
-      return scheme.colors[1] || scheme.baseColor
-    case 'analogous':
-      return scheme.colors[2] || scheme.baseColor
-    case 'monochromatic':
-      return scheme.colors[1] || scheme.baseColor
-    default:
-      return scheme.baseColor
+    accentColor: midLight,
   }
 }
 
