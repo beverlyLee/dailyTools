@@ -23,9 +23,9 @@ export class RangeHoodSuction {
     this.hoodSize = new THREE.Vector2(0.9, 0.5);
     this.suctionStrength = config.suctionPower;
     this.isActive = true;
-    this.intakeRadius = 0.75;
-    this.suctionHeight = 2.8;
-    this.suctionForceMultiplier = 0.3;
+    this.intakeRadius = 0.8;
+    this.suctionHeight = 3.0;
+    this.suctionForceMultiplier = 0.35;
     this.captureRadiusMultiplier = 3.0;
 
     this.createHoodModel();
@@ -150,30 +150,32 @@ export class RangeHoodSuction {
     }
 
     const heightFactor = Math.max(0, 1 - distBelowHood / this.suctionHeight);
-    const heightFactorPow = Math.pow(heightFactor, 0.8);
+    const heightFactorPow = Math.pow(heightFactor, 0.6);
 
     const horizontalFactor = Math.max(0, 1 - horizontalDist / radiusAtHeight);
-    const horizontalFactorPow = Math.pow(horizontalFactor, 0.6);
+    const horizontalFactorPow = Math.pow(horizontalFactor, 0.5);
 
+    const proximityBoost = Math.pow(heightFactor, 2) * 0.8;
     const baseStrength = this.suctionStrength * this.suctionForceMultiplier;
-    const strength = baseStrength * heightFactorPow * horizontalFactorPow;
+    const strength = baseStrength * heightFactorPow * horizontalFactorPow * (1 + proximityBoost);
 
     const dirLen = Math.sqrt(dx * dx + distBelowHood * distBelowHood + dz * dz);
     if (dirLen < 0.001) {
       return new THREE.Vector3(0, -strength, 0);
     }
 
-    const inwardPull = 0.8;
-    const verticalPull = 0.6;
-    const horizontalFactor2 = Math.min(1, horizontalDist / 0.3);
+    const inwardPull = 1.2;
+    const verticalPull = 1.0;
+    const horizontalFactor2 = Math.min(1, horizontalDist / 0.4);
+    const proximityFactor = Math.pow(heightFactor, 1.5);
     
     const dirX = -dx / dirLen;
     const dirY = distBelowHood / dirLen;
     const dirZ = -dz / dirLen;
     
-    const adjDirX = dirX * (1 + inwardPull * heightFactor * horizontalFactor2);
-    const adjDirY = dirY * (1 + verticalPull * heightFactor);
-    const adjDirZ = dirZ * (1 + inwardPull * heightFactor * horizontalFactor2);
+    const adjDirX = dirX * (1 + inwardPull * proximityFactor * horizontalFactor2);
+    const adjDirY = dirY * (1 + verticalPull * proximityFactor);
+    const adjDirZ = dirZ * (1 + inwardPull * proximityFactor * horizontalFactor2);
     
     const direction = new THREE.Vector3(adjDirX, adjDirY, adjDirZ).normalize();
 

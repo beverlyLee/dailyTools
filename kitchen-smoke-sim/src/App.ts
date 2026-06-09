@@ -47,16 +47,16 @@ export class KitchenSmokeApp {
     this.hoodPosition = new THREE.Vector3(0, 2.0, 0);
 
     this.config = {
-      maxParticles: 1500,
-      emissionRate: 60,
+      maxParticles: 2000,
+      emissionRate: 90,
       firePower: 1,
       suctionPower: 1.5,
       hoodHeight: 0.75,
       windowOpen: false,
-      gravity: 1.2,
-      buoyancy: 2.5,
-      diffusion: 0.12,
-      airResistance: 2.0,
+      gravity: 1.0,
+      buoyancy: 3.5,
+      diffusion: 0.18,
+      airResistance: 1.8,
     };
 
     this.scene = new THREE.Scene();

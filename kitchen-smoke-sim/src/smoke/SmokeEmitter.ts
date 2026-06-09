@@ -37,10 +37,10 @@ export class SmokeEmitter {
     const smokeTexture = this.createSmokeTexture();
 
     const particleMaterial = new THREE.PointsMaterial({
-      size: 0.25,
+      size: 0.28,
       vertexColors: true,
       transparent: true,
-      opacity: 0.7,
+      opacity: 0.75,
       blending: THREE.NormalBlending,
       depthWrite: false,
       map: smokeTexture,
@@ -94,8 +94,8 @@ export class SmokeEmitter {
       this.emitterPosition.z + offsetZ
     );
 
-    const upwardSpeed = 0.4 + Math.random() * 0.4;
-    const horizontalSpeed = (Math.random() - 0.5) * 0.08;
+    const upwardSpeed = 0.8 + Math.random() * 0.7;
+    const horizontalSpeed = (Math.random() - 0.5) * 0.12;
     
     const velocity = new THREE.Vector3(
       horizontalSpeed,
@@ -103,18 +103,18 @@ export class SmokeEmitter {
       horizontalSpeed * 0.5
     );
 
-    const baseLife = 8 + Math.random() * 5;
+    const baseLife = 10 + Math.random() * 6;
     
     return {
       id: this.nextId++,
       position,
       velocity,
-      size: 0.05 + Math.random() * 0.04,
+      size: 0.06 + Math.random() * 0.05,
       life: baseLife,
       maxLife: baseLife,
-      opacity: 0.9,
+      opacity: 0.92,
       mass: 0.008 + Math.random() * 0.006,
-      temperature: 90 + Math.random() * 30,
+      temperature: 95 + Math.random() * 35,
       captured: false,
       escaped: false,
       deposited: false,
@@ -123,7 +123,7 @@ export class SmokeEmitter {
 
   public update(deltaTime: number, forces: THREE.Vector3[]): void {
     this.emitTimer += deltaTime;
-    const emitInterval = 0.015 / this.config.firePower;
+    const emitInterval = 0.01 / this.config.firePower;
     
     while (this.emitTimer >= emitInterval && this.particles.length < this.maxParticles) {
       this.emit(1);
@@ -177,12 +177,12 @@ export class SmokeEmitter {
 
       p.position.add(p.velocity.clone().multiplyScalar(deltaTime));
 
-      p.temperature = Math.max(20, p.temperature - deltaTime * 10);
+      p.temperature = Math.max(20, p.temperature - deltaTime * 8);
 
-      p.size += deltaTime * 0.06;
+      p.size += deltaTime * 0.07;
 
       const lifeRatio = p.life / p.maxLife;
-      p.opacity = Math.max(0, 0.8 * lifeRatio * (1 - lifeRatio * 0.25));
+      p.opacity = Math.max(0, 0.85 * lifeRatio * (1 - lifeRatio * 0.2));
     }
 
     this.updateBuffers();
