@@ -37,10 +37,10 @@ export class SmokeEmitter {
     const smokeTexture = this.createSmokeTexture();
 
     const particleMaterial = new THREE.PointsMaterial({
-      size: 0.15,
+      size: 0.18,
       vertexColors: true,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.85,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       map: smokeTexture,
@@ -53,18 +53,20 @@ export class SmokeEmitter {
 
   private createSmokeTexture(): THREE.Texture {
     const canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 128;
+    canvas.width = 256;
+    canvas.height = 256;
     const ctx = canvas.getContext('2d')!;
     
-    const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    gradient.addColorStop(0.3, 'rgba(200, 200, 200, 0.8)');
-    gradient.addColorStop(0.6, 'rgba(150, 150, 150, 0.4)');
-    gradient.addColorStop(1, 'rgba(100, 100, 100, 0)');
+    const gradient = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+    gradient.addColorStop(0, 'rgba(255, 245, 230, 1)');
+    gradient.addColorStop(0.2, 'rgba(230, 210, 185, 0.85)');
+    gradient.addColorStop(0.4, 'rgba(200, 175, 145, 0.6)');
+    gradient.addColorStop(0.6, 'rgba(170, 145, 115, 0.35)');
+    gradient.addColorStop(0.8, 'rgba(140, 115, 90, 0.15)');
+    gradient.addColorStop(1, 'rgba(100, 80, 60, 0)');
     
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 128, 128);
+    ctx.fillRect(0, 0, 256, 256);
     
     const texture = new THREE.CanvasTexture(canvas);
     texture.needsUpdate = true;
@@ -80,7 +82,7 @@ export class SmokeEmitter {
 
   private createParticle(): SmokeParticle {
     const angle = Math.random() * Math.PI * 2;
-    const radius = Math.random() * 0.15 * this.config.firePower;
+    const radius = Math.random() * 0.12 * this.config.firePower;
     
     const offsetX = Math.cos(angle) * radius;
     const offsetZ = Math.sin(angle) * radius;
@@ -91,8 +93,8 @@ export class SmokeEmitter {
       this.emitterPosition.z + offsetZ
     );
 
-    const upwardSpeed = 1.5 + Math.random() * 1.5;
-    const horizontalSpeed = (Math.random() - 0.5) * 0.5;
+    const upwardSpeed = 1.2 + Math.random() * 1.0;
+    const horizontalSpeed = (Math.random() - 0.5) * 0.3;
     
     const velocity = new THREE.Vector3(
       horizontalSpeed,
@@ -100,18 +102,18 @@ export class SmokeEmitter {
       horizontalSpeed * 0.5
     );
 
-    const baseLife = 4 + Math.random() * 3;
+    const baseLife = 5 + Math.random() * 3;
     
     return {
       id: this.nextId++,
       position,
       velocity,
-      size: 0.08 + Math.random() * 0.08,
+      size: 0.07 + Math.random() * 0.06,
       life: baseLife,
       maxLife: baseLife,
-      opacity: 0.8,
-      mass: 0.001 + Math.random() * 0.002,
-      temperature: 80 + Math.random() * 40,
+      opacity: 0.85,
+      mass: 0.002 + Math.random() * 0.002,
+      temperature: 90 + Math.random() * 30,
       captured: false,
       escaped: false,
       deposited: false,
@@ -186,11 +188,14 @@ export class SmokeEmitter {
         const p = this.particles[i];
         positionAttr.setXYZ(i, p.position.x, p.position.y, p.position.z);
         
-        const tempRatio = Math.min(1, p.temperature / 100);
-        const r = 0.45 + tempRatio * 0.15;
-        const g = 0.35 + tempRatio * 0.1;
-        const b = 0.25;
-        colorAttr.setXYZ(i, r, g, b);
+        const tempRatio = Math.min(1, p.temperature / 120);
+        const lifeRatio = p.life / p.maxLife;
+        const ageFactor = 1 - lifeRatio;
+        
+        const r = 0.55 + tempRatio * 0.25 - ageFactor * 0.15;
+        const g = 0.42 + tempRatio * 0.18 - ageFactor * 0.2;
+        const b = 0.28 + tempRatio * 0.05 - ageFactor * 0.15;
+        colorAttr.setXYZ(i, Math.max(0.2, r), Math.max(0.15, g), Math.max(0.08, b));
         
         sizeAttr.setX(i, p.size);
       } else {

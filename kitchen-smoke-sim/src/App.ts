@@ -475,6 +475,7 @@ export class KitchenSmokeApp {
     hoodToggle.addEventListener('change', (e) => {
       this.hoodOn = (e.target as HTMLInputElement).checked;
       this.rangeHood.setActive(this.hoodOn);
+      this.advisor.setHoodOn(this.hoodOn);
     });
 
     suctionSlider.addEventListener('input', (e) => {
