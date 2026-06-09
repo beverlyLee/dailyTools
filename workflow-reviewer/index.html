@@ -5,6 +5,132 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>验证工作流</title>
     <link rel="stylesheet" href="styles.css">
+    <script>
+    // 内联全局函数 - 写入日志轨迹（不依赖main.js，确保一定能执行）
+    window.__writeLogTrace = function(btn) {
+        console.log('🔍 [写入日志轨迹] ===== 按钮被点击 =====');
+        console.log('🔍 [写入日志轨迹] 按钮元素:', btn);
+        
+        const contentEl = btn.closest('[data-project-id]');
+        console.log('🔍 [写入日志轨迹] 项目容器:', contentEl);
+        
+        if (!contentEl) {
+            alert('❌ 找不到项目容器');
+            return;
+        }
+        
+        const logTraceEl = contentEl.querySelector('.field-currentProcess');
+        const roundNumEl = contentEl.querySelector('.field-roundNum');
+        
+        const logTrace = logTraceEl ? logTraceEl.value : '';
+        const roundNum = roundNumEl ? roundNumEl.value : '1';
+        
+        console.log('🔍 [写入日志轨迹] 本轮过程长度:', logTrace.length);
+        console.log('🔍 [写入日志轨迹] 当前轮次:', roundNum);
+        
+        if (!logTrace.trim()) {
+            alert('❌ 本轮过程不能为空');
+            return;
+        }
+        
+        // 查找WPS配置（可能在页面其他位置，也可能是全局的）
+        let wpsDocUrl = '';
+        let wpsFileToken = '';
+        let wpsSheetName = '';
+        let wpsSessionValue = '';
+        
+        // 先从当前项目容器找
+        const wpsDocUrlEl = contentEl.querySelector('.field-wpsDocUrl');
+        const wpsFileTokenEl = contentEl.querySelector('.field-wpsFileToken');
+        const wpsSheetNameEl = contentEl.querySelector('.field-wpsSheetName');
+        const wpsSessionValueEl = contentEl.querySelector('.field-wpsSessionValue');
+        
+        if (wpsDocUrlEl) wpsDocUrl = wpsDocUrlEl.value;
+        if (wpsFileTokenEl) wpsFileToken = wpsFileTokenEl.value;
+        if (wpsSheetNameEl) wpsSheetName = wpsSheetNameEl.value;
+        if (wpsSessionValueEl) wpsSessionValue = wpsSessionValueEl.value;
+        
+        // 再从全局localStorage找
+        try {
+            const globalConfig = JSON.parse(localStorage.getItem('workflow_reviewer_wps_config') || '{}');
+            if (!wpsDocUrl && globalConfig.wpsDocUrl) wpsDocUrl = globalConfig.wpsDocUrl;
+            if (!wpsFileToken && globalConfig.wpsFileToken) wpsFileToken = globalConfig.wpsFileToken;
+            if (!wpsSheetName && globalConfig.wpsSheetName) wpsSheetName = globalConfig.wpsSheetName;
+        } catch(e) {}
+        
+        console.log('🔍 [写入日志轨迹] WPS配置:', {
+            docUrl: wpsDocUrl ? '有' : '无',
+            fileToken: wpsFileToken ? '有' : '无',
+            sheetName: wpsSheetName,
+            sessionValue: wpsSessionValue ? '有' : '无'
+        });
+        
+        if (!wpsFileToken && !wpsDocUrl) {
+            alert('❌ 请先填写文档链接或文件 Token');
+            return;
+        }
+        
+        if (!wpsSessionValue.trim()) {
+            alert('❌ 请先填写 Session ID');
+            return;
+        }
+        
+        // 生成UID
+        const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const uid = 'UID-' + dateStr + '-' + random;
+        
+        const requestData = {
+            doc_url: wpsDocUrl,
+            file_token: wpsFileToken,
+            sheet_name: wpsSheetName,
+            fields: {
+                '日志轨迹': logTrace,
+                '轮次': String(roundNum),
+                'UID': uid
+            },
+            lookup_field: 'Trae Session ID',
+            lookup_value: wpsSessionValue.trim()
+        };
+        
+        console.log('🔍 [写入日志轨迹] 请求参数:', JSON.stringify(requestData, null, 2));
+        
+        btn.disabled = true;
+        const originalText = btn.innerText;
+        btn.innerText = '写入中...';
+        
+        fetch('/api/write-wps-dbt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData)
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(result) {
+            console.log('🔍 [写入日志轨迹] 接口返回:', result);
+            if (result.success) {
+                if (result.is_new) {
+                    alert('✅ 写入成功（新建记录）');
+                } else {
+                    alert('✅ 写入成功（更新记录）');
+                }
+            } else {
+                alert('❌ 写入失败: ' + (result.error || '未知错误'));
+            }
+        })
+        .catch(function(e) {
+            console.error('🔍 [写入日志轨迹] 请求异常:', e);
+            alert('❌ 写入异常: ' + e.message);
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerText = originalText;
+        });
+    };
+    
+    console.log('🔍 [写入日志轨迹] 全局函数已注册');
+    </script>
 </head>
 <body>
     <div class="container">
@@ -16,7 +142,6 @@
             <div class="header-actions">
                 <button id="saveDataBtn" class="icon-btn" title="保存当前项目数据">💾</button>
                 <button id="clearDataBtn" class="icon-btn" title="清除所有存储数据">🗑️</button>
-                <button id="testModeBtn" class="icon-btn" title="切换浏览器点验模式">🔍</button>
                 <button id="configBtn" class="icon-btn" title="模型配置">⚙️</button>
             </div>
         </div>
@@ -29,26 +154,6 @@
             </button>
         </div>
         
-        <div class="test-mode-panel" id="testModePanel" style="display: none;">
-            <div class="panel-header">
-                <h3>🔍 浏览器点验模式</h3>
-                <button id="closeTestModeBtn" class="icon-btn">&times;</button>
-            </div>
-            
-            <div class="panel-content">
-                <div class="form-group">
-                    <label>生成的脚本命令</label>
-                    <textarea id="testScriptOutput" rows="8" readonly placeholder="请填写工程名称、需求和阶段描述..."></textarea>
-                </div>
-                
-                <div class="form-actions">
-                    <button id="copyTestScriptBtn" class="btn btn-primary">📋 复制脚本</button>
-                    <button id="regenerateTestScriptBtn" class="btn btn-secondary">🔄 重新生成</button>
-                    <button id="executeTestScriptBtn" class="btn btn-success">▶️ 执行脚本</button>
-                </div>
-            </div>
-        </div>
-
         <div class="config-panel" id="configPanel" style="display: none;">
             <div class="config-header">
                 <h3>系统配置</h3>
@@ -130,95 +235,186 @@
         <div class="project-content" style="display: none;">
             <div class="project-layout">
                 <div class="project-main">
-                    <div class="card">
-                        <h2 class="card-title">提交验收</h2>
-
+                    <div class="card common-info-card">
+                        <h2 class="card-title">📋 公共信息</h2>
                         <div class="form-group">
                             <label for="projectName">工程名称</label>
                             <input type="text" class="field-projectName" placeholder="如：braille-ocr" autocomplete="off">
                         </div>
-
                         <div class="form-group">
                             <label for="requirement">核心需求</label>
                             <textarea class="field-requirement" rows="3" placeholder="新项目简述目标，续作写"需求同前""></textarea>
                         </div>
+                    </div>
 
-                        <div class="form-row">
-                            <div class="form-group half">
-                                <label for="roundNum">当前轮次</label>
-                                <input type="number" class="field-roundNum" value="1" min="1" max="99">
-                            </div>
-                            <div class="form-group half">
-                                <label for="stage">阶段描述</label>
-                                <input type="text" class="field-stage" placeholder="如：物理碰撞检测" autocomplete="off">
-                            </div>
+                    <div class="step-card">
+                        <div class="step-header">
+                            <span class="step-badge step-1">第一步</span>
+                            <h2 class="step-title">生成测试提示词</h2>
                         </div>
 
-                        <div class="form-group">
-                            <label>运行结果截图 <span class="hint">（拖拽或点击上传，支持多张）</span></label>
-                            <div class="upload-area field-uploadArea">
-                                <div class="upload-placeholder field-uploadPlaceholder">
-                                    <span class="upload-icon">+</span>
-                                    <span>拖拽截图到此处，或点击选择文件</span>
-                                </div>
-                                <div class="preview-grid field-previewGrid"></div>
-                                <input type="file" class="field-fileInput" multiple accept="image/*" hidden>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>用户建议 <span class="hint">（可选，用于补充验收关注点）</span></label>
-                            <textarea class="field-userAdvice" rows="3" placeholder="如：重点关注移动端适配、性能是否流畅、按钮样式是否统一等"></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>本轮过程 <span class="hint">（可选，记录本轮开发过程，用于测试验收）</span></label>
-                            <textarea class="field-currentProcess" rows="5" placeholder="记录本轮的开发过程，如：修改了哪些文件、实现了哪些功能、遇到的问题等..."></textarea>
-                        </div>
-
-                        <div class="card run-project-card">
-                            <h3 class="card-title">🚀 运行项目</h3>
+                        <div class="step-body">
                             <div class="form-row">
                                 <div class="form-group half">
-                                    <label>工程根路径</label>
-                                    <input type="text" class="field-projectPath" placeholder="/Users/liboyang/trae/dailyTools" autocomplete="off">
-                                    <small>默认值：当前 dailyTools 目录</small>
+                                    <label for="roundNum">当前轮次</label>
+                                    <input type="number" class="field-roundNum" value="1" min="1" max="99">
                                 </div>
                                 <div class="form-group half">
-                                    <label>端口号</label>
-                                    <input type="number" class="field-port" placeholder="8980" value="8980" min="1024" max="65535" autocomplete="off">
-                                    <small>默认值：8980</small>
+                                    <label for="stage">阶段描述</label>
+                                    <input type="text" class="field-stage" placeholder="如：物理碰撞检测" autocomplete="off">
                                 </div>
                             </div>
+
                             <div class="form-group">
-                                <label>启动脚本配置 <span class="hint">（可选，不填则自动检测）</span></label>
-                                <div class="form-row">
+                                <label>本轮过程 <span class="hint">（可选，记录本轮开发过程，用于测试验收）</span></label>
+                                <textarea class="field-currentProcess" rows="5" placeholder="记录本轮的开发过程，如：修改了哪些文件、实现了哪些功能、遇到的问题等..."></textarea>
+                            </div>
+                            <div class="form-row" style="margin-top: -8px; margin-bottom: 16px;">
+                                <button class="btn btn-secondary btn-sm field-writeLogTraceBtn" onclick="__writeLogTrace(this)" style="margin-left: auto;">📝 写入日志轨迹</button>
+                            </div>
+
+                            <div class="form-group">
+                                <label>运行结果截图 <span class="hint">（拖拽或点击上传，支持多张）</span></label>
+                                <div class="upload-area field-uploadArea">
+                                    <div class="upload-placeholder field-uploadPlaceholder">
+                                        <span class="upload-icon">+</span>
+                                        <span>拖拽截图到此处，或点击选择文件</span>
+                                    </div>
+                                    <div class="preview-grid field-previewGrid"></div>
+                                    <input type="file" class="field-fileInput" multiple accept="image/*" hidden>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>用户建议 <span class="hint">（可选，用于补充验收关注点）</span></label>
+                                <textarea class="field-userAdvice" rows="2" placeholder="如：重点关注移动端适配、性能是否流畅、按钮样式是否统一等"></textarea>
+                            </div>
+
+                            <div class="two-col-grid">
+                                <div class="card sub-card">
+                                    <h3 class="card-title">📦 Git 提交代码</h3>
                                     <div class="form-group">
-                                        <input type="text" class="field-startupScript" placeholder="整合脚本 (如: start.sh)" autocomplete="off">
+                                        <label>提交信息</label>
+                                        <input type="text" class="field-gitCommitMessage" placeholder="输入提交信息，如: feat: 新增用户登录功能" autocomplete="off">
+                                    </div>
+                                    <div class="form-row">
+                                        <button class="btn btn-secondary field-gitCommitBtn">📝 提交代码</button>
+                                    </div>
+                                    <div class="git-result field-gitResult" hidden>
+                                        <div class="git-commit-id">
+                                            <strong>Commit ID:</strong>
+                                            <span class="field-gitCommitId"></span>
+                                        </div>
+                                        <div class="git-output field-gitOutput"></div>
                                     </div>
                                 </div>
-                                <div class="form-row">
-                                    <div class="form-group half">
-                                        <input type="text" class="field-backendScript" placeholder="后端脚本 (如: start-backend.sh)" autocomplete="off">
+
+                                <div class="card sub-card">
+                                    <h3 class="card-title">📊 WPS 多维表格</h3>
+                                    <div class="form-group">
+                                        <label>文档链接</label>
+                                        <input type="text" class="field-wpsDocUrl" placeholder="粘贴多维表格文档链接" value="https://www.kdocs.cn/l/ct9Ka3fktD75?R=L1MvNw==" autocomplete="off">
                                     </div>
-                                    <div class="form-group half">
-                                        <input type="text" class="field-frontendScript" placeholder="前端脚本 (如: start-frontend.sh)" autocomplete="off">
+                                    <div class="form-row">
+                                        <div class="form-group half">
+                                            <label>文件 Token</label>
+                                            <input type="text" class="field-wpsFileToken" placeholder="如：ct9Ka3fktD75" value="ct9Ka3fktD75" autocomplete="off">
+                                        </div>
+                                        <div class="form-group half">
+                                            <label>工作表</label>
+                                            <input type="text" class="field-wpsSheetName" placeholder="如：表格视图" value="表格视图" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group half">
+                                            <label>Session ID</label>
+                                            <input type="text" class="field-wpsSessionValue" placeholder="输入 sessionid" autocomplete="off">
+                                        </div>
+                                        <div class="form-group half">
+                                            <label>Commit ID</label>
+                                            <input type="text" class="field-wpsCommitId" placeholder="输入 Commit ID" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <button class="btn btn-secondary btn-sm field-writeSessionIdBtn">写入 Session ID</button>
+                                        <button class="btn btn-secondary btn-sm field-writeCommitIdBtn">写入 Commit ID</button>
                                     </div>
                                 </div>
-                                <small>优先级：整合脚本 > 前后端脚本 > 自动检测 > dev.py > 静态服务</small>
                             </div>
-                            <div class="form-row">
-                                <button class="btn btn-secondary field-runProjectBtn">▶️ 启动项目</button>
-                                <button class="btn btn-ghost field-stopProjectBtn" disabled>⏹️ 停止项目</button>
+
+                            <div class="test-mode-section">
+                                <div class="test-mode-header" onclick="toggleTestModeSection(this)">
+                                    <span class="test-mode-title">🔍 浏览器点验模式</span>
+                                    <span class="test-mode-toggle">收起</span>
+                                </div>
+                                <div class="test-mode-body">
+                                    <div class="form-group">
+                                        <label>生成的脚本命令</label>
+                                        <textarea class="field-testScriptOutput" rows="6" readonly placeholder="请填写工程名称、需求和阶段描述..."></textarea>
+                                    </div>
+                                    <div class="form-row">
+                                        <button class="btn btn-primary btn-sm field-copyTestScriptBtn">📋 复制脚本</button>
+                                        <button class="btn btn-secondary btn-sm field-regenerateTestScriptBtn">🔄 重新生成</button>
+                                        <button class="btn btn-success btn-sm field-executeTestScriptBtn">▶️ 执行脚本</button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="run-status" id="runStatus" hidden></div>
-                            <div class="run-output" id="runOutput" hidden></div>
+
+                            <div class="action-bar">
+                                <button class="btn btn-secondary field-writeStagePromptBtn">📝 阶段描述写入 Prompt</button>
+                                <button class="btn btn-primary field-submitBtn" disabled>
+                                    <span class="btn-text">提交验收</span>
+                                    <span class="btn-loading" hidden>验收中...</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-header">
+                            <span class="step-badge step-2">第二步</span>
+                            <h2 class="step-title">处理测试结果</h2>
                         </div>
 
-                        <button class="btn btn-primary field-submitBtn" disabled>
-                            <span class="btn-text">提交验收</span>
-                            <span class="btn-loading" hidden>验收中...</span>
-                        </button>
+                        <div class="step-body">
+                            <div class="card sub-card">
+                                <div class="card-header">
+                                    <h3 class="card-title">📝 不满意原因提取</h3>
+                                    <div class="card-actions">
+                                        <button class="btn btn-secondary btn-sm field-extractDissatisfyBtn">🔄 提取精简</button>
+                                        <button class="btn btn-info btn-sm field-writeDissatisfyBtn">📋 写入表格</button>
+                                        <button class="btn btn-success btn-sm field-saveDissatisfyBtn">💾 保存</button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>原始不满意原因</label>
+                                    <textarea class="field-dissatisfyRaw" rows="8" placeholder="粘贴包含产物不满意和过程不满意的原始文本..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>处理后不满意原因（可编辑）</label>
+                                    <textarea class="field-dissatisfyResult" rows="5" placeholder="点击「提取精简」按钮生成处理后的内容..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="card sub-card">
+                                <div class="card-header">
+                                    <h3 class="card-title">💡 下一轮 Prompt 提取</h3>
+                                    <div class="card-actions">
+                                        <button class="btn btn-secondary btn-sm field-extractPromptBtn">🔄 提取精简</button>
+                                        <button class="btn btn-info btn-sm field-writePromptBtn">📋 写入表格</button>
+                                        <button class="btn btn-success btn-sm field-savePromptBtn">💾 保存</button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>原始下一轮 Prompt</label>
+                                    <textarea class="field-promptRaw" rows="8" placeholder="粘贴包含任务1、任务2...的下一轮 Prompt 原始文本..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>提取后 Prompt（可编辑）</label>
+                                    <textarea class="field-promptResult" rows="5" placeholder="点击「提取精简」按钮生成精简后的 Prompt..."></textarea>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="card field-resultCard" hidden>
@@ -242,67 +438,52 @@
                         <div class="field-historyList"></div>
                     </div>
 
-                    <div class="card">
+                    <div class="card run-project-card">
                         <div class="card-header">
-                            <h2 class="card-title">📝 不满意原因提取</h2>
-                            <div class="card-actions">
-                                <button class="btn btn-secondary btn-sm field-extractDissatisfyBtn">🔄 提取精简</button>
-                                <button class="btn btn-success btn-sm field-saveDissatisfyBtn">💾 保存</button>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>原始不满意原因</label>
-                            <textarea class="field-dissatisfyRaw" rows="10" placeholder="粘贴包含产物不满意和过程不满意的原始文本..."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>处理后不满意原因（可编辑）</label>
-                            <textarea class="field-dissatisfyResult" rows="6" placeholder="点击「提取精简」按钮生成处理后的内容..."></textarea>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">💡 下一轮 Prompt 提取</h2>
-                            <div class="card-actions">
-                                <button class="btn btn-secondary btn-sm field-extractPromptBtn">🔄 提取精简</button>
-                                <button class="btn btn-success btn-sm field-savePromptBtn">💾 保存</button>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>原始下一轮 Prompt</label>
-                            <textarea class="field-promptRaw" rows="10" placeholder="粘贴包含任务1、任务2...的下一轮 Prompt 原始文本..."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>提取后 Prompt（可编辑）</label>
-                            <textarea class="field-promptResult" rows="6" placeholder="点击「提取精简」按钮生成精简后的 Prompt..."></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="project-sidebar">
-                    <div class="card git-commit-card">
-                        <h3 class="card-title">📦 Git 提交代码</h3>
-                        <div class="form-group">
-                            <label>提交信息</label>
-                            <input type="text" class="field-gitCommitMessage" placeholder="输入提交信息，如: feat: 新增用户登录功能" autocomplete="off">
+                            <h3 class="card-title">🚀 运行项目</h3>
                         </div>
                         <div class="form-row">
-                            <button class="btn btn-secondary field-gitCommitBtn">📝 提交代码</button>
-                        </div>
-                        <div class="git-result field-gitResult" hidden>
-                            <div class="git-commit-id">
-                                <strong>Commit ID:</strong>
-                                <span class="field-gitCommitId"></span>
+                            <div class="form-group half">
+                                <label>工程根路径</label>
+                                <input type="text" class="field-projectPath" placeholder="/Users/liboyang/trae/dailyTools" autocomplete="off">
+                                <small>默认值：当前 dailyTools 目录</small>
                             </div>
-                            <div class="git-output field-gitOutput"></div>
+                            <div class="form-group half">
+                                <label>端口号</label>
+                                <input type="number" class="field-port" placeholder="8980" value="8980" min="1024" max="65535" autocomplete="off">
+                                <small>默认值：8980</small>
+                            </div>
                         </div>
+                        <div class="form-group">
+                            <label>启动脚本配置 <span class="hint">（可选，不填则自动检测）</span></label>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="text" class="field-startupScript" placeholder="整合脚本 (如: start.sh)" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <input type="text" class="field-backendScript" placeholder="后端脚本 (如: start-backend.sh)" autocomplete="off">
+                                </div>
+                                <div class="form-group half">
+                                    <input type="text" class="field-frontendScript" placeholder="前端脚本 (如: start-frontend.sh)" autocomplete="off">
+                                </div>
+                            </div>
+                            <small>优先级：整合脚本 > 前后端脚本 > 自动检测 > dev.py > 静态服务</small>
+                        </div>
+                        <div class="form-row">
+                            <button class="btn btn-secondary field-runProjectBtn">▶️ 启动项目</button>
+                            <button class="btn btn-ghost field-stopProjectBtn" disabled>⏹️ 停止项目</button>
+                        </div>
+                        <div class="run-status" id="runStatus" hidden></div>
+                        <div class="run-output" id="runOutput" hidden></div>
                     </div>
                 </div>
             </div>
         </div>
     </template>
 
-    <script src="main.js?v=2026060604"></script>
+    <script src="main.js?v=2026060904"></script>
     <script src="test_functions.js"></script>
 </body>
 </html>

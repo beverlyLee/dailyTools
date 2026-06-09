@@ -1,6 +1,7 @@
 const CONFIG_KEY = 'workflow_reviewer_volc_config';
 const PROJECTS_KEY = 'workflow_reviewer_projects';
 const ACTIVE_PROJECT_KEY = 'workflow_reviewer_active_project';
+const WPS_CONFIG_KEY = 'workflow_reviewer_wps_config';
 
 const IMAGE_STORE_DB = 'WorkflowReviewerImages';
 const IMAGE_STORE_NAME = 'project_images';
@@ -166,7 +167,51 @@ function saveGlobalConfig() {
     localStorage.setItem(CONFIG_KEY, JSON.stringify(globalConfig));
 }
 
+const defaultWpsConfig = {
+    wpsDocUrl: 'https://www.kdocs.cn/l/ct9Ka3fktD75?R=L1MvNw==',
+    wpsFileToken: 'ct9Ka3fktD75',
+    wpsSheetName: '表格视图'
+};
+
+let globalWpsConfig = { ...defaultWpsConfig };
+
+function loadWpsConfig() {
+    try {
+        const saved = localStorage.getItem(WPS_CONFIG_KEY);
+        if (saved) {
+            globalWpsConfig = { ...defaultWpsConfig, ...JSON.parse(saved) };
+        }
+    } catch (e) {
+        console.warn('加载 WPS 配置失败:', e);
+    }
+}
+
+function saveWpsConfig() {
+    localStorage.setItem(WPS_CONFIG_KEY, JSON.stringify(globalWpsConfig));
+}
+
+function syncWpsConfigToAllProjects() {
+    const projectContents = document.querySelectorAll('[data-project-id]');
+    projectContents.forEach(content => {
+        const wpsDocUrlEl = content.querySelector('.field-wpsDocUrl');
+        const wpsFileTokenEl = content.querySelector('.field-wpsFileToken');
+        const wpsSheetNameEl = content.querySelector('.field-wpsSheetName');
+        
+        if (wpsDocUrlEl && wpsDocUrlEl.value !== globalWpsConfig.wpsDocUrl) {
+            wpsDocUrlEl.value = globalWpsConfig.wpsDocUrl;
+        }
+        if (wpsFileTokenEl && wpsFileTokenEl.value !== globalWpsConfig.wpsFileToken) {
+            wpsFileTokenEl.value = globalWpsConfig.wpsFileToken;
+        }
+        if (wpsSheetNameEl && wpsSheetNameEl.value !== globalWpsConfig.wpsSheetName) {
+            wpsSheetNameEl.value = globalWpsConfig.wpsSheetName;
+        }
+    });
+}
+
 async function loadProjects() {
+    loadWpsConfig();
+    
     try {
         const saved = localStorage.getItem(PROJECTS_KEY);
         console.log('加载的项目数据:', saved ? JSON.parse(saved) : '无数据');
@@ -174,6 +219,7 @@ async function loadProjects() {
         if (saved) {
             appState.projects = JSON.parse(saved);
             
+            let hasWpsDataToMigrate = false;
             appState.projects.forEach(p => {
                 if (p.data && p.data.files && p.data.files.length > 0) {
                     p.data.files = [];
@@ -187,7 +233,41 @@ async function loadProjects() {
                 if (p.data.currentProcess === undefined) {
                     p.data.currentProcess = '';
                 }
+                if (p.data.dissatisfyRaw === undefined) {
+                    p.data.dissatisfyRaw = '';
+                }
+                if (p.data.dissatisfyResult === undefined) {
+                    p.data.dissatisfyResult = '';
+                }
+                if (p.data.promptRaw === undefined) {
+                    p.data.promptRaw = '';
+                }
+                if (p.data.promptResult === undefined) {
+                    p.data.promptResult = '';
+                }
+                if (p.data.wpsSessionValue === undefined) {
+                    p.data.wpsSessionValue = '';
+                }
+                if (p.data.wpsCommitId === undefined) {
+                    p.data.wpsCommitId = '';
+                }
+                if (p.data.wpsDocUrl && p.data.wpsDocUrl !== defaultWpsConfig.wpsDocUrl) {
+                    hasWpsDataToMigrate = true;
+                    globalWpsConfig.wpsDocUrl = p.data.wpsDocUrl;
+                }
+                if (p.data.wpsFileToken && p.data.wpsFileToken !== defaultWpsConfig.wpsFileToken) {
+                    hasWpsDataToMigrate = true;
+                    globalWpsConfig.wpsFileToken = p.data.wpsFileToken;
+                }
+                if (p.data.wpsSheetName && p.data.wpsSheetName !== defaultWpsConfig.wpsSheetName) {
+                    hasWpsDataToMigrate = true;
+                    globalWpsConfig.wpsSheetName = p.data.wpsSheetName;
+                }
             });
+            
+            if (hasWpsDataToMigrate) {
+                saveWpsConfig();
+            }
             
             saveProjects();
             
@@ -229,6 +309,12 @@ function saveProjects() {
                     startupScript: p.data.startupScript || '',
                     backendScript: p.data.backendScript || '',
                     frontendScript: p.data.frontendScript || '',
+                    dissatisfyRaw: p.data.dissatisfyRaw || '',
+                    dissatisfyResult: p.data.dissatisfyResult || '',
+                    promptRaw: p.data.promptRaw || '',
+                    promptResult: p.data.promptResult || '',
+                    wpsSessionValue: p.data.wpsSessionValue || '',
+                    wpsCommitId: p.data.wpsCommitId || '',
                     files: [],
                     history: p.data.history || [],
                     currentResult: p.data.currentResult || null,
@@ -275,6 +361,11 @@ function createNewProject() {
             dissatisfyResult: '',
             promptRaw: '',
             promptResult: '',
+            wpsDocUrl: 'https://www.kdocs.cn/l/ct9Ka3fktD75?R=L1MvNw==',
+            wpsFileToken: 'ct9Ka3fktD75',
+            wpsSheetName: '表格视图',
+            wpsSessionValue: '',
+            wpsCommitId: '',
             lastUpdated: Date.now()
         }
     };
@@ -488,7 +579,22 @@ function renderWorkspace() {
             promptRaw: content.querySelector('.field-promptRaw'),
             promptResult: content.querySelector('.field-promptResult'),
             extractPromptBtn: content.querySelector('.field-extractPromptBtn'),
-            savePromptBtn: content.querySelector('.field-savePromptBtn')
+            savePromptBtn: content.querySelector('.field-savePromptBtn'),
+            writePromptBtn: content.querySelector('.field-writePromptBtn'),
+            writeDissatisfyBtn: content.querySelector('.field-writeDissatisfyBtn'),
+            writeStagePromptBtn: content.querySelector('.field-writeStagePromptBtn'),
+            wpsDocUrl: content.querySelector('.field-wpsDocUrl'),
+            wpsFileToken: content.querySelector('.field-wpsFileToken'),
+            wpsSheetName: content.querySelector('.field-wpsSheetName'),
+            wpsSessionValue: content.querySelector('.field-wpsSessionValue'),
+            wpsCommitId: content.querySelector('.field-wpsCommitId'),
+            writeSessionIdBtn: content.querySelector('.field-writeSessionIdBtn'),
+            writeCommitIdBtn: content.querySelector('.field-writeCommitIdBtn'),
+            writeLogTraceBtn: content.querySelector('.field-writeLogTraceBtn'),
+            testScriptOutput: content.querySelector('.field-testScriptOutput'),
+            copyTestScriptBtn: content.querySelector('.field-copyTestScriptBtn'),
+            regenerateTestScriptBtn: content.querySelector('.field-regenerateTestScriptBtn'),
+            executeTestScriptBtn: content.querySelector('.field-executeTestScriptBtn')
         };
         
         fields.projectName.value = data.projectName || '';
@@ -506,6 +612,11 @@ function renderWorkspace() {
         if (fields.dissatisfyResult) fields.dissatisfyResult.value = data.dissatisfyResult || '';
         if (fields.promptRaw) fields.promptRaw.value = data.promptRaw || '';
         if (fields.promptResult) fields.promptResult.value = data.promptResult || '';
+        if (fields.wpsDocUrl) fields.wpsDocUrl.value = globalWpsConfig.wpsDocUrl;
+        if (fields.wpsFileToken) fields.wpsFileToken.value = globalWpsConfig.wpsFileToken;
+        if (fields.wpsSheetName) fields.wpsSheetName.value = globalWpsConfig.wpsSheetName;
+        if (fields.wpsSessionValue) fields.wpsSessionValue.value = data.wpsSessionValue || '';
+        if (fields.wpsCommitId) fields.wpsCommitId.value = data.wpsCommitId || '';
         
         fields.projectName.addEventListener('input', () => {
             project.data.projectName = fields.projectName.value;
@@ -514,7 +625,7 @@ function renderWorkspace() {
             updateProjectName(project, fields.projectName.value);
             updateProjectSubmitState(project, fields);
             saveProjects();
-            if (document.getElementById('testModePanel').style.display !== 'none') {
+            if (isTestModeExpanded()) {
                 generateTestScript();
             }
         });
@@ -524,7 +635,7 @@ function renderWorkspace() {
             project.data.lastUpdated = Date.now();
             updateProjectSubmitState(project, fields);
             saveProjects();
-            if (document.getElementById('testModePanel').style.display !== 'none') {
+            if (isTestModeExpanded()) {
                 generateTestScript();
             }
         });
@@ -540,7 +651,7 @@ function renderWorkspace() {
             project.data.lastUpdated = Date.now();
             updateProjectSubmitState(project, fields);
             saveProjects();
-            if (document.getElementById('testModePanel').style.display !== 'none') {
+            if (isTestModeExpanded()) {
                 generateTestScript();
             }
         });
@@ -555,7 +666,7 @@ function renderWorkspace() {
             project.data.currentProcess = fields.currentProcess.value;
             project.data.lastUpdated = Date.now();
             saveProjects();
-            if (document.getElementById('testModePanel').style.display !== 'none') {
+            if (isTestModeExpanded()) {
                 generateTestScript();
             }
         });
@@ -635,6 +746,73 @@ function renderWorkspace() {
             project.data.lastUpdated = Date.now();
             saveProjects();
         });
+        if (fields.writeDissatisfyBtn) {
+            fields.writeDissatisfyBtn.addEventListener('click', () => writeDissatisfyToWps(project, fields));
+        }
+        if (fields.writePromptBtn) {
+            fields.writePromptBtn.addEventListener('click', () => writePromptToWps(project, fields));
+        }
+        if (fields.writeStagePromptBtn) {
+            fields.writeStagePromptBtn.addEventListener('click', () => writeStagePromptToWps(project, fields));
+        }
+        if (fields.writeSessionIdBtn) {
+            fields.writeSessionIdBtn.addEventListener('click', () => writeSessionIdToWps(project, fields));
+        }
+        if (fields.writeCommitIdBtn) {
+            fields.writeCommitIdBtn.addEventListener('click', () => writeCommitIdToWps(project, fields));
+        }
+        if (fields.writeLogTraceBtn) {
+            fields.writeLogTraceBtn.addEventListener('click', () => writeLogTraceToWps(project, fields));
+        }
+        if (fields.wpsDocUrl) {
+            fields.wpsDocUrl.addEventListener('input', () => {
+                globalWpsConfig.wpsDocUrl = fields.wpsDocUrl.value;
+                const token = extractFileTokenFromUrl(fields.wpsDocUrl.value);
+                if (token && fields.wpsFileToken) {
+                    fields.wpsFileToken.value = token;
+                    globalWpsConfig.wpsFileToken = token;
+                }
+                saveWpsConfig();
+                syncWpsConfigToAllProjects();
+            });
+        }
+        if (fields.wpsFileToken) {
+            fields.wpsFileToken.addEventListener('input', () => {
+                globalWpsConfig.wpsFileToken = fields.wpsFileToken.value;
+                saveWpsConfig();
+                syncWpsConfigToAllProjects();
+            });
+        }
+        if (fields.wpsSheetName) {
+            fields.wpsSheetName.addEventListener('input', () => {
+                globalWpsConfig.wpsSheetName = fields.wpsSheetName.value;
+                saveWpsConfig();
+                syncWpsConfigToAllProjects();
+            });
+        }
+        if (fields.wpsSessionValue) {
+            fields.wpsSessionValue.addEventListener('input', () => {
+                project.data.wpsSessionValue = fields.wpsSessionValue.value;
+                project.data.lastUpdated = Date.now();
+                saveProjects();
+            });
+        }
+        if (fields.wpsCommitId) {
+            fields.wpsCommitId.addEventListener('input', () => {
+                project.data.wpsCommitId = fields.wpsCommitId.value;
+                project.data.lastUpdated = Date.now();
+                saveProjects();
+            });
+        }
+        if (fields.copyTestScriptBtn) {
+            fields.copyTestScriptBtn.addEventListener('click', copyTestScript);
+        }
+        if (fields.regenerateTestScriptBtn) {
+            fields.regenerateTestScriptBtn.addEventListener('click', generateTestScript);
+        }
+        if (fields.executeTestScriptBtn) {
+            fields.executeTestScriptBtn.addEventListener('click', executeTestScript);
+        }
         
         renderProjectPreviews(project, fields);
         renderProjectHistory(project, fields);
@@ -646,6 +824,8 @@ function renderWorkspace() {
         updateProjectSubmitState(project, fields);
         
         workspace.appendChild(content);
+        
+        generateTestScript(project.id);
     });
 }
 
@@ -1156,64 +1336,69 @@ function showToast(msg) {
     }, 2500);
 }
 
-function toggleTestModePanel(show) {
-    const panel = document.getElementById('testModePanel');
-    if (show) {
-        panel.style.display = 'block';
-        setTimeout(() => panel.classList.add('show'), 10);
+function toggleTestModeSection(headerEl) {
+    const section = headerEl?.closest?.('.test-mode-section');
+    if (!section) return;
+    
+    const body = section.querySelector('.test-mode-body');
+    const toggle = section.querySelector('.test-mode-toggle');
+    
+    if (!body || !toggle) return;
+    
+    if (body.style.display === 'none') {
+        body.style.display = 'block';
+        toggle.textContent = '收起';
         generateTestScript();
     } else {
-        panel.classList.remove('show');
-        setTimeout(() => {
-            panel.style.display = 'none';
-        }, 300);
+        body.style.display = 'none';
+        toggle.textContent = '展开';
     }
 }
 
-function generateTestScript() {
+function isTestModeExpanded() {
+    const activeProject = getActiveProject();
+    if (!activeProject) return false;
+    
+    const contentEl = document.querySelector(`[data-project-id="${activeProject.id}"]`);
+    if (!contentEl) return false;
+    
+    const body = contentEl.querySelector('.test-mode-body');
+    if (!body) return false;
+    
+    const style = body.style.display;
+    return style !== 'none';
+}
+
+function generateTestScript(projectId) {
     console.log('=== generateTestScript 开始执行 ===');
     
-    const activeProject = getActiveProject();
-    console.log('activeProject:', activeProject);
-    console.log('activeProject.id:', activeProject?.id);
-    console.log('activeProject.data.currentProcess:', activeProject?.data?.currentProcess);
-    console.log('activeProject.data.currentProcess 是否为空:', !activeProject?.data?.currentProcess);
+    const project = projectId 
+        ? appState.projects.find(p => p.id === projectId) 
+        : getActiveProject();
     
-    if (!activeProject) {
-        document.getElementById('testScriptOutput').value = '请先创建项目';
+    if (!project) {
+        console.log('没有找到项目');
         return;
     }
 
-    // 先从 data 中获取
-    let projectName = (activeProject.data?.projectName || '').trim();
-    let requirement = (activeProject.data?.requirement || '').trim();
-    let stage = (activeProject.data?.stage || '').trim();
-    let currentProcess = (activeProject.data?.currentProcess || '').trim();
+    let projectName = (project.data?.projectName || '').trim();
+    let requirement = (project.data?.requirement || '').trim();
+    let stage = (project.data?.stage || '').trim();
+    let currentProcess = (project.data?.currentProcess || '').trim();
     
-    console.log('从 data 读取:', { projectName, requirement, stage, currentProcess });
-    console.log('currentProcess 长度:', currentProcess.length);
-
-    // 尝试从 DOM 中读取
-    const contentEl = document.querySelector(`[data-project-id="${activeProject.id}"]`);
-    console.log('contentEl:', contentEl);
+    const contentEl = document.querySelector(`[data-project-id="${project.id}"]`);
     
     if (contentEl) {
+        const projectNameEl = contentEl.querySelector('.field-projectName');
+        const requirementEl = contentEl.querySelector('.field-requirement');
+        const stageEl = contentEl.querySelector('.field-stage');
         const currentProcessEl = contentEl.querySelector('.field-currentProcess');
-        console.log('currentProcessEl:', currentProcessEl);
-        if (currentProcessEl) {
-            const domValue = currentProcessEl.value.trim();
-            console.log('从 DOM 读取 currentProcess:', domValue);
-            console.log('DOM 值长度:', domValue.length);
-            // 如果 DOM 中有值但 data 中没有，用 DOM 的值
-            if (domValue && !currentProcess) {
-                currentProcess = domValue;
-                console.log('使用 DOM 中的 currentProcess 值');
-            }
-        }
+        
+        if (projectNameEl?.value) projectName = projectNameEl.value.trim();
+        if (requirementEl?.value) requirement = requirementEl.value.trim();
+        if (stageEl?.value) stage = stageEl.value.trim();
+        if (currentProcessEl?.value) currentProcess = currentProcessEl.value.trim();
     }
-
-    console.log('最终值:', { projectName, requirement, stage, currentProcess });
-    console.log('最终 currentProcess 是否为空:', !currentProcess);
 
     projectName = projectName || '工程名';
     requirement = requirement || '需求';
@@ -1221,21 +1406,42 @@ function generateTestScript() {
     currentProcess = currentProcess || '';
 
     const escapedProcess = currentProcess.replace(/"/g, '\\"').replace(/\n/g, ' ');
+    const escapedRequirement = requirement.replace(/"/g, '\\"').replace(/\n/g, ' ');
+    const escapedStage = stage.replace(/"/g, '\\"').replace(/\n/g, ' ');
     
-    let script = `python3 generate_test_prompt.py \\
+    let script = `python3 /Users/liboyang/trae/dailyTools/generate_test_prompt.py \\
     -n "${projectName}" \\
-    -f "${requirement}" \\
-    -c "${stage}" \\
-    -pr "${escapedProcess}"`;
+    -f "${escapedRequirement}" \\
+    -c "${escapedStage}" \\
+    -pr "${escapedProcess}" \\
+    -r`;
 
-    console.log('✅ 添加了 -pr 参数:', escapedProcess);
-    console.log('生成的脚本:', script);
-    document.getElementById('testScriptOutput').value = script;
+    if (contentEl) {
+        const outputEl = contentEl.querySelector('.field-testScriptOutput');
+        if (outputEl) {
+            outputEl.value = script;
+            console.log('✅ 脚本已写入文本框');
+        } else {
+            console.log('❌ 找不到 testScriptOutput 元素');
+        }
+    }
     console.log('=== generateTestScript 结束 ===');
 }
 
 function copyTestScript() {
-    const script = document.getElementById('testScriptOutput').value;
+    const activeProject = getActiveProject();
+    if (!activeProject) {
+        showToast('请先创建项目');
+        return;
+    }
+    
+    const contentEl = document.querySelector(`[data-project-id="${activeProject.id}"]`);
+    if (!contentEl) return;
+    
+    const outputEl = contentEl.querySelector('.field-testScriptOutput');
+    if (!outputEl) return;
+    
+    const script = outputEl.value;
     if (!script || script.includes('请先创建项目') || script.includes('无法获取项目信息')) {
         showToast('没有可复制的脚本');
         return;
@@ -1246,30 +1452,36 @@ function copyTestScript() {
         .catch(() => showToast('❌ 复制失败'));
 }
 
-async function executeTestScript() {
+async function executeTestScript(e) {
     const activeProject = getActiveProject();
     if (!activeProject) {
         showToast('请先创建项目');
         return;
     }
 
-    const contentEl = document.querySelector(`[data-project-id="${activeProject.id}"]`);
+    const btn = e?.currentTarget || document.querySelector('.field-executeTestScriptBtn');
+    const contentEl = btn?.closest?.('[data-project-id]');
+    
+    if (!contentEl) {
+        console.error('找不到项目内容容器');
+        showToast('页面元素加载异常，请刷新');
+        return;
+    }
+
     let projectName = '';
     let requirement = '';
     let stage = '';
     let currentProcess = '';
 
-    if (contentEl) {
-        const projectNameEl = contentEl.querySelector('.field-projectName');
-        const requirementEl = contentEl.querySelector('.field-requirement');
-        const stageEl = contentEl.querySelector('.field-stage');
-        const currentProcessEl = contentEl.querySelector('.field-currentProcess');
-        
-        projectName = (projectNameEl?.value || '').trim();
-        requirement = (requirementEl?.value || '').trim();
-        stage = (stageEl?.value || '').trim();
-        currentProcess = (currentProcessEl?.value || '').trim();
-    }
+    const projectNameEl = contentEl.querySelector('.field-projectName');
+    const requirementEl = contentEl.querySelector('.field-requirement');
+    const stageEl = contentEl.querySelector('.field-stage');
+    const currentProcessEl = contentEl.querySelector('.field-currentProcess');
+    
+    projectName = (projectNameEl?.value || '').trim();
+    requirement = (requirementEl?.value || '').trim();
+    stage = (stageEl?.value || '').trim();
+    currentProcess = (currentProcessEl?.value || '').trim();
 
     if (!projectName) projectName = (activeProject.data?.projectName || '').trim();
     if (!requirement) requirement = (activeProject.data?.requirement || '').trim();
@@ -1278,13 +1490,6 @@ async function executeTestScript() {
 
     if (!projectName || !requirement || !stage) {
         showToast('请填写完整：工程名称、核心需求、阶段描述');
-        return;
-    }
-
-    const btn = document.getElementById('executeTestScriptBtn');
-    if (!btn) {
-        console.error('找不到执行脚本按钮');
-        showToast('页面元素加载异常，请刷新');
         return;
     }
 
@@ -1561,12 +1766,6 @@ async function initGlobalUI() {
     document.getElementById('saveDataBtn').addEventListener('click', saveCurrentProject);
     document.getElementById('clearDataBtn').addEventListener('click', forceClearAllData);
     
-    document.getElementById('testModeBtn').addEventListener('click', () => toggleTestModePanel(true));
-    document.getElementById('closeTestModeBtn').addEventListener('click', () => toggleTestModePanel(false));
-    document.getElementById('copyTestScriptBtn').addEventListener('click', copyTestScript);
-    document.getElementById('regenerateTestScriptBtn').addEventListener('click', generateTestScript);
-    document.getElementById('executeTestScriptBtn').addEventListener('click', executeTestScript);
-    
     ['volcApiKey', 'volcBaseUrl', 'volcModel'].forEach(id => {
         document.getElementById(id)?.addEventListener('input', () => {
             const activeProject = getActiveProject();
@@ -1812,6 +2011,11 @@ async function gitCommit(project, fields) {
         if (result.commit_id) {
             fields.gitCommitId.textContent = result.commit_id;
             fields.gitCommitId.style.color = '#22c55e';
+            if (fields.wpsCommitId) {
+                fields.wpsCommitId.value = result.commit_id;
+                project.data.wpsCommitId = result.commit_id;
+                saveProjects();
+            }
             showToast('✅ 代码提交成功');
             fields.gitCommitMessage.value = '';
         } else {
@@ -2085,6 +2289,221 @@ function saveNextPrompt(project, fields) {
     saveProjects();
     showToast('✅ 已保存');
 }
+
+function extractFileTokenFromUrl(url) {
+    if (!url) return '';
+    const patterns = [
+        /\/l\/([a-zA-Z0-9]+)/,
+        /file_token=([a-zA-Z0-9]+)/,
+    ];
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match) {
+            return match[1];
+        }
+    }
+    return '';
+}
+
+function generateUid() {
+    const now = new Date();
+    const dateStr = now.getFullYear().toString() +
+        (now.getMonth() + 1).toString().padStart(2, '0') +
+        now.getDate().toString().padStart(2, '0');
+    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+    return `UID-${dateStr}-${random}`;
+}
+
+async function writeToWps(project, fields, fieldsData) {
+    console.log('📝 [writeToWps] 开始执行', { fieldsData });
+    
+    const docUrl = globalWpsConfig.wpsDocUrl || fields.wpsDocUrl?.value || project.data.wpsDocUrl;
+    const fileToken = globalWpsConfig.wpsFileToken || fields.wpsFileToken?.value || project.data.wpsFileToken;
+    const sheetName = globalWpsConfig.wpsSheetName || fields.wpsSheetName?.value || project.data.wpsSheetName;
+    const sessionValue = project.data.wpsSessionValue || fields.wpsSessionValue?.value || '';
+
+    console.log('📝 [writeToWps] 配置参数', { docUrl, fileToken, sheetName, sessionValue });
+
+    if (!fileToken && !docUrl) {
+        showToast('❌ 请先填写文档链接或文件 Token');
+        return false;
+    }
+
+    if (!sessionValue.trim()) {
+        showToast('❌ 请先填写 sessionid 值');
+        return false;
+    }
+
+    const finalFields = { ...fieldsData };
+    if (!finalFields['UID']) {
+        finalFields['UID'] = generateUid();
+    }
+
+    console.log('📝 [writeToWps] 最终写入字段:', finalFields);
+
+    try {
+        const response = await fetch('/api/write-wps-dbt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                doc_url: docUrl,
+                file_token: fileToken,
+                sheet_name: sheetName,
+                fields: finalFields,
+                lookup_field: 'Trae Session ID',
+                lookup_value: sessionValue.trim(),
+            }),
+        });
+
+        const result = await response.json();
+        console.log('📝 [writeToWps] 接口返回:', result);
+
+        if (result.success) {
+            if (result.is_new) {
+                showToast('✅ 写入成功（新建记录）');
+            } else {
+                showToast('✅ 写入成功（更新记录）');
+            }
+            return true;
+        } else {
+            showToast('❌ 写入失败: ' + (result.error || '未知错误'));
+            console.error('WPS 写入失败:', result);
+            return false;
+        }
+    } catch (e) {
+        showToast('❌ 写入失败: ' + e.message);
+        console.error('WPS 写入异常:', e);
+        return false;
+    }
+}
+
+function writeDissatisfyToWps(project, fields) {
+    const dissatisfyText = fields.dissatisfyResult?.value || '';
+    if (!dissatisfyText.trim()) {
+        showToast('❌ 不满意原因不能为空');
+        return;
+    }
+    writeToWps(project, fields, { '不满意原因': dissatisfyText });
+}
+
+function writePromptToWps(project, fields) {
+    const promptText = fields.promptResult?.value || '';
+    if (!promptText.trim()) {
+        showToast('❌ 下一轮 Prompt 不能为空');
+        return;
+    }
+    writeToWps(project, fields, { 'AI审核意见': promptText });
+}
+
+function writeSessionIdToWps(project, fields) {
+    const sessionValue = project.data.wpsSessionValue || fields.wpsSessionValue?.value || '';
+    if (!sessionValue.trim()) {
+        showToast('❌ sessionid 值不能为空');
+        return;
+    }
+    writeToWps(project, fields, { 'Trae Session ID': sessionValue });
+}
+
+function writeCommitIdToWps(project, fields) {
+    const commitId = project.data.wpsCommitId || fields.wpsCommitId?.value || '';
+    if (!commitId.trim()) {
+        showToast('❌ Commit ID 不能为空');
+        return;
+    }
+    writeToWps(project, fields, { 'commit id': commitId });
+}
+
+function writeLogTraceToWps(project, fields) {
+    const logTrace = project.data.currentProcess || fields.currentProcess?.value || '';
+    if (!logTrace.trim()) {
+        showToast('❌ 本轮过程不能为空');
+        return;
+    }
+    const roundNum = project.data.roundNum || fields.roundNum?.value || 1;
+    writeToWps(project, fields, { 
+        '日志轨迹': logTrace,
+        '轮次': String(roundNum)
+    });
+}
+
+function handleWriteLogTrace(btnEl) {
+    const contentEl = btnEl?.closest?.('[data-project-id]');
+    if (!contentEl) {
+        showToast('❌ 找不到项目容器');
+        return;
+    }
+    
+    const projectId = contentEl.dataset.projectId;
+    const project = appState.projects.find(p => p.id == projectId);
+    if (!project) {
+        showToast('❌ 找不到项目数据');
+        return;
+    }
+    
+    const fields = {
+        currentProcess: contentEl.querySelector('.field-currentProcess'),
+        roundNum: contentEl.querySelector('.field-roundNum'),
+        wpsDocUrl: contentEl.querySelector('.field-wpsDocUrl'),
+        wpsFileToken: contentEl.querySelector('.field-wpsFileToken'),
+        wpsSheetName: contentEl.querySelector('.field-wpsSheetName'),
+        wpsSessionValue: contentEl.querySelector('.field-wpsSessionValue'),
+    };
+    
+    writeLogTraceToWps(project, fields);
+}
+
+window.onWriteLogTraceClick = function(btn) {
+    console.log('[写入日志轨迹] 按钮被点击', btn);
+    handleWriteLogTrace(btn);
+};
+
+window.__writeLogTrace = function(btn) {
+    console.log('[写入日志轨迹] __writeLogTrace 被调用', btn);
+    handleWriteLogTrace(btn);
+};
+
+window.__doWriteLogTrace = function(project, fields, logTrace, roundNum) {
+    console.log('📝 [__doWriteLogTrace] 执行写入', { project: project?.id, logTraceLen: logTrace?.length, roundNum });
+    writeToWps(project, fields, { 
+        '日志轨迹': logTrace,
+        '轮次': String(roundNum)
+    });
+};
+
+function writeStagePromptToWps(project, fields) {
+    const stage = project.data.stage || fields.stage?.value || '';
+    if (!stage.trim()) {
+        showToast('❌ 阶段描述不能为空');
+        return;
+    }
+    writeToWps(project, fields, { 'User Prompt': stage });
+}
+
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.field-writeLogTraceBtn');
+    if (!btn) return;
+    
+    const contentEl = btn.closest('[data-project-id]');
+    if (!contentEl) return;
+    
+    const projectId = contentEl.dataset.projectId;
+    const project = appState.projects.find(p => p.id == projectId);
+    if (!project) {
+        showToast('❌ 找不到项目数据');
+        return;
+    }
+    
+    const fields = {
+        currentProcess: contentEl.querySelector('.field-currentProcess'),
+        roundNum: contentEl.querySelector('.field-roundNum'),
+        wpsDocUrl: contentEl.querySelector('.field-wpsDocUrl'),
+        wpsFileToken: contentEl.querySelector('.field-wpsFileToken'),
+        wpsSheetName: contentEl.querySelector('.field-wpsSheetName'),
+        wpsSessionValue: contentEl.querySelector('.field-wpsSessionValue'),
+    };
+    
+    writeLogTraceToWps(project, fields);
+});
 
 document.addEventListener('DOMContentLoaded', async () => {
     loadGlobalConfig();

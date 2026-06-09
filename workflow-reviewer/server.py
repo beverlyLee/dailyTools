@@ -108,13 +108,6 @@ async def main_js():
     return FileResponse(str(STATIC_DIR / "main.js"), media_type="application/javascript")
 
 
-@app.api_route("/{path:path}", response_class=HTMLResponse, methods=["GET"])
-async def catch_all(path: str):
-    if path.startswith("api/"):
-        return JSONResponse(status_code=404, content={"error": "Not Found"})
-    return (STATIC_DIR / "index.html").read_text(encoding="utf-8")
-
-
 def save_config_json(system_prompt: str, user_prompt_template: str):
     import json
     global RUNTIME_CONFIG
@@ -990,7 +983,7 @@ class ExecuteTestPromptRequest(BaseModel):
 async def execute_test_prompt(request: ExecuteTestPromptRequest):
     """执行 generate_test_prompt.py 脚本"""
     try:
-        script_path = Path(__file__).parent.parent / "/Users/liboyang/trae/dailyTools/generate_test_prompt.py"
+        script_path = Path("/Users/liboyang/trae/dailyTools/generate_test_prompt.py")
         
         if not script_path.exists():
             return JSONResponse(
@@ -1008,7 +1001,7 @@ async def execute_test_prompt(request: ExecuteTestPromptRequest):
         if request.current_process:
             cmd.extend(["-pr", request.current_process])
         
-        cmd.append("-p")
+        cmd.append("-r")
         
         print(f"[execute-test-prompt] 执行命令: {' '.join(cmd)}")
         
@@ -1177,6 +1170,126 @@ async def sync_feishu(request: SyncFeishuRequest):
         )
 
 
+class WriteWpsDbtRequest(BaseModel):
+    file_token: str = ''
+    doc_url: str = ''
+    sheet_name: str = '表格视图'
+    fields: dict
+    lookup_field: str = ''
+    lookup_value: str = ''
+
+
+@app.post("/api/write-wps-dbt")
+async def write_wps_dbt(request: WriteWpsDbtRequest):
+    """写入 WPS 多维表格（使用 .env 中配置的 app_id + app_key）
+
+    支持两种模式：
+    1. 普通追加模式：直接新增一行记录（默认）
+    2. Upsert 模式：根据 lookup_field 和 lookup_value 查找记录，找到则更新，找不到则创建
+    """
+    import json
+    print("\n" + "=" * 60)
+    print("[write-wps-dbt] 收到请求")
+    print(f"  doc_url: {request.doc_url}")
+    print(f"  file_token: {request.file_token}")
+    print(f"  sheet_name: {request.sheet_name}")
+    print(f"  fields: {json.dumps(request.fields, ensure_ascii=False)}")
+    print(f"  lookup_field: {request.lookup_field}")
+    print(f"  lookup_value: {request.lookup_value}")
+    print("=" * 60)
+
+    try:
+        from wps_dbt import WpsDbtClient, extract_file_token
+
+        file_id = request.file_token
+        if not file_id and request.doc_url:
+            file_id = extract_file_token(request.doc_url)
+            print(f"[write-wps-dbt] 从 URL 提取 file_id: {file_id}")
+
+        if not file_id:
+            print("[write-wps-dbt] 错误: 缺少 file_token 或 doc_url")
+            return JSONResponse(
+                status_code=400,
+                content={"success": False, "error": "缺少 file_token 或 doc_url"}
+            )
+
+        app_id = os.getenv('WPS_APP_ID', '')
+        app_key = os.getenv('WPS_APP_KEY', '')
+        api_base_url = os.getenv('WPS_API_BASE_URL', 'https://openapi.wps.cn')
+        scope = os.getenv('WPS_SCOPE', '')
+        api_version = os.getenv('WPS_API_VERSION', 'v2')
+
+        print(f"[write-wps-dbt] API 版本: {api_version}, scope: {scope}")
+
+        client = WpsDbtClient(
+            app_id=app_id,
+            app_key=app_key,
+            file_id=file_id,
+            api_base_url=api_base_url,
+            scope=scope,
+            api_version=api_version,
+        )
+
+        print(f"[write-wps-dbt] 准备写入工作表: {request.sheet_name}")
+        print(f"[write-wps-dbt] 写入字段: {json.dumps(request.fields, ensure_ascii=False, indent=2)}")
+
+        if request.lookup_field and request.lookup_value:
+            print(f"[write-wps-dbt] 使用 Upsert 模式，查找字段: {request.lookup_field} = {request.lookup_value}")
+            result = client.upsert_record_by_field(
+                sheet_name=request.sheet_name,
+                lookup_field=request.lookup_field,
+                lookup_value=request.lookup_value,
+                fields=request.fields,
+            )
+        else:
+            print("[write-wps-dbt] 使用普通追加模式")
+            result = client.append_record_by_sheet_name(
+                sheet_name=request.sheet_name,
+                fields=request.fields,
+            )
+
+        print(f"[write-wps-dbt] 写入结果:")
+        print(f"  success: {result.get('success')}")
+        print(f"  error: {result.get('error')}")
+        print(f"  is_new: {result.get('is_new')}")
+        print(f"  record_id: {result.get('record_id')}")
+        if result.get('raw'):
+            raw = result['raw']
+            print(f"  code: {raw.get('code')}")
+            print(f"  msg: {raw.get('msg')}")
+            if raw.get('data'):
+                print(f"  records: {raw['data'].get('records', [])}")
+
+        if result.get('success', False):
+            print("[write-wps-dbt] ✅ 写入成功")
+            return JSONResponse(content={
+                "success": True,
+                "data": result.get('data', {}),
+                "is_new": result.get('is_new'),
+                "record_id": result.get('record_id'),
+                "raw": result,
+            })
+        else:
+            print(f"[write-wps-dbt] ❌ 写入失败: {result.get('error')}")
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "success": False,
+                    "error": result.get('error', '写入失败'),
+                    "raw": result,
+                }
+            )
+
+    except Exception as e:
+        import traceback
+        print(f"[write-wps-dbt] 异常: {str(e)}")
+        print(f"[write-wps-dbt] 堆栈: {traceback.format_exc()}")
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
+
 # ── 工具函数 ──────────────────────────────────────────────
 
 def encode_image_bytes(data: bytes) -> tuple[str, str]:
@@ -1241,6 +1354,14 @@ def build_user_prompt(
         user_text += f"\n\n本轮过程：\n{current_process}"
 
     return user_text
+
+
+# ── 通配路由（必须放在最后） ──────────────────────────────────────────────────
+@app.api_route("/{path:path}", response_class=HTMLResponse, methods=["GET"])
+async def catch_all(path: str):
+    if path.startswith("api/"):
+        return JSONResponse(status_code=404, content={"error": "Not Found"})
+    return (STATIC_DIR / "index.html").read_text(encoding="utf-8")
 
 
 # ── 启动 ──────────────────────────────────────────────────

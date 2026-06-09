@@ -58,10 +58,17 @@ def generate_test_prompt(project_name, first_round_prompt, current_round_prompt,
     process_content = current_progress if current_progress else '暂无过程记录'
     
     filtered_lines = []
+    skip_next_indented = False
     for line in process_content.split('\n'):
         stripped = line.strip()
         if not stripped:
+            skip_next_indented = False
             continue
+        
+        if skip_next_indented and (line.startswith('  ') or line.startswith('\t')):
+            continue
+        skip_next_indented = False
+        
         if stripped.startswith('toolName'):
             continue
         if stripped.startswith('status'):
@@ -75,6 +82,13 @@ def generate_test_prompt(project_name, first_round_prompt, current_round_prompt,
         if stripped.startswith('command') or stripped.startswith('Command'):
             continue
         if stripped.lower().startswith('mcp'):
+            skip_next_indented = True
+            continue
+        if re.match(r'^mcp:', stripped, re.IGNORECASE):
+            skip_next_indented = True
+            continue
+        if 'mcp.config.' in stripped:
+            skip_next_indented = True
             continue
         if re.match(r'^第[一二三四五六七八九十百千\d]+轮', stripped):
             continue
@@ -89,6 +103,11 @@ def generate_test_prompt(project_name, first_round_prompt, current_round_prompt,
         if stripped.startswith('🎉') or stripped.startswith('✅') or stripped.startswith('❌') or stripped.startswith('📦'):
             if len(stripped) < 50:
                 continue
+        line = re.sub(r'\(file:///[^\)]+\)', '', line)
+        line = re.sub(r'file:///[^\s]+', '', line)
+        line = line.strip()
+        if not line:
+            continue
         filtered_lines.append(line)
     
     process_content = '\n'.join(filtered_lines).strip()
@@ -247,6 +266,7 @@ def main():
     parser.add_argument('--file', default=default_requirement_file, help=f'需求文档路径（默认：{default_requirement_file}）')
     parser.add_argument('-o', '--output', default=default_output, help=f'输出文件路径（默认：{default_output}）')
     parser.add_argument('-p', '--print', action='store_true', help='同时打印到控制台')
+    parser.add_argument('-r', '--raw', action='store_true', help='纯输出模式：只打印prompt内容，不写入文件，不显示头部信息')
 
     args = parser.parse_args()
     
@@ -260,25 +280,29 @@ def main():
         sys.exit(1)
     
     # 获取项目信息
-    if args.num is not None:
-        try:
-            project_info = extract_project_by_num(args.file, args.num)
-            project_name = project_info['folder_name']
-            first_round_prompt = project_info['prompt_content']
-            project_identifier = f"项目{args.num}-{project_info['folder_name']}"
-            round_number = get_next_round_number(args.output, project_identifier)
-            project_label = f"项目{args.num}-{project_info['folder_name']} - 第{round_number}轮"
-        except Exception as e:
-            print(f"错误：{e}")
-            sys.exit(1)
-    else:
-        project_name = args.name
-        first_round_prompt = args.first
-        project_identifier = project_name
-        round_number = get_next_round_number(args.output, project_identifier)
-        project_label = f"{project_name} - 第{round_number}轮"
+    # if args.num is not None:
+    #     try:
+    #         project_info = extract_project_by_num(args.file, args.num)
+    #         project_name = project_info['folder_name']
+    #         first_round_prompt = project_info['prompt_content']
+    #         project_identifier = f"项目{args.num}-{project_info['folder_name']}"
+    #         round_number = get_next_round_number(args.output, project_identifier)
+    #         project_label = f"项目{args.num}-{project_info['folder_name']} - 第{round_number}轮"
+    #     except Exception as e:
+    #         print(f"错误：{e}")
+    #         sys.exit(1)
+    # else:
+    project_name = args.name
+    first_round_prompt = args.first
+    project_identifier = project_name
+    round_number = get_next_round_number(args.output, project_identifier)
+    project_label = f"{project_name} - 第{round_number}轮"
 
     result = generate_test_prompt(project_name, first_round_prompt, args.current, args.progress)
+    
+    if args.raw:
+        print(result)
+        return
     
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     separator = '\n' + '='*80 + '\n'
