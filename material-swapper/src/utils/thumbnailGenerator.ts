@@ -37,6 +37,36 @@ function fbm(x: number, y: number, octaves: number = 6): number {
   return value;
 }
 
+function fbm2(x: number, y: number, octaves: number = 6): [number, number] {
+  return [fbm(x, y, octaves), fbm(x + 5.2, y + 1.3, octaves)];
+}
+
+function voronoi(x: number, y: number, scale: number): number {
+  const px = x * scale;
+  const py = y * scale;
+  const ix = Math.floor(px);
+  const iy = Math.floor(py);
+  const fx = px - ix;
+  const fy = py - iy;
+  let minDist = 1;
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      const nx = hash([ix + dx, iy + dy]);
+      const ny = hash([ix + dx + 100, iy + dy + 100]);
+      const ddx = dx + nx - fx;
+      const ddy = dy + ny - fy;
+      const dist = Math.sqrt(ddx * ddx + ddy * ddy);
+      minDist = Math.min(minDist, dist);
+    }
+  }
+  return minDist;
+}
+
+function smoothstep(edge0: number, edge1: number, x: number): number {
+  const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+
 function hexToRgb(hex: string): [number, number, number] {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result ? [
@@ -47,112 +77,140 @@ function hexToRgb(hex: string): [number, number, number] {
 }
 
 function woodGrain(u: number, v: number): number {
-  const baseWarp = fbm(u * 2, v * 2, 4) * 0.3;
-  const y = v * 12 + baseWarp * 3;
-  const primaryGrain = Math.pow(Math.sin(y * 1.5 + fbm(u * 2.5, v * 2.5, 4) * 2) * 0.5 + 0.5, 1.5);
-  const secondaryGrain = Math.pow(Math.sin(y * 4 + fbm(u * 6, v * 6, 4) * 1.5) * 0.5 + 0.5, 2) * 0.4;
-  let grain = primaryGrain * 0.7 + secondaryGrain * 0.3;
-  grain += fbm(u * 40, v * 0.5, 4) * 0.15;
-  grain += fbm(u * 80, v * 80, 4) * 0.1;
+  const baseWarp = fbm(u * 1.5, v * 1.5, 5) * 0.4;
+  const fineWarp = fbm(u * 6, v * 6, 5) * 0.15;
+  const y = v * 10 + baseWarp * 4;
+  const primaryGrain = Math.pow(Math.sin(y * 1.2 + fbm(u * 2, v * 2, 5) * 2.5) * 0.5 + 0.5, 1.2);
+  const secondaryGrain = Math.pow(Math.sin(y * 3.5 + fineWarp * 6 + fbm(u * 5, v * 5, 5) * 2) * 0.5 + 0.5, 2.5) * 0.5;
+  let grain = primaryGrain * 0.6 + secondaryGrain * 0.4;
+  grain += fbm(u * 50, v * 0.3, 5) * 0.12;
+  grain += fbm(u * 100, v * 100, 5) * 0.08;
   return Math.max(0, Math.min(1, grain));
 }
 
 function woodKnots(u: number, v: number): { knots: number; mask: number } {
-  const warpX = fbm(u * 1.5, v * 1.5 + 5, 4) * 0.2;
-  const warpY = fbm(u * 1.5 + 5, v * 1.5, 4) * 0.2;
-  const du = u + warpX;
-  const dv = v + warpY;
+  const [wx, wy] = fbm2(u * 1.2, v * 1.2, 5);
+  const du = u + wx * 0.3;
+  const dv = v + wy * 0.3;
   
-  const scale = 3;
-  const iu = Math.floor(du * scale);
-  const iv = Math.floor(dv * scale);
-  const fu = du * scale - iu;
-  const fv = dv * scale - iv;
+  const vor = voronoi(du, dv, 2.5);
+  let knotCenters = smoothstep(0, 0.2, vor);
+  knotCenters = 1 - knotCenters;
+  knotCenters = Math.pow(knotCenters, 1.5);
   
-  let minDist = 1;
-  for (let y = -1; y <= 1; y++) {
-    for (let x = -1; x <= 1; x++) {
-      const px = hash([iu + x, iv + y]);
-      const py = hash([iu + x + 100, iv + y + 100]);
-      const dx = x + px - fu;
-      const dy = y + py - fv;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      minDist = Math.min(minDist, dist);
-    }
-  }
+  let knotRings = Math.sin(vor * 25) * 0.5 + 0.5;
+  knotRings *= knotCenters;
+  knotRings = Math.pow(knotRings, 1.3);
   
-  const knotCenters = minDist < 0.15 ? 1 : 0;
-  const knotRings = (Math.sin(minDist * 30) * 0.5 + 0.5) * knotCenters;
-  const darkKnots = (minDist < 0.2 ? 1 - minDist / 0.2 : 0) * 0.6;
+  const darkKnots = smoothstep(0.25, 0, vor) * 0.8;
   
   return {
-    knots: knotRings * 0.4 + darkKnots,
+    knots: knotRings * 0.5 + darkKnots,
     mask: knotCenters
   };
 }
 
 function marbleVeins(u: number, v: number): number {
-  const warp1 = fbm(u * 1.5 * 2.5, v * 1.5 * 2.5, 5) * 0.8;
-  const warp2 = fbm((u + 0.5) * 3 * 2.5, (v + 0.5) * 3 * 2.5, 5) * 0.4;
-  const wu = u * 2.5 + warp1;
-  const wv = v * 2.5 + warp2 * 0.5;
+  const p = [u * 1.8, v * 1.8];
+  const warp1 = fbm(p[0] * 1.2, p[1] * 1.2, 5) * 1.2;
+  const warp2 = fbm(p[0] * 2.5 + 5, p[1] * 2.5 + 5, 5) * 0.6;
+  const wu = p[0] + warp1;
+  const wv = p[1] + warp2 * 0.6;
   
-  const mainVein = Math.pow(Math.sin(wu * 2.5 + wv * 0.5) * 0.5 + 0.5, 4);
-  const secVein1 = Math.pow(Math.sin(wu * 6 + wv * 1.5 + fbm(u * 4 * 2.5, v * 4 * 2.5, 4) * 2) * 0.5 + 0.5, 6) * 0.6;
-  const secVein2 = Math.pow(Math.sin(wu * 12 + wv * 3 + fbm(u * 8 * 2.5, v * 8 * 2.5, 4) * 3) * 0.5 + 0.5, 8) * 0.3;
+  const mainVein = Math.pow(Math.sin(wu * 1.8 + wv * 0.8 + fbm(p[0] * 1.5, p[1] * 1.5, 5) * 1.5) * 0.5 + 0.5, 3);
+  const secVein1 = Math.pow(Math.sin(wu * 4 + wv * 2 + fbm(p[0] * 3, p[1] * 3, 5) * 2.5) * 0.5 + 0.5, 5) * 0.7;
+  const secVein2 = Math.pow(Math.sin(wu * 9 + wv * 4 + fbm(p[0] * 6, p[1] * 6, 5) * 3.5) * 0.5 + 0.5, 7) * 0.4;
   
-  const crackNoise = fbm(u * 20 * 2.5, v * 20 * 2.5, 4);
-  const cracks = crackNoise > 0.55 && crackNoise < 0.65 ? (crackNoise - 0.55) / 0.1 * 0.2 : 0;
+  const crackNoise = fbm(p[0] * 15, p[1] * 15, 5);
+  const cracks = smoothstep(0.5, 0.62, crackNoise) * 0.25;
   
-  return Math.max(0, Math.min(1, mainVein + secVein1 + secVein2 + cracks));
+  const edgeDetail = fbm(p[0] * 40, p[1] * 40, 4) * 0.2;
+  
+  return Math.max(0, Math.min(1, mainVein + secVein1 + secVein2 + cracks + edgeDetail * mainVein));
 }
 
 function carpetFiber(u: number, v: number): number {
-  const dirNoise = fbm(u * 3, v * 3, 4) * Math.PI;
+  const dirNoise = fbm(u * 2, v * 2, 5) * Math.PI * 1.5;
   const cosDir = Math.cos(dirNoise);
   const sinDir = Math.sin(dirNoise);
   
-  const su = (u * cosDir - v * sinDir) * 80;
-  const sv = (u * sinDir + v * cosDir) * 80;
+  const su = (u * cosDir - v * sinDir) * 60;
+  const sv = (u * sinDir + v * cosDir) * 60;
   
-  const fiberLines = Math.pow(Math.sin(su + fbm(u * 20, v * 20, 4) * 5) * 0.5 + 0.5, 2);
+  const fiberLines = Math.pow(Math.sin(su + fbm(u * 15, v * 15, 5) * 6) * 0.5 + 0.5, 1.8);
   
-  let fiber = fiberLines * 0.4;
-  fiber += fbm(u * 60, v * 60, 4) * 0.3;
-  fiber += fbm(u * 120, v * 120, 4) * 0.2;
-  fiber += fbm(u * 250, v * 250, 3) * 0.1;
+  let fiber = fiberLines * 0.35;
+  fiber += fbm(u * 40, v * 40, 5) * 0.25;
+  fiber += fbm(u * 80, v * 80, 5) * 0.2;
+  fiber += fbm(u * 160, v * 160, 4) * 0.15;
+  fiber += fbm(u * 320, v * 320, 3) * 0.1;
   
-  const clumps = Math.pow(fbm(u * 10, v * 10, 4), 2);
-  fiber += clumps * 0.15;
+  const clumps = Math.pow(fbm(u * 8, v * 8, 5), 2);
+  fiber += clumps * 0.2;
   
-  const tuft = Math.pow(Math.sin(u * 30) * Math.sin(v * 30) * 0.5 + 0.5, 4);
-  fiber += tuft * 0.1;
+  const tuft = Math.pow(
+    Math.sin(u * 20 + fbm(u * 5, v * 5, 5) * 3) * 
+    Math.sin(v * 20 + fbm(u * 5 + 1, v * 5 + 1, 5) * 3) * 0.5 + 0.5, 
+    3
+  );
+  fiber += tuft * 0.15;
   
   return Math.max(0, Math.min(1, fiber));
 }
 
 function brushedMetal(u: number, v: number): number {
-  let brush = Math.pow(fbm(u * 30, v * 0.3, 5), 1.5) * 0.6;
-  brush += fbm(u * 100, v * 1, 4) * 0.25;
-  brush += fbm(u * 300, v * 2, 3) * 0.15;
+  const mainBrush = Math.pow(fbm(u * 25, v * 0.2, 6), 1.3) * 0.55;
+  let brush = mainBrush;
+  brush += fbm(u * 80, v * 0.8, 5) * 0.25;
+  brush += fbm(u * 250, v * 1.5, 4) * 0.15;
   
-  const scratches = Math.pow(fbm(u * 500, v * 10, 3), 4) * 0.1;
+  const scratches = Math.pow(fbm(u * 400, v * 8, 3), 3.5) * 0.12;
   brush += scratches;
   
-  brush += fbm(u * 20, v * 20, 4) * 0.1;
+  brush += fbm(u * 15, v * 15, 4) * 0.08;
   
   return Math.max(0, Math.min(1, brush));
 }
 
 function concreteTexture(u: number, v: number): number {
   let concrete = 0;
-  concrete += fbm(u * 3, v * 3, 5) * 0.35;
-  concrete += fbm(u * 8, v * 8, 5) * 0.25;
-  concrete += fbm(u * 20, v * 20, 5) * 0.2;
-  concrete += fbm(u * 50, v * 50, 4) * 0.15;
-  concrete += fbm(u * 120, v * 120, 4) * 0.1;
-  concrete += fbm(u * 300, v * 300, 3) * 0.05;
+  concrete += fbm(u * 2, v * 2, 6) * 0.4;
+  concrete += fbm(u * 6, v * 6, 5) * 0.25;
+  concrete += fbm(u * 15, v * 15, 5) * 0.2;
+  concrete += fbm(u * 40, v * 40, 4) * 0.15;
+  concrete += fbm(u * 100, v * 100, 4) * 0.1;
+  concrete += fbm(u * 250, v * 250, 3) * 0.06;
   return Math.max(0, Math.min(1, concrete));
+}
+
+function concreteSpots(u: number, v: number): number {
+  const vor = voronoi(u, v, 6);
+  let spots = smoothstep(0, 0.35, 1 - vor);
+  spots *= 0.35;
+  
+  const poreNoise = fbm(u * 80, v * 80, 4);
+  const pores = smoothstep(0.55, 0.9, poreNoise);
+  spots -= pores * 0.18;
+  
+  return spots;
+}
+
+function mixColor(a: [number, number, number], b: [number, number, number], t: number): [number, number, number] {
+  return [
+    a[0] + (b[0] - a[0]) * t,
+    a[1] + (b[1] - a[1]) * t,
+    a[2] + (b[2] - a[2]) * t
+  ];
+}
+
+function scaleColor(c: [number, number, number], s: number): [number, number, number] {
+  return [c[0] * s, c[1] * s, c[2] * s];
+}
+
+function addColor(c: [number, number, number], v: number): [number, number, number] {
+  return [Math.max(0, Math.min(1, c[0] + v)), 
+          Math.max(0, Math.min(1, c[1] + v)), 
+          Math.max(0, Math.min(1, c[2] + v))];
 }
 
 export function generateMaterialThumbnail(
@@ -172,10 +230,12 @@ export function generateMaterialThumbnail(
   const baseColor = hexToRgb(color);
   const type = materialTypeMap[category] ?? 0;
 
+  const uvScale = 3;
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const u = x / width * 4;
-      const v = y / height * 4;
+      const u = (x / width) * uvScale;
+      const v = (y / height) * uvScale;
       let r = baseColor[0];
       let g = baseColor[1];
       let b = baseColor[2];
@@ -184,114 +244,125 @@ export function generateMaterialThumbnail(
         const grain = woodGrain(u, v);
         const { knots, mask } = woodKnots(u, v);
         
-        const lightWood = [baseColor[0] * 1.25, baseColor[1] * 1.25, baseColor[2] * 1.25];
-        const darkWood = [baseColor[0] * 0.65, baseColor[1] * 0.65, baseColor[2] * 0.65];
-        const veryDark = [baseColor[0] * 0.4, baseColor[1] * 0.4, baseColor[2] * 0.4];
+        const lightWood = scaleColor(baseColor, 1.35);
+        const darkWood = scaleColor(baseColor, 0.55);
+        const veryDark = scaleColor(baseColor, 0.3);
         
-        r = darkWood[0] + (baseColor[0] - darkWood[0]) * grain * 0.7;
-        g = darkWood[1] + (baseColor[1] - darkWood[1]) * grain * 0.7;
-        b = darkWood[2] + (baseColor[2] - darkWood[2]) * grain * 0.7;
+        let col = mixColor(darkWood, baseColor, grain * 0.6);
+        const lightT = smoothstep(0.3, 0.95, grain) * 0.7;
+        col = mixColor(col, lightWood, lightT);
         
-        if (grain > 0.4) {
-          const t = (grain - 0.4) / 0.5;
-          r += (lightWood[0] - r) * t * 0.6;
-          g += (lightWood[1] - g) * t * 0.6;
-          b += (lightWood[2] - b) * t * 0.6;
-        }
+        const ringVar = Math.sin(v * 15 + fbm(u * 4, v * 4, 5) * 4) * 0.5 + 0.5;
+        const ringFactor = 0.85 + ringVar * 0.3;
+        col = scaleColor(col, ringFactor);
         
-        const knotColor = [veryDark[0] + (darkWood[0] - veryDark[0]) * knots,
-                          veryDark[1] + (darkWood[1] - veryDark[1]) * knots,
-                          veryDark[2] + (darkWood[2] - veryDark[2]) * knots];
-        r = r + (knotColor[0] - r) * mask * 0.8;
-        g = g + (knotColor[1] - g) * mask * 0.8;
-        b = b + (knotColor[2] - b) * mask * 0.8;
+        const knotColor = mixColor(veryDark, darkWood, knots);
+        col = mixColor(col, knotColor, mask * 0.9);
+        
+        const poreNoise = fbm(u * 200, v * 200, 4);
+        col = scaleColor(col, 0.92 + poreNoise * 0.16);
+        
+        r = col[0];
+        g = col[1];
+        b = col[2];
       }
       else if (type === 1) {
         const veins = marbleVeins(u, v);
-        const darkVein = [baseColor[0] * 0.4, baseColor[1] * 0.4, baseColor[2] * 0.4];
-        const midVein = [baseColor[0] * 0.65, baseColor[1] * 0.65, baseColor[2] * 0.65];
+        const darkVein = scaleColor(baseColor, 0.3);
+        const midVein = scaleColor(baseColor, 0.55);
         
-        if (veins > 0.1 && veins < 0.4) {
-          const t = (veins - 0.1) / 0.3;
-          r = baseColor[0] + (midVein[0] - baseColor[0]) * t * 0.5;
-          g = baseColor[1] + (midVein[1] - baseColor[1]) * t * 0.5;
-          b = baseColor[2] + (midVein[2] - baseColor[2]) * t * 0.5;
-        } else if (veins >= 0.5) {
-          const t = Math.min(1, (veins - 0.5) / 0.4);
-          r = baseColor[0] + (darkVein[0] - baseColor[0]) * t * 0.8;
-          g = baseColor[1] + (darkVein[1] - baseColor[1]) * t * 0.8;
-          b = baseColor[2] + (darkVein[2] - baseColor[2]) * t * 0.8;
-        }
+        let col = [...baseColor] as [number, number, number];
         
-        const sparkle = Math.pow(fbm(u * 60, v * 60, 3), 3) * 0.15;
-        r += sparkle;
-        g += sparkle;
-        b += sparkle;
+        const midT = smoothstep(0.08, 0.35, veins) * 0.6;
+        col = mixColor(col, midVein, midT);
+        
+        const darkT = smoothstep(0.4, 0.85, veins) * 0.9;
+        col = mixColor(col, darkVein, darkT);
+        
+        const sparkle = Math.pow(fbm(u * 50, v * 50, 4), 3) * 0.2;
+        col = addColor(col, sparkle);
+        
+        const surfVar = fbm(u * 6, v * 6, 5) * 0.04;
+        col = addColor(col, surfVar);
+        
+        const micro = fbm(u * 100, v * 100, 4) * 0.06;
+        col = scaleColor(col, 0.96 + micro);
+        
+        r = col[0];
+        g = col[1];
+        b = col[2];
       }
       else if (type === 2) {
         const fiber = carpetFiber(u, v);
-        const darkRoot = [baseColor[0] * 0.7, baseColor[1] * 0.7, baseColor[2] * 0.7];
-        const lightTip = [baseColor[0] * 1.2, baseColor[1] * 1.2, baseColor[2] * 1.2];
+        const darkRoot = scaleColor(baseColor, 0.6);
+        const baseFiber = scaleColor(baseColor, 0.85);
+        const lightTip = scaleColor(baseColor, 1.25);
         
-        if (fiber < 0.2) {
-          const t = fiber / 0.2;
-          r = darkRoot[0] + (baseColor[0] * 0.9 - darkRoot[0]) * t;
-          g = darkRoot[1] + (baseColor[1] * 0.9 - darkRoot[1]) * t;
-          b = darkRoot[2] + (baseColor[2] * 0.9 - darkRoot[2]) * t;
-        } else if (fiber < 0.6) {
-          const t = (fiber - 0.2) / 0.4;
-          r = baseColor[0] * 0.9 + (baseColor[0] - baseColor[0] * 0.9) * t;
-          g = baseColor[1] * 0.9 + (baseColor[1] - baseColor[1] * 0.9) * t;
-          b = baseColor[2] * 0.9 + (baseColor[2] - baseColor[2] * 0.9) * t;
-        } else {
-          const t = Math.min(1, (fiber - 0.6) / 0.35);
-          r = baseColor[0] + (lightTip[0] - baseColor[0]) * t * 0.6;
-          g = baseColor[1] + (lightTip[1] - baseColor[1]) * t * 0.6;
-          b = baseColor[2] + (lightTip[2] - baseColor[2]) * t * 0.6;
-        }
+        let col = mixColor(darkRoot, baseFiber, smoothstep(0.15, 0.55, fiber));
+        col = mixColor(col, lightTip, smoothstep(0.55, 0.95, fiber) * 0.7);
         
-        const shadowNoise = fbm(u * 15, v * 15, 3);
-        const shadowFactor = 0.85 + shadowNoise * 0.3;
-        r *= shadowFactor;
-        g *= shadowFactor;
-        b *= shadowFactor;
+        const colorVar = fbm(u * 4, v * 4, 5);
+        const varColor = scaleColor(baseColor, 0.85 + colorVar * 0.3);
+        col = mixColor(col, varColor, 0.35);
+        
+        const shadowNoise = fbm(u * 12, v * 12, 5);
+        col = scaleColor(col, 0.8 + shadowNoise * 0.4);
+        
+        const microShadows = fbm(u * 60, v * 60, 4) * 0.12;
+        col = addColor(col, -microShadows);
+        
+        const sheen = Math.pow(fiber, 4) * 0.15;
+        col = addColor(col, sheen);
+        
+        r = col[0];
+        g = col[1];
+        b = col[2];
       }
       else if (type === 3) {
         const brush = brushedMetal(u, v);
-        const darkMetal = [baseColor[0] * 0.75, baseColor[1] * 0.75, baseColor[2] * 0.75];
-        const brightMetal = [baseColor[0] * 1.3, baseColor[1] * 1.3, baseColor[2] * 1.3];
+        const darkMetal = scaleColor(baseColor, 0.7);
+        const brightMetal = scaleColor(baseColor, 1.4);
         
-        r = darkMetal[0] + (baseColor[0] - darkMetal[0]) * brush * 0.6;
-        g = darkMetal[1] + (baseColor[1] - darkMetal[1]) * brush * 0.6;
-        b = darkMetal[2] + (baseColor[2] - darkMetal[2]) * brush * 0.6;
+        let col = mixColor(darkMetal, baseColor, brush * 0.55);
+        col = mixColor(col, brightMetal, smoothstep(0.55, 0.95, brush) * 0.6);
         
-        if (brush > 0.6) {
-          const t = (brush - 0.6) / 0.35;
-          r += (brightMetal[0] - r) * t * 0.5;
-          g += (brightMetal[1] - g) * t * 0.5;
-          b += (brightMetal[2] - b) * t * 0.5;
-        }
+        const grainDetail = fbm(u * 50, v * 50, 4) * 0.12;
+        col = addColor(col, grainDetail);
+        
+        const microScratch = Math.pow(fbm(u * 350, v * 350, 3), 4.5) * 0.18;
+        col = addColor(col, microScratch);
+        
+        const tarnish = fbm(u * 4, v * 4, 5) * 0.06;
+        col = scaleColor(col, 0.94 + tarnish);
+        
+        r = col[0];
+        g = col[1];
+        b = col[2];
       }
       else if (type === 4) {
         const tex = concreteTexture(u, v);
-        const lightConc = [baseColor[0] * 1.15, baseColor[1] * 1.15, baseColor[2] * 1.15];
-        const darkConc = [baseColor[0] * 0.8, baseColor[1] * 0.8, baseColor[2] * 0.8];
+        const spots = concreteSpots(u, v);
+        const lightConc = scaleColor(baseColor, 1.2);
+        const darkConc = scaleColor(baseColor, 0.75);
+        const spotColor = scaleColor(baseColor, 0.6);
         
-        r = darkConc[0] + (baseColor[0] - darkConc[0]) * tex * 0.5;
-        g = darkConc[1] + (baseColor[1] - darkConc[1]) * tex * 0.5;
-        b = darkConc[2] + (baseColor[2] - darkConc[2]) * tex * 0.5;
+        let col = mixColor(darkConc, baseColor, tex * 0.45);
+        col = mixColor(col, lightConc, smoothstep(0.45, 0.9, tex) * 0.5);
         
-        if (tex > 0.5) {
-          const t = (tex - 0.5) / 0.4;
-          r += (lightConc[0] - r) * t * 0.4;
-          g += (lightConc[1] - g) * t * 0.4;
-          b += (lightConc[2] - b) * t * 0.4;
-        }
+        col = mixColor(col, spotColor, Math.abs(spots) * 1.2);
         
-        const aggregate = Math.pow(fbm(u * 40, v * 40, 3), 3) * 0.1;
-        r += aggregate;
-        g += aggregate;
-        b += aggregate;
+        const aggregate = Math.pow(fbm(u * 35, v * 35, 4), 3) * 0.12;
+        col = addColor(col, aggregate);
+        
+        const fineGrain = fbm(u * 180, v * 180, 3) * 0.06;
+        col = addColor(col, fineGrain);
+        
+        const wearPattern = fbm(u * 1.5, v * 1.5, 5) * 0.06;
+        col = addColor(col, wearPattern);
+        
+        r = col[0];
+        g = col[1];
+        b = col[2];
       }
 
       const idx = (y * width + x) * 4;
