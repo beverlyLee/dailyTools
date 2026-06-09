@@ -79,6 +79,10 @@ export class AirTightnessDetector {
     
     const segmentsW = 30;
     const segmentsH = 40;
+    
+    const topY = this.originalPositions[1];
+    const bottomY = this.originalPositions[(segmentsH * (segmentsW + 1)) * 3 + 1];
+    const curtainHeight = topY - bottomY;
 
     for (let i = 0; i <= segmentsH; i++) {
       for (let j = 0; j <= segmentsW; j++) {
@@ -88,22 +92,22 @@ export class AirTightnessDetector {
         const origY = this.originalPositions[idx + 1];
         const origZ = this.originalPositions[idx + 2];
 
-        const heightFactor = (origY + 1) / 2;
-        const topFactor = Math.pow(heightFactor, 0.5);
+        const distFromTop = topY - origY;
+        const swingFactor = Math.pow(distFromTop / curtainHeight, 0.7);
         
-        const wave1 = Math.sin(this.time * 2 + j * 0.3 + i * 0.1) * 0.05;
+        const wave1 = Math.sin(this.time * 2 + j * 0.3 + i * 0.15) * 0.05;
         const wave2 = Math.sin(this.time * 3.5 + j * 0.5 - i * 0.2) * 0.03;
         const wave3 = Math.sin(this.time * 1.8 + i * 0.4) * 0.04;
         
-        const bulge = effectiveWind * topFactor * 0.4;
+        const bulge = effectiveWind * swingFactor * 0.5;
         
-        const swayX = Math.sin(this.time * 1.5 + i * 0.3) * effectiveWind * 0.1 * topFactor;
+        const swayX = Math.sin(this.time * 1.5 + i * 0.3 + j * 0.1) * effectiveWind * 0.12 * swingFactor;
         
-        positions[idx] = origX + swayX + wave1 * effectiveWind * 0.5;
-        positions[idx + 1] = origY + wave2 * effectiveWind * 0.3 * topFactor;
-        positions[idx + 2] = origZ + bulge + wave3 * effectiveWind * 0.5 + Math.abs(swayX) * 0.3;
+        positions[idx] = origX + swayX + wave1 * effectiveWind * 0.5 * swingFactor;
+        positions[idx + 1] = origY + wave2 * effectiveWind * 0.2 * swingFactor - bulge * 0.1;
+        positions[idx + 2] = origZ + bulge + wave3 * effectiveWind * 0.5 * swingFactor + Math.abs(swayX) * 0.2;
 
-        if (i === segmentsH) {
+        if (i === 0) {
           positions[idx] = origX;
           positions[idx + 1] = origY;
           positions[idx + 2] = origZ;

@@ -65,11 +65,10 @@ export class RainParticleSystem {
     this.positions[i3 + 2] = -this.emitterArea.depth - Math.random() * 2;
 
     const windX = Math.sin(this.config.windDirection) * this.config.windSpeed;
-    const windZ = Math.cos(this.config.windDirection) * this.config.windSpeed;
 
     this.velocities[i3] = windX * (0.8 + Math.random() * 0.4);
     this.velocities[i3 + 1] = -5 - Math.random() * 5;
-    this.velocities[i3 + 2] = -windZ * (0.8 + Math.random() * 0.4) - 2;
+    this.velocities[i3 + 2] = 3 + Math.random() * 4 + this.config.windSpeed * 0.3;
 
     this.lifetimes[index] = 0;
   }
@@ -85,16 +84,16 @@ export class RainParticleSystem {
       this.velocities[i3 + 1] -= this.gravity * deltaTime * 0.5;
       
       const windX = Math.sin(this.config.windDirection) * this.config.windSpeed;
-      const windZ = Math.cos(this.config.windDirection) * this.config.windSpeed;
+      const targetVZ = 3 + this.config.windSpeed * 0.4;
       this.velocities[i3] += (windX - this.velocities[i3]) * deltaTime * 0.5;
-      this.velocities[i3 + 2] += (-windZ - 2 - this.velocities[i3 + 2]) * deltaTime * 0.3;
+      this.velocities[i3 + 2] += (targetVZ - this.velocities[i3 + 2]) * deltaTime * 0.2;
 
       this.positions[i3] += this.velocities[i3] * deltaTime;
       this.positions[i3 + 1] += this.velocities[i3 + 1] * deltaTime;
       this.positions[i3 + 2] += this.velocities[i3 + 2] * deltaTime;
 
-      if (this.positions[i3 + 1] < -1 || this.positions[i3 + 2] > 3 ||
-          Math.abs(this.positions[i3]) > this.emitterArea.width + 2) {
+      if (this.positions[i3 + 1] < -2 || this.positions[i3 + 2] > 5 ||
+          Math.abs(this.positions[i3]) > this.emitterArea.width + 3) {
         this.resetParticle(i);
       }
     }

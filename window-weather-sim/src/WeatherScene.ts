@@ -156,6 +156,8 @@ export class WeatherScene {
 
   setWindowType(type: WindowType): void {
     this.windowSystem.setWindowType(type);
+    this.airDetector.setWindStrength(this.rainSystem.getConfig().windSpeed / 15);
+    this.waterDetector.reset();
   }
 
   setRainIntensity(intensity: number): void {
@@ -178,6 +180,12 @@ export class WeatherScene {
 
   reset(): void {
     this.waterDetector.reset();
+    this.rainSystem.setIntensity(0.5);
+    this.rainSystem.setWindSpeed(0.5);
+    this.rainSystem.setWindDirection(0);
+    this.airDetector.setWindStrength(0.5);
+    this.drainVisualizer.setRainIntensity(0.5);
+    this.windowSystem.setWindowType('sliding');
   }
 
   getWaterAmount(): number {

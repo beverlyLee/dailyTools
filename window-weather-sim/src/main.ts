@@ -127,6 +127,25 @@ function initApp(): void {
 
   resetBtn.addEventListener('click', () => {
     scene.reset();
+    
+    windowTypeSelect.value = 'sliding';
+    windowTypeEl.textContent = '推拉窗';
+    
+    rainSlider.value = '50';
+    rainValue.textContent = '50%';
+    rainIntensityEl.textContent = updateRainLabel(50);
+    
+    windSlider.value = '50';
+    windValue.textContent = '50%';
+    windSpeedEl.textContent = updateWindLabel(50);
+    
+    drainToggle.checked = true;
+    curtainToggle.checked = true;
+    
+    stormBtn.textContent = '🌪️ 台风模式';
+    
+    scene.setDrainVisible(true);
+    scene.setCurtainVisible(true);
   });
 
   updateStatusLabels();
