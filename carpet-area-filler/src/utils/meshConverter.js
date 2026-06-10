@@ -34,8 +34,9 @@ export function polygonToGeometry(polygon, height = 0.01, bevelEnabled = false) 
   
   const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
   
-  geometry.rotateX(-Math.PI / 2);
-  geometry.translate(-centerX, 0, -centerY);
+  geometry.translate(-centerX, -centerY, 0);
+  
+  geometry.rotateX(Math.PI / 2);
   
   geometry.computeVertexNormals();
   
@@ -51,8 +52,9 @@ export function polygonToFlatGeometry(polygon) {
   const centerX = (bounds.minX + bounds.maxX) / 2;
   const centerY = (bounds.minY + bounds.maxY) / 2;
   
-  geometry.rotateX(-Math.PI / 2);
-  geometry.translate(-centerX, 0, -centerY);
+  geometry.translate(-centerX, -centerY, 0);
+  
+  geometry.rotateX(Math.PI / 2);
   
   geometry.computeVertexNormals();
   
@@ -63,13 +65,15 @@ export function createCarpetMesh(polygon, material, pileHeight = 0.01) {
   const group = new THREE.Group();
   
   const baseGeometry = polygonToFlatGeometry(polygon);
-  const baseMesh = new THREE.Mesh(baseGeometry, material);
+  const baseMaterial = material.clone();
+  baseMaterial.bumpScale = 0;
+  const baseMesh = new THREE.Mesh(baseGeometry, baseMaterial);
   baseMesh.position.y = 0.001;
   baseMesh.receiveShadow = true;
-  baseMesh.castShadow = true;
+  baseMesh.castShadow = false;
   group.add(baseMesh);
   
-  const pileGeometry = polygonToGeometry(polygon, pileHeight * 0.8, false);
+  const pileGeometry = polygonToGeometry(polygon, pileHeight, false);
   const pileMaterial = material.clone();
   pileMaterial.bumpScale = pileHeight * 0.3;
   const pileMesh = new THREE.Mesh(pileGeometry, pileMaterial);
@@ -77,18 +81,6 @@ export function createCarpetMesh(polygon, material, pileHeight = 0.01) {
   pileMesh.receiveShadow = true;
   pileMesh.castShadow = true;
   group.add(pileMesh);
-  
-  const edgesGeometry = polygonToGeometry(polygon, pileHeight * 0.5, false);
-  const edgeMaterial = new THREE.MeshStandardMaterial({
-    color: new THREE.Color(material.color).multiplyScalar(0.85),
-    roughness: 0.9,
-    side: THREE.DoubleSide
-  });
-  const edgeMesh = new THREE.Mesh(edgesGeometry, edgeMaterial);
-  edgeMesh.position.y = 0.001;
-  edgeMesh.receiveShadow = true;
-  edgeMesh.castShadow = true;
-  group.add(edgeMesh);
   
   const bounds = getPolygonBounds(polygon);
   group.userData = {
@@ -114,7 +106,8 @@ export function createRoomFloor(width, depth, material = null) {
   }
   
   const geometry = new THREE.PlaneGeometry(width, depth);
-  geometry.rotateX(-Math.PI / 2);
+  geometry.rotateX(Math.PI / 2);
+  geometry.scale(1, -1, 1);
   
   const floor = new THREE.Mesh(geometry, material);
   floor.receiveShadow = true;
@@ -133,9 +126,9 @@ export function createWallLine(points, height = 2.8, color = 0xcccccc) {
     const p2 = points[(i + 1) % points.length];
     
     const dx = p2.x - p1.x;
-    const dy = p2.y - p1.y;
-    const length = Math.sqrt(dx * dx + dy * dy);
-    const angle = Math.atan2(dy, dx);
+    const dz = p2.y - p1.y;
+    const length = Math.sqrt(dx * dx + dz * dz);
+    const angle = Math.atan2(dz, dx);
     
     const wallGeometry = new THREE.BoxGeometry(length, height, 0.1);
     const wallMaterial = new THREE.MeshStandardMaterial({
@@ -181,23 +174,23 @@ export function createObstacleMesh(obstacle, color = 0xff6b6b) {
     
     group.add(mesh);
   } else if (obstacle.type === 'door') {
-    const shape = new THREE.Shape();
     const poly = obstacle.polygon;
     
-    if (poly && poly.length > 0) {
-      shape.moveTo(poly[0].x, poly[0].y);
-      for (let i = 1; i < poly.length; i++) {
-        shape.lineTo(poly[i].x, poly[i].y);
-      }
-      shape.closePath();
+    if (!poly || poly.length < 3) return group;
+    
+    const shape = new THREE.Shape();
+    shape.moveTo(poly[0].x, poly[0].y);
+    for (let i = 1; i < poly.length; i++) {
+      shape.lineTo(poly[i].x, poly[i].y);
     }
+    shape.closePath();
     
     const geometry = new THREE.ExtrudeGeometry(shape, {
       depth: 0.02,
       bevelEnabled: false
     });
     
-    geometry.rotateX(-Math.PI / 2);
+    geometry.rotateX(Math.PI / 2);
     
     const material = new THREE.MeshStandardMaterial({
       color: color,
@@ -213,6 +206,35 @@ export function createObstacleMesh(obstacle, color = 0xff6b6b) {
   }
   
   group.userData = { obstacle };
+  
+  return group;
+}
+
+export function createPolygonOutlineMesh(polygon, color = 0x00ff88, height = 0.02) {
+  const group = new THREE.Group();
+  
+  for (let i = 0; i < polygon.length; i++) {
+    const p1 = polygon[i];
+    const p2 = polygon[(i + 1) % polygon.length];
+    
+    const dx = p2.x - p1.x;
+    const dz = p2.y - p1.y;
+    const length = Math.sqrt(dx * dx + dz * dz);
+    const angle = Math.atan2(dz, dx);
+    
+    const lineGeometry = new THREE.BoxGeometry(length, height, 0.01);
+    const lineMaterial = new THREE.MeshBasicMaterial({ color: color });
+    
+    const line = new THREE.Mesh(lineGeometry, lineMaterial);
+    line.position.set(
+      (p1.x + p2.x) / 2,
+      height / 2 + 0.005,
+      (p1.y + p2.y) / 2
+    );
+    line.rotation.y = -angle;
+    
+    group.add(line);
+  }
   
   return group;
 }

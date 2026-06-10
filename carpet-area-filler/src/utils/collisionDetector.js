@@ -117,99 +117,22 @@ export function checkCollision(carpetPolygon, obstacles) {
   };
 }
 
-export function adjustCarpetToAvoidCollisions(carpetPolygon, obstacles, contourPolygon, maxAttempts = 100) {
-  const result = checkCollision(carpetPolygon, obstacles);
-  
-  if (!result.hasCollision) {
-    return { polygon: carpetPolygon, adjusted: false, result };
-  }
-  
-  const bounds = getPolygonBounds(carpetPolygon);
-  const carpetWidth = bounds.width;
-  const carpetHeight = bounds.height;
-  const isCircle = isCircular(carpetPolygon);
-  
-  let bestCenter = getPolygonCentroid(carpetPolygon);
-  let bestCollisionArea = result.totalCollidingArea;
-  let bestPolygon = [...carpetPolygon];
-  
-  const directions = [
-    { dx: 1, dy: 0 },
-    { dx: -1, dy: 0 },
-    { dx: 0, dy: 1 },
-    { dx: 0, dy: -1 },
-    { dx: 0.707, dy: 0.707 },
-    { dx: -0.707, dy: 0.707 },
-    { dx: 0.707, dy: -0.707 },
-    { dx: -0.707, dy: -0.707 }
-  ];
-  
-  let step = Math.max(carpetWidth, carpetHeight) * 0.1;
-  const minStep = 0.01;
-  
-  let currentCenter = { ...bestCenter };
-  
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    let improved = false;
-    
-    for (const dir of directions) {
-      const testCenter = {
-        x: currentCenter.x + dir.dx * step,
-        y: currentCenter.y + dir.dy * step
-      };
-      
-      let testPolygon;
-      if (isCircle) {
-        const radius = carpetWidth / 2;
-        const segments = 24;
-        testPolygon = [];
-        for (let i = 0; i < segments; i++) {
-          const angle = (i / segments) * Math.PI * 2;
-          testPolygon.push({
-            x: testCenter.x + Math.cos(angle) * radius,
-            y: testCenter.y + Math.sin(angle) * radius
-          });
-        }
-      } else {
-        testPolygon = createRectanglePolygon(
-          testCenter.x, testCenter.y,
-          carpetWidth, carpetHeight
-        );
-      }
-      
-      const clipped = sutherlandHodgman(testPolygon, contourPolygon);
-      if (clipped.length < 3) continue;
-      
-      const clippedArea = getPolygonArea(clipped);
-      const originalArea = isCircle 
-        ? Math.PI * Math.pow(carpetWidth / 2, 2)
-        : carpetWidth * carpetHeight;
-      
-      if (clippedArea < originalArea * 0.5) continue;
-      
-      const collisionResult = checkCollision(clipped, obstacles);
-      
-      if (collisionResult.totalCollidingArea < bestCollisionArea * 0.995) {
-        bestCollisionArea = collisionResult.totalCollidingArea;
-        bestPolygon = clipped;
-        bestCenter = { ...testCenter };
-        improved = true;
-      }
+function createCarpetPolygon(centerX, centerY, width, height, isCircle) {
+  if (isCircle) {
+    const radius = width / 2;
+    const segments = 32;
+    const poly = [];
+    for (let i = 0; i < segments; i++) {
+      const angle = (i / segments) * Math.PI * 2;
+      poly.push({
+        x: centerX + Math.cos(angle) * radius,
+        y: centerY + Math.sin(angle) * radius
+      });
     }
-    
-    if (improved) {
-      currentCenter = { ...bestCenter };
-    } else {
-      step *= 0.5;
-      if (step < minStep) break;
-    }
+    return poly;
+  } else {
+    return createRectanglePolygon(centerX, centerY, width, height);
   }
-  
-  return {
-    polygon: bestPolygon,
-    adjusted: bestCollisionArea < result.totalCollidingArea * 0.99,
-    result: checkCollision(bestPolygon, obstacles)
-  };
 }
 
 function isCircular(polygon) {
@@ -244,6 +167,68 @@ function getPolygonCentroid(polygon) {
   const factor = 1 / (6 * area);
   
   return { x: cx * factor, y: cy * factor };
+}
+
+function evaluatePosition(centerX, centerY, width, height, isCircle, contourPolygon, obstacles) {
+  const carpetPoly = createCarpetPolygon(centerX, centerY, width, height, isCircle);
+  
+  const clipped = sutherlandHodgman(carpetPoly, contourPolygon);
+  if (clipped.length < 3) {
+    return { score: -Infinity, clippedArea: 0, collisionArea: Infinity, clippedPolygon: [] };
+  }
+  
+  const clippedArea = getPolygonArea(clipped);
+  const originalArea = isCircle 
+    ? Math.PI * Math.pow(width / 2, 2) 
+    : width * height;
+  
+  const coverageRatio = clippedArea / originalArea;
+  
+  if (coverageRatio < 0.6) {
+    return { score: -Infinity, clippedArea, collisionArea: Infinity, clippedPolygon: clipped, coverageRatio };
+  }
+  
+  const collisionResult = checkCollision(clipped, obstacles);
+  
+  const collisionPenalty = collisionResult.totalCollidingArea * 10;
+  
+  const score = coverageRatio * 100 - collisionPenalty * 50;
+  
+  return {
+    score,
+    clippedArea,
+    collisionArea: collisionResult.totalCollidingArea,
+    collisionRatio: collisionResult.collisionRatio,
+    clippedPolygon: clipped,
+    coverageRatio,
+    hasCollision: collisionResult.hasCollision,
+    collisions: collisionResult.collisions
+  };
+}
+
+export function adjustCarpetToAvoidCollisions(carpetPolygon, obstacles, contourPolygon, maxAttempts = 100) {
+  const bounds = getPolygonBounds(carpetPolygon);
+  const carpetWidth = bounds.width;
+  const carpetHeight = bounds.height;
+  const isCircle = isCircular(carpetPolygon);
+  
+  const initCenter = getPolygonCentroid(carpetPolygon);
+  
+  const result = adjustPositionForObstacles(
+    initCenter.x, initCenter.y,
+    carpetWidth, carpetHeight, isCircle,
+    contourPolygon, obstacles
+  );
+  
+  const finalCollisionResult = checkCollision(result.polygon, obstacles);
+  
+  return {
+    polygon: result.polygon,
+    center: { x: result.x, y: result.y },
+    adjusted: result.adjusted,
+    result: finalCollisionResult,
+    coverageRatio: result.coverageRatio
+  };
 }
 
 export function clipCarpetAroundObstacles(carpetPolygon, obstacles) {
@@ -287,11 +272,12 @@ function subtractPolygon(mainPoly, holePoly) {
     result.push({ ...mainPoly[i] });
   }
   
-  for (let i = 0; i <= holePoly.length; i++) {
+  const holeReversed = [];
+  for (let i = holePoly.length - 1; i >= 0; i--) {
     const idx = (holeIdx + i) % holePoly.length;
-    result.push({ ...holePoly[idx] });
+    holeReversed.push({ ...holePoly[idx] });
   }
-  
+  result.push(...holeReversed);
   result.push({ ...holePoly[holeIdx] });
   
   for (let i = mainIdx; i < mainPoly.length; i++) {
@@ -299,4 +285,96 @@ function subtractPolygon(mainPoly, holePoly) {
   }
   
   return result;
+}
+
+export function adjustPositionForObstacles(
+  centerX, centerY,
+  width, height, isCircle,
+  contourPolygon, obstacles
+) {
+  const initEval = evaluatePosition(
+    centerX, centerY,
+    width, height, isCircle,
+    contourPolygon, obstacles
+  );
+  
+  if (!initEval.hasCollision) {
+    return { x: centerX, y: centerY, polygon: initEval.clippedPolygon, adjusted: false,
+             collisionArea: 0, coverageRatio: initEval.coverageRatio, hasCollision: false };
+  }
+  
+  const directions = [
+    { dx: 1, dy: 0 },
+    { dx: -1, dy: 0 },
+    { dx: 0, dy: 1 },
+    { dx: 0, dy: -1 },
+    { dx: 0.707, dy: 0.707 },
+    { dx: -0.707, dy: 0.707 },
+    { dx: 0.707, dy: -0.707 },
+    { dx: -0.707, dy: -0.707 }
+  ];
+  
+  let bestX = centerX;
+  let bestY = centerY;
+  let bestEval = initEval;
+  
+  const maxDim = Math.max(width, height);
+  
+  const searchSteps = [
+    maxDim * 0.5,
+    maxDim * 0.25,
+    maxDim * 0.12,
+    maxDim * 0.06,
+    maxDim * 0.03,
+    maxDim * 0.01
+  ];
+  
+  for (const step of searchSteps) {
+    let improved = true;
+    let iterations = 0;
+    const maxIterations = 20;
+    
+    while (improved && iterations < maxIterations) {
+      improved = false;
+      iterations++;
+      
+      let bestDirX = 0;
+      let bestDirY = 0;
+      let bestDirEval = bestEval;
+      
+      for (const dir of directions) {
+        const testX = bestX + dir.dx * step;
+        const testY = bestY + dir.dy * step;
+        
+        const evalResult = evaluatePosition(
+          testX, testY,
+          width, height, isCircle,
+          contourPolygon, obstacles
+        );
+        
+        if (evalResult.score > bestDirEval.score) {
+          bestDirEval = evalResult;
+          bestDirX = dir.dx;
+          bestDirY = dir.dy;
+        }
+      }
+      
+      if (bestDirEval.score > bestEval.score + 0.001) {
+        bestX = bestX + bestDirX * step;
+        bestY = bestY + bestDirY * step;
+        bestEval = bestDirEval;
+        improved = true;
+      }
+    }
+  }
+  
+  return {
+    x: bestX,
+    y: bestY,
+    polygon: bestEval.clippedPolygon,
+    adjusted: Math.abs(bestX - centerX) > 0.005 || Math.abs(bestY - centerY) > 0.005,
+    collisionArea: bestEval.collisionArea || 0,
+    coverageRatio: bestEval.coverageRatio,
+    hasCollision: bestEval.hasCollision || false
+  };
 }

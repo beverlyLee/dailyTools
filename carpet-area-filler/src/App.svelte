@@ -6,7 +6,7 @@
   import { sutherlandHodgman, getPolygonBounds, getPolygonArea, getPolygonCentroid, createRectanglePolygon, pointInPolygon } from './utils/polygonClipping.js';
   import { recommendCarpetSize, adjustCarpetPosition, findBestFitPosition } from './utils/sizeEngine.js';
   import { createCarpetMaterial, getCarpetTypes } from './utils/materialGenerator.js';
-  import { checkCollision, createDoorSwingObstacle, createFurnitureLegObstacle, getObstaclePolygon, adjustCarpetToAvoidCollisions } from './utils/collisionDetector.js';
+  import { checkCollision, createDoorSwingObstacle, createFurnitureLegObstacle, getObstaclePolygon, adjustPositionForObstacles } from './utils/collisionDetector.js';
   import { createCarpetMesh, createRoomFloor, createWallLine, createObstacleMesh } from './utils/meshConverter.js';
   
   let canvasContainer;
@@ -32,6 +32,9 @@
   
   let showObstacles = true;
   let collisionInfo = null;
+  
+  let materialCache = {};
+  let lastCarpetPolygonKey = '';
   
   const ROOM_WIDTH = 8;
   const ROOM_DEPTH = 6;
@@ -91,12 +94,14 @@
     const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
     dirLight.position.set(5, 10, 5);
     dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 2048;
-    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.mapSize.width = 1024;
+    dirLight.shadow.mapSize.height = 1024;
     dirLight.shadow.camera.left = -6;
     dirLight.shadow.camera.right = 6;
     dirLight.shadow.camera.top = 6;
     dirLight.shadow.camera.bottom = -6;
+    dirLight.shadow.bias = -0.001;
+    dirLight.shadow.normalBias = 0.02;
     scene.add(dirLight);
     
     const fillLight = new THREE.DirectionalLight(0x88aaff, 0.3);
@@ -146,7 +151,7 @@
     const cy = topCanvas.height / 2;
     return {
       x: cx + wx * SCALE,
-      y: cy + wy * SCALE
+      y: cy - wy * SCALE
     };
   }
   
@@ -155,7 +160,7 @@
     const cy = topCanvas.height / 2;
     return {
       x: (sx - cx) / SCALE,
-      y: (sy - cy) / SCALE
+      y: (cy - sy) / SCALE
     };
   }
   
@@ -355,32 +360,76 @@
     updateCarpet3D();
   }
   
+  function getCarpetMaterial(type) {
+    if (materialCache[type]) {
+      return materialCache[type];
+    }
+    
+    const result = createCarpetMaterial(type);
+    materialCache[type] = result;
+    return result;
+  }
+  
+  function getPolygonKey(polygon) {
+    if (!polygon || polygon.length === 0) return '';
+    return polygon.map(p => `${p.x.toFixed(3)},${p.y.toFixed(3)}`).join('|');
+  }
+  
   function updateCarpet3D() {
+    if (!recommendedSize || !recommendedSize.clippedPolygon) return;
+    
+    const workingContour = contourPoints.slice(0, -1);
+    
+    const size = recommendedSize;
+    const isCircle = size.shape === 'circle';
+    const width = isCircle ? size.diameter : size.width;
+    const height = isCircle ? size.diameter : size.height;
+    
+    const initPos = size.position || { x: 0, y: 0 };
+    
+    const adjustResult = adjustPositionForObstacles(
+      initPos.x, initPos.y,
+      width, height, isCircle,
+      workingContour, obstacles
+    );
+    
+    const carpetPoly = adjustResult.polygon;
+    collisionInfo = {
+      hasCollision: adjustResult.hasCollision,
+      totalCollidingArea: adjustResult.collisionArea || 0,
+      collisionRatio: adjustResult.collisionArea ? 
+        (adjustResult.collisionArea / getPolygonArea(carpetPoly)) : 0
+    };
+    
+    const polyKey = getPolygonKey(carpetPoly);
+    const materialResult = getCarpetMaterial(selectedCarpetType);
+    
+    if (carpetMesh && polyKey === lastCarpetPolygonKey) {
+      carpetMesh.children.forEach(child => {
+        if (child.material) {
+          child.material = materialResult.material.clone();
+          if (child.geometry && child.geometry.type === 'ExtrudeGeometry') {
+            child.material.bumpScale = materialResult.pileHeight * 0.3;
+          }
+        }
+      });
+      return;
+    }
+    
     if (carpetMesh) {
       scene.remove(carpetMesh);
+      carpetMesh.traverse(child => {
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) {
+          if (child.material.map) child.material.map.dispose();
+          if (child.material.bumpMap) child.material.bumpMap.dispose();
+          child.material.dispose();
+        }
+      });
       carpetMesh = null;
     }
     
-    if (!recommendedSize || !recommendedSize.clippedPolygon) return;
-    
-    let carpetPoly = recommendedSize.clippedPolygon;
-    
-    const collisionResult = checkCollision(carpetPoly, obstacles);
-    collisionInfo = collisionResult;
-    
-    if (collisionResult.hasCollision) {
-      const workingContour = contourPoints.slice(0, -1);
-      const adjusted = adjustCarpetToAvoidCollisions(
-        carpetPoly, obstacles, workingContour, 30
-      );
-      if (adjusted.adjusted) {
-        carpetPoly = adjusted.polygon;
-        collisionInfo = adjusted.result;
-      }
-    }
-    
-    const { material, pileHeight } = createCarpetMaterial(selectedCarpetType);
-    carpetMesh = createCarpetMesh(carpetPoly, material, pileHeight);
+    carpetMesh = createCarpetMesh(carpetPoly, materialResult.material, materialResult.pileHeight);
     
     const bounds = getPolygonBounds(carpetPoly);
     const centerX = (bounds.minX + bounds.maxX) / 2;
@@ -388,6 +437,7 @@
     carpetMesh.position.set(centerX, 0, centerZ);
     
     scene.add(carpetMesh);
+    lastCarpetPolygonKey = polyKey;
     
     drawTopView();
   }
@@ -395,12 +445,21 @@
   function clearCarpet() {
     if (carpetMesh) {
       scene.remove(carpetMesh);
+      carpetMesh.traverse(child => {
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) {
+          if (child.material.map) child.material.map.dispose();
+          if (child.material.bumpMap) child.material.bumpMap.dispose();
+          child.material.dispose();
+        }
+      });
       carpetMesh = null;
     }
     recommendedSize = null;
     allSizes = [];
     selectedSizeIndex = 0;
     collisionInfo = null;
+    lastCarpetPolygonKey = '';
   }
   
   function resetDrawing() {
