@@ -205,10 +205,9 @@ export class WaterTightnessDetector {
     const velocities = this.rainSystem.getParticleVelocities();
     const activeCount = this.rainSystem.getActiveParticleCount();
     const gaps = this.windowSystem.getGaps();
+    const rainIntensity = this.rainSystem.getConfig().intensity;
 
     const dimensions = this.windowSystem.getDimensions();
-    const sillZ = 0.25;
-    const sillY = -dimensions.height / 2 + 0.02;
 
     let waterThisFrame = 0;
 
@@ -221,16 +220,19 @@ export class WaterTightnessDetector {
       const vy = velocities[i3 + 1];
       const vz = velocities[i3 + 2];
 
-      if (pz < -0.1 && pz > -0.3 && py < dimensions.height / 2 && py > -dimensions.height / 2) {
+      if (pz > -0.8 && pz < 0.05 && py < dimensions.height / 2 && py > -dimensions.height / 2) {
         for (const gap of gaps) {
           if (this.checkGapCollision(px, py, pz, vx, vy, vz, gap, deltaTime)) {
             const gapSize = gap.width * gap.height;
-            const penetrationAmount = Math.min(1, gapSize * 100) * 0.3;
+            const penetrationAmount = Math.min(1, gapSize * 200) * 0.6;
+            const windFactor = Math.min(1, Math.abs(vz) / 5);
             
-            if (Math.random() < penetrationAmount) {
-              waterThisFrame += 0.05;
+            const totalProbability = penetrationAmount * windFactor * 0.8;
+            
+            if (Math.random() < totalProbability) {
+              waterThisFrame += 0.15 + Math.random() * 0.1;
               
-              if (Math.random() < 0.3) {
+              if (Math.random() < 0.6) {
                 this.addWaterStain(px, penetrationAmount);
               }
             }
@@ -245,8 +247,8 @@ export class WaterTightnessDetector {
 
     this.updateSplashParticles(deltaTime);
 
-    if (this.waterAmount > 0.1) {
-      this.waterAmount -= deltaTime * 0.05;
+    if (rainIntensity < 0.05 && this.waterAmount > 0.01) {
+      this.waterAmount -= deltaTime * 0.08;
       this.waterAmount = Math.max(0, this.waterAmount);
     }
   }

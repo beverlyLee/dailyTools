@@ -156,7 +156,7 @@ export class WeatherScene {
 
   setWindowType(type: WindowType): void {
     this.windowSystem.setWindowType(type);
-    this.airDetector.setWindStrength(this.rainSystem.getConfig().windSpeed / 15);
+    this.airDetector.setWindStrength(this.rainSystem.getConfig().windSpeed);
     this.waterDetector.reset();
   }
 

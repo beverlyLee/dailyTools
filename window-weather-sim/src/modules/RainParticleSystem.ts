@@ -18,12 +18,14 @@ export class RainParticleSystem {
   private emitterArea: { width: number; height: number; depth: number };
   private gravity: number = 9.8;
 
+  private readonly windScale: number = 15;
+
   constructor(scene: THREE.Scene, maxParticles: number = 5000) {
     this.scene = scene;
     this.maxParticles = maxParticles;
     this.config = {
       intensity: 0.5,
-      windSpeed: 5,
+      windSpeed: 0.5,
       windDirection: 0,
       particleCount: maxParticles
     };
@@ -64,17 +66,19 @@ export class RainParticleSystem {
     this.positions[i3 + 1] = Math.random() * this.emitterArea.height + 2;
     this.positions[i3 + 2] = -this.emitterArea.depth - Math.random() * 2;
 
-    const windX = Math.sin(this.config.windDirection) * this.config.windSpeed;
+    const windSpeedScaled = this.config.windSpeed * this.windScale;
+    const windX = Math.sin(this.config.windDirection) * windSpeedScaled;
 
     this.velocities[i3] = windX * (0.8 + Math.random() * 0.4);
     this.velocities[i3 + 1] = -5 - Math.random() * 5;
-    this.velocities[i3 + 2] = 3 + Math.random() * 4 + this.config.windSpeed * 0.3;
+    this.velocities[i3 + 2] = 3 + Math.random() * 4 + windSpeedScaled * 0.3;
 
     this.lifetimes[index] = 0;
   }
 
   update(deltaTime: number): void {
     const activeCount = Math.floor(this.maxParticles * this.config.intensity);
+    const windSpeedScaled = this.config.windSpeed * this.windScale;
     
     for (let i = 0; i < activeCount; i++) {
       const i3 = i * 3;
@@ -83,8 +87,8 @@ export class RainParticleSystem {
       
       this.velocities[i3 + 1] -= this.gravity * deltaTime * 0.5;
       
-      const windX = Math.sin(this.config.windDirection) * this.config.windSpeed;
-      const targetVZ = 3 + this.config.windSpeed * 0.4;
+      const windX = Math.sin(this.config.windDirection) * windSpeedScaled;
+      const targetVZ = 3 + windSpeedScaled * 0.4;
       this.velocities[i3] += (windX - this.velocities[i3]) * deltaTime * 0.5;
       this.velocities[i3 + 2] += (targetVZ - this.velocities[i3 + 2]) * deltaTime * 0.2;
 
@@ -111,7 +115,7 @@ export class RainParticleSystem {
   }
 
   setWindSpeed(speed: number): void {
-    this.config.windSpeed = speed * 15;
+    this.config.windSpeed = Math.max(0, Math.min(1, speed));
   }
 
   setWindDirection(direction: number): void {
