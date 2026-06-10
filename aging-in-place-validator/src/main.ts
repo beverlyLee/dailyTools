@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { WheelchairGenerator } from './wheelchair/WheelchairGenerator';
-import { TurnPathCalculator, RotationPathConfig } from './path/TurnPathCalculator';
 import { CollisionDetector, CollisionInfo } from './collision/CollisionDetector';
 import { GrabInteractionSystem } from './interaction/GrabInteractionSystem';
 import { ClearWidthVerifier } from './verification/ClearWidthVerifier';
@@ -24,7 +23,6 @@ class AgingInPlaceValidator {
   private bathroomBuilder: BathroomSceneBuilder;
   private sceneElements: SceneElements | null = null;
 
-  private rotationPath: RotationPathConfig | null = null;
   private rotationPathVisual: THREE.Object3D | null = null;
 
   private isRotating = false;
@@ -32,6 +30,7 @@ class AgingInPlaceValidator {
   private rotationSpeed = 0.15;
   private initialWheelchairPosition = new THREE.Vector3();
   private initialWheelchairRotation = 0;
+  private collisionGracePeriod = 0;
 
   constructor() {
     this.scene = new THREE.Scene();
@@ -55,7 +54,7 @@ class AgingInPlaceValidator {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
-    this.controls.target.set(1.5, 0.5, 1.5);
+    this.controls.target.set(1.2, 0.5, 1.4);
     this.controls.maxPolarAngle = Math.PI / 2 - 0.05;
     this.controls.minDistance = 1;
     this.controls.maxDistance = 10;
@@ -116,13 +115,13 @@ class AgingInPlaceValidator {
     this.wheelchair = this.wheelchairGenerator.generate();
     this.wheelchairCollisionBoxes = this.wheelchairGenerator.getCollisionBoxes();
 
-    const startX = 1.5;
-    const startZ = 1.8;
+    const startX = 0.85;
+    const startZ = 1.55;
     this.wheelchair.position.set(startX, 0, startZ);
-    this.wheelchair.rotation.y = Math.PI;
+    this.wheelchair.rotation.y = -Math.PI / 2;
 
     this.initialWheelchairPosition.set(startX, 0, startZ);
-    this.initialWheelchairRotation = Math.PI;
+    this.initialWheelchairRotation = -Math.PI / 2;
 
     this.scene.add(this.wheelchair);
 
@@ -154,6 +153,7 @@ class AgingInPlaceValidator {
 
     this.isRotating = true;
     this.rotationProgress = 0;
+    this.collisionGracePeriod = 0.5;
 
     const center = new THREE.Vector3(
       this.wheelchair.position.x,
@@ -161,19 +161,14 @@ class AgingInPlaceValidator {
       this.wheelchair.position.z
     );
 
-    this.rotationPath = TurnPathCalculator.calculateRotationPath(
-      center,
-      this.wheelchair.rotation.y - Math.PI / 2,
-      Math.PI * 2
-    );
-
     if (this.rotationPathVisual) {
       this.scene.remove(this.rotationPathVisual);
     }
-    this.rotationPathVisual = TurnPathCalculator.createPathVisualization(this.rotationPath);
+    this.rotationPathVisual = this.createRotationSpaceVisualization(center);
     this.scene.add(this.rotationPathVisual);
 
     this.collisionDetector.clearCollisionMarkers();
+    this.updateCollisionPoints([]);
 
     this.updateStatus(
       '正在进行回转测试...',
@@ -197,6 +192,7 @@ class AgingInPlaceValidator {
   private resetScene(): void {
     this.isRotating = false;
     this.rotationProgress = 0;
+    this.collisionGracePeriod = 0;
 
     if (this.wheelchair) {
       this.wheelchair.position.copy(this.initialWheelchairPosition);
@@ -209,10 +205,9 @@ class AgingInPlaceValidator {
     }
 
     this.collisionDetector.clearCollisionMarkers();
+    this.updateCollisionPoints([]);
     this.grabSystem.clearMarkers();
     this.widthVerifier.clearVisualization();
-
-    this.rotationPath = null;
 
     document.getElementById('angle-value')!.textContent = '0°';
 
@@ -305,6 +300,7 @@ class AgingInPlaceValidator {
 
     if (collisions.length === 0) {
       container.style.display = 'none';
+      container.innerHTML = '';
       return;
     }
 
@@ -336,7 +332,11 @@ class AgingInPlaceValidator {
 
     const delta = this.clock.getDelta();
 
-    if (this.isRotating && this.rotationPath && this.wheelchair) {
+    if (this.collisionGracePeriod > 0) {
+      this.collisionGracePeriod -= delta;
+    }
+
+    if (this.isRotating && this.wheelchair) {
       this.rotationProgress += this.rotationSpeed * delta;
 
       if (this.rotationProgress >= 1.0) {
@@ -345,59 +345,129 @@ class AgingInPlaceValidator {
         this.completeRotationTest(true);
       }
 
-      const point = TurnPathCalculator.getPositionAtProgress(this.rotationPath, this.rotationProgress);
-      this.wheelchair.position.copy(point.position);
-      this.wheelchair.rotation.y = point.rotation;
+      const totalRotation = Math.PI * 2;
+      const currentRotation = this.initialWheelchairRotation + this.rotationProgress * totalRotation;
+      this.wheelchair.rotation.y = currentRotation;
 
       const angleDeg = Math.round((this.rotationProgress * 360) % 360);
       document.getElementById('angle-value')!.textContent = `${angleDeg}°`;
 
-      const worldBoxes = this.wheelchairCollisionBoxes.map(box => {
-        const worldBox = box.clone();
-        const center = new THREE.Vector3();
-        worldBox.getCenter(center);
+      const worldBoxes = this.getRotatedWheelchairBoxes(
+        this.wheelchair.position,
+        currentRotation
+      );
 
-        const angle = point.rotation;
-        const cos = Math.cos(angle);
-        const sin = Math.sin(angle);
+      if (this.collisionGracePeriod <= 0) {
+        const collisions = this.collisionDetector.checkCollisions(worldBoxes);
+        this.collisionDetector.showCollisionMarkers(collisions);
+        this.updateCollisionPoints(collisions);
 
-        const corners = [
-          new THREE.Vector3(worldBox.min.x, worldBox.min.y, worldBox.min.z),
-          new THREE.Vector3(worldBox.max.x, worldBox.min.y, worldBox.min.z),
-          new THREE.Vector3(worldBox.max.x, worldBox.max.y, worldBox.min.z),
-          new THREE.Vector3(worldBox.min.x, worldBox.max.y, worldBox.min.z),
-          new THREE.Vector3(worldBox.min.x, worldBox.min.y, worldBox.max.z),
-          new THREE.Vector3(worldBox.max.x, worldBox.min.y, worldBox.max.z),
-          new THREE.Vector3(worldBox.max.x, worldBox.max.y, worldBox.max.z),
-          new THREE.Vector3(worldBox.min.x, worldBox.max.y, worldBox.max.z)
-        ];
-
-        const transformedCorners = corners.map(corner => {
-          const dx = corner.x - center.x;
-          const dz = corner.z - center.z;
-          return new THREE.Vector3(
-            point.position.x + center.x + dx * cos - dz * sin,
-            center.y + corner.y,
-            point.position.z + center.z + dx * sin + dz * cos
-          );
-        });
-
-        const newBox = new THREE.Box3();
-        transformedCorners.forEach(c => newBox.expandByPoint(c));
-        return newBox;
-      });
-
-      const collisions = this.collisionDetector.checkCollisions(worldBoxes);
-      this.collisionDetector.showCollisionMarkers(collisions);
-      this.updateCollisionPoints(collisions);
-
-      if (collisions.length > 0) {
-        this.completeRotationTest(false, collisions);
+        if (collisions.length > 0) {
+          this.completeRotationTest(false, collisions);
+        }
       }
     }
 
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
+  }
+
+  private getRotatedWheelchairBoxes(position: THREE.Vector3, rotationY: number): THREE.Box3[] {
+    const cos = Math.cos(rotationY);
+    const sin = Math.sin(rotationY);
+
+    return this.wheelchairCollisionBoxes.map(box => {
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+
+      const corners = [
+        new THREE.Vector3(box.min.x, box.min.y, box.min.z),
+        new THREE.Vector3(box.max.x, box.min.y, box.min.z),
+        new THREE.Vector3(box.max.x, box.max.y, box.min.z),
+        new THREE.Vector3(box.min.x, box.max.y, box.min.z),
+        new THREE.Vector3(box.min.x, box.min.y, box.max.z),
+        new THREE.Vector3(box.max.x, box.min.y, box.max.z),
+        new THREE.Vector3(box.max.x, box.max.y, box.max.z),
+        new THREE.Vector3(box.min.x, box.max.y, box.max.z)
+      ];
+
+      const transformedCorners = corners.map(corner => {
+        const dx = corner.x - center.x;
+        const dz = corner.z - center.z;
+        return new THREE.Vector3(
+          position.x + center.x + dx * cos - dz * sin,
+          center.y + corner.y,
+          position.z + center.z + dx * sin + dz * cos
+        );
+      });
+
+      const newBox = new THREE.Box3();
+      transformedCorners.forEach(c => newBox.expandByPoint(c));
+      return newBox;
+    });
+  }
+
+  private createRotationSpaceVisualization(center: THREE.Vector3): THREE.Object3D {
+    const group = new THREE.Group();
+    group.name = 'RotationSpace';
+
+    const outerRadius = 1.5;
+
+    const outerRing = new THREE.Mesh(
+      new THREE.RingGeometry(outerRadius - 0.02, outerRadius, 64),
+      new THREE.MeshBasicMaterial({
+        color: 0xe74c3c,
+        transparent: true,
+        opacity: 0.5,
+        side: THREE.DoubleSide
+      })
+    );
+    outerRing.rotation.x = -Math.PI / 2;
+    outerRing.position.copy(center);
+    outerRing.position.y = 0.02;
+    group.add(outerRing);
+
+    const safeZone = new THREE.Mesh(
+      new THREE.RingGeometry(0, outerRadius - 0.03, 64),
+      new THREE.MeshBasicMaterial({
+        color: 0x3498db,
+        transparent: true,
+        opacity: 0.15,
+        side: THREE.DoubleSide
+      })
+    );
+    safeZone.rotation.x = -Math.PI / 2;
+    safeZone.position.copy(center);
+    safeZone.position.y = 0.01;
+    group.add(safeZone);
+
+    const centerMarker = new THREE.Mesh(
+      new THREE.CircleGeometry(0.08, 32),
+      new THREE.MeshBasicMaterial({ color: 0xe74c3c, transparent: true, opacity: 0.9 })
+    );
+    centerMarker.rotation.x = -Math.PI / 2;
+    centerMarker.position.copy(center);
+    centerMarker.position.y = 0.03;
+    group.add(centerMarker);
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    canvas.width = 256;
+    canvas.height = 64;
+    ctx.font = 'bold 24px sans-serif';
+    ctx.fillStyle = '#e74c3c';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('回转半径 R=1.5m', 128, 32);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const label = new THREE.Sprite(spriteMat);
+    label.position.set(center.x, 0.3, center.z + outerRadius + 0.15);
+    label.scale.set(0.7, 0.18, 1);
+    group.add(label);
+
+    return group;
   }
 
   private completeRotationTest(success: boolean, collisions?: CollisionInfo[]): void {
