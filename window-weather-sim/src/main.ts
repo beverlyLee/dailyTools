@@ -55,6 +55,7 @@ function initApp(): void {
     const waterStatus = scene.getWaterTightnessStatus();
     const airStatus = scene.getAirTightnessStatus();
     const waterAmount = scene.getWaterAmount();
+    const maxWater = scene.getMaxWaterAmount();
 
     const statusLabels: Record<string, string> = {
       good: '良好',
@@ -68,9 +69,9 @@ function initApp(): void {
     airTightnessEl.textContent = statusLabels[airStatus];
     updateStatusClass(airTightnessEl, airStatus);
 
-    waterAmountEl.textContent = `${(waterAmount * 10).toFixed(1)} ml`;
+    waterAmountEl.textContent = `${waterAmount.toFixed(1)} ml`;
     
-    const waterPercent = Math.min(100, waterAmount);
+    const waterPercent = Math.min(100, (waterAmount / maxWater) * 100);
     waterMeterEl.style.width = `${waterPercent}%`;
 
     requestAnimationFrame(updateStatusLabels);
@@ -131,22 +132,34 @@ function initApp(): void {
     windowTypeSelect.value = 'sliding';
     windowTypeEl.textContent = '推拉窗';
     
-    rainSlider.value = '50';
-    rainValue.textContent = '50%';
-    rainIntensityEl.textContent = updateRainLabel(50);
+    rainSlider.value = '0';
+    rainValue.textContent = '0%';
+    rainIntensityEl.textContent = updateRainLabel(0);
     
-    windSlider.value = '50';
-    windValue.textContent = '50%';
-    windSpeedEl.textContent = updateWindLabel(50);
+    windSlider.value = '0';
+    windValue.textContent = '0%';
+    windSpeedEl.textContent = updateWindLabel(0);
     
     drainToggle.checked = true;
     curtainToggle.checked = true;
     
     stormBtn.textContent = '🌪️ 台风模式';
     
+    scene.setRainIntensity(0);
+    scene.setWindSpeed(0);
     scene.setDrainVisible(true);
     scene.setCurtainVisible(true);
   });
+
+  const initRainValue = parseInt(rainSlider.value);
+  const initWindValue = parseInt(windSlider.value);
+  scene.setRainIntensity(initRainValue / 100);
+  scene.setWindSpeed(initWindValue / 100);
+  rainValue.textContent = `${initRainValue}%`;
+  windValue.textContent = `${initWindValue}%`;
+  rainIntensityEl.textContent = updateRainLabel(initRainValue);
+  windSpeedEl.textContent = updateWindLabel(initWindValue);
+  windowTypeEl.textContent = windowTypeSelect.value === 'sliding' ? '推拉窗' : '平开窗';
 
   updateStatusLabels();
 }

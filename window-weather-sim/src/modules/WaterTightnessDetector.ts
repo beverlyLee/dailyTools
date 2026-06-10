@@ -8,7 +8,9 @@ export class WaterTightnessDetector {
   private windowSystem: WindowSystem;
   private rainSystem: RainParticleSystem;
   private waterAmount: number = 0;
-  private maxWaterAmount: number = 100;
+  private maxWaterAmount: number = 50;
+  private warningThreshold: number = 2.5;
+  private dangerThreshold: number = 12;
   private waterStains: { x: number; y: number; size: number; alpha: number }[] = [];
   private stainTexture: THREE.CanvasTexture | null = null;
   private stainMesh: THREE.Mesh | null = null;
@@ -158,13 +160,13 @@ export class WaterTightnessDetector {
     const stainX = (x + (dimensions.width + 0.2) / 2) / (dimensions.width + 0.2);
     
     this.waterStains.push({
-      x: stainX,
-      y: 0.5 + (Math.random() - 0.5) * 0.3,
-      size: 0.02 + amount * 0.05,
-      alpha: 0.3 + amount * 0.4
+      x: stainX + (Math.random() - 0.5) * 0.05,
+      y: 0.45 + Math.random() * 0.35,
+      size: 0.04 + amount * 0.08 + Math.random() * 0.02,
+      alpha: 0.5 + amount * 0.4
     });
 
-    if (this.waterStains.length > 100) {
+    if (this.waterStains.length > 200) {
       this.waterStains.shift();
     }
 
@@ -183,17 +185,19 @@ export class WaterTightnessDetector {
     this.waterStains.forEach(stain => {
       const x = stain.x * canvas.width;
       const y = stain.y * canvas.height;
-      const radius = stain.size * canvas.width;
+      const radiusX = stain.size * canvas.width;
+      const radiusY = stain.size * canvas.height * 0.6;
       const alpha = stain.alpha;
 
-      const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
-      gradient.addColorStop(0, `rgba(100, 150, 200, ${alpha})`);
-      gradient.addColorStop(0.5, `rgba(100, 150, 200, ${alpha * 0.6})`);
+      const gradient = ctx.createRadialGradient(x, y, 0, x, y, Math.max(radiusX, radiusY));
+      gradient.addColorStop(0, `rgba(60, 110, 170, ${alpha})`);
+      gradient.addColorStop(0.4, `rgba(70, 120, 180, ${alpha * 0.75})`);
+      gradient.addColorStop(0.7, `rgba(80, 130, 190, ${alpha * 0.45})`);
       gradient.addColorStop(1, 'rgba(100, 150, 200, 0)');
 
       ctx.fillStyle = gradient;
       ctx.beginPath();
-      ctx.ellipse(x, y, radius, radius * 0.4, 0, 0, Math.PI * 2);
+      ctx.ellipse(x, y, radiusX, radiusY, 0, 0, Math.PI * 2);
       ctx.fill();
     });
 
@@ -210,6 +214,8 @@ export class WaterTightnessDetector {
     const dimensions = this.windowSystem.getDimensions();
 
     let waterThisFrame = 0;
+    let shouldAddStain = false;
+    let lastStainX = 0;
 
     for (let i = 0; i < activeCount; i++) {
       const i3 = i * 3;
@@ -230,11 +236,9 @@ export class WaterTightnessDetector {
             const totalProbability = penetrationAmount * windFactor * 0.8;
             
             if (Math.random() < totalProbability) {
-              waterThisFrame += 0.15 + Math.random() * 0.1;
-              
-              if (Math.random() < 0.6) {
-                this.addWaterStain(px, penetrationAmount);
-              }
+              waterThisFrame += 0.06 + Math.random() * 0.04;
+              lastStainX = px;
+              shouldAddStain = true;
             }
             break;
           }
@@ -242,14 +246,23 @@ export class WaterTightnessDetector {
       }
     }
 
+    if (shouldAddStain && Math.random() < 0.7) {
+      this.addWaterStain(lastStainX, 0.6);
+    }
+
     this.waterAmount += waterThisFrame;
     this.waterAmount = Math.min(this.waterAmount, this.maxWaterAmount);
 
     this.updateSplashParticles(deltaTime);
 
-    if (rainIntensity < 0.05 && this.waterAmount > 0.01) {
-      this.waterAmount -= deltaTime * 0.08;
+    if (rainIntensity < 0.05 && this.waterAmount > 0.1) {
+      this.waterAmount -= deltaTime * 0.5;
       this.waterAmount = Math.max(0, this.waterAmount);
+      
+      if (this.waterStains.length > 0 && Math.random() < 0.02) {
+        this.waterStains.shift();
+        this.updateStainTexture();
+      }
     }
   }
 
@@ -306,10 +319,13 @@ export class WaterTightnessDetector {
   }
 
   getWaterTightnessStatus(): 'good' | 'warning' | 'danger' {
-    const ratio = this.waterAmount / this.maxWaterAmount;
-    if (ratio < 0.1) return 'good';
-    if (ratio < 0.4) return 'warning';
+    if (this.waterAmount < this.warningThreshold) return 'good';
+    if (this.waterAmount < this.dangerThreshold) return 'warning';
     return 'danger';
+  }
+
+  getMaxWaterAmount(): number {
+    return this.maxWaterAmount;
   }
 
   reset(): void {

@@ -180,16 +180,20 @@ export class WeatherScene {
 
   reset(): void {
     this.waterDetector.reset();
-    this.rainSystem.setIntensity(0.5);
-    this.rainSystem.setWindSpeed(0.5);
+    this.rainSystem.setIntensity(0);
+    this.rainSystem.setWindSpeed(0);
     this.rainSystem.setWindDirection(0);
-    this.airDetector.setWindStrength(0.5);
-    this.drainVisualizer.setRainIntensity(0.5);
+    this.airDetector.setWindStrength(0);
+    this.drainVisualizer.setRainIntensity(0);
     this.windowSystem.setWindowType('sliding');
   }
 
   getWaterAmount(): number {
     return this.waterDetector.getWaterAmount();
+  }
+
+  getMaxWaterAmount(): number {
+    return this.waterDetector.getMaxWaterAmount();
   }
 
   getWaterTightnessStatus(): 'good' | 'warning' | 'danger' {
