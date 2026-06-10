@@ -120,10 +120,6 @@ export class WallWashRenderer {
         varying vec2 vUv;
         varying vec3 vPosition;
 
-        float gaussian(float x, float sigma) {
-          return exp(-0.5 * x * x / (sigma * sigma));
-        }
-
         float smoothFalloff(float x, float edge) {
           if (x >= edge) return 0.0;
           float t = x / edge;
@@ -134,44 +130,40 @@ export class WallWashRenderer {
           float topY = 1.0 - vUv.y;
 
           float tiltFactor = sin(uTiltAngle);
-          float verticalSpread = 0.3 + tiltFactor * 0.4 + uHaloSpread * 0.2;
+          float beamRad = uBeamAngle * 3.14159 / 180.0;
+          float beamSpread = sin(beamRad * 0.5) * 0.6 + 0.2;
+          float verticalSpread = beamSpread + tiltFactor * 0.3 + uHaloSpread * 0.25;
 
           float mainBeam = 0.0;
           if (topY < verticalSpread) {
             float t = topY / verticalSpread;
-            mainBeam = pow(1.0 - t, 2.5);
+            mainBeam = pow(1.0 - t, 2.0);
           }
 
-          float softFalloff = exp(-topY * 2.5 / max(uHaloSpread, 0.15));
+          float softFalloff = exp(-topY * 2.0 / max(uHaloSpread, 0.1));
 
-          float verticalWash = mainBeam * 0.6 + softFalloff * 0.4;
+          float topGlow = exp(-topY * 8.0) * (0.4 + tiltFactor * 0.5);
 
-          float beamRad = uBeamAngle * 3.14159 / 180.0;
-          float beamWidthRatio = tan(beamRad * 0.5) * 0.5 + 0.15;
+          float verticalWash = mainBeam * 0.5 + softFalloff * 0.35 + topGlow * 0.25;
 
-          float centerDist = abs(vUv.x - 0.5) * 2.0;
-          float horizontalProfile = gaussian(centerDist, beamWidthRatio + uHaloSpread * 0.2);
+          float edgeFadeWidth = 0.08;
+          float leftEdge = smoothFalloff(vUv.x, edgeFadeWidth);
+          float rightEdge = smoothFalloff(1.0 - vUv.x, edgeFadeWidth);
+          float horizontalProfile = leftEdge * rightEdge;
+          horizontalProfile = mix(0.85, 1.0, horizontalProfile);
 
-          float edgeFade = smoothFalloff(centerDist, 0.98);
-          edgeFade = mix(1.0, edgeFade, 0.3);
+          float wash = verticalWash * horizontalProfile;
 
-          float topGlow = exp(-topY * 6.0) * (0.3 + tiltFactor * 0.4);
+          float bottomFade = smoothFalloff(1.0 - vUv.y, 0.12);
+          wash *= mix(1.0, bottomFade, 0.6);
 
-          float wash = verticalWash * horizontalProfile * 0.7 + topGlow * horizontalProfile * 0.3;
-          wash *= edgeFade;
+          float intensityMult = uIntensity * uLightIntensity * 2.5;
+          wash = wash * intensityMult;
 
-          float bottomFade = smoothFalloff(1.0 - vUv.y, 0.15);
-          wash *= mix(1.0, bottomFade, 0.7);
-
-          wash = pow(wash, 1.1) * uIntensity * uLightIntensity * 1.8;
-
-          float halo = gaussian(centerDist, 0.35 + uHaloSpread * 0.4) * softFalloff * 0.25;
-          wash += halo * uIntensity * uLightIntensity;
-
-          wash = clamp(wash, 0.0, 2.5);
+          wash = clamp(wash, 0.0, 3.0);
 
           vec3 finalColor = uColor * wash;
-          float alpha = clamp(wash * 0.7, 0.0, 1.0);
+          float alpha = clamp(wash * 0.65, 0.0, 1.0);
 
           gl_FragColor = vec4(finalColor, alpha);
         }

@@ -24,8 +24,9 @@ export class IndirectLightSimulator {
   private cachedDirectLux: number = 0;
   private cachedIndirectLux: number = 0;
 
-  private readonly VISUAL_INTENSITY_SCALE = 4.0;
-  private readonly LUX_CALIBRATION = 3.5;
+  private readonly VISUAL_INTENSITY_SCALE = 5.0;
+  private readonly LUX_CALIBRATION = 4.5;
+  private readonly INDIRECT_RATIO_CALIBRATION = 1.15;
 
   constructor(scene: THREE.Scene, ceilingGenerator: CeilingGenerator, config: IndirectLightConfig) {
     this.scene = scene;
@@ -124,18 +125,16 @@ export class IndirectLightSimulator {
     this.clearBounceLights();
     this.bouncePoints = [];
 
-    if (this.config.bounceCount <= 0) {
-      this.updateStats(sources);
-      return;
+    if (this.config.bounceCount > 0) {
+      this.calculateFirstBounce(sources);
+
+      for (let bounce = 1; bounce < this.config.bounceCount; bounce++) {
+        this.calculateSubsequentBounces(bounce);
+      }
+
+      this.createBounceLights();
     }
 
-    this.calculateFirstBounce(sources);
-
-    for (let bounce = 1; bounce < this.config.bounceCount; bounce++) {
-      this.calculateSubsequentBounces(bounce);
-    }
-
-    this.createBounceLights();
     this.updateStats(sources);
   }
 
@@ -337,14 +336,22 @@ export class IndirectLightSimulator {
   }
 
   public calculateAverageWallBrightness(_sources: LightSourceData[]): number {
-    return (this.cachedDirectLux + this.cachedIndirectLux) * this.LUX_CALIBRATION;
+    const adjustedIndirect = this.cachedIndirectLux * this.INDIRECT_RATIO_CALIBRATION;
+    return (this.cachedDirectLux + adjustedIndirect) * this.LUX_CALIBRATION;
   }
 
   public getIndirectContributionRatio(_sources: LightSourceData[]): number {
     const total = this.cachedDirectLux + this.cachedIndirectLux;
-    if (total <= 0) return 0.35;
+    if (total <= 0) return 0;
 
-    const ratio = this.cachedIndirectLux / total;
+    const rawIndirect = this.cachedIndirectLux * this.INDIRECT_RATIO_CALIBRATION;
+    const adjustedTotal = this.cachedDirectLux + rawIndirect;
+    const ratio = rawIndirect / adjustedTotal;
+
+    if (this.config.bounceCount <= 0) {
+      return Math.max(0, ratio);
+    }
+
     return clamp(ratio, PHYSICS.MIN_INDIRECT_RATIO, PHYSICS.MAX_INDIRECT_RATIO);
   }
 

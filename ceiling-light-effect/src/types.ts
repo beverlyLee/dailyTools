@@ -126,10 +126,10 @@ export function smoothstep(edge0: number, edge1: number, x: number): number {
 export const PHYSICS = {
   MAX_CONE_ANGLE: Math.PI * 0.45,
   LUMINOUS_EFFICACY: 1.0,
-  INDIRECT_BOUNCE_DECAY: 0.35,
+  INDIRECT_BOUNCE_DECAY: 0.4,
   WALL_SAMPLE_HEIGHT_RATIO: 0.5,
-  MIN_INDIRECT_RATIO: 0.30,
-  MAX_INDIRECT_RATIO: 0.50,
+  MIN_INDIRECT_RATIO: 0.35,
+  MAX_INDIRECT_RATIO: 0.48,
   TARGET_INDIRECT_RATIO: 0.40,
 };
 

@@ -71,12 +71,12 @@ class CeilingLightPreviewer {
     this.scene.fog = new THREE.Fog(0x0a0a0a, 10, 50);
 
     this.camera = new THREE.PerspectiveCamera(
-      55,
+      50,
       window.innerWidth / window.innerHeight,
       0.1,
       100
     );
-    this.camera.position.set(6.5, 3.8, 5.5);
+    this.camera.position.set(8.0, 3.5, 6.5);
 
     this.container = document.body;
 
@@ -98,7 +98,7 @@ class CeilingLightPreviewer {
     this.controls.maxPolarAngle = Math.PI / 2 - 0.05;
     this.controls.minDistance = 3;
     this.controls.maxDistance = 25;
-    this.controls.target.set(0, 1.2, 0);
+    this.controls.target.set(0, 1.4, 0);
 
     this.ceilingGenerator = new CeilingGenerator(
       this.scene,

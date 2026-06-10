@@ -146,35 +146,6 @@ export class CeilingGenerator {
     this.ceilingMain.position.y = 0;
     this.ceilingMain.receiveShadow = true;
     this.ceilingGroup.add(this.ceilingMain);
-
-    const sideThickness = 0.03;
-    const frontSide = new THREE.Mesh(
-      new THREE.BoxGeometry(innerWidth, drop, sideThickness),
-      this.ceilingMaterial
-    );
-    frontSide.position.set(0, -drop / 2, -innerDepth / 2);
-    this.ceilingGroup.add(frontSide);
-
-    const backSide = new THREE.Mesh(
-      new THREE.BoxGeometry(innerWidth, drop, sideThickness),
-      this.ceilingMaterial
-    );
-    backSide.position.set(0, -drop / 2, innerDepth / 2);
-    this.ceilingGroup.add(backSide);
-
-    const leftSide = new THREE.Mesh(
-      new THREE.BoxGeometry(sideThickness, drop, innerDepth),
-      this.ceilingMaterial
-    );
-    leftSide.position.set(-innerWidth / 2, -drop / 2, 0);
-    this.ceilingGroup.add(leftSide);
-
-    const rightSide = new THREE.Mesh(
-      new THREE.BoxGeometry(sideThickness, drop, innerDepth),
-      this.ceilingMaterial
-    );
-    rightSide.position.set(innerWidth / 2, -drop / 2, 0);
-    this.ceilingGroup.add(rightSide);
   }
 
   private buildTrenches(): void {
