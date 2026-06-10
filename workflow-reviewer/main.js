@@ -313,6 +313,7 @@ function saveProjects() {
                     dissatisfyResult: p.data.dissatisfyResult || '',
                     promptRaw: p.data.promptRaw || '',
                     promptResult: p.data.promptResult || '',
+                    testReportRaw: p.data.testReportRaw || '',
                     wpsSessionValue: p.data.wpsSessionValue || '',
                     wpsCommitId: p.data.wpsCommitId || '',
                     files: [],
@@ -594,7 +595,9 @@ function renderWorkspace() {
             testScriptOutput: content.querySelector('.field-testScriptOutput'),
             copyTestScriptBtn: content.querySelector('.field-copyTestScriptBtn'),
             regenerateTestScriptBtn: content.querySelector('.field-regenerateTestScriptBtn'),
-            executeTestScriptBtn: content.querySelector('.field-executeTestScriptBtn')
+            executeTestScriptBtn: content.querySelector('.field-executeTestScriptBtn'),
+            testReportRaw: content.querySelector('.field-testReportRaw'),
+            parseReportBtn: content.querySelector('.field-parseReportBtn')
         };
         
         fields.projectName.value = data.projectName || '';
@@ -612,6 +615,7 @@ function renderWorkspace() {
         if (fields.dissatisfyResult) fields.dissatisfyResult.value = data.dissatisfyResult || '';
         if (fields.promptRaw) fields.promptRaw.value = data.promptRaw || '';
         if (fields.promptResult) fields.promptResult.value = data.promptResult || '';
+        if (fields.testReportRaw) fields.testReportRaw.value = data.testReportRaw || '';
         if (fields.wpsDocUrl) fields.wpsDocUrl.value = globalWpsConfig.wpsDocUrl;
         if (fields.wpsFileToken) fields.wpsFileToken.value = globalWpsConfig.wpsFileToken;
         if (fields.wpsSheetName) fields.wpsSheetName.value = globalWpsConfig.wpsSheetName;
@@ -812,6 +816,16 @@ function renderWorkspace() {
         }
         if (fields.executeTestScriptBtn) {
             fields.executeTestScriptBtn.addEventListener('click', executeTestScript);
+        }
+        if (fields.parseReportBtn) {
+            fields.parseReportBtn.addEventListener('click', () => parseTestReport(project, fields));
+        }
+        if (fields.testReportRaw) {
+            fields.testReportRaw.addEventListener('input', () => {
+                project.data.testReportRaw = fields.testReportRaw.value;
+                project.data.lastUpdated = Date.now();
+                saveProjects();
+            });
         }
         
         renderProjectPreviews(project, fields);
@@ -2393,6 +2407,80 @@ function writePromptToWps(project, fields) {
         return;
     }
     writeToWps(project, fields, { 'AI审核意见': promptText });
+}
+
+function parseTestReport(project, fields) {
+    const reportText = fields.testReportRaw?.value || '';
+    if (!reportText.trim()) {
+        showToast('❌ 请先粘贴测试报告');
+        return;
+    }
+
+    console.log('📋 [解析测试报告] 原始文本长度:', reportText.length);
+    
+    let dissatisfyText = '';
+    let promptText = '';
+    
+    // 1. 提取不满意原因（【验收结论】部分）
+    const conclusionMatch = reportText.match(/[【\[]验收结论[】\]][\s\S]*?(?=[【\[]归因诊断[】\]]|[【\[]下一轮|$)/i);
+    if (conclusionMatch) {
+        dissatisfyText = conclusionMatch[0].trim();
+        console.log('📋 [解析测试报告] 找到验收结论部分，长度:', dissatisfyText.length);
+    } else {
+        // 备用方式：找「产物不满意」和「过程不满意」
+        const productMatch = reportText.match(/产物不满意[：:][\s\S]*?(?=过程不满意|$)/i);
+        const processMatch = reportText.match(/过程不满意[：:][\s\S]*?(?=[【\[]|$)/i);
+        if (productMatch || processMatch) {
+            dissatisfyText = [
+                productMatch ? productMatch[0].trim() : '',
+                processMatch ? processMatch[0].trim() : ''
+            ].filter(Boolean).join('\n\n');
+            console.log('📋 [解析测试报告] 备用方式提取不满意原因，长度:', dissatisfyText.length);
+        }
+    }
+    
+    // 2. 提取下一轮 Prompt
+    const promptMatch = reportText.match(/[【\[]下一轮.*?Prompt.*?[】\]][\s\S]*?(?=[【\[]|$)/i);
+    if (promptMatch) {
+        promptText = promptMatch[0].trim();
+        console.log('📋 [解析测试报告] 找到下一轮 Prompt，长度:', promptText.length);
+    } else {
+        // 备用方式：找「需要完成的任务有」或「任务1」开头的部分
+        const taskMatch = reportText.match(/需要完成的.*?[：:][\s\S]*$/i);
+        if (taskMatch) {
+            promptText = taskMatch[0].trim();
+            console.log('📋 [解析测试报告] 备用方式提取 Prompt，长度:', promptText.length);
+        }
+    }
+    
+    // 填充到对应区域
+    if (dissatisfyText && fields.dissatisfyRaw) {
+        fields.dissatisfyRaw.value = dissatisfyText;
+        // 自动触发提取
+        if (fields.extractDissatisfyBtn) {
+            fields.extractDissatisfyBtn.click();
+        }
+        console.log('📋 [解析测试报告] 已填充不满意原因');
+    }
+    
+    if (promptText && fields.promptRaw) {
+        fields.promptRaw.value = promptText;
+        // 自动触发提取
+        if (fields.extractPromptBtn) {
+            fields.extractPromptBtn.click();
+        }
+        console.log('📋 [解析测试报告] 已填充下一轮 Prompt');
+    }
+    
+    // 保存到项目数据
+    saveProjects();
+    
+    const count = [dissatisfyText, promptText].filter(Boolean).length;
+    if (count === 0) {
+        showToast('⚠️ 未识别到有效内容，请检查报告格式');
+    } else {
+        showToast(`✅ 解析完成，提取到 ${count} 项内容`);
+    }
 }
 
 function writeSessionIdToWps(project, fields) {

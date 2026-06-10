@@ -129,7 +129,411 @@
         });
     };
     
-    console.log('🔍 [写入日志轨迹] 全局函数已注册');
+    function __cleanFormatChars(text) {
+        if (!text) return '';
+        let cleaned = text;
+        
+        cleaned = cleaned.replace(/^#{1,6}\s+/gm, '');
+        cleaned = cleaned.replace(/^[-*+]\s+/gm, '');
+        cleaned = cleaned.replace(/^\d+[.、]\s+/gm, '');
+        cleaned = cleaned.replace(/\*\*(.+?)\*\*/g, '$1');
+        cleaned = cleaned.replace(/\*(.+?)\*/g, '$1');
+        cleaned = cleaned.replace(/`(.+?)`/g, '$1');
+        cleaned = cleaned.replace(/^>\s?/gm, '');
+        cleaned = cleaned.replace(/^---+$/gm, '');
+        cleaned = cleaned.replace(/\[(.+?)\]\(.+?\)/g, '$1');
+        cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+        cleaned = cleaned.trim();
+        
+        return cleaned;
+    }
+
+    window.__parseTestReport = function(btn) {
+        console.log('📋 [解析测试报告] ===== 按钮被点击 =====');
+        
+        const contentEl = btn.closest('[data-project-id]');
+        if (!contentEl) {
+            alert('❌ 找不到项目容器');
+            return;
+        }
+        
+        const reportEl = contentEl.querySelector('.field-testReportRaw');
+        const reportText = reportEl ? reportEl.value : '';
+        
+        console.log('📋 [解析测试报告] 原始文本长度:', reportText.length);
+        console.log('📋 [解析测试报告] 原始文本前200字:', reportText.substring(0, 200));
+        
+        if (!reportText.trim()) {
+            alert('❌ 请先粘贴测试报告');
+            return;
+        }
+        
+        let dissatisfyText = '';
+        let promptText = '';
+        
+        // ========== 提取不满意原因 ==========
+        // 方式1: 【验收结论】部分
+        const conclusionMatch = reportText.match(/[【\[]\s*验收结论\s*[】\]][\s\S]*?(?=[【\[]\s*归因诊断\s*[】\]]|[【\[]\s*下一轮|$)/i);
+        if (conclusionMatch) {
+            dissatisfyText = conclusionMatch[0].trim();
+            console.log('📋 [解析测试报告] 方式1：找到【验收结论】，长度:', dissatisfyText.length);
+        }
+        
+        // 方式2: 找「产物不满意」和「过程不满意」
+        if (!dissatisfyText) {
+            const productMatch = reportText.match(/产物不满意\s*[：:][\s\S]*?(?=过程不满意|$)/i);
+            const processMatch = reportText.match(/过程不满意\s*[：:][\s\S]*?(?=[【\[]|$)/i);
+            if (productMatch || processMatch) {
+                dissatisfyText = [
+                    productMatch ? productMatch[0].trim() : '',
+                    processMatch ? processMatch[0].trim() : ''
+                ].filter(Boolean).join('\n\n');
+                console.log('📋 [解析测试报告] 方式2：找到产物/过程不满意，长度:', dissatisfyText.length);
+            }
+        }
+        
+        // 方式3: 找「不满意」关键字的段落
+        if (!dissatisfyText) {
+            const lines = reportText.split('\n');
+            const dissatisfyLines = [];
+            let inDissatisfy = false;
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line.includes('不满意') || line.includes('问题') || line.includes('异常') || line.includes('错误')) {
+                    inDissatisfy = true;
+                }
+                if (inDissatisfy && line) {
+                    dissatisfyLines.push(line);
+                }
+            }
+            
+            if (dissatisfyLines.length > 2) {
+                dissatisfyText = dissatisfyLines.join('\n');
+                console.log('📋 [解析测试报告] 方式3：模糊匹配不满意内容，行数:', dissatisfyLines.length);
+            }
+        }
+        
+        // 方式4: 如果还是没有，就把所有以 - 或数字开头的列表项作为不满意原因
+        if (!dissatisfyText) {
+            const lines = reportText.split('\n').filter(function(l) {
+                const t = l.trim();
+                return t && (t.startsWith('-') || t.startsWith('*') || /^\d+[.、]/.test(t));
+            });
+            if (lines.length > 0) {
+                dissatisfyText = lines.join('\n');
+                console.log('📋 [解析测试报告] 方式4：提取列表项作为不满意原因，行数:', lines.length);
+            }
+        }
+        
+        // ========== 提取下一轮 Prompt ==========
+        // 方式1: 【下一轮 Prompt】部分
+        const promptMatch = reportText.match(/[【\[]\s*下一轮.*?Prompt.*?[】\]][\s\S]*?(?=[【\[]|$)/i);
+        if (promptMatch) {
+            promptText = promptMatch[0].trim();
+            console.log('📋 [解析测试报告] 方式1：找到下一轮 Prompt，长度:', promptText.length);
+        }
+        
+        // 方式2: 找「需要完成的任务」或「任务1」开头的部分
+        if (!promptText) {
+            const taskMatch = reportText.match(/需要完成的.*?[：:][\s\S]*$/i);
+            if (taskMatch) {
+                promptText = taskMatch[0].trim();
+                console.log('📋 [解析测试报告] 方式2：找到需要完成的任务，长度:', promptText.length);
+            }
+        }
+        
+        // 方式3: 找「整改」「修复」「优化」等关键词开头的段落
+        if (!promptText) {
+            const lines = reportText.split('\n');
+            const promptLines = [];
+            let inPrompt = false;
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line.includes('整改') || line.includes('修复') || line.includes('优化') || line.includes('任务') || line.includes('需要')) {
+                    inPrompt = true;
+                }
+                if (inPrompt && line) {
+                    promptLines.push(line);
+                }
+            }
+            
+            if (promptLines.length > 2) {
+                promptText = promptLines.join('\n');
+                console.log('📋 [解析测试报告] 方式3：模糊匹配 Prompt 内容，行数:', promptLines.length);
+            }
+        }
+        
+        console.log('📋 [解析测试报告] 最终结果：不满意原因长度 =', dissatisfyText ? dissatisfyText.length : 0, '，Prompt 长度 =', promptText ? promptText.length : 0);
+        
+        dissatisfyText = __cleanFormatChars(dissatisfyText);
+        promptText = __cleanFormatChars(promptText);
+        
+        console.log('📋 [解析测试报告] 清理格式后：不满意原因长度 =', dissatisfyText ? dissatisfyText.length : 0, '，Prompt 长度 =', promptText ? promptText.length : 0);
+        
+        // 填充到对应区域
+        if (dissatisfyText) {
+            const dissRawEl = contentEl.querySelector('.field-dissatisfyRaw');
+            if (dissRawEl) {
+                dissRawEl.value = dissatisfyText;
+                dissRawEl.dispatchEvent(new Event('input', { bubbles: true }));
+                console.log('📋 [解析测试报告] 已填充不满意原因');
+            }
+            // 自动触发提取
+            const extractBtn = contentEl.querySelector('.field-extractDissatisfyBtn');
+            if (extractBtn) {
+                setTimeout(function() { extractBtn.click(); }, 100);
+            }
+        } else {
+            console.log('⚠️ [解析测试报告] 未提取到不满意原因');
+        }
+        
+        if (promptText) {
+            const promptRawEl = contentEl.querySelector('.field-promptRaw');
+            if (promptRawEl) {
+                promptRawEl.value = promptText;
+                promptRawEl.dispatchEvent(new Event('input', { bubbles: true }));
+                console.log('📋 [解析测试报告] 已填充下一轮 Prompt');
+            }
+            // 自动触发提取
+            const extractBtn = contentEl.querySelector('.field-extractPromptBtn');
+            if (extractBtn) {
+                setTimeout(function() { extractBtn.click(); }, 100);
+            }
+        } else {
+            console.log('⚠️ [解析测试报告] 未提取到下一轮 Prompt');
+        }
+        
+        // 保存测试报告原文
+        if (reportEl) {
+            reportEl.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        
+        const count = [dissatisfyText, promptText].filter(Boolean).length;
+        if (count === 0) {
+            alert('⚠️ 未识别到有效内容，请检查报告格式\n\n已尝试了 7 种匹配方式都没匹配到，\n请确认报告中是否包含「验收结论」「不满意」「下一轮」等关键字');
+        } else {
+            alert('✅ 解析完成，提取到 ' + count + ' 项内容\n\n' +
+                (dissatisfyText ? '• 不满意原因: ' + dissatisfyText.length + ' 字\n' : '') +
+                (promptText ? '• 下一轮 Prompt: ' + promptText.length + ' 字' : ''));
+        }
+    };
+    
+    // 内联全局函数 - 生成脚本命令
+    window.__generateTestScript = function(btn) {
+        const contentEl = btn.closest('[data-project-id]');
+        if (!contentEl) return;
+        
+        const projectNameEl = contentEl.querySelector('.field-projectName');
+        const requirementEl = contentEl.querySelector('.field-requirement');
+        const stageEl = contentEl.querySelector('.field-stage');
+        const currentProcessEl = contentEl.querySelector('.field-currentProcess');
+        
+        const projectName = (projectNameEl?.value || '工程名').trim();
+        const requirement = (requirementEl?.value || '需求').trim();
+        const stage = (stageEl?.value || '阶段描述').trim();
+        const currentProcess = (currentProcessEl?.value || '').trim();
+        
+        const escapedProcess = currentProcess.replace(/"/g, '\\"').replace(/\n/g, ' ');
+        const escapedRequirement = requirement.replace(/"/g, '\\"').replace(/\n/g, ' ');
+        const escapedStage = stage.replace(/"/g, '\\"').replace(/\n/g, ' ');
+        
+        const script = 'python3 /Users/liboyang/trae/dailyTools/generate_test_prompt.py \\\n' +
+            '    -n "' + projectName + '" \\\n' +
+            '    -f "' + escapedRequirement + '" \\\n' +
+            '    -c "' + escapedStage + '" \\\n' +
+            '    -pr "' + escapedProcess + '" \\\n' +
+            '    -r';
+        
+        const outputEl = contentEl.querySelector('.field-testScriptOutput');
+        if (outputEl) {
+            outputEl.value = script;
+        }
+        
+        console.log('✅ [生成脚本命令] 脚本已生成，长度:', script.length);
+    };
+    
+    // 内联全局函数 - 复制脚本
+    window.__copyTestScript = function(btn) {
+        const contentEl = btn.closest('[data-project-id]');
+        if (!contentEl) return;
+        
+        const outputEl = contentEl.querySelector('.field-testScriptOutput');
+        const script = outputEl?.value || '';
+        
+        if (!script || script.length < 10) {
+            alert('没有可复制的脚本');
+            return;
+        }
+        
+        navigator.clipboard.writeText(script)
+            .then(function() {
+                alert('✅ 脚本已复制到剪贴板');
+            })
+            .catch(function() {
+                alert('❌ 复制失败');
+            });
+    };
+    
+    // 内联全局函数 - 执行脚本
+    window.__executeTestScript = function(btn) {
+        const contentEl = btn.closest('[data-project-id]');
+        if (!contentEl) return;
+        
+        const outputEl = contentEl.querySelector('.field-testScriptOutput');
+        const script = outputEl?.value || '';
+        
+        if (!script || script.length < 10) {
+            alert('请先生成脚本');
+            return;
+        }
+        
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = '执行中...';
+        
+        // 解析参数并调用后端
+        const projectNameEl = contentEl.querySelector('.field-projectName');
+        const requirementEl = contentEl.querySelector('.field-requirement');
+        const stageEl = contentEl.querySelector('.field-stage');
+        const currentProcessEl = contentEl.querySelector('.field-currentProcess');
+        
+        const projectName = (projectNameEl?.value || '工程名').trim();
+        const requirement = (requirementEl?.value || '需求').trim();
+        const stage = (stageEl?.value || '阶段描述').trim();
+        const currentProcess = (currentProcessEl?.value || '').trim();
+        
+        fetch('/api/execute-test-prompt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                project_name: projectName,
+                first_round: requirement,
+                current_round: stage,
+                current_process: currentProcess
+            })
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(result) {
+            if (result.success) {
+                // 复制到剪贴板
+                navigator.clipboard.writeText(result.output)
+                    .then(function() {
+                        alert('✅ 执行成功，结果已复制到剪贴板');
+                    })
+                    .catch(function() {
+                        alert('✅ 执行成功（复制剪贴板失败）');
+                    });
+            } else {
+                alert('❌ 执行失败: ' + (result.error || '未知错误'));
+            }
+        })
+        .catch(function(e) {
+            alert('❌ 请求异常: ' + e.message);
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerText = originalText;
+        });
+    };
+    
+    // 页面加载后自动生成脚本（监听项目内容变化）
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🔍 [内联初始化] DOMContentLoaded 触发');
+        
+        // ===== 事件委托：所有按钮点击都能捕获到 =====
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            
+            const onclickAttr = btn.getAttribute('onclick') || '';
+            
+            // 解析报告按钮（双重保险：onclick + 事件委托）
+            if (onclickAttr.includes('__parseTestReport') || btn.innerText.includes('解析报告')) {
+                console.log('📋 [事件委托] 捕获到解析报告按钮点击');
+                e.preventDefault();
+                if (typeof __parseTestReport === 'function') {
+                    __parseTestReport(btn);
+                }
+            }
+            
+            // 重新生成脚本按钮
+            if (onclickAttr.includes('__generateTestScript') || btn.innerText.includes('重新生成')) {
+                console.log('🔄 [事件委托] 捕获到重新生成按钮点击');
+                e.preventDefault();
+                if (typeof __generateTestScript === 'function') {
+                    __generateTestScript(btn);
+                }
+            }
+            
+            // 复制脚本按钮
+            if (onclickAttr.includes('__copyTestScript') || (btn.innerText.includes('复制脚本') && btn.closest('.test-mode-section'))) {
+                console.log('📋 [事件委托] 捕获到复制脚本按钮点击');
+                e.preventDefault();
+                if (typeof __copyTestScript === 'function') {
+                    __copyTestScript(btn);
+                }
+            }
+            
+            // 执行脚本按钮
+            if (onclickAttr.includes('__executeTestScript') || (btn.innerText.includes('执行脚本') && btn.closest('.test-mode-section'))) {
+                console.log('▶️ [事件委托] 捕获到执行脚本按钮点击');
+                e.preventDefault();
+                if (typeof __executeTestScript === 'function') {
+                    __executeTestScript(btn);
+                }
+            }
+            
+            // 写入日志轨迹按钮
+            if (onclickAttr.includes('__writeLogTrace') || btn.innerText.includes('写入日志轨迹')) {
+                console.log('📝 [事件委托] 捕获到写入日志轨迹按钮点击');
+                e.preventDefault();
+                if (typeof __writeLogTrace === 'function') {
+                    __writeLogTrace(btn);
+                }
+            }
+        });
+        
+        console.log('🔍 [内联初始化] 事件委托已绑定');
+        
+        // 等 main.js 渲染完项目后，自动生成脚本
+        setTimeout(function() {
+            console.log('🔍 [内联初始化] 500ms 后自动生成脚本');
+            document.querySelectorAll('[data-project-id]').forEach(function(el) {
+                const outputEl = el.querySelector('.field-testScriptOutput');
+                if (outputEl && !outputEl.value) {
+                    const regenBtn = el.querySelector('[onclick*="__generateTestScript"]');
+                    if (regenBtn) {
+                        __generateTestScript(regenBtn);
+                    }
+                }
+            });
+        }, 800);
+        
+        // 监听关键输入框变化，自动更新脚本
+        document.addEventListener('input', function(e) {
+            const target = e.target;
+            if (target.classList.contains('field-projectName') ||
+                target.classList.contains('field-requirement') ||
+                target.classList.contains('field-stage') ||
+                target.classList.contains('field-currentProcess')) {
+                const contentEl = target.closest('[data-project-id]');
+                if (contentEl) {
+                    const regenBtn = contentEl.querySelector('[onclick*="__generateTestScript"]');
+                    if (regenBtn) {
+                        // 防抖
+                        clearTimeout(target._regenTimer);
+                        target._regenTimer = setTimeout(function() {
+                            __generateTestScript(regenBtn);
+                        }, 300);
+                    }
+                }
+            }
+        });
+    });
+    
+    console.log('🔍 [内联函数] 全局函数已注册');
     </script>
 </head>
 <body>
@@ -261,7 +665,7 @@
                                 </div>
                                 <div class="form-group half">
                                     <label for="stage">阶段描述</label>
-                                    <input type="text" class="field-stage" placeholder="如：物理碰撞检测" autocomplete="off">
+                                    <textarea class="field-stage" rows="2" placeholder="如：物理碰撞检测" autocomplete="off"></textarea>
                                 </div>
                             </div>
 
@@ -353,9 +757,9 @@
                                         <textarea class="field-testScriptOutput" rows="6" readonly placeholder="请填写工程名称、需求和阶段描述..."></textarea>
                                     </div>
                                     <div class="form-row">
-                                        <button class="btn btn-primary btn-sm field-copyTestScriptBtn">📋 复制脚本</button>
-                                        <button class="btn btn-secondary btn-sm field-regenerateTestScriptBtn">🔄 重新生成</button>
-                                        <button class="btn btn-success btn-sm field-executeTestScriptBtn">▶️ 执行脚本</button>
+                                        <button class="btn btn-primary btn-sm field-copyTestScriptBtn" onclick="__copyTestScript(this)">📋 复制脚本</button>
+                                        <button class="btn btn-secondary btn-sm" onclick="__generateTestScript(this)">🔄 重新生成</button>
+                                        <button class="btn btn-success btn-sm" onclick="__executeTestScript(this)">▶️ 执行脚本</button>
                                     </div>
                                 </div>
                             </div>
@@ -377,6 +781,22 @@
                         </div>
 
                         <div class="step-body">
+                            <div class="card sub-card">
+                                <div class="card-header">
+                                    <h3 class="card-title">📋 测试报告解析</h3>
+                                    <div class="card-actions">
+                                        <button class="btn btn-primary btn-sm" onclick="__parseTestReport(this)">🔍 解析报告</button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>粘贴完整测试报告</label>
+                                    <textarea class="field-testReportRaw" rows="8" placeholder="粘贴完整的测试报告（包含验收结论、归因诊断、下一轮 Prompt 等）..."></textarea>
+                                </div>
+                                <div class="hint" style="font-size: 12px; color: #888; margin-top: -8px; margin-bottom: 8px;">
+                                    点击「解析报告」后，将自动提取不满意原因和下一轮 Prompt 到下方对应区域
+                                </div>
+                            </div>
+
                             <div class="card sub-card">
                                 <div class="card-header">
                                     <h3 class="card-title">📝 不满意原因提取</h3>
