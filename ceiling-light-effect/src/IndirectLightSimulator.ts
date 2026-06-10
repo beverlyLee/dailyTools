@@ -3,9 +3,9 @@ import {
   IndirectLightConfig,
   LightSourceData,
   BouncePoint,
-  gaussianFalloff,
   clamp,
-  lerp,
+  PHYSICS,
+  calculateAreaLightIlluminance,
 } from './types';
 import { CeilingGenerator } from './CeilingGenerator';
 
@@ -21,8 +21,11 @@ export class IndirectLightSimulator {
   private wallSamplePoints: THREE.Vector3[] = [];
   private ceilingSamplePoints: THREE.Vector3[] = [];
 
-  private wallBounceTexture: THREE.CanvasTexture | null = null;
-  private ceilingBounceTexture: THREE.CanvasTexture | null = null;
+  private cachedDirectLux: number = 0;
+  private cachedIndirectLux: number = 0;
+
+  private readonly VISUAL_INTENSITY_SCALE = 4.0;
+  private readonly LUX_CALIBRATION = 3.5;
 
   constructor(scene: THREE.Scene, ceilingGenerator: CeilingGenerator, config: IndirectLightConfig) {
     this.scene = scene;
@@ -42,8 +45,8 @@ export class IndirectLightSimulator {
     const roomConfig = this.ceilingGenerator.getRoomConfig();
     const { width, depth, height } = roomConfig;
 
-    const wallSamplesH = 12;
-    const wallSamplesV = 8;
+    const wallSamplesH = 10;
+    const wallSamplesV = 6;
 
     for (let i = 0; i < wallSamplesH; i++) {
       for (let j = 0; j < wallSamplesV; j++) {
@@ -84,7 +87,7 @@ export class IndirectLightSimulator {
       }
     }
 
-    const ceilingSamples = 8;
+    const ceilingSamples = 6;
     const ceilingHeight = height - this.ceilingGenerator.getCeilingConfig().drop;
 
     for (let i = 0; i < ceilingSamples; i++) {
@@ -102,11 +105,29 @@ export class IndirectLightSimulator {
     }
   }
 
+  private getWallNormal(point: THREE.Vector3): THREE.Vector3 {
+    const roomConfig = this.ceilingGenerator.getRoomConfig();
+    const eps = 0.02;
+
+    if (Math.abs(point.x + roomConfig.width / 2) < eps) {
+      return new THREE.Vector3(1, 0, 0);
+    } else if (Math.abs(point.x - roomConfig.width / 2) < eps) {
+      return new THREE.Vector3(-1, 0, 0);
+    } else if (Math.abs(point.z + roomConfig.depth / 2) < eps) {
+      return new THREE.Vector3(0, 0, 1);
+    } else {
+      return new THREE.Vector3(0, 0, -1);
+    }
+  }
+
   public updateLightSources(sources: LightSourceData[]): void {
     this.clearBounceLights();
     this.bouncePoints = [];
 
-    if (this.config.bounceCount <= 0) return;
+    if (this.config.bounceCount <= 0) {
+      this.updateStats(sources);
+      return;
+    }
 
     this.calculateFirstBounce(sources);
 
@@ -115,66 +136,48 @@ export class IndirectLightSimulator {
     }
 
     this.createBounceLights();
+    this.updateStats(sources);
   }
 
   private calculateFirstBounce(sources: LightSourceData[]): void {
     const allPoints = [...this.wallSamplePoints, ...this.ceilingSamplePoints];
-    const intensityScale = 2.5;
 
     for (const point of allPoints) {
-      let totalIntensity = 0;
+      let totalLux = 0;
       let totalColor = new THREE.Color(0, 0, 0);
 
+      const isWall = this.wallSamplePoints.some(p => p.distanceTo(point) < 0.01);
+      const normal = isWall
+        ? this.getWallNormal(point)
+        : new THREE.Vector3(0, -1, 0);
+
       for (const source of sources) {
-        const distance = point.distanceTo(source.position);
-        if (distance < 0.01) continue;
+        const lux = calculateAreaLightIlluminance(
+          source.intensity,
+          source.width,
+          source.height,
+          source.direction.clone().normalize(),
+          point,
+          normal,
+          source.position,
+          Math.PI / 2.5
+        );
 
-        const toPoint = new THREE.Vector3().subVectors(point, source.position).normalize();
-        const lightDir = source.direction.clone().normalize();
-        const cosAngle = toPoint.dot(lightDir);
-
-        if (cosAngle <= 0) continue;
-
-        const directFactor = cosAngle / (distance * distance);
-        const beamAngleRad = (source.type === 'area' ? Math.PI / 3 : Math.PI / 4);
-        const beamFactor = this.beamDistribution(cosAngle, beamAngleRad);
-
-        const intensity = source.intensity * directFactor * beamFactor * intensityScale;
-
-        if (intensity > 0.001) {
-          totalIntensity += intensity;
-          totalColor.add(source.color.clone().multiplyScalar(intensity));
+        if (lux > 0.001) {
+          totalLux += lux;
+          totalColor.add(source.color.clone().multiplyScalar(lux));
         }
       }
 
-      if (totalIntensity > 0.001) {
-        const isWall = this.wallSamplePoints.some(
-          (p) => p.distanceTo(point) < 0.01
-        );
+      if (totalLux > 0.01) {
         const albedo = isWall ? this.config.wallAlbedo : this.config.ceilingAlbedo;
 
-        const bounceColor = totalColor.clone().multiplyScalar(albedo);
-        const bounceIntensity = totalIntensity * albedo;
-
-        let normal: THREE.Vector3;
-        if (isWall) {
-          const roomConfig = this.ceilingGenerator.getRoomConfig();
-          if (Math.abs(point.x + roomConfig.width / 2) < 0.01) {
-            normal = new THREE.Vector3(1, 0, 0);
-          } else if (Math.abs(point.x - roomConfig.width / 2) < 0.01) {
-            normal = new THREE.Vector3(-1, 0, 0);
-          } else if (Math.abs(point.z + roomConfig.depth / 2) < 0.01) {
-            normal = new THREE.Vector3(0, 0, 1);
-          } else {
-            normal = new THREE.Vector3(0, 0, -1);
-          }
-        } else {
-          normal = new THREE.Vector3(0, -1, 0);
-        }
+        const bounceColor = totalColor.clone().multiplyScalar(albedo / totalLux);
+        const bounceIntensity = totalLux * albedo / Math.PI;
 
         this.bouncePoints.push({
           position: point.clone(),
-          normal,
+          normal: normal.clone(),
           color: bounceColor,
           intensity: bounceIntensity,
           bounceLevel: 1,
@@ -184,75 +187,55 @@ export class IndirectLightSimulator {
   }
 
   private calculateSubsequentBounces(bounceLevel: number): void {
-    const firstBouncePoints = this.bouncePoints.filter(
-      (p) => p.bounceLevel === bounceLevel
-    );
+    const prevBouncePoints = this.bouncePoints.filter(p => p.bounceLevel === bounceLevel);
 
-    if (firstBouncePoints.length === 0) return;
+    if (prevBouncePoints.length === 0) return;
 
     const allPoints = [...this.wallSamplePoints, ...this.ceilingSamplePoints];
     const newBouncePoints: BouncePoint[] = [];
 
+    const decayFactor = Math.pow(PHYSICS.INDIRECT_BOUNCE_DECAY, bounceLevel);
+
     for (const point of allPoints) {
-      let totalIntensity = 0;
+      let totalLux = 0;
       let totalColor = new THREE.Color(0, 0, 0);
 
-      for (const bouncePoint of firstBouncePoints) {
-        const distance = point.distanceTo(bouncePoint.position);
-        if (distance < 0.1) continue;
+      const isWall = this.wallSamplePoints.some(p => p.distanceTo(point) < 0.01);
+      const normal = isWall
+        ? this.getWallNormal(point)
+        : new THREE.Vector3(0, -1, 0);
 
+      for (const bouncePoint of prevBouncePoints) {
         const toPoint = new THREE.Vector3()
           .subVectors(point, bouncePoint.position)
           .normalize();
-        const cosIncoming = toPoint.dot(bouncePoint.normal);
 
-        if (cosIncoming <= 0) continue;
+        const distance = point.distanceTo(bouncePoint.position);
+        if (distance < 0.1) continue;
 
-        const isWall = this.wallSamplePoints.some(
-          (p) => p.distanceTo(point) < 0.01
-        );
-        let outgoingNormal: THREE.Vector3;
-        if (isWall) {
-          const roomConfig = this.ceilingGenerator.getRoomConfig();
-          if (Math.abs(point.x + roomConfig.width / 2) < 0.01) {
-            outgoingNormal = new THREE.Vector3(1, 0, 0);
-          } else if (Math.abs(point.x - roomConfig.width / 2) < 0.01) {
-            outgoingNormal = new THREE.Vector3(-1, 0, 0);
-          } else if (Math.abs(point.z + roomConfig.depth / 2) < 0.01) {
-            outgoingNormal = new THREE.Vector3(0, 0, 1);
-          } else {
-            outgoingNormal = new THREE.Vector3(0, 0, -1);
-          }
-        } else {
-          outgoingNormal = new THREE.Vector3(0, -1, 0);
-        }
+        const cosOut = toPoint.dot(bouncePoint.normal);
+        if (cosOut <= 0) continue;
 
-        const cosOutgoing = -toPoint.dot(outgoingNormal);
-        if (cosOutgoing <= 0) continue;
+        const cosIn = -toPoint.dot(normal);
+        if (cosIn <= 0) continue;
 
-        const lambertFactor = cosIncoming * cosOutgoing;
-        const distanceFactor = 1 / (distance * distance + 0.1);
-        const intensity = bouncePoint.intensity * lambertFactor * distanceFactor * 0.5;
+        const intensity = bouncePoint.intensity * cosOut * cosIn / (distance * distance);
+        const lux = intensity * decayFactor;
 
-        if (intensity > 0.0001) {
-          totalIntensity += intensity;
-          totalColor.add(bouncePoint.color.clone().multiplyScalar(intensity));
+        if (lux > 0.001) {
+          totalLux += lux;
+          totalColor.add(bouncePoint.color.clone().multiplyScalar(lux));
         }
       }
 
-      if (totalIntensity > 0.001) {
-        const isWall = this.wallSamplePoints.some(
-          (p) => p.distanceTo(point) < 0.01
-        );
+      if (totalLux > 0.01) {
         const albedo = isWall ? this.config.wallAlbedo : this.config.ceilingAlbedo;
 
         newBouncePoints.push({
           position: point.clone(),
-          normal: isWall
-            ? new THREE.Vector3(0, 0, 1)
-            : new THREE.Vector3(0, -1, 0),
-          color: totalColor.clone().multiplyScalar(albedo),
-          intensity: totalIntensity * albedo,
+          normal: normal.clone(),
+          color: totalColor.clone().multiplyScalar(albedo / totalLux),
+          intensity: totalLux * albedo / Math.PI,
           bounceLevel: bounceLevel + 1,
         });
       }
@@ -261,25 +244,18 @@ export class IndirectLightSimulator {
     this.bouncePoints.push(...newBouncePoints);
   }
 
-  private beamDistribution(cosAngle: number, beamAngleRad: number): number {
-    const angle = Math.acos(clamp(cosAngle, -1, 1));
-    if (angle >= beamAngleRad) return 0;
-
-    const t = angle / beamAngleRad;
-    return Math.pow(1 - t, 1.5);
-  }
-
   private createBounceLights(): void {
-    const maxLights = 40;
+    const maxLights = 36;
     const sortedPoints = [...this.bouncePoints]
       .sort((a, b) => b.intensity - a.intensity)
       .slice(0, maxLights);
 
     for (const point of sortedPoints) {
+      const visualIntensity = point.intensity * this.VISUAL_INTENSITY_SCALE;
       const light = new THREE.PointLight(
         point.color,
-        point.intensity * 8,
-        15,
+        visualIntensity,
+        12,
         2
       );
       light.position.copy(point.position);
@@ -289,12 +265,63 @@ export class IndirectLightSimulator {
   }
 
   private clearBounceLights(): void {
-    this.bounceLights.forEach((light) => light.dispose());
+    this.bounceLights.forEach(light => light.dispose());
     this.bounceLights = [];
 
     while (this.indirectLightGroup.children.length > 0) {
       this.indirectLightGroup.remove(this.indirectLightGroup.children[0]);
     }
+  }
+
+  private updateStats(sources: LightSourceData[]): void {
+    let directTotal = 0;
+    let indirectTotal = 0;
+    let sampleCount = 0;
+
+    const wallUpperPoints = this.wallSamplePoints.filter(p => {
+      const height = this.ceilingGenerator.getRoomConfig().height;
+      return p.y > height * 0.4 && p.y < height * 0.7;
+    });
+
+    for (const point of wallUpperPoints) {
+      const normal = this.getWallNormal(point);
+
+      let directLux = 0;
+      for (const source of sources) {
+        directLux += calculateAreaLightIlluminance(
+          source.intensity,
+          source.width,
+          source.height,
+          source.direction.clone().normalize(),
+          point,
+          normal,
+          source.position,
+          Math.PI / 2.5
+        );
+      }
+
+      let indirectLux = 0;
+      for (const bouncePoint of this.bouncePoints) {
+        const toPoint = new THREE.Vector3()
+          .subVectors(point, bouncePoint.position)
+          .normalize();
+        const distance = point.distanceTo(bouncePoint.position);
+        if (distance < 0.1) continue;
+
+        const cosOut = toPoint.dot(bouncePoint.normal);
+        const cosIn = -toPoint.dot(normal);
+        if (cosOut <= 0 || cosIn <= 0) continue;
+
+        indirectLux += bouncePoint.intensity * cosOut * cosIn / (distance * distance);
+      }
+
+      directTotal += directLux;
+      indirectTotal += indirectLux;
+      sampleCount++;
+    }
+
+    this.cachedDirectLux = sampleCount > 0 ? directTotal / sampleCount : 0;
+    this.cachedIndirectLux = sampleCount > 0 ? indirectTotal / sampleCount : 0;
   }
 
   public updateConfig(config: Partial<IndirectLightConfig>): void {
@@ -309,90 +336,24 @@ export class IndirectLightSimulator {
     return [...this.bouncePoints];
   }
 
-  public calculateAverageWallBrightness(sources: LightSourceData[]): number {
-    let totalBrightness = 0;
-    let sampleCount = 0;
-
-    const wallPoints = this.wallSamplePoints;
-    const luxConversionFactor = 150;
-
-    for (const point of wallPoints) {
-      let brightness = 0;
-
-      for (const source of sources) {
-        const distance = point.distanceTo(source.position);
-        if (distance < 0.01) continue;
-
-        const toPoint = new THREE.Vector3().subVectors(point, source.position).normalize();
-        const cosAngle = toPoint.dot(source.direction.clone().normalize());
-
-        if (cosAngle <= 0) continue;
-
-        const directFactor = cosAngle / (distance * distance + 0.1);
-        brightness += source.intensity * directFactor * 0.08;
-      }
-
-      for (const bouncePoint of this.bouncePoints) {
-        const distance = point.distanceTo(bouncePoint.position);
-        if (distance < 0.1) continue;
-
-        const toPoint = new THREE.Vector3()
-          .subVectors(point, bouncePoint.position)
-          .normalize();
-        const cosIncoming = toPoint.dot(bouncePoint.normal);
-
-        if (cosIncoming <= 0) continue;
-
-        const factor = cosIncoming / (distance * distance + 0.5);
-        brightness += bouncePoint.intensity * factor * 0.5;
-      }
-
-      totalBrightness += brightness;
-      sampleCount++;
-    }
-
-    const avgBrightness = sampleCount > 0 ? totalBrightness / sampleCount : 0;
-    return avgBrightness * luxConversionFactor;
+  public calculateAverageWallBrightness(_sources: LightSourceData[]): number {
+    return (this.cachedDirectLux + this.cachedIndirectLux) * this.LUX_CALIBRATION;
   }
 
-  public getIndirectContributionRatio(sources: LightSourceData[]): number {
-    let directBrightness = 0;
-    let indirectBrightness = 0;
+  public getIndirectContributionRatio(_sources: LightSourceData[]): number {
+    const total = this.cachedDirectLux + this.cachedIndirectLux;
+    if (total <= 0) return 0.35;
 
-    const wallPoints = this.wallSamplePoints.slice(0, 20);
+    const ratio = this.cachedIndirectLux / total;
+    return clamp(ratio, PHYSICS.MIN_INDIRECT_RATIO, PHYSICS.MAX_INDIRECT_RATIO);
+  }
 
-    for (const point of wallPoints) {
-      for (const source of sources) {
-        const distance = point.distanceTo(source.position);
-        if (distance < 0.01) continue;
+  public getDirectLux(): number {
+    return this.cachedDirectLux;
+  }
 
-        const toPoint = new THREE.Vector3().subVectors(point, source.position).normalize();
-        const cosAngle = toPoint.dot(source.direction.clone().normalize());
-
-        if (cosAngle <= 0) continue;
-
-        const directFactor = cosAngle / (distance * distance + 0.1);
-        directBrightness += source.intensity * directFactor * 0.08;
-      }
-
-      for (const bouncePoint of this.bouncePoints) {
-        const distance = point.distanceTo(bouncePoint.position);
-        if (distance < 0.1) continue;
-
-        const toPoint = new THREE.Vector3()
-          .subVectors(point, bouncePoint.position)
-          .normalize();
-        const cosIncoming = toPoint.dot(bouncePoint.normal);
-
-        if (cosIncoming <= 0) continue;
-
-        const factor = cosIncoming / (distance * distance + 0.5);
-        indirectBrightness += bouncePoint.intensity * factor * 0.5;
-      }
-    }
-
-    const total = directBrightness + indirectBrightness;
-    return total > 0 ? indirectBrightness / total : 0;
+  public getIndirectLux(): number {
+    return this.cachedIndirectLux;
   }
 
   public rebuild(): void {
@@ -401,7 +362,5 @@ export class IndirectLightSimulator {
 
   public dispose(): void {
     this.clearBounceLights();
-    if (this.wallBounceTexture) this.wallBounceTexture.dispose();
-    if (this.ceilingBounceTexture) this.ceilingBounceTexture.dispose();
   }
 }

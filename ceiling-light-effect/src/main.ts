@@ -71,12 +71,12 @@ class CeilingLightPreviewer {
     this.scene.fog = new THREE.Fog(0x0a0a0a, 10, 50);
 
     this.camera = new THREE.PerspectiveCamera(
-      50,
+      55,
       window.innerWidth / window.innerHeight,
       0.1,
       100
     );
-    this.camera.position.set(5, 3.5, 6);
+    this.camera.position.set(6.5, 3.8, 5.5);
 
     this.container = document.body;
 
@@ -89,16 +89,16 @@ class CeilingLightPreviewer {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.1;
+    this.renderer.toneMappingExposure = 1.15;
     this.container.appendChild(this.renderer.domElement);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
     this.controls.maxPolarAngle = Math.PI / 2 - 0.05;
-    this.controls.minDistance = 2;
-    this.controls.maxDistance = 20;
-    this.controls.target.set(0, 1.0, 0);
+    this.controls.minDistance = 3;
+    this.controls.maxDistance = 25;
+    this.controls.target.set(0, 1.2, 0);
 
     this.ceilingGenerator = new CeilingGenerator(
       this.scene,
@@ -324,8 +324,8 @@ class CeilingLightPreviewer {
   }
 
   private updateWallWash(): void {
-    this.wallWashRenderer.updateLightColor(this.lightConfig.color);
-    this.wallWashRenderer.updateLightIntensity(this.lightConfig.intensity);
+    const sources = this.lightEditor.getLightSources();
+    this.wallWashRenderer.updateFromLightSources(sources);
   }
 
   private updateStats(): void {
