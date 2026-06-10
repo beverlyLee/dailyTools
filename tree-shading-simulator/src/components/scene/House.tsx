@@ -1,5 +1,4 @@
-import { useMemo, useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useMemo, useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { useSimulationStore } from '../../store/useSimulationStore';
 import type { WindowData } from '../../types';
@@ -8,7 +7,7 @@ import {
   calculateSolarAltitude,
   DEFAULT_SOLAR_AZIMUTH,
 } from '../../utils/solar';
-import { calculateShadowProjection, pointInShadowEllipse } from '../../utils/shadow';
+import { pointInShadowEllipse } from '../../utils/shadow';
 
 function WindowPane({
   data,
@@ -69,52 +68,98 @@ function WindowPane({
 
 function FacadeShadowOverlay() {
   const overlayRef = useRef<THREE.Mesh>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const textureRef = useRef<THREE.CanvasTexture | null>(null);
+  const initializedRef = useRef(false);
+
   const season = useSimulationStore((s) => s.season);
-  const tree = useSimulationStore((s) => s.tree);
+  const treeSpecies = useSimulationStore((s) => s.tree.species);
+  const treeYears = useSimulationStore((s) => s.tree.years);
+  const treePosition = useSimulationStore((s) => s.tree.position);
   const latitude = useSimulationStore((s) => s.latitude);
   const solarAzimuth = useSimulationStore(
     (s) => s.solarAzimuth || DEFAULT_SOLAR_AZIMUTH
   );
 
-  useFrame(() => {
-    if (!overlayRef.current) return;
-    const canopy = calculateCanopySize(tree.species, tree.years);
-    const isWinterDeciduous = season === 'winter' && tree.species === 'deciduous';
+  const TEX_WIDTH = 256;
+  const TEX_HEIGHT = 192;
+  const SAMPLES_X = 32;
+  const SAMPLES_Y = 24;
+
+  useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = TEX_WIDTH;
+    canvas.height = TEX_HEIGHT;
+    canvasRef.current = canvas;
+
+    const ctx = canvas.getContext('2d');
+    ctxRef.current = ctx;
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.magFilter = THREE.LinearFilter;
+    texture.minFilter = THREE.LinearFilter;
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    textureRef.current = texture;
+
+    if (overlayRef.current) {
+      const mat = overlayRef.current.material as THREE.MeshBasicMaterial;
+      mat.map = texture;
+      mat.transparent = true;
+      mat.needsUpdate = true;
+    }
+
+    return () => {
+      if (textureRef.current) {
+        textureRef.current.dispose();
+        textureRef.current = null;
+      }
+      canvasRef.current = null;
+      ctxRef.current = null;
+      initializedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const ctx = ctxRef.current;
+    const texture = textureRef.current;
+    if (!ctx || !texture) return;
+
+    const canopy = calculateCanopySize(treeSpecies, treeYears);
+    const isWinterDeciduous = season === 'winter' && treeSpecies === 'deciduous';
     const effectiveCanopy = isWinterDeciduous
-      ? { ...canopy, radius: 0.2, height: 0.2 }
+      ? { ...canopy, radius: 0.2, height: 0.2, trunkHeight: canopy.trunkHeight }
       : canopy;
     const altitude = calculateSolarAltitude(latitude, season);
 
-    const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 192;
-    const ctx = canvas.getContext('2d')!;
-    ctx.clearRect(0, 0, 256, 192);
+    ctx.clearRect(0, 0, TEX_WIDTH, TEX_HEIGHT);
 
     if (!isWinterDeciduous) {
       const houseFacadeZ = 4.01;
-      const samplesX = 32;
-      const samplesY = 24;
 
-      for (let i = 0; i < samplesX; i++) {
-        for (let j = 0; j < samplesY; j++) {
-          const px = -6 + (i / samplesX) * 12 + (6 / samplesX);
-          const py = 0 + (j / samplesY) * 7 + (3.5 / samplesY);
+      for (let i = 0; i < SAMPLES_X; i++) {
+        for (let j = 0; j < SAMPLES_Y; j++) {
+          const px = -6 + ((i + 0.5) / SAMPLES_X) * 12;
+          const py = ((j + 0.5) / SAMPLES_Y) * 7;
           const point: [number, number, number] = [px, py, houseFacadeZ];
 
           const inShadow = pointInShadowEllipse(
             point,
-            tree.position,
+            treePosition,
             effectiveCanopy,
             altitude,
             solarAzimuth
           );
 
           if (inShadow) {
-            const cx = ((i + 0.5) / samplesX) * 256;
-            const cy = 192 - ((j + 0.5) / samplesY) * 192;
-            const cellW = 256 / samplesX + 1;
-            const cellH = 192 / samplesY + 1;
+            const cx = ((i + 0.5) / SAMPLES_X) * TEX_WIDTH;
+            const cy = TEX_HEIGHT - ((j + 0.5) / SAMPLES_Y) * TEX_HEIGHT;
+            const cellW = TEX_WIDTH / SAMPLES_X + 2;
+            const cellH = TEX_HEIGHT / SAMPLES_Y + 2;
             const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(cellW, cellH));
             grad.addColorStop(0, 'rgba(0,0,0,0.55)');
             grad.addColorStop(1, 'rgba(0,0,0,0)');
@@ -125,17 +170,13 @@ function FacadeShadowOverlay() {
       }
     }
 
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.needsUpdate = true;
-    const mat = overlayRef.current.material as THREE.MeshBasicMaterial;
-    if (mat.map) {
-      (mat.map as THREE.Texture).dispose();
+    texture.needsUpdate = true;
+
+    if (overlayRef.current) {
+      const mat = overlayRef.current.material as THREE.MeshBasicMaterial;
+      mat.opacity = isWinterDeciduous ? 0 : 0.85;
     }
-    mat.map = tex;
-    mat.opacity = isWinterDeciduous ? 0 : 0.85;
-    mat.transparent = true;
-    mat.needsUpdate = true;
-  });
+  }, [season, treeSpecies, treeYears, treePosition[0], treePosition[1], treePosition[2], latitude, solarAzimuth]);
 
   return (
     <mesh ref={overlayRef} position={[0, 3.5, 4.04]}>
