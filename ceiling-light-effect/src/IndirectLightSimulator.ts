@@ -24,9 +24,9 @@ export class IndirectLightSimulator {
   private cachedDirectLux: number = 0;
   private cachedIndirectLux: number = 0;
 
-  private readonly VISUAL_INTENSITY_SCALE = 5.0;
-  private readonly LUX_CALIBRATION = 4.5;
-  private readonly INDIRECT_RATIO_CALIBRATION = 1.15;
+  private readonly VISUAL_INTENSITY_SCALE = 3.5;
+  private readonly LUX_CALIBRATION = 4.2;
+  private readonly INDIRECT_RATIO_CALIBRATION = 1.18;
 
   constructor(scene: THREE.Scene, ceilingGenerator: CeilingGenerator, config: IndirectLightConfig) {
     this.scene = scene;

@@ -63,7 +63,7 @@ export class LightEditor {
     ) => {
       const areaLight = new THREE.RectAreaLight(
         this.config.color,
-        this.config.intensity / 4,
+        (this.config.intensity / 4) * 0.35,
         length,
         lightWidth
       );
@@ -112,13 +112,14 @@ export class LightEditor {
       }
 
       mesh.position.y -= 0.005;
+      mesh.visible = false;
       this.lightMeshes.push(mesh);
       this.lightGroup.add(mesh);
 
       for (let i = 0; i < 5; i++) {
         const pointLight = new THREE.PointLight(
           this.config.color,
-          (this.config.intensity / 4) * 0.15,
+          (this.config.intensity / 4) * 0.08,
           10,
           2
         );
@@ -174,6 +175,7 @@ export class LightEditor {
         }
       }
 
+      tubeMesh.visible = false;
       this.lightMeshes.push(tubeMesh);
       this.lightGroup.add(tubeMesh);
 
@@ -181,7 +183,7 @@ export class LightEditor {
       for (let i = 0; i <= segments; i++) {
         const pointLight = new THREE.PointLight(
           this.config.color,
-          (this.config.intensity / 4) * (1 / segments) * 0.8,
+          (this.config.intensity / 4) * (1 / segments) * 0.4,
           8,
           2
         );
@@ -199,7 +201,7 @@ export class LightEditor {
 
       const areaLight = new THREE.RectAreaLight(
         this.config.color,
-        (this.config.intensity / 4) * 0.6,
+        (this.config.intensity / 4) * 0.3,
         length,
         tubeRadius * 2
       );

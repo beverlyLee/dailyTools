@@ -68,15 +68,15 @@ class CeilingLightPreviewer {
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x0a0a0a);
-    this.scene.fog = new THREE.Fog(0x0a0a0a, 10, 50);
+    this.scene.fog = new THREE.Fog(0x0a0a0a, 18, 60);
 
     this.camera = new THREE.PerspectiveCamera(
-      50,
+      55,
       window.innerWidth / window.innerHeight,
       0.1,
       100
     );
-    this.camera.position.set(8.0, 3.5, 6.5);
+    this.camera.position.set(9.5, 2.8, 8.0);
 
     this.container = document.body;
 
@@ -89,7 +89,7 @@ class CeilingLightPreviewer {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.15;
+    this.renderer.toneMappingExposure = 0.9;
     this.container.appendChild(this.renderer.domElement);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -98,7 +98,7 @@ class CeilingLightPreviewer {
     this.controls.maxPolarAngle = Math.PI / 2 - 0.05;
     this.controls.minDistance = 3;
     this.controls.maxDistance = 25;
-    this.controls.target.set(0, 1.4, 0);
+    this.controls.target.set(0, 1.3, 0);
 
     this.ceilingGenerator = new CeilingGenerator(
       this.scene,
@@ -134,7 +134,7 @@ class CeilingLightPreviewer {
   }
 
   private addAmbientLight(): void {
-    const ambient = new THREE.AmbientLight(0xffffff, 0.1);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.03);
     this.scene.add(ambient);
   }
 
@@ -324,6 +324,7 @@ class CeilingLightPreviewer {
   }
 
   private updateWallWash(): void {
+    this.wallWashRenderer.updateConfig(this.wallWashConfig);
     const sources = this.lightEditor.getLightSources();
     this.wallWashRenderer.updateFromLightSources(sources);
   }
@@ -362,16 +363,16 @@ class CeilingLightPreviewer {
 
     switch (view) {
       case 'front':
-        this.camera.position.set(0, height * 0.5, distance * 0.8);
-        this.controls.target.set(0, height * 0.4, 0);
+        this.camera.position.set(0, height * 0.6, distance * 0.9);
+        this.controls.target.set(0, height * 0.45, 0);
         break;
       case 'side':
-        this.camera.position.set(distance * 0.8, height * 0.5, 0);
-        this.controls.target.set(0, height * 0.4, 0);
+        this.camera.position.set(distance * 0.9, height * 0.6, 0);
+        this.controls.target.set(0, height * 0.45, 0);
         break;
       case 'iso':
-        this.camera.position.set(distance * 0.6, height * 1.2, distance * 0.6);
-        this.controls.target.set(0, height * 0.4, 0);
+        this.camera.position.set(distance * 0.75, height * 1.0, distance * 0.75);
+        this.controls.target.set(0, height * 0.45, 0);
         break;
     }
   }

@@ -131,39 +131,40 @@ export class WallWashRenderer {
 
           float tiltFactor = sin(uTiltAngle);
           float beamRad = uBeamAngle * 3.14159 / 180.0;
-          float beamSpread = sin(beamRad * 0.5) * 0.6 + 0.2;
-          float verticalSpread = beamSpread + tiltFactor * 0.3 + uHaloSpread * 0.25;
+          float beamSpread = sin(beamRad * 0.5) * 1.0 + 0.15;
+          float verticalSpread = beamSpread + tiltFactor * 0.35 + uHaloSpread * 0.5;
 
           float mainBeam = 0.0;
           if (topY < verticalSpread) {
             float t = topY / verticalSpread;
-            mainBeam = pow(1.0 - t, 2.0);
+            mainBeam = pow(1.0 - t, 1.8);
           }
 
-          float softFalloff = exp(-topY * 2.0 / max(uHaloSpread, 0.1));
+          float softDecay = 2.5 / max(uHaloSpread + 0.25, 0.3);
+          float softFalloff = exp(-topY * softDecay);
 
-          float topGlow = exp(-topY * 8.0) * (0.4 + tiltFactor * 0.5);
+          float topGlow = exp(-topY * (10.0 - tiltFactor * 3.0)) * (0.5 + tiltFactor * 0.5);
 
-          float verticalWash = mainBeam * 0.5 + softFalloff * 0.35 + topGlow * 0.25;
+          float verticalWash = mainBeam * 0.45 + softFalloff * 0.35 + topGlow * 0.3;
 
-          float edgeFadeWidth = 0.08;
+          float edgeFadeWidth = 0.06;
           float leftEdge = smoothFalloff(vUv.x, edgeFadeWidth);
           float rightEdge = smoothFalloff(1.0 - vUv.x, edgeFadeWidth);
           float horizontalProfile = leftEdge * rightEdge;
-          horizontalProfile = mix(0.85, 1.0, horizontalProfile);
+          horizontalProfile = mix(0.8, 1.0, horizontalProfile);
 
           float wash = verticalWash * horizontalProfile;
 
-          float bottomFade = smoothFalloff(1.0 - vUv.y, 0.12);
-          wash *= mix(1.0, bottomFade, 0.6);
+          float bottomFade = smoothFalloff(1.0 - vUv.y, 0.15);
+          wash *= mix(1.0, bottomFade, 0.55);
 
-          float intensityMult = uIntensity * uLightIntensity * 2.5;
+          float intensityMult = uIntensity * uLightIntensity * 3.0;
           wash = wash * intensityMult;
 
           wash = clamp(wash, 0.0, 3.0);
 
           vec3 finalColor = uColor * wash;
-          float alpha = clamp(wash * 0.65, 0.0, 1.0);
+          float alpha = clamp(wash * 0.6, 0.0, 1.0);
 
           gl_FragColor = vec4(finalColor, alpha);
         }
