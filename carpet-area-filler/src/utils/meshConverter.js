@@ -1,6 +1,14 @@
 import * as THREE from 'three';
 import { getPolygonBounds } from './polygonClipping.js';
 
+export function worldTo3D(x, y, height = 0) {
+  return { x: x, y: height, z: y };
+}
+
+export function worldTo3DVector(x, y, height = 0) {
+  return new THREE.Vector3(x, height, y);
+}
+
 export function polygonToShape(polygon) {
   const shape = new THREE.Shape();
   
@@ -20,10 +28,6 @@ export function polygonToShape(polygon) {
 export function polygonToGeometry(polygon, height = 0.01, bevelEnabled = false) {
   const shape = polygonToShape(polygon);
   
-  const bounds = getPolygonBounds(polygon);
-  const centerX = (bounds.minX + bounds.maxX) / 2;
-  const centerY = (bounds.minY + bounds.maxY) / 2;
-  
   const extrudeSettings = {
     depth: height,
     bevelEnabled: bevelEnabled,
@@ -33,8 +37,6 @@ export function polygonToGeometry(polygon, height = 0.01, bevelEnabled = false) 
   };
   
   const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-  
-  geometry.translate(-centerX, -centerY, 0);
   
   geometry.rotateX(Math.PI / 2);
   
@@ -47,12 +49,6 @@ export function polygonToFlatGeometry(polygon) {
   const shape = polygonToShape(polygon);
   
   const geometry = new THREE.ShapeGeometry(shape);
-  
-  const bounds = getPolygonBounds(polygon);
-  const centerX = (bounds.minX + bounds.maxX) / 2;
-  const centerY = (bounds.minY + bounds.maxY) / 2;
-  
-  geometry.translate(-centerX, -centerY, 0);
   
   geometry.rotateX(Math.PI / 2);
   
@@ -138,11 +134,13 @@ export function createWallLine(points, height = 2.8, color = 0xcccccc) {
     });
     
     const wall = new THREE.Mesh(wallGeometry, wallMaterial);
-    wall.position.set(
+    
+    const midPoint = worldTo3D(
       (p1.x + p2.x) / 2,
-      height / 2,
-      (p1.y + p2.y) / 2
+      (p1.y + p2.y) / 2,
+      height / 2
     );
+    wall.position.set(midPoint.x, midPoint.y, midPoint.z);
     wall.rotation.y = -angle;
     wall.castShadow = true;
     wall.receiveShadow = true;
@@ -168,7 +166,12 @@ export function createObstacleMesh(obstacle, color = 0xff6b6b) {
     });
     
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(obstacle.position.x, height / 2 + 0.05, obstacle.position.y);
+    const pos = worldTo3D(
+      obstacle.position.x,
+      obstacle.position.y,
+      height / 2 + 0.05
+    );
+    mesh.position.set(pos.x, pos.y, pos.z);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     
@@ -226,15 +229,38 @@ export function createPolygonOutlineMesh(polygon, color = 0x00ff88, height = 0.0
     const lineMaterial = new THREE.MeshBasicMaterial({ color: color });
     
     const line = new THREE.Mesh(lineGeometry, lineMaterial);
-    line.position.set(
+    const midPoint = worldTo3D(
       (p1.x + p2.x) / 2,
-      height / 2 + 0.005,
-      (p1.y + p2.y) / 2
+      (p1.y + p2.y) / 2,
+      height / 2 + 0.005
     );
+    line.position.set(midPoint.x, midPoint.y, midPoint.z);
     line.rotation.y = -angle;
     
     group.add(line);
   }
   
   return group;
+}
+
+export function updateCarpetMaterials(carpetGroup, newMaterial, pileHeight) {
+  if (!carpetGroup) return;
+  
+  carpetGroup.children.forEach((child, index) => {
+    if (child.material) {
+      if (index === 0) {
+        const mat = newMaterial.clone();
+        mat.bumpScale = 0;
+        child.material = mat;
+      } else if (index === 1) {
+        const mat = newMaterial.clone();
+        mat.bumpScale = pileHeight * 0.3;
+        child.material = mat;
+      }
+    }
+  });
+  
+  if (carpetGroup.userData) {
+    carpetGroup.userData.pileHeight = pileHeight;
+  }
 }

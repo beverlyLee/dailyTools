@@ -7,7 +7,7 @@
   import { recommendCarpetSize, adjustCarpetPosition, findBestFitPosition } from './utils/sizeEngine.js';
   import { createCarpetMaterial, getCarpetTypes } from './utils/materialGenerator.js';
   import { checkCollision, createDoorSwingObstacle, createFurnitureLegObstacle, getObstaclePolygon, adjustPositionForObstacles } from './utils/collisionDetector.js';
-  import { createCarpetMesh, createRoomFloor, createWallLine, createObstacleMesh } from './utils/meshConverter.js';
+  import { createCarpetMesh, createRoomFloor, createWallLine, createObstacleMesh, worldTo3D, updateCarpetMaterials } from './utils/meshConverter.js';
   
   let canvasContainer;
   let topCanvas;
@@ -379,12 +379,10 @@
     if (!recommendedSize || !recommendedSize.clippedPolygon) return;
     
     const workingContour = contourPoints.slice(0, -1);
-    
     const size = recommendedSize;
     const isCircle = size.shape === 'circle';
     const width = isCircle ? size.diameter : size.width;
     const height = isCircle ? size.diameter : size.height;
-    
     const initPos = size.position || { x: 0, y: 0 };
     
     const adjustResult = adjustPositionForObstacles(
@@ -393,7 +391,10 @@
       workingContour, obstacles
     );
     
-    const carpetPoly = adjustResult.polygon;
+    const finalCenterX = adjustResult.x;
+    const finalCenterY = adjustResult.y;
+    let carpetPoly = adjustResult.polygon;
+    
     collisionInfo = {
       hasCollision: adjustResult.hasCollision,
       totalCollidingArea: adjustResult.collisionArea || 0,
@@ -401,43 +402,44 @@
         (adjustResult.collisionArea / getPolygonArea(carpetPoly)) : 0
     };
     
-    const polyKey = getPolygonKey(carpetPoly);
+    const polyBounds = getPolygonBounds(carpetPoly);
+    const polyCenterX = (polyBounds.minX + polyBounds.maxX) / 2;
+    const polyCenterY = (polyBounds.minY + polyBounds.maxY) / 2;
+    const centeredPoly = carpetPoly.map(p => ({
+      x: p.x - polyCenterX,
+      y: p.y - polyCenterY
+    }));
+    
     const materialResult = getCarpetMaterial(selectedCarpetType);
+    const polyKey = getPolygonKey(centeredPoly);
+    const centerKey = `${finalCenterX.toFixed(4)},${finalCenterY.toFixed(4)}`;
     
-    if (carpetMesh && polyKey === lastCarpetPolygonKey) {
-      carpetMesh.children.forEach(child => {
-        if (child.material) {
-          child.material = materialResult.material.clone();
-          if (child.geometry && child.geometry.type === 'ExtrudeGeometry') {
-            child.material.bumpScale = materialResult.pileHeight * 0.3;
+    const needsRebuild = !carpetMesh || polyKey !== lastCarpetPolygonKey;
+    
+    if (needsRebuild) {
+      if (carpetMesh) {
+        scene.remove(carpetMesh);
+        carpetMesh.traverse(child => {
+          if (child.geometry) child.geometry.dispose();
+          if (child.material) {
+            if (child.material.map) child.material.map.dispose();
+            if (child.material.bumpMap) child.material.bumpMap.dispose();
+            child.material.dispose();
           }
-        }
-      });
-      return;
+        });
+        carpetMesh = null;
+      }
+      
+      carpetMesh = createCarpetMesh(centeredPoly, materialResult.material, materialResult.pileHeight);
+      
+      const pos3D = worldTo3D(polyCenterX, polyCenterY);
+      carpetMesh.position.set(pos3D.x, pos3D.y, pos3D.z);
+      
+      scene.add(carpetMesh);
+      lastCarpetPolygonKey = polyKey;
+    } else {
+      updateCarpetMaterials(carpetMesh, materialResult.material, materialResult.pileHeight);
     }
-    
-    if (carpetMesh) {
-      scene.remove(carpetMesh);
-      carpetMesh.traverse(child => {
-        if (child.geometry) child.geometry.dispose();
-        if (child.material) {
-          if (child.material.map) child.material.map.dispose();
-          if (child.material.bumpMap) child.material.bumpMap.dispose();
-          child.material.dispose();
-        }
-      });
-      carpetMesh = null;
-    }
-    
-    carpetMesh = createCarpetMesh(carpetPoly, materialResult.material, materialResult.pileHeight);
-    
-    const bounds = getPolygonBounds(carpetPoly);
-    const centerX = (bounds.minX + bounds.maxX) / 2;
-    const centerZ = (bounds.minY + bounds.maxY) / 2;
-    carpetMesh.position.set(centerX, 0, centerZ);
-    
-    scene.add(carpetMesh);
-    lastCarpetPolygonKey = polyKey;
     
     drawTopView();
   }

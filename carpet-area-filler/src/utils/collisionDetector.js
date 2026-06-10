@@ -184,15 +184,13 @@ function evaluatePosition(centerX, centerY, width, height, isCircle, contourPoly
   
   const coverageRatio = clippedArea / originalArea;
   
-  if (coverageRatio < 0.6) {
+  if (coverageRatio < 0.3) {
     return { score: -Infinity, clippedArea, collisionArea: Infinity, clippedPolygon: clipped, coverageRatio };
   }
   
   const collisionResult = checkCollision(clipped, obstacles);
   
-  const collisionPenalty = collisionResult.totalCollidingArea * 10;
-  
-  const score = coverageRatio * 100 - collisionPenalty * 50;
+  const score = coverageRatio * 100 - collisionResult.totalCollidingArea * 2000 + clippedArea * 10;
   
   return {
     score,
