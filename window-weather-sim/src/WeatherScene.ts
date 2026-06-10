@@ -219,8 +219,8 @@ export class WeatherScene {
 
     const deltaTime = Math.min(this.clock.getDelta(), 0.1);
 
-    this.rainSystem.update(deltaTime);
     this.waterDetector.update(deltaTime);
+    this.rainSystem.update(deltaTime);
     this.airDetector.update(deltaTime);
     this.drainVisualizer.update(deltaTime);
     this.controls.update();

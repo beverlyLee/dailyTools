@@ -9,7 +9,7 @@ export class DrainPathVisualizer {
   private flowPositions: Float32Array | null = null;
   private flowProgress: Float32Array | null = null;
   private flowPaths: THREE.Vector3[][] = [];
-  private maxFlowParticles: number = 300;
+  private maxFlowParticles: number = 600;
   private visible: boolean = true;
   private rainIntensity: number = 0;
   private drainHoles: THREE.Mesh[] = [];
@@ -111,11 +111,12 @@ export class DrainPathVisualizer {
     geometry.setAttribute('position', new THREE.BufferAttribute(this.flowPositions, 3));
 
     const material = new THREE.PointsMaterial({
-      color: 0x66b3ff,
-      size: 0.04,
+      color: 0x5cabff,
+      size: 0.08,
       transparent: true,
-      opacity: 0.8,
-      sizeAttenuation: true
+      opacity: 0.95,
+      sizeAttenuation: true,
+      depthWrite: false
     });
 
     this.flowParticles = new THREE.Points(geometry, material);
@@ -153,9 +154,9 @@ export class DrainPathVisualizer {
 
   private createPathLines(): void {
     const lineMaterial = new THREE.LineBasicMaterial({
-      color: 0x4dabf7,
+      color: 0x4da6ff,
       transparent: true,
-      opacity: 0.4
+      opacity: 0.7
     });
 
     this.flowPaths.forEach(path => {
@@ -179,11 +180,13 @@ export class DrainPathVisualizer {
   update(deltaTime: number): void {
     if (!this.flowParticles || !this.flowPositions || !this.flowProgress || !this.visible) return;
 
-    const speed = this.rainIntensity * 1.5 + 0.3;
-    const activeCount = Math.floor(this.maxFlowParticles * this.rainIntensity * 0.8);
+    const speed = this.rainIntensity * 2.5 + 0.8;
+    const minParticles = Math.floor(this.maxFlowParticles * 0.15);
+    const rainParticles = Math.floor(this.maxFlowParticles * this.rainIntensity * 0.7);
+    const activeCount = Math.max(minParticles, rainParticles);
 
     for (let i = 0; i < activeCount; i++) {
-      this.flowProgress[i] += deltaTime * speed * (0.7 + Math.random() * 0.6);
+      this.flowProgress[i] += deltaTime * speed * (0.8 + Math.random() * 0.5);
       
       if (this.flowProgress[i] >= 1) {
         this.flowProgress[i] = 0;

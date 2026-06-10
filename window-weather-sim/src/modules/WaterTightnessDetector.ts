@@ -74,12 +74,13 @@ export class WaterTightnessDetector {
     const material = new THREE.MeshBasicMaterial({
       map: this.stainTexture,
       transparent: true,
-      opacity: 0.8
+      opacity: 0.95,
+      depthWrite: false
     });
 
     this.stainMesh = new THREE.Mesh(geometry, material);
     this.stainMesh.rotation.x = -Math.PI / 2;
-    this.stainMesh.position.set(0, -dimensions.height / 2 + 0.031, 0.25);
+    this.stainMesh.position.set(0, -dimensions.height / 2 + 0.032, 0.25);
     this.scene.add(this.stainMesh);
   }
 
@@ -113,6 +114,8 @@ export class WaterTightnessDetector {
     gap: WindowGap,
     deltaTime: number
   ): boolean {
+    if (vz <= 0) return false;
+
     const gapLeft = gap.position.x - gap.width / 2;
     const gapRight = gap.position.x + gap.width / 2;
     const gapBottom = gap.position.y - gap.height / 2;
@@ -120,15 +123,23 @@ export class WaterTightnessDetector {
     const gapFront = gap.position.z - gap.depth / 2;
     const gapBack = gap.position.z + gap.depth / 2;
 
-    const nextX = px + vx * deltaTime;
-    const nextY = py + vy * deltaTime;
+    const inXRange = px > gapLeft - 0.02 && px < gapRight + 0.02;
+    const inYRange = py > gapBottom - 0.02 && py < gapTop + 0.02;
+    if (!inXRange || !inYRange) return false;
+
     const nextZ = pz + vz * deltaTime;
+    const crossesGap = pz < gapBack && nextZ > gapFront;
 
-    const inX = nextX > gapLeft && nextX < gapRight;
-    const inY = nextY > gapBottom && nextY < gapTop;
-    const crossZ = pz <= gapFront && nextZ >= gapFront;
+    if (!crossesGap) return false;
 
-    return inX && inY && crossZ && vz > 0;
+    const t = (gapFront - pz) / (vz * deltaTime || 0.001);
+    const crossX = px + vx * deltaTime * Math.max(0, Math.min(1, t));
+    const crossY = py + vy * deltaTime * Math.max(0, Math.min(1, t));
+
+    const inX = crossX > gapLeft && crossX < gapRight;
+    const inY = crossY > gapBottom && crossY < gapTop;
+
+    return inX && inY;
   }
 
   private addSplash(x: number, y: number, z: number): void {
@@ -158,15 +169,19 @@ export class WaterTightnessDetector {
   private addWaterStain(x: number, amount: number): void {
     const dimensions = this.windowSystem.getDimensions();
     const stainX = (x + (dimensions.width + 0.2) / 2) / (dimensions.width + 0.2);
+
+    const waterFactor = Math.min(1, this.waterAmount / this.dangerThreshold);
+    const baseSize = 0.06 + waterFactor * 0.1;
+    const baseAlpha = 0.55 + waterFactor * 0.35;
     
     this.waterStains.push({
-      x: stainX + (Math.random() - 0.5) * 0.05,
-      y: 0.45 + Math.random() * 0.35,
-      size: 0.04 + amount * 0.08 + Math.random() * 0.02,
-      alpha: 0.5 + amount * 0.4
+      x: stainX + (Math.random() - 0.5) * 0.08,
+      y: 0.4 + Math.random() * 0.5,
+      size: baseSize + amount * 0.1 + Math.random() * 0.04,
+      alpha: baseAlpha + amount * 0.2
     });
 
-    if (this.waterStains.length > 200) {
+    if (this.waterStains.length > 500) {
       this.waterStains.shift();
     }
 
@@ -186,18 +201,19 @@ export class WaterTightnessDetector {
       const x = stain.x * canvas.width;
       const y = stain.y * canvas.height;
       const radiusX = stain.size * canvas.width;
-      const radiusY = stain.size * canvas.height * 0.6;
+      const radiusY = stain.size * canvas.height * 0.55;
       const alpha = stain.alpha;
 
       const gradient = ctx.createRadialGradient(x, y, 0, x, y, Math.max(radiusX, radiusY));
-      gradient.addColorStop(0, `rgba(60, 110, 170, ${alpha})`);
-      gradient.addColorStop(0.4, `rgba(70, 120, 180, ${alpha * 0.75})`);
-      gradient.addColorStop(0.7, `rgba(80, 130, 190, ${alpha * 0.45})`);
-      gradient.addColorStop(1, 'rgba(100, 150, 200, 0)');
+      gradient.addColorStop(0, `rgba(30, 80, 140, ${alpha})`);
+      gradient.addColorStop(0.3, `rgba(40, 95, 160, ${alpha * 0.85})`);
+      gradient.addColorStop(0.6, `rgba(55, 115, 180, ${alpha * 0.6})`);
+      gradient.addColorStop(0.85, `rgba(80, 140, 200, ${alpha * 0.3})`);
+      gradient.addColorStop(1, 'rgba(100, 160, 210, 0)');
 
       ctx.fillStyle = gradient;
       ctx.beginPath();
-      ctx.ellipse(x, y, radiusX, radiusY, 0, 0, Math.PI * 2);
+      ctx.ellipse(x, y, radiusX, radiusY, (Math.random() - 0.5) * 0.3, 0, Math.PI * 2);
       ctx.fill();
     });
 
@@ -210,12 +226,15 @@ export class WaterTightnessDetector {
     const activeCount = this.rainSystem.getActiveParticleCount();
     const gaps = this.windowSystem.getGaps();
     const rainIntensity = this.rainSystem.getConfig().intensity;
+    const windowType = this.windowSystem.getWindowType();
 
     const dimensions = this.windowSystem.getDimensions();
 
     let waterThisFrame = 0;
-    let shouldAddStain = false;
+    let penetrationEvents = 0;
     let lastStainX = 0;
+
+    const gapMultiplier = windowType === 'sliding' ? 1.0 : 0.08;
 
     for (let i = 0; i < activeCount; i++) {
       const i3 = i * 3;
@@ -226,19 +245,20 @@ export class WaterTightnessDetector {
       const vy = velocities[i3 + 1];
       const vz = velocities[i3 + 2];
 
-      if (pz > -0.8 && pz < 0.05 && py < dimensions.height / 2 && py > -dimensions.height / 2) {
+      if (pz > -1.0 && pz < 0.1 && py < dimensions.height / 2 + 0.2 && py > -dimensions.height / 2 - 0.2) {
         for (const gap of gaps) {
           if (this.checkGapCollision(px, py, pz, vx, vy, vz, gap, deltaTime)) {
             const gapSize = gap.width * gap.height;
-            const penetrationAmount = Math.min(1, gapSize * 200) * 0.6;
-            const windFactor = Math.min(1, Math.abs(vz) / 5);
+            const penetrationAmount = Math.min(1, gapSize * 300);
+            const windFactor = Math.min(1, Math.abs(vz) / 4);
+            const rainFactor = 0.6 + rainIntensity * 0.4;
             
-            const totalProbability = penetrationAmount * windFactor * 0.8;
+            const totalProbability = penetrationAmount * windFactor * rainFactor * gapMultiplier;
             
             if (Math.random() < totalProbability) {
-              waterThisFrame += 0.06 + Math.random() * 0.04;
+              waterThisFrame += (0.08 + Math.random() * 0.07) * gapMultiplier;
               lastStainX = px;
-              shouldAddStain = true;
+              penetrationEvents++;
             }
             break;
           }
@@ -246,8 +266,13 @@ export class WaterTightnessDetector {
       }
     }
 
-    if (shouldAddStain && Math.random() < 0.7) {
-      this.addWaterStain(lastStainX, 0.6);
+    if (penetrationEvents > 0) {
+      const stainCount = Math.min(5, Math.floor(penetrationEvents / 2) + 1);
+      for (let s = 0; s < stainCount; s++) {
+        if (Math.random() < 0.85) {
+          this.addWaterStain(lastStainX + (Math.random() - 0.5) * 0.3, 0.7 + rainIntensity * 0.3);
+        }
+      }
     }
 
     this.waterAmount += waterThisFrame;
@@ -256,10 +281,10 @@ export class WaterTightnessDetector {
     this.updateSplashParticles(deltaTime);
 
     if (rainIntensity < 0.05 && this.waterAmount > 0.1) {
-      this.waterAmount -= deltaTime * 0.5;
+      this.waterAmount -= deltaTime * 0.8;
       this.waterAmount = Math.max(0, this.waterAmount);
       
-      if (this.waterStains.length > 0 && Math.random() < 0.02) {
+      if (this.waterStains.length > 0 && Math.random() < 0.04) {
         this.waterStains.shift();
         this.updateStainTexture();
       }
