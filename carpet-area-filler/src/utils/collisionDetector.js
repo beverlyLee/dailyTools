@@ -41,7 +41,7 @@ export function createDoorSwingObstacle(hingeX, hingeY, doorWidth, swingAngle = 
 }
 
 export function createFurnitureLegObstacle(x, y, radius = 0.05) {
-  const segments = 12;
+  const segments = 16;
   const polygon = [];
   
   for (let i = 0; i < segments; i++) {
@@ -169,7 +169,7 @@ function getPolygonCentroid(polygon) {
   return { x: cx * factor, y: cy * factor };
 }
 
-function evaluatePosition(centerX, centerY, width, height, isCircle, contourPolygon, obstacles) {
+function evaluatePosition(centerX, centerY, width, height, isCircle, contourPolygon, obstacles, hasCollisionContext) {
   const carpetPoly = createCarpetPolygon(centerX, centerY, width, height, isCircle);
   
   const clipped = sutherlandHodgman(carpetPoly, contourPolygon);
@@ -184,13 +184,23 @@ function evaluatePosition(centerX, centerY, width, height, isCircle, contourPoly
   
   const coverageRatio = clippedArea / originalArea;
   
-  if (coverageRatio < 0.3) {
-    return { score: -Infinity, clippedArea, collisionArea: Infinity, clippedPolygon: clipped, coverageRatio };
-  }
-  
   const collisionResult = checkCollision(clipped, obstacles);
   
-  const score = coverageRatio * 100 - collisionResult.totalCollidingArea * 2000 + clippedArea * 10;
+  if (hasCollisionContext && collisionResult.totalCollidingArea > 0) {
+    if (coverageRatio < 0.01) {
+      return { score: -Infinity, clippedArea, collisionArea: collisionResult.totalCollidingArea, clippedPolygon: clipped, coverageRatio };
+    }
+  } else {
+    if (coverageRatio < 0.05) {
+      return { score: -Infinity, clippedArea, collisionArea: collisionResult.totalCollidingArea, clippedPolygon: clipped, coverageRatio };
+    }
+  }
+  
+  const collisionPenalty = collisionResult.totalCollidingArea * 5000;
+  const coverageBonus = coverageRatio * 80;
+  const areaBonus = clippedArea * 8;
+  
+  const score = coverageBonus + areaBonus - collisionPenalty;
   
   return {
     score,
@@ -293,10 +303,13 @@ export function adjustPositionForObstacles(
   const initEval = evaluatePosition(
     centerX, centerY,
     width, height, isCircle,
-    contourPolygon, obstacles
+    contourPolygon, obstacles,
+    false
   );
   
-  if (!initEval.hasCollision) {
+  const hasInitialCollision = initEval.hasCollision && initEval.collisionArea > 0;
+  
+  if (!hasInitialCollision) {
     return { x: centerX, y: centerY, polygon: initEval.clippedPolygon, adjusted: false,
              collisionArea: 0, coverageRatio: initEval.coverageRatio, hasCollision: false };
   }
@@ -347,7 +360,8 @@ export function adjustPositionForObstacles(
         const evalResult = evaluatePosition(
           testX, testY,
           width, height, isCircle,
-          contourPolygon, obstacles
+          contourPolygon, obstacles,
+          hasInitialCollision
         );
         
         if (evalResult.score > bestDirEval.score) {

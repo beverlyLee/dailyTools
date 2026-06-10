@@ -7,7 +7,7 @@
   import { recommendCarpetSize, adjustCarpetPosition, findBestFitPosition } from './utils/sizeEngine.js';
   import { createCarpetMaterial, getCarpetTypes } from './utils/materialGenerator.js';
   import { checkCollision, createDoorSwingObstacle, createFurnitureLegObstacle, getObstaclePolygon, adjustPositionForObstacles } from './utils/collisionDetector.js';
-  import { createCarpetMesh, createRoomFloor, createWallLine, createObstacleMesh, worldTo3D, updateCarpetMaterials } from './utils/meshConverter.js';
+  import { createCarpetMesh, createRoomFloor, createWallLine, createObstacleMesh, worldTo3D, updateCarpetMaterials, verifyRenderCollision } from './utils/meshConverter.js';
   
   let canvasContainer;
   let topCanvas;
@@ -71,7 +71,7 @@
     
     const aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
     camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 100);
-    camera.position.set(6, 7, 8);
+    camera.position.set(0, 12, 0.01);
     camera.lookAt(0, 0, 0);
     
     renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -439,6 +439,24 @@
       lastCarpetPolygonKey = polyKey;
     } else {
       updateCarpetMaterials(carpetMesh, materialResult.material, materialResult.pileHeight);
+    }
+    
+    const renderVerifyResult = verifyRenderCollision(carpetMesh, obstacleMeshes, 15);
+    if (renderVerifyResult.hasCollision) {
+      collisionInfo.hasCollision = true;
+      collisionInfo.renderCollision = true;
+      collisionInfo.collisionCount = renderVerifyResult.collisionCount;
+    } else if (renderVerifyResult.adjusted) {
+      const finalPos = carpetMesh.position;
+      const final3DCenter = { x: finalPos.x, y: -finalPos.z };
+      const finalBounds = getPolygonBounds(carpetPoly);
+      const deltaX = final3DCenter.x - polyCenterX;
+      const deltaY = final3DCenter.y - polyCenterY;
+      const adjustedPoly = carpetPoly.map(p => ({
+        x: p.x + deltaX,
+        y: p.y + deltaY
+      }));
+      carpetMesh.userData.polygon = adjustedPoly;
     }
     
     drawTopView();

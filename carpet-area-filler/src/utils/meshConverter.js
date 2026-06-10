@@ -2,11 +2,11 @@ import * as THREE from 'three';
 import { getPolygonBounds } from './polygonClipping.js';
 
 export function worldTo3D(x, y, height = 0) {
-  return { x: x, y: height, z: y };
+  return { x: x, y: height, z: -y };
 }
 
 export function worldTo3DVector(x, y, height = 0) {
-  return new THREE.Vector3(x, height, y);
+  return new THREE.Vector3(x, height, -y);
 }
 
 export function polygonToShape(polygon) {
@@ -38,7 +38,7 @@ export function polygonToGeometry(polygon, height = 0.01, bevelEnabled = false) 
   
   const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
   
-  geometry.rotateX(Math.PI / 2);
+  geometry.rotateX(-Math.PI / 2);
   
   geometry.computeVertexNormals();
   
@@ -50,7 +50,7 @@ export function polygonToFlatGeometry(polygon) {
   
   const geometry = new THREE.ShapeGeometry(shape);
   
-  geometry.rotateX(Math.PI / 2);
+  geometry.rotateX(-Math.PI / 2);
   
   geometry.computeVertexNormals();
   
@@ -102,8 +102,7 @@ export function createRoomFloor(width, depth, material = null) {
   }
   
   const geometry = new THREE.PlaneGeometry(width, depth);
-  geometry.rotateX(Math.PI / 2);
-  geometry.scale(1, -1, 1);
+  geometry.rotateX(-Math.PI / 2);
   
   const floor = new THREE.Mesh(geometry, material);
   floor.receiveShadow = true;
@@ -122,7 +121,7 @@ export function createWallLine(points, height = 2.8, color = 0xcccccc) {
     const p2 = points[(i + 1) % points.length];
     
     const dx = p2.x - p1.x;
-    const dz = p2.y - p1.y;
+    const dz = -(p2.y - p1.y);
     const length = Math.sqrt(dx * dx + dz * dz);
     const angle = Math.atan2(dz, dx);
     
@@ -193,7 +192,7 @@ export function createObstacleMesh(obstacle, color = 0xff6b6b) {
       bevelEnabled: false
     });
     
-    geometry.rotateX(Math.PI / 2);
+    geometry.rotateX(-Math.PI / 2);
     
     const material = new THREE.MeshStandardMaterial({
       color: color,
@@ -221,7 +220,7 @@ export function createPolygonOutlineMesh(polygon, color = 0x00ff88, height = 0.0
     const p2 = polygon[(i + 1) % polygon.length];
     
     const dx = p2.x - p1.x;
-    const dz = p2.y - p1.y;
+    const dz = -(p2.y - p1.y);
     const length = Math.sqrt(dx * dx + dz * dz);
     const angle = Math.atan2(dz, dx);
     
@@ -263,4 +262,92 @@ export function updateCarpetMaterials(carpetGroup, newMaterial, pileHeight) {
   if (carpetGroup.userData) {
     carpetGroup.userData.pileHeight = pileHeight;
   }
+}
+
+export function verifyRenderCollision(carpetGroup, obstacleMeshes, maxAdjustSteps = 10) {
+  if (!carpetGroup || obstacleMeshes.length === 0) {
+    return { hasCollision: false, adjusted: false };
+  }
+  
+  const carpetBox = new THREE.Box3().setFromObject(carpetGroup);
+  
+  let hasCollision = false;
+  let collisionNormal = new THREE.Vector2(0, 0);
+  let collisionCount = 0;
+  
+  for (const obsMesh of obstacleMeshes) {
+    const obsBox = new THREE.Box3().setFromObject(obsMesh);
+    
+    if (carpetBox.intersectsBox(obsBox)) {
+      hasCollision = true;
+      collisionCount++;
+      
+      const carpetCenter = new THREE.Vector3();
+      carpetBox.getCenter(carpetCenter);
+      const obsCenter = new THREE.Vector3();
+      obsBox.getCenter(obsCenter);
+      
+      const dx = carpetCenter.x - obsCenter.x;
+      const dz = carpetCenter.z - obsCenter.z;
+      const dist = Math.sqrt(dx * dx + dz * dz);
+      
+      if (dist > 0.001) {
+        collisionNormal.x += dx / dist;
+        collisionNormal.y += dz / dist;
+      }
+    }
+  }
+  
+  if (!hasCollision) {
+    return { hasCollision: false, adjusted: false };
+  }
+  
+  const normLen = Math.sqrt(collisionNormal.x ** 2 + collisionNormal.y ** 2);
+  if (normLen > 0.001) {
+    collisionNormal.x /= normLen;
+    collisionNormal.y /= normLen;
+  } else {
+    collisionNormal.set(1, 0);
+  }
+  
+  const pileHeight = carpetGroup.userData?.pileHeight || 0.01;
+  const polygon = carpetGroup.userData?.polygon;
+  if (!polygon) {
+    return { hasCollision: true, adjusted: false };
+  }
+  
+  const bounds = getPolygonBounds(polygon);
+  const maxDim = Math.max(bounds.width, bounds.height);
+  
+  let adjusted = false;
+  const stepSize = maxDim * 0.02;
+  
+  for (let step = 0; step < maxAdjustSteps; step++) {
+    const currentPos = carpetGroup.position;
+    
+    const testX = currentPos.x + collisionNormal.x * stepSize;
+    const testZ = currentPos.z + collisionNormal.y * stepSize;
+    
+    carpetGroup.position.set(testX, currentPos.y, testZ);
+    carpetGroup.updateMatrixWorld(true);
+    
+    const newCarpetBox = new THREE.Box3().setFromObject(carpetGroup);
+    
+    let stillColliding = false;
+    for (const obsMesh of obstacleMeshes) {
+      const obsBox = new THREE.Box3().setFromObject(obsMesh);
+      if (newCarpetBox.intersectsBox(obsBox)) {
+        stillColliding = true;
+        break;
+      }
+    }
+    
+    if (!stillColliding) {
+      adjusted = true;
+      hasCollision = false;
+      break;
+    }
+  }
+  
+  return { hasCollision, adjusted, collisionCount };
 }
