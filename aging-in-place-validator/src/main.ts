@@ -6,6 +6,10 @@ import { GrabInteractionSystem } from './interaction/GrabInteractionSystem';
 import { ClearWidthVerifier } from './verification/ClearWidthVerifier';
 import { BathroomSceneBuilder, DEFAULT_BATHROOM_CONFIG, SceneElements } from './scene/BathroomSceneBuilder';
 
+function easeOutCubic(t: number): number {
+  return 1 - Math.pow(1 - t, 3);
+}
+
 class AgingInPlaceValidator {
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
@@ -27,10 +31,11 @@ class AgingInPlaceValidator {
 
   private isRotating = false;
   private rotationProgress = 0;
-  private rotationSpeed = 0.15;
+  private baseRotationSpeed = 0.12;
   private initialWheelchairPosition = new THREE.Vector3();
   private initialWheelchairRotation = 0;
   private collisionGracePeriod = 0;
+  private minRotationProgress = 45 / 360;
 
   constructor() {
     this.scene = new THREE.Scene();
@@ -153,7 +158,7 @@ class AgingInPlaceValidator {
 
     this.isRotating = true;
     this.rotationProgress = 0;
-    this.collisionGracePeriod = 0.5;
+    this.collisionGracePeriod = 1.2;
 
     const center = new THREE.Vector3(
       this.wheelchair.position.x,
@@ -210,6 +215,7 @@ class AgingInPlaceValidator {
     this.widthVerifier.clearVisualization();
 
     document.getElementById('angle-value')!.textContent = '0°';
+    this.updateUIWidth();
 
     this.updateStatus(
       '系统就绪',
@@ -337,7 +343,8 @@ class AgingInPlaceValidator {
     }
 
     if (this.isRotating && this.wheelchair) {
-      this.rotationProgress += this.rotationSpeed * delta;
+      const speedMultiplier = this.getRotationSpeedMultiplier(this.rotationProgress);
+      this.rotationProgress += this.baseRotationSpeed * speedMultiplier * delta;
 
       if (this.rotationProgress >= 1.0) {
         this.rotationProgress = 1.0;
@@ -357,7 +364,7 @@ class AgingInPlaceValidator {
         currentRotation
       );
 
-      if (this.collisionGracePeriod <= 0) {
+      if (this.collisionGracePeriod <= 0 && this.rotationProgress >= this.minRotationProgress) {
         const collisions = this.collisionDetector.checkCollisions(worldBoxes);
         this.collisionDetector.showCollisionMarkers(collisions);
         this.updateCollisionPoints(collisions);
@@ -370,6 +377,23 @@ class AgingInPlaceValidator {
 
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
+  }
+
+  private getRotationSpeedMultiplier(progress: number): number {
+    const accelPhase = 0.15;
+    const decelPhase = 0.15;
+
+    if (progress < accelPhase) {
+      const t = progress / accelPhase;
+      return 0.3 + 0.7 * easeOutCubic(t);
+    }
+
+    if (progress > 1 - decelPhase) {
+      const t = (1 - progress) / decelPhase;
+      return 0.3 + 0.7 * easeOutCubic(t);
+    }
+
+    return 1.0;
   }
 
   private getRotatedWheelchairBoxes(position: THREE.Vector3, rotationY: number): THREE.Box3[] {
