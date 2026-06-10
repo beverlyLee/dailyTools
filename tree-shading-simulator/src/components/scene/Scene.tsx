@@ -16,7 +16,7 @@ export function Scene() {
     <div className="w-full h-full">
       <Canvas
         shadows
-        camera={{ position: [18, 12, 18], fov: 45 }}
+        camera={{ position: [0, 6, 22], fov: 45 }}
         gl={{ antialias: true }}
         dpr={[1, 2]}
       >
@@ -26,10 +26,10 @@ export function Scene() {
         <Sky
           distance={450000}
           sunPosition={
-            season === 'summer' ? [100, 80, 100] : [100, 30, 100]
+            season === 'summer' ? [20, 80, 100] : [20, 30, 100]
           }
-          inclination={season === 'summer' ? 0.55 : 0.25}
-          azimuth={0.25}
+          inclination={season === 'summer' ? 0.58 : 0.22}
+          azimuth={0.3}
         />
 
         <SunLight />
@@ -42,10 +42,10 @@ export function Scene() {
           enablePan={true}
           enableZoom={true}
           enableRotate={true}
-          minDistance={5}
+          minDistance={8}
           maxDistance={50}
           maxPolarAngle={Math.PI / 2 - 0.05}
-          target={[0, 3, 0]}
+          target={[0, 3.5, 4]}
         />
 
         <BakeShadows />

@@ -2,12 +2,12 @@ import type { TreeSpecies, GrowthYear, CanopySize } from '../types';
 
 const GROWTH_TABLE: Record<TreeSpecies, Record<GrowthYear, CanopySize>> = {
   deciduous: {
-    5: { radius: 3.0, height: 8.0, trunkHeight: 2.5 },
-    10: { radius: 5.0, height: 12.0, trunkHeight: 3.5 },
+    5: { radius: 3.5, height: 9.0, trunkHeight: 2.8 },
+    10: { radius: 5.5, height: 13.0, trunkHeight: 3.8 },
   },
   evergreen: {
-    5: { radius: 2.0, height: 6.0, trunkHeight: 1.5 },
-    10: { radius: 3.5, height: 9.0, trunkHeight: 2.5 },
+    5: { radius: 2.8, height: 7.0, trunkHeight: 1.8 },
+    10: { radius: 4.2, height: 10.0, trunkHeight: 2.8 },
   },
 };
 

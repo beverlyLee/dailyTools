@@ -8,15 +8,19 @@ import type {
   WindowData,
 } from '../types';
 import { assessWindowLighting } from '../utils/shadow';
+import { DEFAULT_SOLAR_AZIMUTH } from '../utils/solar';
 
 const DEFAULT_LATITUDE = 39.9;
 
+const HOUSE_HALF_DEPTH = 4;
+const WALL_Z = HOUSE_HALF_DEPTH + 0.01;
+
 const DEFAULT_WINDOWS: WindowData[] = [
-  { id: 'W1', position: [-3, 2.5, 0.01], size: [1.5, 2], normal: [0, 0, 1] },
-  { id: 'W2', position: [0, 2.5, 0.01], size: [1.5, 2], normal: [0, 0, 1] },
-  { id: 'W3', position: [3, 2.5, 0.01], size: [1.5, 2], normal: [0, 0, 1] },
-  { id: 'W4', position: [-1.5, 5.5, 0.01], size: [1.2, 1.5], normal: [0, 0, 1] },
-  { id: 'W5', position: [1.5, 5.5, 0.01], size: [1.2, 1.5], normal: [0, 0, 1] },
+  { id: 'W1', position: [-3, 2.5, WALL_Z], size: [1.5, 2], normal: [0, 0, 1] },
+  { id: 'W2', position: [0, 2.5, WALL_Z], size: [1.5, 2], normal: [0, 0, 1] },
+  { id: 'W3', position: [3, 2.5, WALL_Z], size: [1.5, 2], normal: [0, 0, 1] },
+  { id: 'W4', position: [-1.5, 5.5, WALL_Z], size: [1.2, 1.5], normal: [0, 0, 1] },
+  { id: 'W5', position: [1.5, 5.5, WALL_Z], size: [1.2, 1.5], normal: [0, 0, 1] },
 ];
 
 interface SimulationStoreState {
@@ -24,6 +28,7 @@ interface SimulationStoreState {
   year: GrowthYear;
   tree: TreeConfig;
   latitude: number;
+  solarAzimuth: number;
   windows: WindowData[];
   assessment: LightingAssessment;
 }
@@ -43,13 +48,14 @@ function computeAssessment(state: SimulationStoreState): LightingAssessment {
     state.tree.years,
     state.tree.position,
     state.latitude,
-    state.season
+    state.season,
+    state.solarAzimuth
   );
 }
 
 const initialTree: TreeConfig = {
   species: 'deciduous',
-  position: [-5, 0, 5],
+  position: [-2.2, 0, 8],
   years: 5,
 };
 
@@ -58,6 +64,7 @@ const baseInitialState = {
   year: 5 as const,
   tree: initialTree,
   latitude: DEFAULT_LATITUDE,
+  solarAzimuth: DEFAULT_SOLAR_AZIMUTH,
   windows: DEFAULT_WINDOWS,
 };
 
@@ -68,7 +75,7 @@ const initialState: SimulationStoreState = {
 
 export type SimulationStore = SimulationStoreState & SimulationStoreActions;
 
-export const useSimulationStore = create<SimulationStore>((set, get) => ({
+export const useSimulationStore = create<SimulationStore>((set) => ({
   ...initialState,
   assessment: computeAssessment(initialState),
   setSeason: (season: Season) =>
