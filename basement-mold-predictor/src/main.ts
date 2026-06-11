@@ -442,7 +442,7 @@ class BasementMoldPredictorApp {
     riskStatus.classList.remove('safe', 'moderate', 'danger');
     if (moldRiskData.overallRisk === 'safe') {
       riskStatus.classList.add('safe');
-      riskStatus.innerHTML = '✅ 低风险 - 无霉变威胁';
+      riskStatus.innerHTML = `✅ 低风险 - 霉变概率 ${(moldRiskData.riskLevel * 100).toFixed(0)}%，无霉变威胁`;
     } else if (moldRiskData.overallRisk === 'moderate') {
       riskStatus.classList.add('moderate');
       riskStatus.innerHTML = `⚠️ 中风险 - 霉变概率 ${(moldRiskData.riskLevel * 100).toFixed(0)}%`;
