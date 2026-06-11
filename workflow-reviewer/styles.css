@@ -1074,11 +1074,19 @@ body {
 .action-bar {
     display: flex;
     gap: 12px;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     padding-top: 16px;
     border-top: 1px solid var(--border);
     margin-top: 8px;
+}
+
+.action-bar .btn {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .run-project-card .card-header {
@@ -1146,12 +1154,12 @@ body {
 
 .test-mode-body .btn {
     white-space: nowrap;
-    flex-shrink: 0;
+    flex: 1;
+    min-width: 0;
 }
 
 .test-mode-body .btn-primary {
     width: auto;
-    flex: 1;
 }
 
 @media (max-width: 900px) {

@@ -129,6 +129,143 @@
         });
     };
     
+    window.__writeStepOneToWps = function(btn) {
+        console.log('📤 [一键写入第一步] ===== 按钮被点击 =====');
+        
+        const contentEl = btn.closest('[data-project-id]');
+        if (!contentEl) {
+            alert('❌ 找不到项目容器');
+            return;
+        }
+        
+        const sessionIdEl = contentEl.querySelector('.field-wpsSessionValue');
+        const commitIdEl = contentEl.querySelector('.field-wpsCommitId');
+        const stageEl = contentEl.querySelector('.field-stage');
+        const currentProcessEl = contentEl.querySelector('.field-currentProcess');
+        const roundNumEl = contentEl.querySelector('.field-roundNum');
+        const docUrlEl = contentEl.querySelector('.field-wpsDocUrl');
+        const fileTokenEl = contentEl.querySelector('.field-wpsFileToken');
+        const sheetNameEl = contentEl.querySelector('.field-wpsSheetName');
+        
+        const sessionId = (sessionIdEl?.value || '').trim();
+        const commitId = (commitIdEl?.value || '').trim();
+        const stage = (stageEl?.value || '').trim();
+        const currentProcess = (currentProcessEl?.value || '').trim();
+        const roundNum = (roundNumEl?.value || '1').trim();
+        
+        let docUrl = docUrlEl?.value || '';
+        let fileToken = fileTokenEl?.value || '';
+        let sheetName = sheetNameEl?.value || '';
+        
+        try {
+            if (typeof globalConfig !== 'undefined') {
+                if (!docUrl && globalConfig.wpsDocUrl) docUrl = globalConfig.wpsDocUrl;
+                if (!fileToken && globalConfig.wpsFileToken) fileToken = globalConfig.wpsFileToken;
+                if (!sheetName && globalConfig.wpsSheetName) sheetName = globalConfig.wpsSheetName;
+            }
+            if (typeof globalWpsConfig !== 'undefined') {
+                if (!docUrl && globalWpsConfig.wpsDocUrl) docUrl = globalWpsConfig.wpsDocUrl;
+                if (!fileToken && globalWpsConfig.wpsFileToken) fileToken = globalWpsConfig.wpsFileToken;
+                if (!sheetName && globalWpsConfig.wpsSheetName) sheetName = globalWpsConfig.wpsSheetName;
+            }
+        } catch(e) {}
+        
+        console.log('📤 [一键写入第一步] 字段值:', {
+            sessionId: sessionId ? '有' : '无',
+            commitId: commitId ? '有' : '无',
+            stage: stage ? '有' : '无',
+            currentProcessLen: currentProcess.length,
+            roundNum
+        });
+        
+        if (!sessionId) {
+            alert('❌ sessionid 不能为空');
+            return;
+        }
+        if (!commitId) {
+            alert('❌ Commit ID 不能为空');
+            return;
+        }
+        if (!stage) {
+            alert('❌ 阶段描述不能为空');
+            return;
+        }
+        if (!currentProcess) {
+            alert('❌ 本轮过程不能为空');
+            return;
+        }
+        
+        const MAX_PROCESS_LENGTH = 8000;
+        if (currentProcess.length > MAX_PROCESS_LENGTH) {
+            alert('❌ 本轮过程内容过长（' + currentProcess.length + ' 字），无法写入表格\n\n请精简至 ' + MAX_PROCESS_LENGTH + ' 字以内，当前超出 ' + (currentProcess.length - MAX_PROCESS_LENGTH) + ' 字');
+            return;
+        }
+        
+        if (!fileToken && !docUrl) {
+            alert('❌ 请先填写文档链接或文件 Token');
+            return;
+        }
+        
+        const requestData = {
+            file_token: fileToken || extractFileTokenFromUrl(docUrl),
+            sheet_name: sheetName,
+            fields: {
+                'Trae Session ID': sessionId,
+                'commit id': commitId,
+                'User Prompt': stage,
+                '日志轨迹': currentProcess,
+                '轮次': roundNum
+            },
+            lookup_field: 'Trae Session ID',
+            lookup_value: sessionId
+        };
+        
+        console.log('📤 [一键写入第一步] 请求参数:', JSON.stringify(requestData, null, 2));
+        
+        btn.disabled = true;
+        const originalText = btn.innerText;
+        btn.innerText = '写入中...';
+        
+        fetch('/api/write-wps-dbt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData)
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(result) {
+            console.log('📤 [一键写入第一步] 接口返回:', result);
+            if (result.success) {
+                if (result.is_new) {
+                    alert('✅ 一键写入成功（新建记录）\n\n' +
+                        '• Session ID: ' + sessionId.substring(0, 20) + '...\n' +
+                        '• Commit ID: ' + commitId.substring(0, 20) + '...\n' +
+                        '• 阶段描述: ' + stage.length + ' 字\n' +
+                        '• 本轮过程: ' + currentProcess.length + ' 字\n' +
+                        '• 轮次: ' + roundNum);
+                } else {
+                    alert('✅ 一键写入成功（更新记录）\n\n' +
+                        '• Session ID: ' + sessionId.substring(0, 20) + '...\n' +
+                        '• Commit ID: ' + commitId.substring(0, 20) + '...\n' +
+                        '• 阶段描述: ' + stage.length + ' 字\n' +
+                        '• 本轮过程: ' + currentProcess.length + ' 字\n' +
+                        '• 轮次: ' + roundNum);
+                }
+            } else {
+                alert('❌ 写入失败: ' + (result.error || '未知错误'));
+            }
+        })
+        .catch(function(e) {
+            console.error('📤 [一键写入第一步] 请求异常:', e);
+            alert('❌ 写入异常: ' + e.message);
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerText = originalText;
+        });
+    };
+    
     function __cleanFormatChars(text) {
         if (!text) return '';
         let cleaned = text;
@@ -147,6 +284,237 @@
         
         return cleaned;
     }
+
+    function __extractSection(text, markers) {
+        let section = '';
+        let found = false;
+        const allMarkers = ['产物不满意', '产品不满意', '产出不满意', '过程不满意'];
+        const lines = text.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            let isMarker = false;
+            for (const marker of markers) {
+                if (line.trim().startsWith(marker)) {
+                    isMarker = true;
+                    found = true;
+                    const rest = line.trim().substring(marker.length).replace(/^[：: 　]*/, '');
+                    if (rest) {
+                        section += rest + '\n';
+                    }
+                    break;
+                }
+            }
+            if (!isMarker && found) {
+                let isOtherSection = false;
+                for (const m of allMarkers) {
+                    if (line.trim().startsWith(m)) {
+                        isOtherSection = true;
+                        break;
+                    }
+                }
+                if (isOtherSection) {
+                    break;
+                }
+                section += line + '\n';
+            }
+        }
+        return section.trim();
+    }
+
+    function __processDissatisfySection(text) {
+        if (!text) return '';
+        let lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        let result = lines.join(' ');
+        result = result.replace(/\s+/g, ' ');
+        const filterPrefixes = [
+            '期望', '原因分析', '分析', '预期', '希望', '建议', '改进建议',
+            '产物不满意', '产品不满意', '产出不满意', '过程不满意'
+        ];
+        for (const prefix of filterPrefixes) {
+            const pattern = new RegExp(prefix + '[：:][^。]*。', 'g');
+            result = result.replace(pattern, '');
+        }
+        const sentences = result.split(/(?<=。)/);
+        const filtered = [];
+        for (const sentence of sentences) {
+            const trimmed = sentence.trim();
+            if (!trimmed) continue;
+            let skip = false;
+            for (const prefix of filterPrefixes) {
+                if (trimmed.startsWith(prefix)) {
+                    skip = true;
+                    break;
+                }
+            }
+            if (!skip) {
+                filtered.push(trimmed);
+            }
+        }
+        result = filtered.join('');
+        result = result.replace(/\b([1-9]\d*)[.、．]\s*/g, '$1. ');
+        result = result.replace(/。\s*([1-9]\d*)[.、．]/g, '。$1.');
+        result = result.trim();
+        return result;
+    }
+
+    function __extractDissatisfy(raw) {
+        if (!raw || !raw.trim()) return '';
+        const productSection = __extractSection(raw, ['产物不满意', '产品不满意', '产出不满意']);
+        const processSection = __extractSection(raw, ['过程不满意']);
+        const productResult = __processDissatisfySection(productSection);
+        const processResult = __processDissatisfySection(processSection);
+        let result = '';
+        if (productResult) {
+            result += '产物不满意：' + productResult + '\n';
+        }
+        if (processResult) {
+            result += '过程不满意：' + processResult;
+        }
+        return result.trim();
+    }
+
+    function __extractPromptSection(text) {
+        const patterns = [
+            /[#\s]*【下一轮\s*Prompt】/,
+            /[#\s]*下一轮\s*Prompt/,
+            /[#\s]*下一轮\s*prompt/,
+        ];
+        let startIdx = null;
+        for (const pattern of patterns) {
+            const match = text.match(pattern);
+            if (match) {
+                startIdx = match.index + match[0].length;
+                break;
+            }
+        }
+        if (startIdx === null) {
+            return text;
+        }
+        return text.substring(startIdx).trim();
+    }
+
+    function __extractTasksFromPrompt(text) {
+        const tasks = [];
+        const taskPattern = /(?:^|\n)\s*任务\s*(\d+)\s*[：:]\s*([\s\S]*?)(?=\n\s*任务\s*\d+\s*[：:]|$)/g;
+        let match;
+        while ((match = taskPattern.exec(text)) !== null) {
+            const taskContent = match[2];
+            const lines = taskContent.trim().split('\n');
+            const title = lines[0]?.trim() || '';
+            let fixContent = '';
+            const fixPatterns = [
+                /(?:^|\n)\s*[-*]\s*修正\s*[：:]\s*([\s\S]*?)(?=\n\s*[-*]\s*[\u4e00-\u9fa5]+\s*[：:]|$)/,
+                /(?:^|\n)\s*修正\s*[：:]\s*([\s\S]*?)(?=\n\s*[\u4e00-\u9fa5]+\s*[：:]|$)/,
+                /(?:^|\n)\s*[-*]\s*修正\s*[：:]\s*([\s\S]*?)$/,
+                /(?:^|\n)\s*修正\s*[：:]\s*([\s\S]*?)$/,
+            ];
+            for (const fixPattern of fixPatterns) {
+                const fixMatch = taskContent.match(fixPattern);
+                if (fixMatch && fixMatch[1]) {
+                    fixContent = fixMatch[1].trim();
+                    break;
+                }
+            }
+            if (title && fixContent) {
+                tasks.push([title, fixContent]);
+            } else if (title && !fixContent) {
+                const bodyLines = lines.slice(1).filter(l => l.trim());
+                if (bodyLines.length > 0) {
+                    fixContent = bodyLines.join(' ').trim();
+                    tasks.push([title, fixContent]);
+                }
+            }
+        }
+        return tasks;
+    }
+
+    function __cleanPromptText(text) {
+        let result = text;
+        result = result.replace(/（[^）]*）/g, '');
+        result = result.replace(/\([^)]*\)/g, '');
+        result = result.replace(/[「」【】《》]/g, '');
+        result = result.replace(/\s+/g, ' ');
+        result = result.replace(/，+/g, '，');
+        result = result.replace(/。+/g, '。');
+        result = result.replace(/，。/g, '。');
+        result = result.replace(/，\s*，+/g, '，');
+        const removePhrases = [
+            '别漏项', '别遗漏', '白做', '等于没做', '等于白做',
+        ];
+        for (const phrase of removePhrases) {
+            result = result.replace(new RegExp(phrase, 'g'), '');
+        }
+        result = result.replace(/^[，、。\s]+|[，、。\s]+$/g, '');
+        return result.trim();
+    }
+
+    function __extractNextPrompt(raw) {
+        if (!raw || !raw.trim()) return '';
+        const promptText = __extractPromptSection(raw);
+        const tasks = __extractTasksFromPrompt(promptText);
+        if (!tasks || tasks.length === 0) {
+            return __cleanPromptText(promptText);
+        }
+        const parts = [];
+        for (let i = 0; i < tasks.length; i++) {
+            const [title, fixContent] = tasks[i];
+            const cleanTitle = __cleanPromptText(title);
+            const cleanFix = __cleanPromptText(fixContent);
+            if (cleanTitle && cleanFix) {
+                let fix = cleanFix;
+                if (!fix.endsWith('。')) {
+                    fix += '。';
+                }
+                parts.push(`${i + 1}.${cleanTitle}：${fix}`);
+            }
+        }
+        if (parts.length === 0) {
+            return __cleanPromptText(promptText);
+        }
+        let result = '优化系统实现：' + parts.join('');
+        result = result.replace(/。+/g, '。');
+        return result;
+    }
+
+    window.__doExtractDissatisfy = function(btn) {
+        const contentEl = btn.closest('[data-project-id]');
+        if (!contentEl) return;
+        const rawEl = contentEl.querySelector('.field-dissatisfyRaw');
+        const resultEl = contentEl.querySelector('.field-dissatisfyResult');
+        if (!rawEl || !resultEl) return;
+        const raw = rawEl.value.trim();
+        if (!raw) {
+            alert('请先输入原始不满意原因');
+            return;
+        }
+        const result = __extractDissatisfy(raw);
+        resultEl.value = result;
+        resultEl.dispatchEvent(new Event('input', { bubbles: true }));
+        console.log('🔄 [手动提取不满意原因] 完成，长度:', result.length);
+        if (typeof showToast === 'function') {
+            showToast('✅ 提取完成');
+        }
+    };
+
+    window.__doExtractPrompt = function(btn) {
+        const contentEl = btn.closest('[data-project-id]');
+        if (!contentEl) return;
+        const rawEl = contentEl.querySelector('.field-promptRaw');
+        const resultEl = contentEl.querySelector('.field-promptResult');
+        if (!rawEl || !resultEl) return;
+        const raw = rawEl.value.trim();
+        if (!raw) {
+            alert('请先输入原始下一轮 Prompt');
+            return;
+        }
+        const result = __extractNextPrompt(raw);
+        resultEl.value = result;
+        resultEl.dispatchEvent(new Event('input', { bubbles: true }));
+        console.log('🔄 [手动提取Prompt] 完成，长度:', result.length);
+        if (typeof showToast === 'function') {
+            showToast('✅ 提取完成');
+        }
+    };
 
     window.__parseTestReport = function(btn) {
         console.log('📋 [解析测试报告] ===== 按钮被点击 =====');
@@ -272,34 +640,41 @@
         
         console.log('📋 [解析测试报告] 清理格式后：不满意原因长度 =', dissatisfyText ? dissatisfyText.length : 0, '，Prompt 长度 =', promptText ? promptText.length : 0);
         
-        // 填充到对应区域
+        // 填充不满意原因（原始 + 提取结果）
+        let dissatisfyResult = '';
         if (dissatisfyText) {
             const dissRawEl = contentEl.querySelector('.field-dissatisfyRaw');
             if (dissRawEl) {
                 dissRawEl.value = dissatisfyText;
                 dissRawEl.dispatchEvent(new Event('input', { bubbles: true }));
-                console.log('📋 [解析测试报告] 已填充不满意原因');
+                console.log('📋 [解析测试报告] 已填充不满意原因原始文本');
             }
-            // 自动触发提取
-            const extractBtn = contentEl.querySelector('.field-extractDissatisfyBtn');
-            if (extractBtn) {
-                setTimeout(function() { extractBtn.click(); }, 100);
+            dissatisfyResult = __extractDissatisfy(dissatisfyText);
+            const dissResultEl = contentEl.querySelector('.field-dissatisfyResult');
+            if (dissResultEl && dissatisfyResult) {
+                dissResultEl.value = dissatisfyResult;
+                dissResultEl.dispatchEvent(new Event('input', { bubbles: true }));
+                console.log('📋 [解析测试报告] 已填充不满意原因提取结果，长度:', dissatisfyResult.length);
             }
         } else {
             console.log('⚠️ [解析测试报告] 未提取到不满意原因');
         }
         
+        // 填充下一轮 Prompt（原始 + 提取结果）
+        let promptResult = '';
         if (promptText) {
             const promptRawEl = contentEl.querySelector('.field-promptRaw');
             if (promptRawEl) {
                 promptRawEl.value = promptText;
                 promptRawEl.dispatchEvent(new Event('input', { bubbles: true }));
-                console.log('📋 [解析测试报告] 已填充下一轮 Prompt');
+                console.log('📋 [解析测试报告] 已填充下一轮 Prompt 原始文本');
             }
-            // 自动触发提取
-            const extractBtn = contentEl.querySelector('.field-extractPromptBtn');
-            if (extractBtn) {
-                setTimeout(function() { extractBtn.click(); }, 100);
+            promptResult = __extractNextPrompt(promptText);
+            const promptResultEl = contentEl.querySelector('.field-promptResult');
+            if (promptResultEl && promptResult) {
+                promptResultEl.value = promptResult;
+                promptResultEl.dispatchEvent(new Event('input', { bubbles: true }));
+                console.log('📋 [解析测试报告] 已填充下一轮 Prompt 提取结果，长度:', promptResult.length);
             }
         } else {
             console.log('⚠️ [解析测试报告] 未提取到下一轮 Prompt');
@@ -310,16 +685,95 @@
             reportEl.dispatchEvent(new Event('input', { bubbles: true }));
         }
         
-        const count = [dissatisfyText, promptText].filter(Boolean).length;
-        if (count === 0) {
+        const rawCount = [dissatisfyText, promptText].filter(Boolean).length;
+        const resultCount = [dissatisfyResult, promptResult].filter(Boolean).length;
+        
+        if (rawCount === 0) {
             alert('⚠️ 未识别到有效内容，请检查报告格式\n\n已尝试了 7 种匹配方式都没匹配到，\n请确认报告中是否包含「验收结论」「不满意」「下一轮」等关键字');
         } else {
-            alert('✅ 解析完成，提取到 ' + count + ' 项内容\n\n' +
-                (dissatisfyText ? '• 不满意原因: ' + dissatisfyText.length + ' 字\n' : '') +
-                (promptText ? '• 下一轮 Prompt: ' + promptText.length + ' 字' : ''));
+            alert('✅ 解析完成，共 ' + rawCount + ' 项\n\n' +
+                (dissatisfyText ? '• 不满意原因: 原始 ' + dissatisfyText.length + ' 字，精简 ' + (dissatisfyResult ? dissatisfyResult.length : 0) + ' 字\n' : '') +
+                (promptText ? '• 下一轮 Prompt: 原始 ' + promptText.length + ' 字，精简 ' + (promptResult ? promptResult.length : 0) + ' 字' : '') +
+                (resultCount < rawCount ? '\n\n⚠️ 有 ' + (rawCount - resultCount) + ' 项未能成功精简提取' : ''));
         }
     };
     
+    function __simplifyProcessText(text) {
+        if (!text) return '';
+        let simplified = text;
+        
+        simplified = simplified.replace(/^\s*(?:content|Content)\s*:\s*\{[\s\S]*?\n\s*\}\s*(?=\n|$)/gm, '');
+        simplified = simplified.replace(/^\s*\{["\s]*content["\s]*:[\s\S]*?\n\s*\}\s*(?=\n|$)/gm, '');
+        
+        const lines = simplified.split('\n');
+        const resultLines = [];
+        let braceDepth = 0;
+        let inJsonBlock = false;
+        let jsonStartDepth = 0;
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmed = line.trim();
+            
+            if (!inJsonBlock) {
+                if (/^\s*(?:content|Content)\s*:\s*\{/.test(line) || /^\s*\{[\s\S]*["']content["']\s*:/.test(line)) {
+                    inJsonBlock = true;
+                    let count = 0;
+                    for (const ch of line) {
+                        if (ch === '{') count++;
+                        if (ch === '}') count--;
+                    }
+                    braceDepth = count;
+                    jsonStartDepth = count;
+                    if (braceDepth <= 0) {
+                        inJsonBlock = false;
+                    }
+                    continue;
+                }
+                if (/^\s*\{/.test(trimmed)) {
+                    inJsonBlock = true;
+                    let count = 0;
+                    for (const ch of line) {
+                        if (ch === '{') count++;
+                        if (ch === '}') count--;
+                    }
+                    braceDepth = count;
+                    jsonStartDepth = count;
+                    if (braceDepth <= 0) {
+                        inJsonBlock = false;
+                    }
+                    continue;
+                }
+                resultLines.push(line);
+            } else {
+                for (const ch of line) {
+                    if (ch === '{') braceDepth++;
+                    if (ch === '}') braceDepth--;
+                }
+                if (braceDepth <= 0) {
+                    inJsonBlock = false;
+                }
+            }
+        }
+        simplified = resultLines.join('\n');
+        
+        simplified = simplified.replace(/^#{1,6}\s+/gm, '');
+        simplified = simplified.replace(/^[-*+]\s+/gm, '');
+        simplified = simplified.replace(/^\d+[.、]\s+/gm, '');
+        simplified = simplified.replace(/\*\*(.+?)\*\*/g, '$1');
+        simplified = simplified.replace(/\*(.+?)\*/g, '$1');
+        simplified = simplified.replace(/`(.+?)`/g, '$1');
+        simplified = simplified.replace(/^>\s?/gm, '');
+        simplified = simplified.replace(/^---+$/gm, '');
+        simplified = simplified.replace(/\[(.+?)\]\(.+?\)/g, '$1');
+        simplified = simplified.replace(/<[^>]+>/g, '');
+        
+        simplified = simplified.replace(/\n{3,}/g, '\n\n');
+        simplified = simplified.trim();
+        
+        return simplified;
+    }
+
     // 内联全局函数 - 生成脚本命令
     window.__generateTestScript = function(btn) {
         const contentEl = btn.closest('[data-project-id]');
@@ -335,7 +789,8 @@
         const stage = (stageEl?.value || '阶段描述').trim();
         const currentProcess = (currentProcessEl?.value || '').trim();
         
-        const escapedProcess = currentProcess.replace(/"/g, '\\"').replace(/\n/g, ' ');
+        const simplifiedProcess = __simplifyProcessText(currentProcess);
+        const escapedProcess = simplifiedProcess.replace(/"/g, '\\"').replace(/\n/g, ' ');
         const escapedRequirement = requirement.replace(/"/g, '\\"').replace(/\n/g, ' ');
         const escapedStage = stage.replace(/"/g, '\\"').replace(/\n/g, ' ');
         
@@ -351,7 +806,7 @@
             outputEl.value = script;
         }
         
-        console.log('✅ [生成脚本命令] 脚本已生成，长度:', script.length);
+        console.log('✅ [生成脚本命令] 脚本已生成，原始长度:', currentProcess.length, '，简化后长度:', simplifiedProcess.length);
     };
     
     // 内联全局函数 - 复制脚本
@@ -393,7 +848,62 @@
         btn.disabled = true;
         btn.innerText = '执行中...';
         
-        // 解析参数并调用后端
+        const resetBtn = function() {
+            btn.disabled = false;
+            btn.innerText = originalText;
+        };
+        
+        const timeoutId = setTimeout(function() {
+            resetBtn();
+            console.warn('⏰ [执行脚本] 超时保护，强制恢复按钮状态');
+        }, 30000);
+        
+        const copyToClipboard = function(text) {
+            return new Promise(function(resolve, reject) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text)
+                        .then(resolve)
+                        .catch(function() {
+                            try {
+                                const textarea = document.createElement('textarea');
+                                textarea.value = text;
+                                textarea.style.position = 'fixed';
+                                textarea.style.opacity = '0';
+                                document.body.appendChild(textarea);
+                                textarea.select();
+                                const success = document.execCommand('copy');
+                                document.body.removeChild(textarea);
+                                if (success) {
+                                    resolve();
+                                } else {
+                                    reject(new Error('execCommand 失败'));
+                                }
+                            } catch (e) {
+                                reject(e);
+                            }
+                        });
+                } else {
+                    try {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = text;
+                        textarea.style.position = 'fixed';
+                        textarea.style.opacity = '0';
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        const success = document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        if (success) {
+                            resolve();
+                        } else {
+                            reject(new Error('execCommand 失败'));
+                        }
+                    } catch (e) {
+                        reject(e);
+                    }
+                }
+            });
+        };
+        
         const projectNameEl = contentEl.querySelector('.field-projectName');
         const requirementEl = contentEl.querySelector('.field-requirement');
         const stageEl = contentEl.querySelector('.field-stage');
@@ -403,6 +913,7 @@
         const requirement = (requirementEl?.value || '需求').trim();
         const stage = (stageEl?.value || '阶段描述').trim();
         const currentProcess = (currentProcessEl?.value || '').trim();
+        const simplifiedProcess = __simplifyProcessText(currentProcess);
         
         fetch('/api/execute-test-prompt', {
             method: 'POST',
@@ -411,30 +922,38 @@
                 project_name: projectName,
                 first_round: requirement,
                 current_round: stage,
-                current_process: currentProcess
+                current_process: simplifiedProcess
             })
         })
         .then(function(response) { return response.json(); })
         .then(function(result) {
+            clearTimeout(timeoutId);
+            resetBtn();
+            
             if (result.success) {
-                // 复制到剪贴板
-                navigator.clipboard.writeText(result.output)
+                copyToClipboard(result.output)
                     .then(function() {
-                        alert('✅ 执行成功，结果已复制到剪贴板');
+                        setTimeout(function() {
+                            alert('✅ 执行成功，结果已复制到剪贴板');
+                        }, 50);
                     })
                     .catch(function() {
-                        alert('✅ 执行成功（复制剪贴板失败）');
+                        setTimeout(function() {
+                            alert('✅ 执行成功（复制剪贴板失败，请手动复制）\n\n' + result.output.substring(0, 200) + (result.output.length > 200 ? '...' : ''));
+                        }, 50);
                     });
             } else {
-                alert('❌ 执行失败: ' + (result.error || '未知错误'));
+                setTimeout(function() {
+                    alert('❌ 执行失败: ' + (result.error || '未知错误'));
+                }, 50);
             }
         })
         .catch(function(e) {
-            alert('❌ 请求异常: ' + e.message);
-        })
-        .finally(function() {
-            btn.disabled = false;
-            btn.innerText = originalText;
+            clearTimeout(timeoutId);
+            resetBtn();
+            setTimeout(function() {
+                alert('❌ 请求异常: ' + e.message);
+            }, 50);
         });
     };
     
@@ -455,6 +974,24 @@
                 e.preventDefault();
                 if (typeof __parseTestReport === 'function') {
                     __parseTestReport(btn);
+                }
+            }
+            
+            // 提取不满意原因按钮（双重保险）
+            if (onclickAttr.includes('__doExtractDissatisfy') || btn.classList.contains('field-extractDissatisfyBtn')) {
+                console.log('🔄 [事件委托] 捕获到提取不满意原因按钮点击');
+                e.preventDefault();
+                if (typeof __doExtractDissatisfy === 'function') {
+                    __doExtractDissatisfy(btn);
+                }
+            }
+            
+            // 提取Prompt按钮（双重保险）
+            if (onclickAttr.includes('__doExtractPrompt') || btn.classList.contains('field-extractPromptBtn')) {
+                console.log('💡 [事件委托] 捕获到提取Prompt按钮点击');
+                e.preventDefault();
+                if (typeof __doExtractPrompt === 'function') {
+                    __doExtractPrompt(btn);
                 }
             }
             
@@ -482,6 +1019,15 @@
                 e.preventDefault();
                 if (typeof __executeTestScript === 'function') {
                     __executeTestScript(btn);
+                }
+            }
+            
+            // 一键写入第一步按钮（双重保险）
+            if (onclickAttr.includes('__writeStepOneToWps') || btn.innerText.includes('一键写入第一步')) {
+                console.log('📤 [事件委托] 捕获到一键写入第一步按钮点击');
+                e.preventDefault();
+                if (typeof __writeStepOneToWps === 'function') {
+                    __writeStepOneToWps(btn);
                 }
             }
             
@@ -765,6 +1311,7 @@
                             </div>
 
                             <div class="action-bar">
+                                <button class="btn btn-primary field-writeStepOneBtn" onclick="__writeStepOneToWps(this)">📤 一键写入第一步</button>
                                 <button class="btn btn-secondary field-writeStagePromptBtn">📝 阶段描述写入 Prompt</button>
                                 <button class="btn btn-primary field-submitBtn" disabled>
                                     <span class="btn-text">提交验收</span>
@@ -801,7 +1348,7 @@
                                 <div class="card-header">
                                     <h3 class="card-title">📝 不满意原因提取</h3>
                                     <div class="card-actions">
-                                        <button class="btn btn-secondary btn-sm field-extractDissatisfyBtn">🔄 提取精简</button>
+                                        <button class="btn btn-secondary btn-sm field-extractDissatisfyBtn" onclick="__doExtractDissatisfy(this)">🔄 提取精简</button>
                                         <button class="btn btn-info btn-sm field-writeDissatisfyBtn">📋 写入表格</button>
                                         <button class="btn btn-success btn-sm field-saveDissatisfyBtn">💾 保存</button>
                                     </div>
@@ -820,7 +1367,7 @@
                                 <div class="card-header">
                                     <h3 class="card-title">💡 下一轮 Prompt 提取</h3>
                                     <div class="card-actions">
-                                        <button class="btn btn-secondary btn-sm field-extractPromptBtn">🔄 提取精简</button>
+                                        <button class="btn btn-secondary btn-sm field-extractPromptBtn" onclick="__doExtractPrompt(this)">🔄 提取精简</button>
                                         <button class="btn btn-info btn-sm field-writePromptBtn">📋 写入表格</button>
                                         <button class="btn btn-success btn-sm field-savePromptBtn">💾 保存</button>
                                     </div>

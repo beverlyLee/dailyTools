@@ -57,6 +57,51 @@ def generate_test_prompt(project_name, first_round_prompt, current_round_prompt,
     """生成测试验收prompt"""
     process_content = current_progress if current_progress else '暂无过程记录'
     
+    process_content = re.sub(r'^\s*(?:content|Content)\s*:\s*\{[\s\S]*?\n\s*\}\s*(?=\n|$)', '', process_content, flags=re.MULTILINE)
+    process_content = re.sub(r'^\s*\{["\s]*content["\s]*:[\s\S]*?\n\s*\}\s*(?=\n|$)', '', process_content, flags=re.MULTILINE)
+    
+    lines = process_content.split('\n')
+    result_lines = []
+    brace_depth = 0
+    in_json_block = False
+    
+    for line in lines:
+        stripped = line.strip()
+        if not in_json_block:
+            if re.match(r'^\s*(?:content|Content)\s*:\s*\{', line) or re.match(r'^\s*\{[\s\S]*["\']content["\']\s*:', line):
+                in_json_block = True
+                count = line.count('{') - line.count('}')
+                brace_depth = count
+                if brace_depth <= 0:
+                    in_json_block = False
+                continue
+            if re.match(r'^\s*\{', stripped):
+                in_json_block = True
+                count = line.count('{') - line.count('}')
+                brace_depth = count
+                if brace_depth <= 0:
+                    in_json_block = False
+                continue
+            result_lines.append(line)
+        else:
+            brace_depth += line.count('{') - line.count('}')
+            if brace_depth <= 0:
+                in_json_block = False
+    process_content = '\n'.join(result_lines)
+    
+    process_content = re.sub(r'^#{1,6}\s+', '', process_content, flags=re.MULTILINE)
+    process_content = re.sub(r'^[-*+]\s+', '', process_content, flags=re.MULTILINE)
+    process_content = re.sub(r'^\d+[.、]\s+', '', process_content, flags=re.MULTILINE)
+    process_content = re.sub(r'\*\*(.+?)\*\*', r'\1', process_content)
+    process_content = re.sub(r'\*(.+?)\*', r'\1', process_content)
+    process_content = re.sub(r'`(.+?)`', r'\1', process_content)
+    process_content = re.sub(r'^>\s?', '', process_content, flags=re.MULTILINE)
+    process_content = re.sub(r'^---+$', '', process_content, flags=re.MULTILINE)
+    process_content = re.sub(r'\[(.+?)\]\(.+?\)', r'\1', process_content)
+    process_content = re.sub(r'<[^>]+>', '', process_content)
+    process_content = re.sub(r'\n{3,}', '\n\n', process_content)
+    process_content = process_content.strip()
+    
     filtered_lines = []
     skip_next_indented = False
     for line in process_content.split('\n'):

@@ -584,6 +584,7 @@ function renderWorkspace() {
             writePromptBtn: content.querySelector('.field-writePromptBtn'),
             writeDissatisfyBtn: content.querySelector('.field-writeDissatisfyBtn'),
             writeStagePromptBtn: content.querySelector('.field-writeStagePromptBtn'),
+            writeStepOneBtn: content.querySelector('.field-writeStepOneBtn'),
             wpsDocUrl: content.querySelector('.field-wpsDocUrl'),
             wpsFileToken: content.querySelector('.field-wpsFileToken'),
             wpsSheetName: content.querySelector('.field-wpsSheetName'),
@@ -767,6 +768,9 @@ function renderWorkspace() {
         }
         if (fields.writeLogTraceBtn) {
             fields.writeLogTraceBtn.addEventListener('click', () => writeLogTraceToWps(project, fields));
+        }
+        if (fields.writeStepOneBtn) {
+            fields.writeStepOneBtn.addEventListener('click', () => writeStepOneToWps(project, fields));
         }
         if (fields.wpsDocUrl) {
             fields.wpsDocUrl.addEventListener('input', () => {
@@ -1510,9 +1514,70 @@ async function executeTestScript(e) {
     const originalText = btn.textContent;
     btn.disabled = true;
     btn.textContent = '执行中...';
+    
+    function simplifyProcessText(text) {
+        if (!text) return '';
+        let simplified = text;
+        simplified = simplified.replace(/^\s*(?:content|Content)\s*:\s*\{[\s\S]*?\n\s*\}\s*(?=\n|$)/gm, '');
+        simplified = simplified.replace(/^\s*\{["\s]*content["\s]*:[\s\S]*?\n\s*\}\s*(?=\n|$)/gm, '');
+        const lines = simplified.split('\n');
+        const resultLines = [];
+        let braceDepth = 0;
+        let inJsonBlock = false;
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmed = line.trim();
+            if (!inJsonBlock) {
+                if (/^\s*(?:content|Content)\s*:\s*\{/.test(line) || /^\s*\{[\s\S]*["']content["']\s*:/.test(line)) {
+                    inJsonBlock = true;
+                    let count = 0;
+                    for (const ch of line) {
+                        if (ch === '{') count++;
+                        if (ch === '}') count--;
+                    }
+                    braceDepth = count;
+                    if (braceDepth <= 0) inJsonBlock = false;
+                    continue;
+                }
+                if (/^\s*\{/.test(trimmed)) {
+                    inJsonBlock = true;
+                    let count = 0;
+                    for (const ch of line) {
+                        if (ch === '{') count++;
+                        if (ch === '}') count--;
+                    }
+                    braceDepth = count;
+                    if (braceDepth <= 0) inJsonBlock = false;
+                    continue;
+                }
+                resultLines.push(line);
+            } else {
+                for (const ch of line) {
+                    if (ch === '{') braceDepth++;
+                    if (ch === '}') braceDepth--;
+                }
+                if (braceDepth <= 0) inJsonBlock = false;
+            }
+        }
+        simplified = resultLines.join('\n');
+        simplified = simplified.replace(/^#{1,6}\s+/gm, '');
+        simplified = simplified.replace(/^[-*+]\s+/gm, '');
+        simplified = simplified.replace(/^\d+[.、]\s+/gm, '');
+        simplified = simplified.replace(/\*\*(.+?)\*\*/g, '$1');
+        simplified = simplified.replace(/\*(.+?)\*/g, '$1');
+        simplified = simplified.replace(/`(.+?)`/g, '$1');
+        simplified = simplified.replace(/^>\s?/gm, '');
+        simplified = simplified.replace(/^---+$/gm, '');
+        simplified = simplified.replace(/\[(.+?)\]\(.+?\)/g, '$1');
+        simplified = simplified.replace(/<[^>]+>/g, '');
+        simplified = simplified.replace(/\n{3,}/g, '\n\n');
+        return simplified.trim();
+    }
+    
+    const simplifiedProcess = simplifyProcessText(currentProcess);
 
     try {
-        console.log('发送请求:', { projectName, requirement, stage, currentProcess });
+        console.log('发送请求:', { projectName, requirement, stage, currentProcess: simplifiedProcess });
         
         const res = await fetch('/api/execute-test-prompt', {
             method: 'POST',
@@ -1521,12 +1586,15 @@ async function executeTestScript(e) {
                 project_name: projectName,
                 first_round: requirement,
                 current_round: stage,
-                current_process: currentProcess
+                current_process: simplifiedProcess
             })
         });
 
         const data = await res.json();
         console.log('响应数据:', data);
+        
+        btn.disabled = false;
+        btn.textContent = originalText;
         
         if (data.success) {
             try {
@@ -1534,17 +1602,28 @@ async function executeTestScript(e) {
                 showToast('✅ 脚本执行成功，结果已自动复制');
             } catch (clipboardError) {
                 console.warn('自动复制失败:', clipboardError);
-                showToast('✅ 脚本执行成功（自动复制失败，请检查浏览器权限）');
+                try {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = data.output;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    showToast('✅ 脚本执行成功，结果已自动复制');
+                } catch (e) {
+                    showToast('✅ 脚本执行成功（自动复制失败，请检查浏览器权限）');
+                }
             }
         } else {
             showToast('❌ 脚本执行失败: ' + (data.error || '未知错误'));
         }
     } catch (e) {
         console.error('请求异常:', e);
-        showToast('❌ 请求失败: ' + e.message);
-    } finally {
         btn.disabled = false;
         btn.textContent = originalText;
+        showToast('❌ 请求失败: ' + e.message);
     }
 }
 
@@ -2222,13 +2301,28 @@ function extractTasksFromPrompt(text) {
         const title = lines[0]?.trim() || '';
 
         let fixContent = '';
-        const fixMatch = taskContent.match(/(?:^|\n)\s*[-*]\s*修正\s*[：:]\s*([\s\S]*?)(?=\n\s*[-*]\s*[\u4e00-\u9fa5]+\s*[：:]|$)/);
-        if (fixMatch) {
-            fixContent = fixMatch[1].trim();
+        const fixPatterns = [
+            /(?:^|\n)\s*[-*]\s*修正\s*[：:]\s*([\s\S]*?)(?=\n\s*[-*]\s*[\u4e00-\u9fa5]+\s*[：:]|$)/,
+            /(?:^|\n)\s*修正\s*[：:]\s*([\s\S]*?)(?=\n\s*[\u4e00-\u9fa5]+\s*[：:]|$)/,
+            /(?:^|\n)\s*[-*]\s*修正\s*[：:]\s*([\s\S]*?)$/,
+            /(?:^|\n)\s*修正\s*[：:]\s*([\s\S]*?)$/,
+        ];
+        for (const fixPattern of fixPatterns) {
+            const fixMatch = taskContent.match(fixPattern);
+            if (fixMatch && fixMatch[1]) {
+                fixContent = fixMatch[1].trim();
+                break;
+            }
         }
 
         if (title && fixContent) {
             tasks.push([title, fixContent]);
+        } else if (title && !fixContent) {
+            const bodyLines = lines.slice(1).filter(l => l.trim());
+            if (bodyLines.length > 0) {
+                fixContent = bodyLines.join(' ').trim();
+                tasks.push([title, fixContent]);
+            }
         }
     }
 
@@ -2267,7 +2361,7 @@ function compressNextPrompt(rawText) {
     const tasks = extractTasksFromPrompt(promptText);
 
     if (!tasks || tasks.length === 0) {
-        return '';
+        return cleanPromptText(promptText);
     }
 
     const parts = [];
@@ -2286,7 +2380,7 @@ function compressNextPrompt(rawText) {
     }
 
     if (parts.length === 0) {
-        return '';
+        return cleanPromptText(promptText);
     }
 
     let result = '优化系统实现：' + parts.join('');
@@ -2565,6 +2659,45 @@ function writeStagePromptToWps(project, fields) {
         return;
     }
     writeToWps(project, fields, { 'User Prompt': stage });
+}
+
+function writeStepOneToWps(project, fields) {
+    const sessionId = project.data.wpsSessionValue || fields.wpsSessionValue?.value || '';
+    const commitId = project.data.wpsCommitId || fields.wpsCommitId?.value || '';
+    const stage = project.data.stage || fields.stage?.value || '';
+    const currentProcess = project.data.currentProcess || fields.currentProcess?.value || '';
+    const roundNum = project.data.roundNum || fields.roundNum?.value || 1;
+    
+    if (!sessionId.trim()) {
+        showToast('❌ sessionid 不能为空');
+        return;
+    }
+    if (!commitId.trim()) {
+        showToast('❌ Commit ID 不能为空');
+        return;
+    }
+    if (!stage.trim()) {
+        showToast('❌ 阶段描述不能为空');
+        return;
+    }
+    if (!currentProcess.trim()) {
+        showToast('❌ 本轮过程不能为空');
+        return;
+    }
+    
+    const MAX_PROCESS_LENGTH = 8000;
+    if (currentProcess.length > MAX_PROCESS_LENGTH) {
+        showToast('❌ 本轮过程内容过长（' + currentProcess.length + ' 字），无法写入表格\n\n请精简至 ' + MAX_PROCESS_LENGTH + ' 字以内，当前超出 ' + (currentProcess.length - MAX_PROCESS_LENGTH) + ' 字');
+        return;
+    }
+    
+    writeToWps(project, fields, { 
+        'Trae Session ID': sessionId,
+        'commit id': commitId,
+        'User Prompt': stage,
+        '日志轨迹': currentProcess,
+        '轮次': String(roundNum)
+    });
 }
 
 document.addEventListener('click', function(e) {
