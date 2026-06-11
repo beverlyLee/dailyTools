@@ -3,9 +3,9 @@ import type { EnvironmentParams, VentilationConfig, DewPointData } from './types
 export class DewPointCalculator {
   private resolution: { x: number; y: number } = { x: 40, y: 35 };
 
-  private VENTILATION_ACH = [0.3, 0.6, 1.0];
-  private TARGET_HUMIDITY_LOW = 45;
-  private TIME_CONSTANT_HOURS = 4;
+  private VENTILATION_ACH = [0.5, 1.5, 4.0];
+  private VENTILATION_TARGET_RH = [65, 55, 45];
+  private TIME_CONSTANT_HOURS = 96;
 
   constructor(
     private env: EnvironmentParams,
@@ -25,13 +25,13 @@ export class DewPointCalculator {
       return baseHumidity;
     }
 
-    const ach = this.VENTILATION_ACH[Math.min(this.ventilation.intensity - 1, 2)];
+    const idx = Math.min(this.ventilation.intensity - 1, 2);
+    const ach = this.VENTILATION_ACH[idx];
+    const targetHumidity = this.VENTILATION_TARGET_RH[idx];
     const rainyHours = this.env.rainyDays * 24;
     const tau = this.TIME_CONSTANT_HOURS;
 
     const decayFactor = Math.exp(-(ach * rainyHours) / tau);
-    const targetHumidity = this.TARGET_HUMIDITY_LOW;
-
     const effectiveHumidity = targetHumidity + (baseHumidity - targetHumidity) * decayFactor;
     return Math.max(30, Math.min(100, effectiveHumidity));
   }

@@ -13,7 +13,7 @@ export class MoldRiskAssessor {
   constructor(
     private env: EnvironmentParams,
     private material: WallMaterial,
-    _insulation: InsulationConfig,
+    private insulation: InsulationConfig,
     _ventilation: VentilationConfig
   ) {}
 
@@ -62,7 +62,8 @@ export class MoldRiskAssessor {
     dewDurationHours: number,
     indoorHumidity: number,
     x: number,
-    y: number
+    y: number,
+    dewPointTemp: number = 0
   ): number {
     const timeWeight = this.calculateTimeWeightFactor();
     const materialFactor = this.calculateMaterialFactor();
@@ -70,15 +71,45 @@ export class MoldRiskAssessor {
     const humidityFactor = this.calculateHumidityFactor(indoorHumidity);
     const tempFactor = this.calculateTemperatureFactor(surfaceTemp);
 
-    const cornerFactor = this.calculatePositionFactor(x, y);
+    const hasCondensation = condensationFactor > 0;
 
-    const primaryRisks = condensationFactor * 0.4 + humidityFactor * 0.3;
-    const secondaryRisks = materialFactor * 0.15 + tempFactor * 0.15;
-    const baseRisk = (primaryRisks + secondaryRisks) * timeWeight;
+    let baseRisk: number;
+    if (hasCondensation) {
+      const primaryRisks = condensationFactor * 0.45 + humidityFactor * 0.25;
+      const secondaryRisks = materialFactor * 0.15 + tempFactor * 0.15;
+      baseRisk = (primaryRisks + secondaryRisks) * timeWeight;
+    } else {
+      const surfaceMargin = this.calculateSurfaceMarginFactor(surfaceTemp, dewPointTemp);
+      const dryRisk = humidityFactor * 0.25 + materialFactor * 0.10 + tempFactor * 0.05;
+      baseRisk = dryRisk * timeWeight * surfaceMargin;
+    }
+
+    const cornerFactor = hasCondensation
+      ? this.calculatePositionFactor(x, y)
+      : 1.0 + (this.calculatePositionFactor(x, y) - 1.0) * 0.15;
+
+    const insulationBonus = this.calculateInsulationSurfaceTempBonus();
+    baseRisk *= insulationBonus;
 
     const adjustedRisk = baseRisk * cornerFactor;
-
     return Math.min(1, Math.max(0, adjustedRisk));
+  }
+
+  private calculateSurfaceMarginFactor(surfaceTemp: number, dewPointTemp: number): number {
+    const margin = surfaceTemp - dewPointTemp;
+    if (margin < 0) return 1.0;
+    if (margin < 2) return 0.5 + 0.25 * (margin / 2);
+    if (margin < 5) return 0.3 - 0.15 * ((margin - 2) / 3);
+    return 0.15;
+  }
+
+  private calculateInsulationSurfaceTempBonus(): number {
+    if (!this.insulation.enabled || this.insulation.thickness <= 0) return 1.0;
+    const thicknessM = this.insulation.thickness / 1000;
+    const lambda = this.insulation.thermalConductivity;
+    const R_insulation = thicknessM / lambda;
+    const reduction = 1 / (1 + R_insulation * 2.5);
+    return reduction;
   }
 
   private calculatePositionFactor(x: number, y: number): number {
@@ -131,8 +162,8 @@ export class MoldRiskAssessor {
   }
 
   calculateOverallRisk(maxRisk: number): 'safe' | 'moderate' | 'danger' {
-    if (maxRisk < 0.4) return 'safe';
-    if (maxRisk < 0.7) return 'moderate';
+    if (maxRisk < 0.3) return 'safe';
+    if (maxRisk < 0.6) return 'moderate';
     return 'danger';
   }
 
@@ -144,6 +175,7 @@ export class MoldRiskAssessor {
     const riskMap: Array<{ x: number; y: number; risk: number }> = [];
     const highRiskZones: Array<{ x: number; y: number; severity: number }> = [];
     let maxRisk = 0;
+    const dewPointTemp = dewData.dewPointTemp;
 
     for (let i = 0; i < this.resolution.x; i++) {
       for (let j = 0; j < this.resolution.y; j++) {
@@ -156,7 +188,8 @@ export class MoldRiskAssessor {
           localDewDuration,
           indoorHumidity,
           x,
-          y
+          y,
+          dewPointTemp
         );
 
         riskMap.push({ x, y, risk });
@@ -199,11 +232,10 @@ export class MoldRiskAssessor {
     env?: EnvironmentParams,
     material?: WallMaterial,
     insulation?: InsulationConfig,
-    ventilation?: VentilationConfig
+    _ventilation?: VentilationConfig
   ) {
     if (env) this.env = env;
     if (material) this.material = material;
-    if (insulation) this._insulation = insulation;
-    if (ventilation) this._ventilation = ventilation;
+    if (insulation) this.insulation = insulation;
   }
 }
