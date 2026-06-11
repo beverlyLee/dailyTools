@@ -30,7 +30,7 @@ export function ControlPanel() {
 
   return (
     <div className="absolute top-4 right-4 z-10 w-80 bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-5 border border-white/50">
-      <h2 className="text-xl font-bold text-stone-800 mb-4 flex items-center gap-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+      <h2 className="text-xl font-bold text-stone-800 mb-4 flex items-center gap-2 font-display">
         <TreeDeciduous size={24} className="text-green-700" />
         庭院遮阴模拟器
       </h2>

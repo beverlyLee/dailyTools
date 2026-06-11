@@ -20,6 +20,8 @@ export interface ShadowProjection {
   azimuthDeg: number;
 }
 
+const PENUMBRA_DISTANCE = 0.6;
+
 function getCanopyCenter(
   treePosition: [number, number, number],
   canopy: CanopySize
@@ -36,7 +38,7 @@ function rayIntersectsCanopyEllipsoid(
   treePosition: [number, number, number],
   canopy: CanopySize,
   sunDir: [number, number, number]
-): boolean {
+): { hit: boolean; softness: number; tEntry: number; tExit: number } {
   const [cx, cy, cz] = getCanopyCenter(treePosition, canopy);
   const rx = canopy.radius;
   const ry = canopy.height * 0.5;
@@ -56,17 +58,31 @@ function rayIntersectsCanopyEllipsoid(
 
   const discriminant = b * b - 4 * a * c;
   if (discriminant < 0) {
-    return false;
+    return { hit: false, softness: 0, tEntry: 0, tExit: 0 };
   }
 
   const sqrtDisc = Math.sqrt(discriminant);
   const t1 = (-b - sqrtDisc) / (2 * a);
   const t2 = (-b + sqrtDisc) / (2 * a);
 
-  const tMin = Math.min(t1, t2);
-  const tMax = Math.max(t1, t2);
+  const tEntry = Math.min(t1, t2);
+  const tExit = Math.max(t1, t2);
 
-  return tMax >= 0;
+  if (tExit < 0) {
+    return { hit: false, softness: 0, tEntry, tExit };
+  }
+
+  if (tEntry <= 0) {
+    return { hit: true, softness: 1, tEntry, tExit };
+  }
+
+  let softness = 1;
+  if (tEntry > 0 && tEntry < PENUMBRA_DISTANCE) {
+    softness = 1 - tEntry / PENUMBRA_DISTANCE;
+    softness = 0.3 + softness * softness * 0.7;
+  }
+
+  return { hit: true, softness, tEntry, tExit };
 }
 
 export function pointInShadowEllipse(
@@ -85,7 +101,29 @@ export function pointInShadowEllipse(
     Math.cos(altitudeRad) * Math.cos(azimuthRad),
   ];
 
-  return rayIntersectsCanopyEllipsoid(point, treePosition, canopy, sunDir);
+  const result = rayIntersectsCanopyEllipsoid(point, treePosition, canopy, sunDir);
+  return result.hit && result.softness >= 0.5;
+}
+
+export function pointShadowSoftness(
+  point: [number, number, number],
+  treePosition: [number, number, number],
+  canopy: CanopySize,
+  sunAltitudeDeg: number,
+  sunAzimuthDeg: number = DEFAULT_SOLAR_AZIMUTH
+): number {
+  const altitudeRad = degToRad(sunAltitudeDeg);
+  const azimuthRad = degToRad(sunAzimuthDeg);
+
+  const sunDir: [number, number, number] = [
+    Math.cos(altitudeRad) * Math.sin(azimuthRad),
+    Math.sin(altitudeRad),
+    Math.cos(altitudeRad) * Math.cos(azimuthRad),
+  ];
+
+  const result = rayIntersectsCanopyEllipsoid(point, treePosition, canopy, sunDir);
+  if (!result.hit) return 0;
+  return result.softness;
 }
 
 export function calculateShadowProjection(
@@ -114,11 +152,12 @@ export function calculateShadowProjection(
   const centerX = treePosition[0] + offsetX;
   const centerZ = treePosition[2] + offsetZ;
 
+  const penumbraScale = 1 + (PENUMBRA_DISTANCE / Math.max(canopy.radius, 0.1)) * 0.3;
   const perpX = Math.cos(azimuthRad);
   const perpZ = -Math.sin(azimuthRad);
 
-  const stretchAlongAzimuth = canopy.radius * 1.0;
-  const stretchPerpendicular = canopy.radius * 0.92;
+  const stretchAlongAzimuth = canopy.radius * penumbraScale;
+  const stretchPerpendicular = canopy.radius * 0.92 * penumbraScale;
 
   return {
     centerX,
@@ -163,8 +202,9 @@ export function calculateWindowShadowCoverage(
       const py = wy + ((j + 0.5) / step) * h - h / 2;
       const pz = wz;
       const samplePoint: [number, number, number] = [px, py, pz];
-      if (rayIntersectsCanopyEllipsoid(samplePoint, treePosition, canopy, sunDir)) {
-        covered++;
+      const result = rayIntersectsCanopyEllipsoid(samplePoint, treePosition, canopy, sunDir);
+      if (result.hit) {
+        covered += result.softness;
       }
     }
   }
@@ -242,7 +282,9 @@ export function assessWindowLighting(
     if (w.isPermanentlyBlocked) {
       warnings.push(`🚫 窗户 ${w.id}: 此处窗户将常年无直射光`);
     } else if (w.shadowCoverage >= 0.99) {
-      warnings.push(`⬛ 窗户 ${w.id}: 完全被树荫遮挡 (${(w.shadowCoverage * 100).toFixed(0)}%)`);
+      warnings.push(
+        `⬛ 窗户 ${w.id}: 完全被树荫遮挡 (${(w.shadowCoverage * 100).toFixed(0)}%)`
+      );
     } else if (w.shadowCoverage >= 0.85) {
       warnings.push(
         `🟫 窗户 ${w.id}: 绝大部分面积被遮挡 (${(w.shadowCoverage * 100).toFixed(0)}%)`

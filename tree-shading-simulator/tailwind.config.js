@@ -47,8 +47,8 @@ export default {
         },
       },
       fontFamily: {
-        display: ["'Playfair Display'", 'serif'],
-        sans: ["'Lato'", 'sans-serif'],
+        display: ["Georgia", "'Times New Roman'", "'Songti SC'", "'STSong'", "serif"],
+        sans: ["ui-sans-serif", "-apple-system", "BlinkMacSystemFont", "'Segoe UI'", "'Helvetica Neue'", "Arial", "'PingFang SC'", "'Microsoft YaHei'", "sans-serif"],
       },
     },
   },

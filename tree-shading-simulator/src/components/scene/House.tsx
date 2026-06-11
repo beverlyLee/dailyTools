@@ -7,7 +7,7 @@ import {
   calculateSolarAltitude,
   DEFAULT_SOLAR_AZIMUTH,
 } from '../../utils/solar';
-import { pointInShadowEllipse } from '../../utils/shadow';
+import { pointShadowSoftness } from '../../utils/shadow';
 
 function WindowPane({
   data,
@@ -76,7 +76,9 @@ function FacadeShadowOverlay() {
   const season = useSimulationStore((s) => s.season);
   const treeSpecies = useSimulationStore((s) => s.tree.species);
   const treeYears = useSimulationStore((s) => s.tree.years);
-  const treePosition = useSimulationStore((s) => s.tree.position);
+  const treePosX = useSimulationStore((s) => s.tree.position[0]);
+  const treePosY = useSimulationStore((s) => s.tree.position[1]);
+  const treePosZ = useSimulationStore((s) => s.tree.position[2]);
   const latitude = useSimulationStore((s) => s.latitude);
   const solarAzimuth = useSimulationStore(
     (s) => s.solarAzimuth || DEFAULT_SOLAR_AZIMUTH
@@ -86,6 +88,11 @@ function FacadeShadowOverlay() {
   const TEX_HEIGHT = 192;
   const SAMPLES_X = 32;
   const SAMPLES_Y = 24;
+
+  const treePosition: [number, number, number] = useMemo(
+    () => [treePosX, treePosY, treePosZ],
+    [treePosX, treePosY, treePosZ]
+  );
 
   useEffect(() => {
     if (initializedRef.current) return;
@@ -124,17 +131,24 @@ function FacadeShadowOverlay() {
     };
   }, []);
 
+  const drawShadowOverlay = useMemo(() => {
+    const canopy = calculateCanopySize(treeSpecies, treeYears);
+    const isWinterDeciduous =
+      season === 'winter' && treeSpecies === 'deciduous';
+    const effectiveCanopy = isWinterDeciduous
+      ? { ...canopy, radius: 0.2, height: 0.2, trunkHeight: canopy.trunkHeight }
+      : canopy;
+    const altitude = calculateSolarAltitude(latitude, season);
+
+    return { canopy, effectiveCanopy, altitude, isWinterDeciduous };
+  }, [season, treeSpecies, treeYears, treePosX, treePosY, treePosZ, latitude, solarAzimuth]);
+
   useEffect(() => {
     const ctx = ctxRef.current;
     const texture = textureRef.current;
     if (!ctx || !texture) return;
 
-    const canopy = calculateCanopySize(treeSpecies, treeYears);
-    const isWinterDeciduous = season === 'winter' && treeSpecies === 'deciduous';
-    const effectiveCanopy = isWinterDeciduous
-      ? { ...canopy, radius: 0.2, height: 0.2, trunkHeight: canopy.trunkHeight }
-      : canopy;
-    const altitude = calculateSolarAltitude(latitude, season);
+    const { effectiveCanopy, altitude, isWinterDeciduous } = drawShadowOverlay;
 
     ctx.clearRect(0, 0, TEX_WIDTH, TEX_HEIGHT);
 
@@ -147,7 +161,7 @@ function FacadeShadowOverlay() {
           const py = ((j + 0.5) / SAMPLES_Y) * 7;
           const point: [number, number, number] = [px, py, houseFacadeZ];
 
-          const inShadow = pointInShadowEllipse(
+          const softness = pointShadowSoftness(
             point,
             treePosition,
             effectiveCanopy,
@@ -155,13 +169,25 @@ function FacadeShadowOverlay() {
             solarAzimuth
           );
 
-          if (inShadow) {
+          if (softness > 0.02) {
             const cx = ((i + 0.5) / SAMPLES_X) * TEX_WIDTH;
             const cy = TEX_HEIGHT - ((j + 0.5) / SAMPLES_Y) * TEX_HEIGHT;
             const cellW = TEX_WIDTH / SAMPLES_X + 2;
             const cellH = TEX_HEIGHT / SAMPLES_Y + 2;
-            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(cellW, cellH));
-            grad.addColorStop(0, 'rgba(0,0,0,0.55)');
+
+            const alpha = Math.min(0.55, softness * 0.55);
+            const coreAlpha = Math.min(0.75, softness * 0.75);
+
+            const grad = ctx.createRadialGradient(
+              cx,
+              cy,
+              0,
+              cx,
+              cy,
+              Math.max(cellW, cellH)
+            );
+            grad.addColorStop(0, `rgba(0,0,0,${coreAlpha})`);
+            grad.addColorStop(0.5, `rgba(0,0,0,${alpha * 0.6})`);
             grad.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.fillStyle = grad;
             ctx.fillRect(cx - cellW, cy - cellH, cellW * 2, cellH * 2);
@@ -176,7 +202,7 @@ function FacadeShadowOverlay() {
       const mat = overlayRef.current.material as THREE.MeshBasicMaterial;
       mat.opacity = isWinterDeciduous ? 0 : 0.85;
     }
-  }, [season, treeSpecies, treeYears, treePosition[0], treePosition[1], treePosition[2], latitude, solarAzimuth]);
+  }, [drawShadowOverlay, treePosition[0], treePosition[1], treePosition[2], solarAzimuth]);
 
   return (
     <mesh ref={overlayRef} position={[0, 3.5, 4.04]}>
@@ -204,12 +230,6 @@ export function House() {
     windows.forEach((w) => map.set(w.id, w));
     return map;
   }, [windows]);
-
-  const waMap = useMemo(() => {
-    const map = new Map<string, (typeof assessment.windows)[number]>();
-    assessment.windows.forEach((w) => map.set(w.id, w));
-    return map;
-  }, [assessment]);
 
   return (
     <group>
