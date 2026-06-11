@@ -1,7 +1,27 @@
 import * as THREE from 'three';
 import { GLASS_TYPES } from './glassMaterialLib.js';
 
-function createViewCone(origin, direction, halfAngle, rayCount = 24) {
+function deterministicHash(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function createViewCone(origin, direction, halfAngle, rayCount = 24, deterministic = true) {
   const rays = [];
   const up = new THREE.Vector3(0, 1, 0);
   const right = new THREE.Vector3().crossVectors(direction, up).normalize();
@@ -9,9 +29,18 @@ function createViewCone(origin, direction, halfAngle, rayCount = 24) {
 
   rays.push({ origin: origin.clone(), direction: direction.clone() });
 
+  const rng = deterministic
+    ? mulberry32(deterministicHash('cone:' + origin.x.toFixed(2) + ':' + origin.y.toFixed(2)))
+    : null;
+
   for (let i = 0; i < rayCount - 1; i++) {
     const theta = (i / (rayCount - 1)) * Math.PI * 2;
-    const phi = halfAngle * (0.3 + Math.random() * 0.7);
+    let phi;
+    if (deterministic) {
+      phi = halfAngle * (0.3 + rng() * 0.7);
+    } else {
+      phi = halfAngle * (0.3 + Math.random() * 0.7);
+    }
 
     const rayDir = direction.clone()
       .add(right.clone().multiplyScalar(Math.sin(phi) * Math.cos(theta)))
@@ -56,7 +85,7 @@ function rayIntersectsHumanSilhouette(ray, humanBounds) {
   return { distance: tmin, point: hitPoint };
 }
 
-function isRayBlockedByGlass(origin, direction, glassPlane, glassType) {
+function isRayBlockedByGlass(origin, direction, glassPlane, glassType, deterministic = true, seedIndex = 0) {
   const glass = GLASS_TYPES[glassType];
   const ray = new THREE.Ray(origin.clone(), direction.clone());
   const intersectionPoint = new THREE.Vector3();
@@ -76,8 +105,19 @@ function isRayBlockedByGlass(origin, direction, glassPlane, glassType) {
 
   const blockedProbability = Math.min(1.0, effectiveOpacity * angleFactor);
 
+  let isBlocked;
+  if (deterministic) {
+    const rng = mulberry32(deterministicHash(
+      'block:' + glassType + ':' + intersectionPoint.x.toFixed(3) + ':' +
+      intersectionPoint.y.toFixed(3) + ':' + seedIndex
+    ));
+    isBlocked = rng() < blockedProbability;
+  } else {
+    isBlocked = Math.random() < blockedProbability;
+  }
+
   return {
-    blocked: Math.random() < blockedProbability,
+    blocked: isBlocked,
     transparency: glass.transmission * cosAngle,
     intersectionPoint,
     distToGlass,
@@ -93,10 +133,11 @@ function performPrivacyCheck(
   humanBounds,
   glassType,
   halfAngle = Math.PI / 12,
-  sampleCount = 48
+  sampleCount = 48,
+  deterministic = true
 ) {
   const glass = GLASS_TYPES[glassType];
-  const viewCone = createViewCone(observerOrigin, observerDirection, halfAngle, sampleCount);
+  const viewCone = createViewCone(observerOrigin, observerDirection, halfAngle, sampleCount, deterministic);
 
   let totalRays = viewCone.length;
   let raysReachingHuman = 0;
@@ -104,8 +145,9 @@ function performPrivacyCheck(
   let penetrationDistances = [];
   let transparencyValues = [];
 
-  for (const ray of viewCone) {
-    const glassResult = isRayBlockedByGlass(ray.origin, ray.direction, glassPlane, glassType);
+  for (let i = 0; i < viewCone.length; i++) {
+    const ray = viewCone[i];
+    const glassResult = isRayBlockedByGlass(ray.origin, ray.direction, glassPlane, glassType, deterministic, i);
 
     if (glassResult.blocked) {
       raysBlockedByGlass++;
@@ -160,8 +202,9 @@ function performPrivacyCheck(
     raysReachingHuman,
     totalRays,
     penetrationDistances,
-    glassType
+    glassType,
+    deterministic
   };
 }
 
-export { createViewCone, isRayBlockedByGlass, performPrivacyCheck };
+export { createViewCone, isRayBlockedByGlass, performPrivacyCheck, deterministicHash, mulberry32 };

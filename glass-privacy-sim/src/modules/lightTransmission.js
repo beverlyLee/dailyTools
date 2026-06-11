@@ -1,7 +1,32 @@
 import * as THREE from 'three';
 import { GLASS_TYPES } from './glassMaterialLib.js';
 
-function computeRefraction(incidentDir, normal, ior, glassType) {
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function deterministicHash(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function getDeterministicRng(context, index) {
+  const seed = deterministicHash(context + ':' + index);
+  return mulberry32(seed);
+}
+
+function computeRefraction(incidentDir, normal, ior, glassType, deterministicRng) {
   const glass = GLASS_TYPES[glassType];
   const cosI = -normal.dot(incidentDir);
   const eta = cosI > 0 ? (1.0 / ior) : ior;
@@ -16,9 +41,11 @@ function computeRefraction(incidentDir, normal, ior, glassType) {
     .add(normal.clone().multiplyScalar(eta * cosI - cosT));
 
   const normalStrength = glass.normalStrength;
+  const rand1 = deterministicRng ? (deterministicRng() - 0.5) : (Math.random() - 0.5);
+  const rand2 = deterministicRng ? (deterministicRng() - 0.5) : (Math.random() - 0.5);
   const perturbation = new THREE.Vector3(
-    (Math.random() - 0.5) * normalStrength * 0.3,
-    (Math.random() - 0.5) * normalStrength * 0.3,
+    rand1 * normalStrength * 0.3,
+    rand2 * normalStrength * 0.3,
     0
   );
   refracted.add(perturbation);
@@ -33,7 +60,7 @@ function fresnelReflectance(cosTheta, ior) {
   return r0 + (1.0 - r0) * Math.pow(1.0 - cosTheta, 5);
 }
 
-function traceLightRay(origin, direction, glassPlane, glassType, maxBounces = 3) {
+function traceLightRay(origin, direction, glassPlane, glassType, maxBounces = 3, deterministicRng) {
   const glass = GLASS_TYPES[glassType];
   const ray = new THREE.Ray(origin.clone(), direction.clone());
   const intersectionPoint = new THREE.Vector3();
@@ -48,19 +75,19 @@ function traceLightRay(origin, direction, glassPlane, glassType, maxBounces = 3)
   const reflectance = fresnelReflectance(cosI, glass.ior);
   const transmittance = (1.0 - reflectance) * glass.transmission;
 
-  const refractedDir = computeRefraction(direction, glassNormal, glass.ior, glassType);
+  const refractedDir = computeRefraction(direction, glassNormal, glass.ior, glassType, deterministicRng);
 
   const offset = 0.001;
   const exitPoint = intersectionPoint.clone().add(
     glassNormal.clone().multiplyScalar(-glass.thickness * 50)
   );
 
-  const exitRay = new THREE.Ray(exitPoint, refractedDir);
-
   const angularDeviation = glass.normalStrength * 0.35;
   const spreadDir = refractedDir.clone();
-  spreadDir.x += (Math.random() - 0.5) * angularDeviation;
-  spreadDir.y += (Math.random() - 0.5) * angularDeviation;
+  const randDev1 = deterministicRng ? (deterministicRng() - 0.5) : (Math.random() - 0.5);
+  const randDev2 = deterministicRng ? (deterministicRng() - 0.5) : (Math.random() - 0.5);
+  spreadDir.x += randDev1 * angularDeviation;
+  spreadDir.y += randDev2 * angularDeviation;
   spreadDir.normalize();
 
   return {
@@ -74,10 +101,14 @@ function traceLightRay(origin, direction, glassPlane, glassType, maxBounces = 3)
   };
 }
 
-function computeBatchRefraction(origin, direction, glassPlane, glassType, sampleCount = 64) {
+function computeBatchRefraction(origin, direction, glassPlane, glassType, sampleCount = 64, deterministic = true) {
   const results = [];
   for (let i = 0; i < sampleCount; i++) {
-    const result = traceLightRay(origin, direction, glassPlane, glassType);
+    const deterministicRng = deterministic ? getDeterministicRng(
+      'refr:' + glassType + ':' + origin.x.toFixed(2) + ':' + origin.y.toFixed(2),
+      i
+    ) : null;
+    const result = traceLightRay(origin, direction, glassPlane, glassType, 3, deterministicRng);
     if (result) results.push(result);
   }
 
@@ -97,8 +128,9 @@ function computeBatchRefraction(origin, direction, glassPlane, glassType, sample
     avgLightLoss,
     scatterVariance,
     sampleCount: results.length,
-    glassType
+    glassType,
+    deterministic
   };
 }
 
-export { computeRefraction, fresnelReflectance, traceLightRay, computeBatchRefraction };
+export { computeRefraction, fresnelReflectance, traceLightRay, computeBatchRefraction, mulberry32, deterministicHash, getDeterministicRng };

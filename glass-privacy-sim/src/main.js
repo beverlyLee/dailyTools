@@ -11,6 +11,7 @@ let glassMesh, glassMaterial;
 let humanGroup;
 let blurProcessor;
 let currentGlassType = 'ribbed';
+let privacyDynamicLevel = 0;
 let glassPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 let windowArea = 2.0 * 2.5;
 let sunDirection = new THREE.Vector3(0.3, -0.5, -0.8).normalize();
@@ -307,51 +308,10 @@ function updateAnalysis() {
   const silhouetteVisEl = document.getElementById('silhouette-vis');
   const refractionOffsetEl = document.getElementById('refraction-offset');
   const blurRadiusEl = document.getElementById('blur-radius');
-  const alertBox = document.getElementById('alert-box');
+  const privacyAlertBox = document.getElementById('privacy-alert-box');
+  const lightAlertBox = document.getElementById('light-alert-box');
   const viewAngleEl = document.getElementById('view-angle');
   const penetrationProbEl = document.getElementById('penetration-prob');
-
-  const privacyLevel = glass.privacyLevel;
-  const percent = (privacyLevel * 100).toFixed(0);
-  privacyEl.textContent = `${percent}%`;
-
-  if (privacyLevel >= 0.7) {
-    privacyEl.className = 'metric-value safe';
-  } else if (privacyLevel >= 0.4) {
-    privacyEl.className = 'metric-value warn';
-  } else {
-    privacyEl.className = 'metric-value danger';
-  }
-
-  privacyBarFill.style.width = `${percent}%`;
-  if (privacyLevel >= 0.7) privacyBarFill.style.background = '#4cdf8a';
-  else if (privacyLevel >= 0.4) privacyBarFill.style.background = '#f0c040';
-  else privacyBarFill.style.background = '#ff5566';
-
-  const daylightResult = evaluateDaylight(currentGlassType, windowArea, sunDirection, glassPlane);
-  lightRateEl.textContent = `${(daylightResult.effectiveTransmittance * 100).toFixed(1)}%`;
-  if (daylightResult.effectiveTransmittance >= 0.6) lightRateEl.className = 'metric-value safe';
-  else if (daylightResult.effectiveTransmittance >= 0.4) lightRateEl.className = 'metric-value warn';
-  else lightRateEl.className = 'metric-value danger';
-
-  silhouetteVisEl.textContent = `${(glass.silhouetteVisibility * 100).toFixed(0)}%`;
-  if (glass.silhouetteVisibility <= 0.2) silhouetteVisEl.className = 'metric-value safe';
-  else if (glass.silhouetteVisibility <= 0.5) silhouetteVisEl.className = 'metric-value warn';
-  else silhouetteVisEl.className = 'metric-value danger';
-
-  const refractionResult = computeBatchRefraction(
-    new THREE.Vector3(0, 1.5, 3),
-    new THREE.Vector3(0, 0, -1),
-    glassPlane,
-    currentGlassType,
-    32
-  );
-  const offsetDeg = refractionResult
-    ? (refractionResult.avgDeviation * 180 / Math.PI).toFixed(1)
-    : '0.0';
-  refractionOffsetEl.textContent = `${offsetDeg}°`;
-
-  blurRadiusEl.textContent = `${glass.blurRadius.toFixed(1)}px`;
 
   const humanBounds = {
     min: new THREE.Vector3(-0.3, 0, -1.2),
@@ -362,6 +322,51 @@ function updateAnalysis() {
   const privacyResult = performPrivacyCheck(
     observerOrigin, observerDir, glassPlane, humanBounds, currentGlassType
   );
+
+  const privacyScore = privacyResult.privacyScore;
+  privacyDynamicLevel = privacyScore;
+  const privacyPercent = (privacyScore * 100).toFixed(0);
+  privacyEl.textContent = `${privacyPercent}%`;
+
+  if (privacyScore >= 0.65) {
+    privacyEl.className = 'metric-value safe';
+  } else if (privacyScore >= 0.4) {
+    privacyEl.className = 'metric-value warn';
+  } else {
+    privacyEl.className = 'metric-value danger';
+  }
+
+  privacyBarFill.style.width = `${privacyPercent}%`;
+  if (privacyScore >= 0.65) privacyBarFill.style.background = '#4cdf8a';
+  else if (privacyScore >= 0.4) privacyBarFill.style.background = '#f0c040';
+  else privacyBarFill.style.background = '#ff5566';
+
+  const daylightResult = evaluateDaylight(currentGlassType, windowArea, sunDirection, glassPlane);
+  lightRateEl.textContent = `${(daylightResult.effectiveTransmittance * 100).toFixed(1)}%`;
+  if (daylightResult.effectiveTransmittance >= 0.6) lightRateEl.className = 'metric-value safe';
+  else if (daylightResult.effectiveTransmittance >= 0.4) lightRateEl.className = 'metric-value warn';
+  else lightRateEl.className = 'metric-value danger';
+
+  const dynamicSilhouette = privacyResult.penetrationRatio;
+  silhouetteVisEl.textContent = `${(dynamicSilhouette * 100).toFixed(0)}%`;
+  if (dynamicSilhouette <= 0.2) silhouetteVisEl.className = 'metric-value safe';
+  else if (dynamicSilhouette <= 0.5) silhouetteVisEl.className = 'metric-value warn';
+  else silhouetteVisEl.className = 'metric-value danger';
+
+  const refractionResult = computeBatchRefraction(
+    new THREE.Vector3(0, 1.5, 3),
+    new THREE.Vector3(0, 0, -1),
+    glassPlane,
+    currentGlassType,
+    32,
+    true
+  );
+  const offsetDeg = refractionResult
+    ? (refractionResult.avgDeviation * 180 / Math.PI).toFixed(1)
+    : '0.0';
+  refractionOffsetEl.textContent = `${offsetDeg}°`;
+
+  blurRadiusEl.textContent = `${glass.blurRadius.toFixed(1)}px`;
 
   const camAngle = Math.atan2(
     camera.position.x - 0,
@@ -374,21 +379,25 @@ function updateAnalysis() {
   else if (privacyResult.penetrationRatio <= 0.3) penetrationProbEl.className = 'metric-value warn';
   else penetrationProbEl.className = 'metric-value danger';
 
-  const combinedPrivacyScore = privacyLevel * 0.6 + (1 - privacyResult.penetrationRatio) * 0.4;
-
-  alertBox.className = 'alert-box';
-  if (privacyLevel < 0.3) {
-    alertBox.className = 'alert-box privacy-alert';
-    alertBox.innerHTML = `⚠️ <b>隐私警报</b>：当前${glass.name}隐私等级为 ${privacyResult.privacyGrade}，室外可直接辨认室内人体轮廓！穿透概率 ${(privacyResult.penetrationRatio * 100).toFixed(0)}%，建议更换为长虹玻璃或磨砂玻璃。`;
-  } else if (daylightResult.needsAuxLight) {
-    alertBox.className = 'alert-box light-warn';
-    alertBox.innerHTML = `💡 <b>采光提示</b>：当前${glass.name}导致进光量损失 ${daylightResult.lightLossPercent}%，室内照度约 ${daylightResult.luxIndoor} lux。${daylightResult.auxLightSuggestion}。`;
-  } else if (combinedPrivacyScore >= 0.6) {
-    alertBox.className = 'alert-box safe-info';
-    alertBox.innerHTML = `✅ <b>隐私达标</b>：${glass.name}隐私等级 ${privacyResult.privacyGrade}，室外仅能见到模糊色块，无法辨认形态。采光率 ${(daylightResult.effectiveTransmittance * 100).toFixed(0)}%。`;
+  privacyAlertBox.className = 'alert-box';
+  if (privacyScore < 0.4) {
+    privacyAlertBox.className = 'alert-box privacy-alert';
+    privacyAlertBox.innerHTML = `⚠️ <b>隐私警报</b>：当前${glass.name}动态隐私等级为 <b>${privacyResult.privacyGrade}</b>，穿透概率 ${(privacyResult.penetrationRatio * 100).toFixed(0)}%，室外可直接辨认室内人体轮廓！建议更换为长虹玻璃或磨砂玻璃。`;
+  } else if (privacyScore < 0.65) {
+    privacyAlertBox.className = 'alert-box privacy-warn';
+    privacyAlertBox.innerHTML = `⚡ <b>隐私一般</b>：${glass.name}动态隐私等级 <b>${privacyResult.privacyGrade}</b>，穿透概率 ${(privacyResult.penetrationRatio * 100).toFixed(0)}%，室外可辨认模糊轮廓，建议搭配窗帘使用。`;
   } else {
-    alertBox.className = 'alert-box light-warn';
-    alertBox.innerHTML = `⚡ <b>隐私一般</b>：${glass.name}隐私等级 ${privacyResult.privacyGrade}，室外可辨认模糊轮廓，建议搭配窗帘使用。`;
+    privacyAlertBox.className = 'alert-box privacy-safe';
+    privacyAlertBox.innerHTML = `✅ <b>隐私达标</b>：${glass.name}动态隐私等级 <b>${privacyResult.privacyGrade}</b>，穿透概率 ${(privacyResult.penetrationRatio * 100).toFixed(0)}%，室外仅能见到模糊色块，无法辨认形态。`;
+  }
+
+  lightAlertBox.className = 'alert-box';
+  if (daylightResult.needsAuxLight) {
+    lightAlertBox.className = 'alert-box light-warn';
+    lightAlertBox.innerHTML = `💡 <b>采光提示</b>：当前${glass.name}导致进光量损失 ${daylightResult.lightLossPercent}%，室内平均照度约 <b>${daylightResult.luxIndoor} lux</b>（窗地比 ${daylightResult.windowToFloorRatio}%）。${daylightResult.auxLightSuggestion}。`;
+  } else {
+    lightAlertBox.className = 'alert-box light-safe';
+    lightAlertBox.innerHTML = `☀️ <b>采光良好</b>：${glass.name}有效透光率 ${(daylightResult.effectiveTransmittance * 100).toFixed(0)}%，室内平均照度 <b>${daylightResult.luxIndoor} lux</b>（${daylightResult.daylightGrade}）。`;
   }
 }
 
@@ -398,7 +407,7 @@ function animate() {
 
   const glass = GLASS_TYPES[currentGlassType];
   const blurRadius = glass.blurRadius;
-  const privacyLevel = glass.privacyLevel;
+  const effectivePrivacy = privacyDynamicLevel ?? glass.privacyLevel;
 
   let glassTint;
   switch (currentGlassType) {
@@ -409,11 +418,7 @@ function animate() {
     default: glassTint = new THREE.Color(0.98, 0.98, 1.0);
   }
 
-  blurProcessor.process([glassMesh], blurRadius, privacyLevel, glassTint);
-
-  if (Math.random() < 0.02) {
-    updateAnalysis();
-  }
+  blurProcessor.process([glassMesh], blurRadius, effectivePrivacy, glassTint);
 }
 
 function onResize() {

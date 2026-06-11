@@ -56,18 +56,26 @@
     }
 
     .alert-box {
-      margin-top: 12px; padding: 10px 12px; border-radius: 8px;
+      margin-top: 10px; padding: 10px 12px; border-radius: 8px;
       font-size: 12px; line-height: 1.5; display: none;
     }
     .alert-box.privacy-alert {
       background: rgba(255, 60, 80, 0.15); border: 1px solid rgba(255,60,80,0.4);
       color: #ff8899; display: block;
     }
+    .alert-box.privacy-warn {
+      background: rgba(240, 192, 64, 0.15); border: 1px solid rgba(240,192,64,0.4);
+      color: #f0d070; display: block;
+    }
+    .alert-box.privacy-safe {
+      background: rgba(76, 223, 138, 0.12); border: 1px solid rgba(76,223,138,0.35);
+      color: #7ae8a8; display: block;
+    }
     .alert-box.light-warn {
       background: rgba(240, 192, 64, 0.15); border: 1px solid rgba(240,192,64,0.4);
       color: #f0d070; display: block;
     }
-    .alert-box.safe-info {
+    .alert-box.light-safe {
       background: rgba(76, 223, 138, 0.12); border: 1px solid rgba(76,223,138,0.35);
       color: #7ae8a8; display: block;
     }
@@ -118,7 +126,10 @@
         <span class="metric-value" id="blur-radius">--</span>
       </div>
 
-      <div class="alert-box" id="alert-box"></div>
+      <div class="alert-box" id="privacy-alert-box"></div>
+
+      <div class="section-title">采光状态</div>
+      <div class="alert-box" id="light-alert-box"></div>
 
       <div class="section-title">视锥检测</div>
       <div class="metric-row">

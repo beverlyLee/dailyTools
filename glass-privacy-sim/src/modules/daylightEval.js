@@ -2,7 +2,11 @@ import * as THREE from 'three';
 import { GLASS_TYPES } from './glassMaterialLib.js';
 import { computeBatchRefraction } from './lightTransmission.js';
 
-function evaluateDaylight(glassType, windowArea, sunDirection, glassPlane) {
+const OUTDOOR_ILLUMINANCE = 10000;
+const DEFAULT_WINDOW_AREA = 2.0 * 2.5;
+const DEFAULT_ROOM_AREA = 4.0 * 3.5;
+
+function evaluateDaylight(glassType, windowArea, sunDirection, glassPlane, roomArea = DEFAULT_ROOM_AREA) {
   const glass = GLASS_TYPES[glassType];
   const baseTransmittance = glass.lightTransmittance;
 
@@ -25,9 +29,11 @@ function evaluateDaylight(glassType, windowArea, sunDirection, glassPlane) {
 
   const totalTransmittance = Math.max(0, effectiveTransmittance - scatterLoss);
 
-  const luxInput = 50000;
-  const luxIndoor = luxInput * totalTransmittance * windowArea;
+  const windowToFloorRatio = windowArea / roomArea;
+  const wallReflectionFactor = 0.35;
+  const daylightFactor = totalTransmittance * windowToFloorRatio * (1.0 + wallReflectionFactor) * 0.06;
 
+  const luxIndoor = OUTDOOR_ILLUMINANCE * daylightFactor;
   let daylightGrade;
   if (luxIndoor >= 300) daylightGrade = '优秀';
   else if (luxIndoor >= 150) daylightGrade = '良好';
@@ -37,7 +43,7 @@ function evaluateDaylight(glassType, windowArea, sunDirection, glassPlane) {
 
   const needsAuxLight = luxIndoor < 150;
   const auxLightSuggestion = needsAuxLight
-    ? `建议增加 ${(150 - luxIndoor).toFixed(0)} lux 辅助照明`
+    ? `建议增加 ${Math.round(150 - luxIndoor)} lux 辅助照明`
     : '采光充足，无需辅助光源';
 
   return {
@@ -46,6 +52,11 @@ function evaluateDaylight(glassType, windowArea, sunDirection, glassPlane) {
     angleFactor,
     normalLoss,
     scatterLoss,
+    outdoorIlluminance: OUTDOOR_ILLUMINANCE,
+    daylightFactor: (daylightFactor * 100).toFixed(2),
+    roomArea,
+    windowArea,
+    windowToFloorRatio: (windowToFloorRatio * 100).toFixed(1),
     luxIndoor: Math.round(luxIndoor),
     daylightGrade,
     needsAuxLight,
