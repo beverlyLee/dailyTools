@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玻璃材质隐私分析工具</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0f; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    #app { width: 100%; height: 100%; position: relative; }
+    canvas { display: block; }
+
+    #ui-panel {
+      position: absolute; top: 16px; left: 16px; z-index: 10;
+      background: rgba(10, 10, 20, 0.88); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 20px; width: 320px; color: #e0e0e8;
+      backdrop-filter: blur(12px); font-size: 13px; line-height: 1.6;
+    }
+    #ui-panel h2 {
+      font-size: 16px; font-weight: 600; margin-bottom: 14px; color: #fff;
+      border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 10px;
+      letter-spacing: 1px;
+    }
+    .section-title {
+      font-size: 11px; color: rgba(255,255,255,0.45); text-transform: uppercase;
+      letter-spacing: 2px; margin: 14px 0 8px;
+    }
+    .glass-btn-group { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+    .glass-btn {
+      padding: 6px 12px; border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px; background: rgba(255,255,255,0.05);
+      color: #ccc; cursor: pointer; font-size: 12px; transition: all 0.2s;
+    }
+    .glass-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .glass-btn.active {
+      background: rgba(100, 180, 255, 0.25); border-color: rgba(100,180,255,0.6);
+      color: #8cf; font-weight: 600;
+    }
+
+    .metric-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .metric-label { color: rgba(255,255,255,0.55); font-size: 12px; }
+    .metric-value { font-weight: 600; font-size: 13px; }
+    .metric-value.safe { color: #4cdf8a; }
+    .metric-value.warn { color: #f0c040; }
+    .metric-value.danger { color: #ff5566; }
+
+    .privacy-bar {
+      height: 6px; border-radius: 3px; background: rgba(255,255,255,0.08);
+      margin-top: 4px; overflow: hidden;
+    }
+    .privacy-bar-fill {
+      height: 100%; border-radius: 3px; transition: width 0.4s, background 0.4s;
+    }
+
+    .alert-box {
+      margin-top: 12px; padding: 10px 12px; border-radius: 8px;
+      font-size: 12px; line-height: 1.5; display: none;
+    }
+    .alert-box.privacy-alert {
+      background: rgba(255, 60, 80, 0.15); border: 1px solid rgba(255,60,80,0.4);
+      color: #ff8899; display: block;
+    }
+    .alert-box.light-warn {
+      background: rgba(240, 192, 64, 0.15); border: 1px solid rgba(240,192,64,0.4);
+      color: #f0d070; display: block;
+    }
+    .alert-box.safe-info {
+      background: rgba(76, 223, 138, 0.12); border: 1px solid rgba(76,223,138,0.35);
+      color: #7ae8a8; display: block;
+    }
+
+    #view-info {
+      position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+      background: rgba(10,10,20,0.75); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; padding: 8px 16px; color: rgba(255,255,255,0.5);
+      font-size: 11px; z-index: 10; backdrop-filter: blur(8px);
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="ui-panel">
+      <h2>🔬 玻璃隐私分析</h2>
+
+      <div class="section-title">玻璃类型</div>
+      <div class="glass-btn-group">
+        <button class="glass-btn" data-type="clear">普通透明玻璃</button>
+        <button class="glass-btn active" data-type="ribbed">长虹玻璃</button>
+        <button class="glass-btn" data-type="frosted">磨砂玻璃</button>
+        <button class="glass-btn" data-type="embossed">压花玻璃</button>
+        <button class="glass-btn" data-type="wired">夹丝玻璃</button>
+      </div>
+
+      <div class="section-title">隐私指标</div>
+      <div class="metric-row">
+        <span class="metric-label">隐私等级</span>
+        <span class="metric-value" id="privacy-level">--</span>
+      </div>
+      <div class="privacy-bar"><div class="privacy-bar-fill" id="privacy-bar-fill"></div></div>
+
+      <div class="metric-row">
+        <span class="metric-label">采光率</span>
+        <span class="metric-value" id="light-rate">--</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">轮廓可见度</span>
+        <span class="metric-value" id="silhouette-vis">--</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">折射偏移量</span>
+        <span class="metric-value" id="refraction-offset">--</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">模糊半径</span>
+        <span class="metric-value" id="blur-radius">--</span>
+      </div>
+
+      <div class="alert-box" id="alert-box"></div>
+
+      <div class="section-title">视锥检测</div>
+      <div class="metric-row">
+        <span class="metric-label">室外观察角度</span>
+        <span class="metric-value" id="view-angle">0°</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">穿透概率</span>
+        <span class="metric-value" id="penetration-prob">--</span>
+      </div>
+    </div>
+
+    <div id="view-info">鼠标左键旋转 · 滚轮缩放 · 右键平移</div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
