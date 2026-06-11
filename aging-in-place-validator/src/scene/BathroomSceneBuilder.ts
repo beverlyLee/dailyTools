@@ -501,3 +501,12 @@ export const DEFAULT_BATHROOM_CONFIG: BathroomConfig = {
   toiletPosition: { x: 0.45, z: 1.0 },
   sinkPosition: { x: 1.25, z: 0.3 }
 };
+
+export const SPACIOUS_BATHROOM_CONFIG: BathroomConfig = {
+  width: 3.5,
+  depth: 3.5,
+  height: 2.5,
+  doorPosition: { x: 3.5, z: 1.0, width: 0.95 },
+  toiletPosition: { x: 0.5, z: 1.2 },
+  sinkPosition: { x: 1.8, z: 0.3 }
+};

@@ -4,11 +4,9 @@ import { WheelchairGenerator } from './wheelchair/WheelchairGenerator';
 import { CollisionDetector, CollisionInfo } from './collision/CollisionDetector';
 import { GrabInteractionSystem } from './interaction/GrabInteractionSystem';
 import { ClearWidthVerifier } from './verification/ClearWidthVerifier';
-import { BathroomSceneBuilder, DEFAULT_BATHROOM_CONFIG, SceneElements } from './scene/BathroomSceneBuilder';
+import { BathroomSceneBuilder, DEFAULT_BATHROOM_CONFIG, SPACIOUS_BATHROOM_CONFIG, SceneElements } from './scene/BathroomSceneBuilder';
 
-function easeOutCubic(t: number): number {
-  return 1 - Math.pow(1 - t, 3);
-}
+type AppState = 'idle' | 'running' | 'completed_pass' | 'completed_fail' | 'stopped';
 
 class AgingInPlaceValidator {
   private scene: THREE.Scene;
@@ -16,6 +14,8 @@ class AgingInPlaceValidator {
   private renderer: THREE.WebGLRenderer;
   private controls: OrbitControls;
   private clock: THREE.Clock;
+  private animationId: number | null = null;
+  private glContextLost = false;
 
   private wheelchairGenerator: WheelchairGenerator;
   private wheelchair: THREE.Group | null = null;
@@ -26,16 +26,21 @@ class AgingInPlaceValidator {
   private widthVerifier: ClearWidthVerifier;
   private bathroomBuilder: BathroomSceneBuilder;
   private sceneElements: SceneElements | null = null;
+  private isSpaciousMode = false;
 
   private rotationPathVisual: THREE.Object3D | null = null;
 
-  private isRotating = false;
+  private appState: AppState = 'idle';
   private rotationProgress = 0;
-  private baseRotationSpeed = 0.12;
+  private baseRotationSpeed = 0.10;
+  private currentRotationSpeed = 0.10;
   private initialWheelchairPosition = new THREE.Vector3();
   private initialWheelchairRotation = 0;
   private collisionGracePeriod = 0;
-  private minRotationProgress = 45 / 360;
+  private minRotationProgressBeforeCollision = 0.25;
+  private easingProgress = 0;
+
+  private lights: THREE.Light[] = [];
 
   constructor() {
     this.scene = new THREE.Scene();
@@ -55,6 +60,8 @@ class AgingInPlaceValidator {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     document.getElementById('app')?.appendChild(this.renderer.domElement);
+
+    this.setupWebGLContextListeners();
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
@@ -80,12 +87,54 @@ class AgingInPlaceValidator {
 
     window.addEventListener('resize', this.onResize.bind(this));
 
-    this.animate();
+    this.updateUIFromState();
+    this.startAnimationLoop();
+  }
+
+  private setupWebGLContextListeners(): void {
+    const canvas = this.renderer.domElement;
+
+    canvas.addEventListener('webglcontextlost', (event) => {
+      event.preventDefault();
+      this.glContextLost = true;
+      this.stopAnimationLoop();
+      console.warn('WebGL context lost');
+    });
+
+    canvas.addEventListener('webglcontextrestored', () => {
+      this.glContextLost = false;
+      console.info('WebGL context restored');
+      this.restoreRenderer();
+      this.startAnimationLoop();
+    });
+  }
+
+  private restoreRenderer(): void {
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  }
+
+  private startAnimationLoop(): void {
+    if (this.animationId !== null) return;
+    const loop = () => {
+      if (this.glContextLost) return;
+      this.animationId = requestAnimationFrame(loop);
+      this.animate();
+    };
+    this.animationId = requestAnimationFrame(loop);
+  }
+
+  private stopAnimationLoop(): void {
+    if (this.animationId !== null) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
   }
 
   private setupLights(): void {
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     this.scene.add(ambientLight);
+    this.lights.push(ambientLight);
 
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
     directionalLight.position.set(5, 8, 5);
@@ -99,14 +148,23 @@ class AgingInPlaceValidator {
     directionalLight.shadow.camera.top = 5;
     directionalLight.shadow.camera.bottom = -5;
     this.scene.add(directionalLight);
+    this.lights.push(directionalLight);
 
     const fillLight = new THREE.DirectionalLight(0x87ceeb, 0.3);
     fillLight.position.set(-3, 4, -3);
     this.scene.add(fillLight);
+    this.lights.push(fillLight);
   }
 
   private buildScene(): void {
-    this.sceneElements = this.bathroomBuilder.build(DEFAULT_BATHROOM_CONFIG);
+    const config = this.isSpaciousMode ? SPACIOUS_BATHROOM_CONFIG : DEFAULT_BATHROOM_CONFIG;
+
+    this.clearSceneElements();
+    this.collisionDetector.removeAllObstacles();
+    this.widthVerifier.removeAllDoorways();
+    this.grabSystem.removeAllGrabPoints();
+
+    this.sceneElements = this.bathroomBuilder.build(config);
 
     this.sceneElements.doorways.forEach(d => this.widthVerifier.addDoorway(d));
     this.sceneElements.grabPoints.forEach(g =>
@@ -116,12 +174,71 @@ class AgingInPlaceValidator {
     this.updateUIWidth();
   }
 
+  private clearSceneElements(): void {
+    if (!this.sceneElements) return;
+
+    const disposeObject = (obj: THREE.Object3D) => {
+      if (obj instanceof THREE.Mesh) {
+        obj.geometry?.dispose();
+        if (Array.isArray(obj.material)) {
+          obj.material.forEach(m => {
+            if (m instanceof THREE.Material) m.dispose();
+          });
+        } else if (obj.material instanceof THREE.Material) {
+          obj.material.dispose();
+        }
+      }
+      if (obj instanceof THREE.Sprite && obj.material) {
+        if (obj.material.map) obj.material.map.dispose();
+        obj.material.dispose();
+      }
+      if (obj instanceof THREE.Line) {
+        obj.geometry?.dispose();
+        if (obj.material instanceof THREE.Material) obj.material.dispose();
+      }
+      obj.children.forEach(child => disposeObject(child));
+    };
+
+    this.sceneElements.walls.forEach(w => {
+      this.scene.remove(w);
+      disposeObject(w);
+    });
+    if (this.sceneElements.floor) {
+      this.scene.remove(this.sceneElements.floor);
+      disposeObject(this.sceneElements.floor);
+    }
+    if (this.sceneElements.doorFrame) {
+      this.scene.remove(this.sceneElements.doorFrame);
+      disposeObject(this.sceneElements.doorFrame);
+    }
+    if (this.sceneElements.toilet) {
+      this.scene.remove(this.sceneElements.toilet);
+      disposeObject(this.sceneElements.toilet);
+    }
+    if (this.sceneElements.sink) {
+      this.scene.remove(this.sceneElements.sink);
+      disposeObject(this.sceneElements.sink);
+    }
+    this.sceneElements.grabBars.forEach(g => {
+      this.scene.remove(g);
+      disposeObject(g);
+    });
+
+    this.sceneElements = null;
+  }
+
   private setupWheelchair(): void {
+    if (this.wheelchair) {
+      this.scene.remove(this.wheelchair);
+      this.disposeGroup(this.wheelchair);
+      this.wheelchair = null;
+    }
+
     this.wheelchair = this.wheelchairGenerator.generate();
     this.wheelchairCollisionBoxes = this.wheelchairGenerator.getCollisionBoxes();
 
-    const startX = 0.85;
-    const startZ = 1.55;
+    const startX = this.isSpaciousMode ? 1.2 : 0.85;
+    const startZ = this.isSpaciousMode ? 1.6 : 1.55;
     this.wheelchair.position.set(startX, 0, startZ);
     this.wheelchair.rotation.y = -Math.PI / 2;
 
@@ -136,6 +253,21 @@ class AgingInPlaceValidator {
     );
   }
 
+  private disposeGroup(group: THREE.Group): void {
+    const disposeRecursive = (obj: THREE.Object3D) => {
+      if (obj instanceof THREE.Mesh) {
+        obj.geometry?.dispose();
+        if (Array.isArray(obj.material)) {
+          obj.material.forEach(m => { if (m instanceof THREE.Material) m.dispose(); });
+        } else if (obj.material instanceof THREE.Material) {
+          obj.material.dispose();
+        }
+      }
+      obj.children.forEach(child => disposeRecursive(child));
+    };
+    disposeRecursive(group);
+  }
+
   private setupEventListeners(): void {
   }
 
@@ -145,20 +277,75 @@ class AgingInPlaceValidator {
     const btnReset = document.getElementById('btn-reset');
     const btnVerifyWidth = document.getElementById('btn-verify-width');
     const btnVerifyGrab = document.getElementById('btn-verify-grab');
+    const btnToggleScene = document.getElementById('btn-toggle-scene');
 
     btnRotate?.addEventListener('click', () => this.startRotationTest());
     btnStop?.addEventListener('click', () => this.stopRotationTest());
     btnReset?.addEventListener('click', () => this.resetScene());
     btnVerifyWidth?.addEventListener('click', () => this.verifyWidth());
     btnVerifyGrab?.addEventListener('click', () => this.verifyGrabReachability());
+    btnToggleScene?.addEventListener('click', () => this.toggleSceneMode());
+  }
+
+  private setState(newState: AppState): void {
+    this.appState = newState;
+    this.updateUIFromState();
+  }
+
+  private updateUIFromState(): void {
+    const btnRotate = document.getElementById('btn-rotate') as HTMLButtonElement;
+    const btnStop = document.getElementById('btn-stop') as HTMLButtonElement;
+    const btnReset = document.getElementById('btn-reset') as HTMLButtonElement;
+
+    if (btnRotate) {
+      btnRotate.disabled = this.appState === 'running';
+      switch (this.appState) {
+        case 'idle':
+        case 'stopped':
+          btnRotate.textContent = '🔄 开始轮椅回转测试';
+          break;
+        case 'running':
+          btnRotate.textContent = '⏳ 回转中...';
+          break;
+        case 'completed_pass':
+        case 'completed_fail':
+          btnRotate.textContent = '🔄 重新开始回转测试';
+          break;
+      }
+    }
+
+    if (btnStop) {
+      btnStop.disabled = this.appState !== 'running';
+      btnStop.textContent = this.appState === 'running' ? '⏹ 停止测试' : '⏹ 停止（不可用）';
+      btnStop.style.opacity = this.appState === 'running' ? '1' : '0.6';
+    }
+
+    if (btnReset) {
+      btnReset.disabled = false;
+    }
+
+    const stateBadge = document.getElementById('state-badge');
+    if (stateBadge) {
+      const stateLabels: Record<AppState, { text: string; class: string }> = {
+        idle: { text: '就绪', class: 'badge-info' },
+        running: { text: '测试中', class: 'badge-running' },
+        completed_pass: { text: '✓ 通过', class: 'badge-success' },
+        completed_fail: { text: '✗ 失败', class: 'badge-error' },
+        stopped: { text: '已停止', class: 'badge-warning' }
+      };
+      const s = stateLabels[this.appState];
+      stateBadge.textContent = s.text;
+      stateBadge.className = 'state-badge ' + s.class;
+    }
   }
 
   private startRotationTest(): void {
     if (!this.wheelchair) return;
 
-    this.isRotating = true;
     this.rotationProgress = 0;
+    this.easingProgress = 0;
     this.collisionGracePeriod = 1.2;
+    this.currentRotationSpeed = this.baseRotationSpeed * 0.3;
 
     const center = new THREE.Vector3(
       this.wheelchair.position.x,
@@ -168,12 +355,16 @@ class AgingInPlaceValidator {
 
     if (this.rotationPathVisual) {
       this.scene.remove(this.rotationPathVisual);
+      this.disposeGroup(this.rotationPathVisual as THREE.Group);
+      this.rotationPathVisual = null;
     }
     this.rotationPathVisual = this.createRotationSpaceVisualization(center);
     this.scene.add(this.rotationPathVisual);
 
     this.collisionDetector.clearCollisionMarkers();
     this.updateCollisionPoints([]);
+    this.grabSystem.clearMarkers();
+    this.widthVerifier.clearVisualization();
 
     this.updateStatus(
       '正在进行回转测试...',
@@ -181,23 +372,25 @@ class AgingInPlaceValidator {
       'info'
     );
 
-    this.setButtonStates(true);
+    this.setState('running');
   }
 
   private stopRotationTest(): void {
-    this.isRotating = false;
-    this.setButtonStates(false);
+    if (this.appState !== 'running') return;
+
+    this.setState('stopped');
     this.updateStatus(
       '测试已停止',
-      '用户手动停止了回转测试。',
+      '用户手动停止了回转测试。可点击「重新开始」继续，或「重置场景」恢复初始状态。',
       'warning'
     );
   }
 
   private resetScene(): void {
-    this.isRotating = false;
     this.rotationProgress = 0;
+    this.easingProgress = 0;
     this.collisionGracePeriod = 0;
+    this.currentRotationSpeed = this.baseRotationSpeed;
 
     if (this.wheelchair) {
       this.wheelchair.position.copy(this.initialWheelchairPosition);
@@ -206,6 +399,7 @@ class AgingInPlaceValidator {
 
     if (this.rotationPathVisual) {
       this.scene.remove(this.rotationPathVisual);
+      this.disposeGroup(this.rotationPathVisual as THREE.Group);
       this.rotationPathVisual = null;
     }
 
@@ -214,8 +408,8 @@ class AgingInPlaceValidator {
     this.grabSystem.clearMarkers();
     this.widthVerifier.clearVisualization();
 
-    document.getElementById('angle-value')!.textContent = '0°';
-    this.updateUIWidth();
+    const angleEl = document.getElementById('angle-value');
+    if (angleEl) angleEl.textContent = '0°';
 
     this.updateStatus(
       '系统就绪',
@@ -223,11 +417,31 @@ class AgingInPlaceValidator {
       'info'
     );
 
-    this.setButtonStates(false);
+    this.updateUIWidth();
     this.grabSystem.setWheelchairPose(
       this.initialWheelchairPosition,
       this.initialWheelchairRotation
     );
+
+    this.setState('idle');
+  }
+
+  private toggleSceneMode(): void {
+    this.isSpaciousMode = !this.isSpaciousMode;
+    this.buildScene();
+    this.setupWheelchair();
+    this.setState('idle');
+    this.resetScene();
+
+    const btnToggle = document.getElementById('btn-toggle-scene');
+    if (btnToggle) {
+      btnToggle.textContent = this.isSpaciousMode ? '🏠 切换到狭窄场景' : '🏡 切换到宽敞场景';
+    }
+
+    const sceneLabel = document.getElementById('scene-label');
+    if (sceneLabel) {
+      sceneLabel.textContent = this.isSpaciousMode ? '宽敞型（对照）' : '狭窄型（标准）';
+    }
   }
 
   private verifyWidth(): void {
@@ -279,14 +493,6 @@ class AgingInPlaceValidator {
     }
   }
 
-  private setButtonStates(rotating: boolean): void {
-    const btnRotate = document.getElementById('btn-rotate') as HTMLButtonElement;
-    const btnStop = document.getElementById('btn-stop') as HTMLButtonElement;
-
-    if (btnRotate) btnRotate.disabled = rotating;
-    if (btnStop) btnStop.disabled = !rotating;
-  }
-
   private updateStatus(title: string, message: string, type: 'info' | 'success' | 'error' | 'warning'): void {
     const panel = document.getElementById('status-panel');
     const titleEl = document.getElementById('status-title');
@@ -328,27 +534,28 @@ class AgingInPlaceValidator {
   }
 
   private onResize(): void {
+    if (this.glContextLost) return;
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
   private animate(): void {
-    requestAnimationFrame(this.animate.bind(this));
-
     const delta = this.clock.getDelta();
 
     if (this.collisionGracePeriod > 0) {
       this.collisionGracePeriod -= delta;
     }
 
-    if (this.isRotating && this.wheelchair) {
-      const speedMultiplier = this.getRotationSpeedMultiplier(this.rotationProgress);
-      this.rotationProgress += this.baseRotationSpeed * speedMultiplier * delta;
+    if (this.appState === 'running' && this.wheelchair) {
+      this.easingProgress = Math.min(1.0, this.easingProgress + delta * 0.8);
+      const speedEase = this.easeInOutCubic(this.easingProgress);
+      this.currentRotationSpeed = this.baseRotationSpeed * (0.3 + 0.7 * speedEase);
+
+      this.rotationProgress += this.currentRotationSpeed * delta;
 
       if (this.rotationProgress >= 1.0) {
         this.rotationProgress = 1.0;
-        this.isRotating = false;
         this.completeRotationTest(true);
       }
 
@@ -357,19 +564,22 @@ class AgingInPlaceValidator {
       this.wheelchair.rotation.y = currentRotation;
 
       const angleDeg = Math.round((this.rotationProgress * 360) % 360);
-      document.getElementById('angle-value')!.textContent = `${angleDeg}°`;
+      const angleEl = document.getElementById('angle-value');
+      if (angleEl) angleEl.textContent = `${angleDeg}°`;
 
       const worldBoxes = this.getRotatedWheelchairBoxes(
         this.wheelchair.position,
         currentRotation
       );
 
-      if (this.collisionGracePeriod <= 0 && this.rotationProgress >= this.minRotationProgress) {
-        const collisions = this.collisionDetector.checkCollisions(worldBoxes);
-        this.collisionDetector.showCollisionMarkers(collisions);
-        this.updateCollisionPoints(collisions);
+      const canCheckCollision = this.collisionGracePeriod <= 0 &&
+                                 this.rotationProgress >= this.minRotationProgressBeforeCollision;
 
+      if (canCheckCollision) {
+        const collisions = this.collisionDetector.checkCollisions(worldBoxes);
         if (collisions.length > 0) {
+          this.collisionDetector.showCollisionMarkers(collisions);
+          this.updateCollisionPoints(collisions);
           this.completeRotationTest(false, collisions);
         }
       }
@@ -379,21 +589,8 @@ class AgingInPlaceValidator {
     this.renderer.render(this.scene, this.camera);
   }
 
-  private getRotationSpeedMultiplier(progress: number): number {
-    const accelPhase = 0.15;
-    const decelPhase = 0.15;
-
-    if (progress < accelPhase) {
-      const t = progress / accelPhase;
-      return 0.3 + 0.7 * easeOutCubic(t);
-    }
-
-    if (progress > 1 - decelPhase) {
-      const t = (1 - progress) / decelPhase;
-      return 0.3 + 0.7 * easeOutCubic(t);
-    }
-
-    return 1.0;
+  private easeInOutCubic(t: number): number {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
 
   private getRotatedWheelchairBoxes(position: THREE.Vector3, rotationY: number): THREE.Box3[] {
@@ -437,38 +634,35 @@ class AgingInPlaceValidator {
 
     const outerRadius = 1.5;
 
-    const outerRing = new THREE.Mesh(
-      new THREE.RingGeometry(outerRadius - 0.02, outerRadius, 64),
-      new THREE.MeshBasicMaterial({
-        color: 0xe74c3c,
-        transparent: true,
-        opacity: 0.5,
-        side: THREE.DoubleSide
-      })
-    );
+    const outerRingGeom = new THREE.RingGeometry(outerRadius - 0.02, outerRadius, 64);
+    const outerRingMat = new THREE.MeshBasicMaterial({
+      color: 0xe74c3c,
+      transparent: true,
+      opacity: 0.5,
+      side: THREE.DoubleSide
+    });
+    const outerRing = new THREE.Mesh(outerRingGeom, outerRingMat);
     outerRing.rotation.x = -Math.PI / 2;
     outerRing.position.copy(center);
     outerRing.position.y = 0.02;
     group.add(outerRing);
 
-    const safeZone = new THREE.Mesh(
-      new THREE.RingGeometry(0, outerRadius - 0.03, 64),
-      new THREE.MeshBasicMaterial({
-        color: 0x3498db,
-        transparent: true,
-        opacity: 0.15,
-        side: THREE.DoubleSide
-      })
-    );
+    const safeZoneGeom = new THREE.RingGeometry(0, outerRadius - 0.03, 64);
+    const safeZoneMat = new THREE.MeshBasicMaterial({
+      color: 0x3498db,
+      transparent: true,
+      opacity: 0.15,
+      side: THREE.DoubleSide
+    });
+    const safeZone = new THREE.Mesh(safeZoneGeom, safeZoneMat);
     safeZone.rotation.x = -Math.PI / 2;
     safeZone.position.copy(center);
     safeZone.position.y = 0.01;
     group.add(safeZone);
 
-    const centerMarker = new THREE.Mesh(
-      new THREE.CircleGeometry(0.08, 32),
-      new THREE.MeshBasicMaterial({ color: 0xe74c3c, transparent: true, opacity: 0.9 })
-    );
+    const centerMarkerGeom = new THREE.CircleGeometry(0.08, 32);
+    const centerMarkerMat = new THREE.MeshBasicMaterial({ color: 0xe74c3c, transparent: true, opacity: 0.9 });
+    const centerMarker = new THREE.Mesh(centerMarkerGeom, centerMarkerMat);
     centerMarker.rotation.x = -Math.PI / 2;
     centerMarker.position.copy(center);
     centerMarker.position.y = 0.03;
@@ -495,10 +689,8 @@ class AgingInPlaceValidator {
   }
 
   private completeRotationTest(success: boolean, collisions?: CollisionInfo[]): void {
-    this.isRotating = false;
-    this.setButtonStates(false);
-
     if (success) {
+      this.setState('completed_pass');
       this.updateStatus(
         '✓ 回转测试通过',
         '轮椅成功完成 360° 回转，空间满足适老化改造标准。',
@@ -506,6 +698,7 @@ class AgingInPlaceValidator {
       );
       this.updateCollisionPoints([]);
     } else if (collisions && collisions.length > 0) {
+      this.setState('completed_fail');
       const obstacleNames = [...new Set(collisions.map(c => c.obstacleName))].join('、');
       const progressPercent = Math.round(this.rotationProgress * 100);
       this.updateStatus(
@@ -515,8 +708,46 @@ class AgingInPlaceValidator {
       );
     }
   }
+
+  public dispose(): void {
+    this.stopAnimationLoop();
+
+    window.removeEventListener('resize', this.onResize.bind(this));
+
+    if (this.rotationPathVisual) {
+      this.scene.remove(this.rotationPathVisual);
+      this.disposeGroup(this.rotationPathVisual as THREE.Group);
+    }
+
+    this.clearSceneElements();
+
+    if (this.wheelchair) {
+      this.scene.remove(this.wheelchair);
+      this.disposeGroup(this.wheelchair);
+    }
+
+    this.lights.forEach(light => {
+      this.scene.remove(light);
+      if (light instanceof THREE.DirectionalLight && light.shadow && light.shadow.map) {
+        light.shadow.map.dispose();
+      }
+    });
+    this.lights = [];
+
+    this.renderer.dispose();
+    this.controls.dispose();
+  }
 }
 
+let app: AgingInPlaceValidator | null = null;
+
 window.addEventListener('DOMContentLoaded', () => {
-  new AgingInPlaceValidator();
+  app = new AgingInPlaceValidator();
+});
+
+window.addEventListener('beforeunload', () => {
+  if (app) {
+    app.dispose();
+    app = null;
+  }
 });
