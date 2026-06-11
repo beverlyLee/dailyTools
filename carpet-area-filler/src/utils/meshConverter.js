@@ -242,11 +242,33 @@ export function createPolygonOutlineMesh(polygon, color = 0x00ff88, height = 0.0
   return group;
 }
 
+export function disposeCarpetMesh(carpetGroup) {
+  if (!carpetGroup) return;
+  carpetGroup.traverse(child => {
+    if (child.geometry) child.geometry.dispose();
+    if (child.material) {
+      if (child.material.map) child.material.map.dispose();
+      if (child.material.bumpMap && child.material.bumpMap !== child.material.map) {
+        child.material.bumpMap.dispose();
+      }
+      child.material.dispose();
+    }
+  });
+}
+
 export function updateCarpetMaterials(carpetGroup, newMaterial, pileHeight) {
   if (!carpetGroup) return;
   
   carpetGroup.children.forEach((child, index) => {
     if (child.material) {
+      if (child.material.map && child.material.map !== newMaterial.map) {
+        child.material.map.dispose();
+      }
+      if (child.material.bumpMap && child.material.bumpMap !== child.material.map && child.material.bumpMap !== newMaterial.bumpMap) {
+        child.material.bumpMap.dispose();
+      }
+      child.material.dispose();
+      
       if (index === 0) {
         const mat = newMaterial.clone();
         mat.bumpScale = 0;

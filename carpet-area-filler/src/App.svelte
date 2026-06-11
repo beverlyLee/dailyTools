@@ -1,5 +1,5 @@
 <script>
-  import { onMount, onDestroy, afterUpdate } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import * as THREE from 'three';
   import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
   
@@ -7,11 +7,12 @@
   import { recommendCarpetSize, adjustCarpetPosition, findBestFitPosition } from './utils/sizeEngine.js';
   import { createCarpetMaterial, getCarpetTypes } from './utils/materialGenerator.js';
   import { checkCollision, createDoorSwingObstacle, createFurnitureLegObstacle, getObstaclePolygon, adjustPositionForObstacles } from './utils/collisionDetector.js';
-  import { createCarpetMesh, createRoomFloor, createWallLine, createObstacleMesh, worldTo3D, updateCarpetMaterials, verifyRenderCollision } from './utils/meshConverter.js';
+  import { createCarpetMesh, createRoomFloor, createWallLine, createObstacleMesh, worldTo3D, updateCarpetMaterials, verifyRenderCollision, disposeCarpetMesh } from './utils/meshConverter.js';
   
   let canvasContainer;
   let topCanvas;
   let scene, camera, renderer, controls;
+  let animationId = null;
   let carpetMesh = null;
   let floorMesh = null;
   let wallGroup = null;
@@ -74,12 +75,15 @@
     camera.position.set(0, 12, 0.01);
     camera.lookAt(0, 0, 0);
     
-    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'default' });
     renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     canvasContainer.appendChild(renderer.domElement);
+    
+    renderer.domElement.addEventListener('webglcontextlost', onWebGLContextLost);
+    renderer.domElement.addEventListener('webglcontextrestored', onWebGLContextRestored);
     
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -119,8 +123,28 @@
     animate();
   }
   
+  function onWebGLContextLost(e) {
+    e.preventDefault();
+    console.warn('WebGL context lost - will attempt restore');
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+  }
+  
+  function onWebGLContextRestored() {
+    console.log('WebGL context restored');
+    animate();
+  }
+  
   function updateObstacleMeshes() {
-    obstacleMeshes.forEach(m => scene.remove(m));
+    obstacleMeshes.forEach(m => {
+      scene.remove(m);
+      m.traverse(child => {
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) child.material.dispose();
+      });
+    });
     obstacleMeshes = [];
     
     if (!showObstacles) return;
@@ -134,13 +158,12 @@
   }
   
   function animate() {
-    requestAnimationFrame(animate);
+    animationId = requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene, camera);
   }
   
   function initTopCanvas() {
-    const ctx = topCanvas.getContext('2d');
     topCanvas.width = topCanvas.offsetWidth;
     topCanvas.height = topCanvas.offsetHeight;
     drawTopView();
@@ -304,23 +327,29 @@
     
     if (!pointInPolygon(worldPos, roomContour)) return;
     
-    if (isClosed || contourPoints.length === 0) {
+    if (isClosed) {
       contourPoints = [worldPos];
       isClosed = false;
       isDrawing = true;
-      clearCarpet();
+      return drawTopView();
+    }
+    
+    if (contourPoints.length === 0) {
+      contourPoints = [worldPos];
+      isDrawing = true;
+      return drawTopView();
+    }
+    
+    const firstPoint = contourPoints[0];
+    const dist = Math.sqrt(Math.pow(worldPos.x - firstPoint.x, 2) + Math.pow(worldPos.y - firstPoint.y, 2));
+    
+    if (dist < 0.3 && contourPoints.length >= 3) {
+      isClosed = true;
+      isDrawing = false;
+      contourPoints.push({ ...firstPoint });
+      generateCarpet();
     } else {
-      const firstPoint = contourPoints[0];
-      const dist = Math.sqrt(Math.pow(worldPos.x - firstPoint.x, 2) + Math.pow(worldPos.y - firstPoint.y, 2));
-      
-      if (dist < 0.3 && contourPoints.length >= 3) {
-        isClosed = true;
-        isDrawing = false;
-        contourPoints.push({ ...firstPoint });
-        generateCarpet();
-      } else {
-        contourPoints.push(worldPos);
-      }
+      contourPoints.push(worldPos);
     }
     
     drawTopView();
@@ -412,21 +441,13 @@
     
     const materialResult = getCarpetMaterial(selectedCarpetType);
     const polyKey = getPolygonKey(centeredPoly);
-    const centerKey = `${finalCenterX.toFixed(4)},${finalCenterY.toFixed(4)}`;
     
     const needsRebuild = !carpetMesh || polyKey !== lastCarpetPolygonKey;
     
     if (needsRebuild) {
       if (carpetMesh) {
         scene.remove(carpetMesh);
-        carpetMesh.traverse(child => {
-          if (child.geometry) child.geometry.dispose();
-          if (child.material) {
-            if (child.material.map) child.material.map.dispose();
-            if (child.material.bumpMap) child.material.bumpMap.dispose();
-            child.material.dispose();
-          }
-        });
+        disposeCarpetMesh(carpetMesh);
         carpetMesh = null;
       }
       
@@ -449,7 +470,6 @@
     } else if (renderVerifyResult.adjusted) {
       const finalPos = carpetMesh.position;
       const final3DCenter = { x: finalPos.x, y: -finalPos.z };
-      const finalBounds = getPolygonBounds(carpetPoly);
       const deltaX = final3DCenter.x - polyCenterX;
       const deltaY = final3DCenter.y - polyCenterY;
       const adjustedPoly = carpetPoly.map(p => ({
@@ -465,14 +485,7 @@
   function clearCarpet() {
     if (carpetMesh) {
       scene.remove(carpetMesh);
-      carpetMesh.traverse(child => {
-        if (child.geometry) child.geometry.dispose();
-        if (child.material) {
-          if (child.material.map) child.material.map.dispose();
-          if (child.material.bumpMap) child.material.bumpMap.dispose();
-          child.material.dispose();
-        }
-      });
+      disposeCarpetMesh(carpetMesh);
       carpetMesh = null;
     }
     recommendedSize = null;
@@ -483,10 +496,10 @@
   }
   
   function resetDrawing() {
+    clearCarpet();
     contourPoints = [];
     isClosed = false;
     isDrawing = false;
-    clearCarpet();
     drawTopView();
   }
   
@@ -514,6 +527,72 @@
     showObstacles = e.target.checked;
     updateObstacleMeshes();
     drawTopView();
+  }
+  
+  function disposeAllResources() {
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+    
+    if (carpetMesh) {
+      scene.remove(carpetMesh);
+      disposeCarpetMesh(carpetMesh);
+      carpetMesh = null;
+    }
+    
+    obstacleMeshes.forEach(m => {
+      scene.remove(m);
+      m.traverse(child => {
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) child.material.dispose();
+      });
+    });
+    obstacleMeshes = [];
+    
+    if (wallGroup) {
+      scene.remove(wallGroup);
+      wallGroup.traverse(child => {
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) child.material.dispose();
+      });
+      wallGroup = null;
+    }
+    
+    if (floorMesh) {
+      scene.remove(floorMesh);
+      if (floorMesh.geometry) floorMesh.geometry.dispose();
+      if (floorMesh.material) floorMesh.material.dispose();
+      floorMesh = null;
+    }
+    
+    Object.values(materialCache).forEach(cached => {
+      if (cached.texture) cached.texture.dispose();
+      if (cached.material) {
+        if (cached.material.map && cached.material.map !== cached.texture) cached.material.map.dispose();
+        if (cached.material.bumpMap && cached.material.bumpMap !== cached.texture) cached.material.bumpMap.dispose();
+        cached.material.dispose();
+      }
+    });
+    materialCache = {};
+    
+    if (controls) {
+      controls.dispose();
+      controls = null;
+    }
+    
+    if (renderer) {
+      renderer.domElement.removeEventListener('webglcontextlost', onWebGLContextLost);
+      renderer.domElement.removeEventListener('webglcontextrestored', onWebGLContextRestored);
+      renderer.dispose();
+      if (renderer.domElement.parentNode) {
+        renderer.domElement.parentNode.removeChild(renderer.domElement);
+      }
+      renderer = null;
+    }
+    
+    scene = null;
+    camera = null;
   }
   
   function onWindowResize() {
@@ -544,14 +623,8 @@
   
   onDestroy(() => {
     window.removeEventListener('resize', onWindowResize);
-    if (renderer) {
-      renderer.dispose();
-    }
+    disposeAllResources();
   });
-  
-  $: if (recommendedSize) {
-    // reactive update
-  }
 </script>
 
 <div class="app">
