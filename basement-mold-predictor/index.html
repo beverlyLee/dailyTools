@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>地下室霉变风险预测系统 - Basement Mold Predictor</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      overflow: hidden;
+      background: #1a1a2e;
+      font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    .control-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 320px;
+      background: rgba(26, 26, 46, 0.92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(100, 180, 255, 0.25);
+      border-radius: 16px;
+      padding: 20px;
+      color: #e0e6ed;
+      z-index: 100;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .control-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .control-panel::-webkit-scrollbar-thumb {
+      background: rgba(100, 180, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    .panel-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #7dd3fc;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(100, 180, 255, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section {
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .control-group {
+      margin-bottom: 12px;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: #cbd5e1;
+    }
+
+    .control-value {
+      font-weight: 600;
+      color: #7dd3fc;
+      font-family: monospace;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(100, 180, 255, 0.15);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #7dd3fc;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(125, 211, 252, 0.5);
+    }
+
+    .material-select, .mode-select {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(100, 180, 255, 0.25);
+      background: rgba(100, 180, 255, 0.08);
+      color: #e0e6ed;
+      font-size: 13px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .material-select:focus, .mode-select:focus {
+      border-color: #7dd3fc;
+    }
+
+    .toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(100, 180, 255, 0.25);
+      background: rgba(100, 180, 255, 0.08);
+      color: #e0e6ed;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    .toggle-btn:hover {
+      background: rgba(100, 180, 255, 0.15);
+      border-color: #7dd3fc;
+    }
+
+    .toggle-btn.active {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: #22c55e;
+      box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+    }
+
+    .toggle-btn .toggle-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .toggle-btn.active .toggle-icon {
+      background: #22c55e;
+    }
+
+    .info-panel {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 300px;
+      background: rgba(26, 26, 46, 0.92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(100, 180, 255, 0.25);
+      border-radius: 16px;
+      padding: 20px;
+      color: #e0e6ed;
+      z-index: 100;
+    }
+
+    .info-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #f97316;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(100, 180, 255, 0.1);
+      font-size: 13px;
+    }
+
+    .metric-row:last-child {
+      border-bottom: none;
+    }
+
+    .metric-label {
+      color: #94a3b8;
+    }
+
+    .metric-value {
+      font-weight: 600;
+      font-family: monospace;
+    }
+
+    .metric-value.warning {
+      color: #fbbf24;
+    }
+
+    .metric-value.danger {
+      color: #ef4444;
+    }
+
+    .metric-value.safe {
+      color: #22c55e;
+    }
+
+    .risk-status {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .risk-status.safe {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      color: #86efac;
+    }
+
+    .risk-status.moderate {
+      background: rgba(251, 191, 36, 0.15);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      color: #fcd34d;
+    }
+
+    .risk-status.danger {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      animation: pulse-danger 2s infinite;
+    }
+
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { box-shadow: 0 0 20px 5px rgba(239, 68, 68, 0.2); }
+    }
+
+    .legend {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(26, 26, 46, 0.92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(100, 180, 255, 0.25);
+      border-radius: 12px;
+      padding: 14px 18px;
+      color: #e0e6ed;
+      z-index: 100;
+    }
+
+    .legend-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-bottom: 10px;
+    }
+
+    .legend-items {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+    }
+
+    .controls-hint {
+      position: fixed;
+      bottom: 20px;
+      right: 50%;
+      transform: translateX(50%);
+      background: rgba(26, 26, 46, 0.92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(100, 180, 255, 0.25);
+      border-radius: 20px;
+      padding: 10px 20px;
+      color: #cbd5e1;
+      font-size: 12px;
+      z-index: 100;
+    }
+
+    .controls-hint kbd {
+      background: rgba(100, 180, 255, 0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin: 0 3px;
+      font-family: monospace;
+      border: 1px solid rgba(100, 180, 255, 0.3);
+    }
+
+    .ventilation-overlay {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 99;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .ventilation-overlay.active {
+      opacity: 1;
+    }
+
+    .ventilation-text {
+      color: #22c55e;
+      font-size: 24px;
+      font-weight: 700;
+      text-shadow: 0 0 20px rgba(34, 197, 94, 0.8);
+      animation: vent-pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes vent-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="info-panel">
+    <div class="info-title">🏠 环境监测数据</div>
+    <div class="metric-row">
+      <span class="metric-label">室外温度</span>
+      <span class="metric-value" id="outdoorTemp">24°C</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">室外湿度</span>
+      <span class="metric-value" id="outdoorHumidity">70%</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">室内温度</span>
+      <span class="metric-value" id="indoorTemp">22°C</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">墙表温度</span>
+      <span class="metric-value" id="wallTemp">18°C</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">露点温度</span>
+      <span class="metric-value" id="dewPoint">17°C</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">结露时长</span>
+      <span class="metric-value" id="dewDuration">0h</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">墙体温度梯度</span>
+      <span class="metric-value" id="tempGradient">0°C/m</span>
+    </div>
+    <div id="riskStatus" class="risk-status safe">
+      ✅ 低风险 - 无霉变威胁
+    </div>
+  </div>
+
+  <div class="control-panel">
+    <div class="panel-title">⚙️ 控制面板</div>
+
+    <div class="section">
+      <div class="section-title">🌡️ 环境参数</div>
+      <div class="control-group">
+        <div class="control-label">
+          <span>室外温度</span>
+          <span class="control-value" id="outdoorTempValue">24°C</span>
+        </div>
+        <input type="range" id="outdoorTempSlider" min="5" max="35" value="24" step="0.5">
+      </div>
+      <div class="control-group">
+        <div class="control-label">
+          <span>室外相对湿度</span>
+          <span class="control-value" id="outdoorHumidityValue">70%</span>
+        </div>
+        <input type="range" id="outdoorHumiditySlider" min="30" max="100" value="90" step="1">
+      </div>
+      <div class="control-group">
+        <div class="control-label">
+          <span>室内温度</span>
+          <span class="control-value" id="indoorTempValue">22°C</span>
+        </div>
+        <input type="range" id="indoorTempSlider" min="10" max="30" value="22" step="0.5">
+      </div>
+      <div class="control-group">
+        <div class="control-label">
+          <span>梅雨持续天数</span>
+          <span class="control-value" id="rainyDaysValue">7天</span>
+        </div>
+        <input type="range" id="rainyDaysSlider" min="1" max="30" value="7" step="1">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🧱 墙体材质</div>
+      <select class="material-select" id="wallMaterial">
+        <option value="brick">普通砖砌体 (λ=0.8 W/m·K)</option>
+        <option value="concrete">混凝土 (λ=1.5 W/m·K)</option>
+        <option value="aerated">加气混凝土 (λ=0.2 W/m·K)</option>
+        <option value="wood">木质结构 (λ=0.12 W/m·K)</option>
+        <option value="stone">石材 (λ=2.5 W/m·K)</option>
+      </select>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🧽 保温层设置</div>
+      <button class="toggle-btn" id="addInsulationBtn">
+        <span class="toggle-icon" id="insulationIcon">+</span>
+        <span>添加保温层 (EPS聚苯板)</span>
+      </button>
+      <div class="control-group" id="insulationThicknessGroup" style="display: none; margin-top: 10px;">
+        <div class="control-label">
+          <span>保温层厚度</span>
+          <span class="control-value" id="insulationThicknessValue">30mm</span>
+        </div>
+        <input type="range" id="insulationThicknessSlider" min="10" max="100" value="30" step="5">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🌀 通风系统</div>
+      <button class="toggle-btn" id="ventilationBtn">
+        <span class="toggle-icon" id="ventilationIcon">💨</span>
+        <span>开启新风/排气系统</span>
+      </button>
+      <div class="control-group" id="ventilationRateGroup" style="display: none; margin-top: 10px;">
+        <div class="control-label">
+          <span>通风强度</span>
+          <span class="control-value" id="ventilationRateValue">中</span>
+        </div>
+        <input type="range" id="ventilationRateSlider" min="1" max="3" value="2" step="1">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">👁️ 显示模式</div>
+      <select class="mode-select" id="displayMode">
+        <option value="combined">综合视图 (结露+霉变)</option>
+        <option value="temperature">温度场分布</option>
+        <option value="dewpoint">结露分布</option>
+        <option value="mold">霉变风险分布</option>
+        <option value="cross-section">墙体剖面分析</option>
+      </select>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📊 墙体厚度</div>
+      <div class="control-group">
+        <div class="control-label">
+          <span>主体墙厚</span>
+          <span class="control-value" id="wallThicknessValue">240mm</span>
+        </div>
+        <input type="range" id="wallThicknessSlider" min="120" max="480" value="240" step="10">
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-title">📌 风险等级图例</div>
+    <div class="legend-items">
+      <div class="legend-item">
+        <div class="legend-color" style="background: #22c55e;"></div>
+        <span>安全</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #84cc16;"></div>
+        <span>低危</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #fbbf24;"></div>
+        <span>中危</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #f97316;"></div>
+        <span>高危</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #ef4444;"></div>
+        <span>严重</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #3b82f6; opacity: 0.8;"></div>
+        <span>结露点</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls-hint">
+    <kbd>鼠标左键</kbd> 旋转 | <kbd>滚轮</kbd> 缩放 | <kbd>右键</kbd> 平移
+  </div>
+
+  <div class="ventilation-overlay" id="ventilationOverlay">
+    <div class="ventilation-text">💨 通风系统运行中...</div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
