@@ -237,8 +237,8 @@ class AgingInPlaceValidator {
     this.wheelchair = this.wheelchairGenerator.generate();
     this.wheelchairCollisionBoxes = this.wheelchairGenerator.getCollisionBoxes();
 
-    const startX = this.isSpaciousMode ? 1.2 : 0.85;
-    const startZ = this.isSpaciousMode ? 1.6 : 1.55;
+    const startX = this.isSpaciousMode ? 2.0 : 0.85;
+    const startZ = this.isSpaciousMode ? 2.0 : 1.55;
     this.wheelchair.position.set(startX, 0, startZ);
     this.wheelchair.rotation.y = -Math.PI / 2;
 
@@ -299,39 +299,65 @@ class AgingInPlaceValidator {
 
     if (btnRotate) {
       btnRotate.disabled = this.appState === 'running';
+      btnRotate.classList.remove('success', 'danger', 'warning');
       switch (this.appState) {
         case 'idle':
+          btnRotate.textContent = '▶️ 开始轮椅回转测试';
+          break;
         case 'stopped':
-          btnRotate.textContent = '🔄 开始轮椅回转测试';
+          btnRotate.textContent = '⏵ 继续进行回转测试';
+          btnRotate.classList.add('warning');
           break;
         case 'running':
-          btnRotate.textContent = '⏳ 回转中...';
+          btnRotate.textContent = '⏳ 回转进行中...';
           break;
         case 'completed_pass':
+          btnRotate.textContent = '🔁 再次执行回转测试';
+          btnRotate.classList.add('success');
+          break;
         case 'completed_fail':
-          btnRotate.textContent = '🔄 重新开始回转测试';
+          btnRotate.textContent = '🔁 重试回转测试';
+          btnRotate.classList.add('danger');
           break;
       }
     }
 
     if (btnStop) {
       btnStop.disabled = this.appState !== 'running';
-      btnStop.textContent = this.appState === 'running' ? '⏹ 停止测试' : '⏹ 停止（不可用）';
-      btnStop.style.opacity = this.appState === 'running' ? '1' : '0.6';
+      if (this.appState === 'running') {
+        btnStop.textContent = '⏹ 停止测试';
+        btnStop.style.opacity = '1';
+      } else {
+        btnStop.textContent = '⏹ 停止（仅测试中可用）';
+        btnStop.style.opacity = '0.55';
+      }
     }
 
     if (btnReset) {
       btnReset.disabled = false;
+      switch (this.appState) {
+        case 'idle':
+          btnReset.textContent = '↩️ 重置场景';
+          break;
+        case 'running':
+          btnReset.textContent = '↩️ 中止并重置';
+          break;
+        case 'stopped':
+        case 'completed_pass':
+        case 'completed_fail':
+          btnReset.textContent = '↩️ 重置到初始状态';
+          break;
+      }
     }
 
     const stateBadge = document.getElementById('state-badge');
     if (stateBadge) {
       const stateLabels: Record<AppState, { text: string; class: string }> = {
-        idle: { text: '就绪', class: 'badge-info' },
-        running: { text: '测试中', class: 'badge-running' },
-        completed_pass: { text: '✓ 通过', class: 'badge-success' },
-        completed_fail: { text: '✗ 失败', class: 'badge-error' },
-        stopped: { text: '已停止', class: 'badge-warning' }
+        idle: { text: '● 就绪', class: 'badge-info' },
+        running: { text: '◉ 测试中', class: 'badge-running' },
+        completed_pass: { text: '✓ 测试通过', class: 'badge-success' },
+        completed_fail: { text: '✗ 测试失败', class: 'badge-error' },
+        stopped: { text: '⏸ 已暂停', class: 'badge-warning' }
       };
       const s = stateLabels[this.appState];
       stateBadge.textContent = s.text;

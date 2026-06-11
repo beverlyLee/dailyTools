@@ -5,6 +5,7 @@ export default defineConfig({
     port: 5188,
     host: '0.0.0.0',
     strictPort: true,
+    origin: 'http://localhost:5188',
     open: false,
     hmr: {
       port: 5188,

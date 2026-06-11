@@ -310,6 +310,14 @@ export class BathroomSceneBuilder {
     );
     bars.push(sinkBar);
 
+    const seatBar = this.createHorizontalBar(
+      new THREE.Vector3(config.width * 0.55, 0.80, config.depth * 0.70),
+      0.55,
+      'SeatGrabBar',
+      barMaterial
+    );
+    bars.push(seatBar);
+
     return bars;
   }
 
@@ -488,6 +496,11 @@ export class BathroomSceneBuilder {
         position: new THREE.Vector3(config.sinkPosition.x, 0.85, config.sinkPosition.z + 0.30),
         name: '洗手台扶手',
         type: 'wall'
+      },
+      {
+        position: new THREE.Vector3(config.width * 0.55, 0.80, config.depth * 0.70),
+        name: '独立坐席扶手',
+        type: 'seat'
       }
     ];
   }
