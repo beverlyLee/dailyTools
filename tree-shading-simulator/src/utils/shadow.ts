@@ -179,7 +179,7 @@ export function calculateWindowShadowCoverage(
   canopy: CanopySize,
   sunAltitudeDeg: number,
   sunAzimuthDeg: number = DEFAULT_SOLAR_AZIMUTH,
-  samples: number = 121
+  samples: number = 225
 ): number {
   const [wx, wy, wz] = window.position;
   const [w, h] = window.size;
@@ -204,7 +204,7 @@ export function calculateWindowShadowCoverage(
       const samplePoint: [number, number, number] = [px, py, pz];
       const result = rayIntersectsCanopyEllipsoid(samplePoint, treePosition, canopy, sunDir);
       if (result.hit) {
-        covered += result.softness;
+        covered += 1;
       }
     }
   }
