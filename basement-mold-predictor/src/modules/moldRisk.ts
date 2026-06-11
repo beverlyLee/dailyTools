@@ -13,8 +13,8 @@ export class MoldRiskAssessor {
   constructor(
     private env: EnvironmentParams,
     private material: WallMaterial,
-    private insulation: InsulationConfig,
-    private ventilation: VentilationConfig
+    _insulation: InsulationConfig,
+    _ventilation: VentilationConfig
   ) {}
 
   calculateTimeWeightFactor(): number {
@@ -57,19 +57,6 @@ export class MoldRiskAssessor {
     return 0.7;
   }
 
-  calculateVentilationFactor(): number {
-    if (!this.ventilation.enabled) return 1.0;
-    const reduction = this.ventilation.intensity * 0.25;
-    return Math.max(0.2, 1 - reduction);
-  }
-
-  calculateInsulationFactor(): number {
-    if (!this.insulation.enabled) return 1.0;
-    const thicknessFactor = this.insulation.thickness / 100;
-    const baseReduction = 0.4 + thicknessFactor * 0.4;
-    return Math.max(0.1, 1 - baseReduction);
-  }
-
   calculateRiskAtPoint(
     surfaceTemp: number,
     dewDurationHours: number,
@@ -82,15 +69,14 @@ export class MoldRiskAssessor {
     const condensationFactor = this.calculateCondensationFactor(dewDurationHours);
     const humidityFactor = this.calculateHumidityFactor(indoorHumidity);
     const tempFactor = this.calculateTemperatureFactor(surfaceTemp);
-    const ventFactor = this.calculateVentilationFactor();
-    const insulationFactor = this.calculateInsulationFactor();
 
     const cornerFactor = this.calculatePositionFactor(x, y);
 
     const primaryRisks = condensationFactor * 0.4 + humidityFactor * 0.3;
     const secondaryRisks = materialFactor * 0.15 + tempFactor * 0.15;
     const baseRisk = (primaryRisks + secondaryRisks) * timeWeight;
-    const adjustedRisk = baseRisk * ventFactor * insulationFactor * cornerFactor;
+
+    const adjustedRisk = baseRisk * cornerFactor;
 
     return Math.min(1, Math.max(0, adjustedRisk));
   }
@@ -217,7 +203,7 @@ export class MoldRiskAssessor {
   ) {
     if (env) this.env = env;
     if (material) this.material = material;
-    if (insulation) this.insulation = insulation;
-    if (ventilation) this.ventilation = ventilation;
+    if (insulation) this._insulation = insulation;
+    if (ventilation) this._ventilation = ventilation;
   }
 }

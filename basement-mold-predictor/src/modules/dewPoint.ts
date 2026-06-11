@@ -3,6 +3,10 @@ import type { EnvironmentParams, VentilationConfig, DewPointData } from './types
 export class DewPointCalculator {
   private resolution: { x: number; y: number } = { x: 40, y: 35 };
 
+  private VENTILATION_ACH = [0.3, 0.6, 1.0];
+  private TARGET_HUMIDITY_LOW = 45;
+  private TIME_CONSTANT_HOURS = 4;
+
   constructor(
     private env: EnvironmentParams,
     private ventilation: VentilationConfig
@@ -15,15 +19,26 @@ export class DewPointCalculator {
     return 6.1078 * Math.exp(alpha);
   }
 
-  calculateActualVaporPressure(): number {
-    const pSat = this.calculateSaturationVaporPressure(this.env.indoorTemp);
-    let effectiveHumidity = this.env.outdoorHumidity;
-
-    if (this.ventilation.enabled) {
-      const ventFactor = 1 - (this.ventilation.intensity * 0.12);
-      effectiveHumidity = Math.max(30, this.env.outdoorHumidity * ventFactor);
+  getEffectiveHumidity(): number {
+    const baseHumidity = this.env.outdoorHumidity;
+    if (!this.ventilation.enabled) {
+      return baseHumidity;
     }
 
+    const ach = this.VENTILATION_ACH[Math.min(this.ventilation.intensity - 1, 2)];
+    const rainyHours = this.env.rainyDays * 24;
+    const tau = this.TIME_CONSTANT_HOURS;
+
+    const decayFactor = Math.exp(-(ach * rainyHours) / tau);
+    const targetHumidity = this.TARGET_HUMIDITY_LOW;
+
+    const effectiveHumidity = targetHumidity + (baseHumidity - targetHumidity) * decayFactor;
+    return Math.max(30, Math.min(100, effectiveHumidity));
+  }
+
+  calculateActualVaporPressure(): number {
+    const pSat = this.calculateSaturationVaporPressure(this.env.indoorTemp);
+    const effectiveHumidity = this.getEffectiveHumidity();
     return (effectiveHumidity / 100) * pSat;
   }
 
@@ -36,21 +51,18 @@ export class DewPointCalculator {
   }
 
   calculateIndoorHumidity(): number {
-    let baseHumidity = this.env.outdoorHumidity;
+    const outdoorHumidityEffective = this.getEffectiveHumidity();
+    let baseHumidity = outdoorHumidityEffective;
+
     const tempDiff = this.env.indoorTemp - this.env.outdoorTemp;
     if (tempDiff > 0) {
       const pSatOutdoor = this.calculateSaturationVaporPressure(this.env.outdoorTemp);
       const pSatIndoor = this.calculateSaturationVaporPressure(this.env.indoorTemp);
-      const pActual = (this.env.outdoorHumidity / 100) * pSatOutdoor;
+      const pActual = (outdoorHumidityEffective / 100) * pSatOutdoor;
       baseHumidity = (pActual / pSatIndoor) * 100;
     }
 
-    if (this.ventilation.enabled) {
-      const ventFactor = 1 - (this.ventilation.intensity * 0.12);
-      baseHumidity = Math.max(30, baseHumidity * ventFactor);
-    }
-
-    return Math.min(100, baseHumidity);
+    return Math.min(100, Math.max(0, baseHumidity));
   }
 
   checkCondensationAtPoint(surfaceTemp: number): boolean {
@@ -70,6 +82,8 @@ export class DewPointCalculator {
     let hasCondensation = false;
     let lowestSurfaceTemp = Infinity;
     let totalDewHours = 0;
+
+    const effectiveRainyDays = this.getEffectiveRainyDays();
 
     for (const point of surfaceTempProfile) {
       if (point.temp < lowestSurfaceTemp) {
@@ -94,7 +108,7 @@ export class DewPointCalculator {
           }
         }
 
-        const dewHoursAtPoint = this.env.rainyDays * 24 * intensity * 0.4;
+        const dewHoursAtPoint = effectiveRainyDays * 24 * intensity * 0.4;
         totalDewHours = Math.max(totalDewHours, dewHoursAtPoint);
       }
     }
@@ -111,7 +125,7 @@ export class DewPointCalculator {
         });
       }
       hasCondensation = true;
-      const cornerHours = this.env.rainyDays * 24 * cornerIntensity * 0.5;
+      const cornerHours = effectiveRainyDays * 24 * cornerIntensity * 0.5;
       totalDewHours = Math.max(totalDewHours, cornerHours);
     }
 
@@ -136,6 +150,18 @@ export class DewPointCalculator {
       condensationPoints,
       dewDurationHours: totalDewHours,
     };
+  }
+
+  private getEffectiveRainyDays(): number {
+    if (!this.ventilation.enabled) {
+      return this.env.rainyDays;
+    }
+
+    const ach = this.VENTILATION_ACH[Math.min(this.ventilation.intensity - 1, 2)];
+    const tau_days = this.TIME_CONSTANT_HOURS / 24;
+    const decayFactorDays = Math.exp(-(this.env.rainyDays / tau_days / (1 / ach)));
+    const effectiveDays = this.env.rainyDays * decayFactorDays;
+    return Math.max(0, effectiveDays);
   }
 
   private findProfileTemp(profile: Array<{ y: number; temp: number }>, targetY: number): number {
