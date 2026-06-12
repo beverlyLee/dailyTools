@@ -46,6 +46,7 @@ export interface DewPointData {
   hasCondensation: boolean;
   condensationPoints: Array<{ x: number; y: number; intensity: number }>;
   dewDurationHours: number;
+  effectiveRainyDays: number;
 }
 
 export interface MoldRiskData {

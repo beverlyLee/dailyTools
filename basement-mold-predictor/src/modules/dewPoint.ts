@@ -149,6 +149,7 @@ export class DewPointCalculator {
       hasCondensation,
       condensationPoints,
       dewDurationHours: totalDewHours,
+      effectiveRainyDays: effectiveRainyDays,
     };
   }
 
