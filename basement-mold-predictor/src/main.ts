@@ -440,15 +440,20 @@ class BasementMoldPredictorApp {
     tempGradientText.textContent = `${gradient.toFixed(1)}°C/m`;
 
     riskStatus.classList.remove('safe', 'moderate', 'danger');
+    let riskBreakdownHTML = '';
+    if (moldRiskData.riskBreakdown) {
+      const bd = moldRiskData.riskBreakdown;
+      riskBreakdownHTML = `<div style="font-size:11px;opacity:0.75;margin-top:3px;line-height:1.5;">风险贡献：结露 ${bd.condensation.toFixed(0)}%、湿度 ${bd.humidity.toFixed(0)}%、时间加权 ${bd.time.toFixed(0)}%</div>`;
+    }
     if (moldRiskData.overallRisk === 'safe') {
       riskStatus.classList.add('safe');
-      riskStatus.innerHTML = `✅ 低风险 - 霉变概率 ${(moldRiskData.riskLevel * 100).toFixed(0)}%，安全状态`;
+      riskStatus.innerHTML = `✅ 低风险 - 霉变概率 ${(moldRiskData.riskLevel * 100).toFixed(0)}%，安全状态${riskBreakdownHTML}`;
     } else if (moldRiskData.overallRisk === 'moderate') {
       riskStatus.classList.add('moderate');
-      riskStatus.innerHTML = `⚠️ 中风险 - 霉变概率 ${(moldRiskData.riskLevel * 100).toFixed(0)}%`;
+      riskStatus.innerHTML = `⚠️ 中风险 - 霉变概率 ${(moldRiskData.riskLevel * 100).toFixed(0)}%${riskBreakdownHTML}`;
     } else {
       riskStatus.classList.add('danger');
-      riskStatus.innerHTML = `🚨 高风险 - 霉变概率 ${(moldRiskData.riskLevel * 100).toFixed(0)}%，建议立即处理`;
+      riskStatus.innerHTML = `🚨 高风险 - 霉变概率 ${(moldRiskData.riskLevel * 100).toFixed(0)}%，建议立即处理${riskBreakdownHTML}`;
     }
   }
 

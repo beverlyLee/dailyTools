@@ -54,6 +54,13 @@ export interface MoldRiskData {
   riskMap: Array<{ x: number; y: number; risk: number }>;
   highRiskZones: Array<{ x: number; y: number; severity: number }>;
   overallRisk: 'safe' | 'moderate' | 'danger';
+  riskBreakdown?: {
+    condensation: number;
+    humidity: number;
+    material: number;
+    time: number;
+    temperature: number;
+  };
 }
 
 export interface SimulationState {

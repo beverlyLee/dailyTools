@@ -9,15 +9,29 @@ import type {
 
 export class MoldRiskAssessor {
   private resolution: { x: number; y: number } = { x: 45, y: 40 };
+  private ventilation: VentilationConfig;
 
   constructor(
     private env: EnvironmentParams,
     private material: WallMaterial,
     private insulation: InsulationConfig,
-    _ventilation: VentilationConfig
-  ) {}
+    ventilation: VentilationConfig
+  ) {
+    this.ventilation = ventilation;
+  }
 
-  calculateTimeWeightFactor(effectiveDays: number): number {
+  calculateTimeWeightFactor(effectiveDays: number, _hasCondensation: boolean): number {
+    if (this.ventilation?.enabled) {
+      const idx = Math.min((this.ventilation.intensity || 2) - 1, 2);
+      const caps = [2.0, 1.2, 0.6];
+      const caps_risk = [0.30, 0.25, 0.18];
+      const cap = caps[idx];
+      const days = Math.min(Math.max(0, effectiveDays), cap);
+      const t = Math.max(0, days);
+      const slow = 0.08 + (caps_risk[idx] - 0.08) * (1 - Math.exp(-t * 0.7));
+      return Math.min(caps_risk[idx], slow);
+    }
+
     const days = Math.max(0, effectiveDays);
     if (days <= 1) return 0.1;
     if (days >= 21) return 1.0;
@@ -34,10 +48,20 @@ export class MoldRiskAssessor {
 
   calculateCondensationFactor(dewDurationHours: number): number {
     if (dewDurationHours <= 0) return 0;
-    if (dewDurationHours <= 6) return 0.2;
-    if (dewDurationHours <= 24) return 0.5;
-    if (dewDurationHours <= 72) return 0.8;
-    return Math.min(1, 0.85 + dewDurationHours / 500);
+
+    let raw: number;
+    if (dewDurationHours <= 6) raw = 0.2;
+    else if (dewDurationHours <= 24) raw = 0.5;
+    else if (dewDurationHours <= 72) raw = 0.8;
+    else raw = Math.min(1, 0.85 + dewDurationHours / 500);
+
+    if (this.ventilation?.enabled) {
+      const idx = Math.min((this.ventilation.intensity || 2) - 1, 2);
+      const caps = [0.45, 0.3, 0.15];
+      raw = Math.min(raw, caps[idx]);
+    }
+
+    return raw;
   }
 
   calculateHumidityFactor(indoorHumidity: number): number {
@@ -64,24 +88,54 @@ export class MoldRiskAssessor {
     y: number,
     dewPointTemp: number = 0,
     effectiveDays: number = 0
-  ): number {
-    const timeWeight = this.calculateTimeWeightFactor(effectiveDays);
+  ): { risk: number; breakdown: { condensation: number; humidity: number; material: number; time: number; temperature: number } } {
     const materialFactor = this.calculateMaterialFactor();
     const condensationFactor = this.calculateCondensationFactor(dewDurationHours);
     const humidityFactor = this.calculateHumidityFactor(indoorHumidity);
     const tempFactor = this.calculateTemperatureFactor(surfaceTemp);
-
     const hasCondensation = condensationFactor > 0;
+    const timeWeight = this.calculateTimeWeightFactor(effectiveDays, hasCondensation);
 
     let baseRisk: number;
+    let cContrib = 0;
+    let hContrib = 0;
+    let mContrib = 0;
+    let tContrib = 0;
+    let tempContrib = 0;
+
     if (hasCondensation) {
-      const primaryRisks = condensationFactor * 0.45 + humidityFactor * 0.25;
-      const secondaryRisks = materialFactor * 0.15 + tempFactor * 0.15;
+      const cTerm = condensationFactor * 0.45;
+      const hTerm = humidityFactor * 0.25;
+      const mTerm = materialFactor * 0.15;
+      const tempTerm = tempFactor * 0.15;
+      const primaryRisks = cTerm + hTerm;
+      const secondaryRisks = mTerm + tempTerm;
       baseRisk = (primaryRisks + secondaryRisks) * timeWeight;
+
+      cContrib = cTerm * timeWeight;
+      hContrib = hTerm * timeWeight;
+      mContrib = mTerm * timeWeight;
+      tempContrib = tempTerm * timeWeight;
+      tContrib = (primaryRisks + secondaryRisks) * timeWeight * 0.15;
     } else {
       const surfaceMargin = this.calculateSurfaceMarginFactor(surfaceTemp, dewPointTemp);
-      const dryRisk = humidityFactor * 0.25 + materialFactor * 0.10 + tempFactor * 0.05;
+      const hTerm = humidityFactor * 0.25;
+      const mTerm = materialFactor * 0.10;
+      const tempTerm = tempFactor * 0.05;
+      const dryRisk = hTerm + mTerm + tempTerm;
       baseRisk = dryRisk * timeWeight * surfaceMargin;
+
+      if (this.ventilation?.enabled) {
+        const idx = Math.min((this.ventilation.intensity || 2) - 1, 2);
+        const residualFloors = [0.08, 0.05, 0.02];
+        const floor = residualFloors[idx];
+        baseRisk = Math.max(floor, baseRisk);
+      }
+
+      hContrib = hTerm * timeWeight * surfaceMargin;
+      mContrib = mTerm * timeWeight * surfaceMargin;
+      tempContrib = tempTerm * timeWeight * surfaceMargin;
+      tContrib = dryRisk * timeWeight * surfaceMargin * 0.2;
     }
 
     const cornerFactor = hasCondensation
@@ -92,7 +146,22 @@ export class MoldRiskAssessor {
     baseRisk *= insulationBonus;
 
     const adjustedRisk = baseRisk * cornerFactor;
-    return Math.min(1, Math.max(0, adjustedRisk));
+    const c = Math.max(0, cContrib * insulationBonus * cornerFactor);
+    const h = Math.max(0, hContrib * insulationBonus * cornerFactor);
+    const m = Math.max(0, mContrib * insulationBonus * cornerFactor);
+    const t = Math.max(0, tContrib * insulationBonus * cornerFactor);
+    const tp = Math.max(0, tempContrib * insulationBonus * cornerFactor);
+    const totalRaw = c + h + m + t + tp + 1e-9;
+    return {
+      risk: Math.min(1, Math.max(0, adjustedRisk)),
+      breakdown: {
+        condensation: (c / totalRaw) * 100,
+        humidity: (h / totalRaw) * 100,
+        material: (m / totalRaw) * 100,
+        time: (t / totalRaw) * 100,
+        temperature: (tp / totalRaw) * 100,
+      },
+    };
   }
 
   private calculateSurfaceMarginFactor(surfaceTemp: number, dewPointTemp: number): number {
@@ -175,6 +244,7 @@ export class MoldRiskAssessor {
     const riskMap: Array<{ x: number; y: number; risk: number }> = [];
     const highRiskZones: Array<{ x: number; y: number; severity: number }> = [];
     let maxRisk = 0;
+    let maxBreakdown = { condensation: 0, humidity: 0, material: 0, time: 0, temperature: 0 };
     const dewPointTemp = dewData.dewPointTemp;
     const effectiveDays = dewData.effectiveRainyDays;
 
@@ -184,7 +254,7 @@ export class MoldRiskAssessor {
         const y = j / (this.resolution.y - 1);
         const surfaceTemp = this.interpolateProfileTemp(surfaceTempProfile, y);
         const localDewDuration = dewData.dewDurationHours * (1 + (1 - y) * 0.5);
-        const risk = this.calculateRiskAtPoint(
+        const result = this.calculateRiskAtPoint(
           surfaceTemp,
           localDewDuration,
           indoorHumidity,
@@ -193,10 +263,14 @@ export class MoldRiskAssessor {
           dewPointTemp,
           effectiveDays
         );
+        const risk = result.risk;
 
         riskMap.push({ x, y, risk });
 
-        if (risk > maxRisk) maxRisk = risk;
+        if (risk > maxRisk) {
+          maxRisk = risk;
+          maxBreakdown = result.breakdown;
+        }
         if (risk >= 0.7) {
           highRiskZones.push({ x, y, severity: risk });
         }
@@ -208,6 +282,7 @@ export class MoldRiskAssessor {
       riskMap,
       highRiskZones,
       overallRisk: this.calculateOverallRisk(maxRisk),
+      riskBreakdown: maxBreakdown,
     };
   }
 
@@ -234,10 +309,11 @@ export class MoldRiskAssessor {
     env?: EnvironmentParams,
     material?: WallMaterial,
     insulation?: InsulationConfig,
-    _ventilation?: VentilationConfig
+    ventilation?: VentilationConfig
   ) {
     if (env) this.env = env;
     if (material) this.material = material;
     if (insulation) this.insulation = insulation;
+    if (ventilation) this.ventilation = ventilation;
   }
 }

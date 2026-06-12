@@ -158,11 +158,13 @@ export class DewPointCalculator {
       return this.env.rainyDays;
     }
 
-    const ach = this.VENTILATION_ACH[Math.min(this.ventilation.intensity - 1, 2)];
-    const tau_days = this.TIME_CONSTANT_HOURS / 24;
-    const decayFactorDays = Math.exp(-(this.env.rainyDays / tau_days / (1 / ach)));
-    const effectiveDays = this.env.rainyDays * decayFactorDays;
-    return Math.max(0, effectiveDays);
+    const idx = Math.min(this.ventilation.intensity - 1, 2);
+    const ach = this.VENTILATION_ACH[idx];
+    const tau_hours = this.TIME_CONSTANT_HOURS;
+    const k = (ach * 24) / tau_hours;
+    const N = this.env.rainyDays;
+    const integral = (1 - Math.exp(-k * N)) / Math.max(k, 1e-6);
+    return Math.max(0, Math.min(N, integral));
   }
 
   private findProfileTemp(profile: Array<{ y: number; temp: number }>, targetY: number): number {
