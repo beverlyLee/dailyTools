@@ -36,7 +36,7 @@ export class SharpCornerDetector {
 
   public detect(
     sceneObjects: THREE.Object3D[],
-    headHeightRange: { min: number; max: number },
+    childHeightRange: { min: number; max: number },
     childPosition: THREE.Vector3
   ): SharpCornerResult {
     this.clearMarkers();
@@ -53,7 +53,7 @@ export class SharpCornerDetector {
         if (child instanceof THREE.Mesh) {
           const detected = this.analyzeMeshCorners(
             child,
-            headHeightRange,
+            childHeightRange,
             childPosition
           );
           allCorners.push(...detected);
@@ -82,7 +82,7 @@ export class SharpCornerDetector {
 
   private analyzeMeshCorners(
     mesh: THREE.Mesh,
-    headHeightRange: { min: number; max: number },
+    childHeightRange: { min: number; max: number },
     childPosition: THREE.Vector3
   ): DetectedCorner[] {
     const geometry = mesh.geometry;
@@ -97,18 +97,13 @@ export class SharpCornerDetector {
 
     const vertexToFaces = this.buildVertexToFaceMap(indexAttr);
 
-    const headRange = {
-      min: headHeightRange.min + mesh.position.y,
-      max: headHeightRange.max + mesh.position.y,
-    };
-
     for (let vertexIdx = 0; vertexIdx < positionAttr.count; vertexIdx++) {
       const key = `${mesh.uuid}-${vertexIdx}`;
       if (processedCorners.has(key)) continue;
 
       const worldPos = this.getVertexWorldPos(vertexIdx, positionAttr, worldMatrix);
 
-      if (worldPos.y < headRange.min || worldPos.y > headRange.max) {
+      if (worldPos.y < childHeightRange.min || worldPos.y > childHeightRange.max) {
         continue;
       }
 
@@ -128,7 +123,7 @@ export class SharpCornerDetector {
         angle,
         worldPos,
         childPosition,
-        headRange
+        childHeightRange
       );
 
       if (riskLevel === 'low') {
@@ -271,24 +266,21 @@ export class SharpCornerDetector {
     angle: number,
     worldPos: THREE.Vector3,
     childPos: THREE.Vector3,
-    headRange: { min: number; max: number }
+    childHeightRange: { min: number; max: number }
   ): 'high' | 'medium' | 'low' {
-    const distToChild = new THREE.Vector3(worldPos.x, 0, worldPos.z).distanceTo(
-      new THREE.Vector3(childPos.x, 0, childPos.z)
-    );
-
-    const headCenter = (headRange.min + headRange.max) / 2;
-    const distFromHeadCenter = Math.abs(worldPos.y - headCenter);
-
     const angleDeg = (angle * 180) / Math.PI;
 
-    if (angleDeg < 90 && distFromHeadCenter < 0.15) {
-      if (distToChild < 1.5) return 'high';
+    const headZoneMin = 0.7;
+    const headZoneMax = childHeightRange.max;
+    const inHeadZone = worldPos.y >= headZoneMin && worldPos.y <= headZoneMax;
+
+    if (angleDeg < 90) {
+      if (inHeadZone) return 'high';
       return 'high';
     }
 
     if (angleDeg < 100) {
-      if (distFromHeadCenter < 0.2) return 'medium';
+      if (inHeadZone) return 'medium';
       return 'medium';
     }
 

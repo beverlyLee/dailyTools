@@ -142,14 +142,14 @@ class ChildSafeDetectorApp {
 
   private runFullAudit(currentTime: number): void {
     this.lastAuditTime = currentTime;
-    const headRange = this.childModel.getHeadHeightRange();
+    const childHeightRange = { min: 0, max: 0.9 };
     const childPos = this.childModel.getPosition();
 
     const allObjects = [...this.roomBuilder.furnitureObjects, this.roomBuilder.group];
 
     this.sharpCornerResult = this.sharpCornerDetector.detect(
       allObjects,
-      headRange,
+      childHeightRange,
       childPos
     );
 
@@ -182,10 +182,18 @@ class ChildSafeDetectorApp {
       if (cornerAlertsEl) {
         cornerAlertsEl.innerHTML = '';
         if (highRiskCount > 0) {
-          const alert = document.createElement('div');
-          alert.className = 'alert';
-          alert.innerHTML = '🔴 茶几边角高度45cm，尖角直接对准儿童头部区域<br><b>碰撞风险高，建议倒圆角或加装防撞条</b>';
-          cornerAlertsEl.appendChild(alert);
+          const seenNames = new Set<string>();
+          for (const corner of this.sharpCornerResult.corners) {
+            if (corner.riskLevel !== 'high') continue;
+            const name = corner.objectName || '家具';
+            if (seenNames.has(name)) continue;
+            seenNames.add(name);
+            const heightCm = (corner.height * 100).toFixed(0);
+            const alert = document.createElement('div');
+            alert.className = 'alert';
+            alert.innerHTML = `🔴 ${name}边角高度${heightCm}cm，碰撞风险高，建议倒圆角或加装防撞条`;
+            cornerAlertsEl.appendChild(alert);
+          }
         }
         if (mediumRiskCount > 0) {
           const alert = document.createElement('div');
