@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>儿童房安全隐患排查工具</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+      #app { width: 100vw; height: 100vh; }
+      #hud {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.75);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        max-width: 360px;
+        font-size: 14px;
+        backdrop-filter: blur(10px);
+        z-index: 100;
+      }
+      #hud h2 { font-size: 18px; margin-bottom: 12px; color: #4ade80; }
+      #hud .section { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+      #hud .section:last-child { border-bottom: none; }
+      #hud .label { color: #94a3b8; font-size: 12px; margin-bottom: 4px; }
+      #hud .value { color: #fbbf24; font-weight: 600; }
+      #hud .danger { color: #ef4444; }
+      #hud .safe { color: #4ade80; }
+      #hud .warning { color: #f59e0b; }
+      .alert {
+        padding: 8px 12px;
+        background: rgba(239, 68, 68, 0.2);
+        border-left: 3px solid #ef4444;
+        border-radius: 4px;
+        margin-top: 6px;
+        font-size: 13px;
+      }
+      .alert.warn {
+        background: rgba(245, 158, 11, 0.2);
+        border-left-color: #f59e0b;
+      }
+      .alert.ok {
+        background: rgba(74, 222, 128, 0.2);
+        border-left-color: #4ade80;
+      }
+      #controls {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.75);
+        color: white;
+        padding: 16px;
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        z-index: 100;
+      }
+      #controls button {
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-right: 8px;
+        font-size: 13px;
+        transition: transform 0.1s;
+      }
+      #controls button:hover { transform: translateY(-1px); }
+      #controls button.active {
+        background: linear-gradient(135deg, #ef4444, #f97316);
+      }
+      #legend {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.75);
+        color: white;
+        padding: 16px;
+        border-radius: 12px;
+        font-size: 13px;
+        backdrop-filter: blur(10px);
+        z-index: 100;
+      }
+      .legend-item { display: flex; align-items: center; margin: 6px 0; }
+      .legend-color { width: 16px; height: 16px; border-radius: 4px; margin-right: 8px; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="hud">
+      <h2>🛡️ 儿童房安全审计</h2>
+      <div class="section">
+        <div class="label">儿童身高</div>
+        <div class="value">90 cm (2-3岁)</div>
+      </div>
+      <div class="section">
+        <div class="label">头部高度范围</div>
+        <div class="value">70 cm ~ 90 cm</div>
+      </div>
+      <div id="sharpCorners" class="section">
+        <div class="label">锐角检测</div>
+        <div id="cornerCount" class="value">检测中...</div>
+        <div id="cornerAlerts"></div>
+      </div>
+      <div id="paddingInfo" class="section">
+        <div class="label">软包建议</div>
+        <div id="paddingArea" class="value">计算中...</div>
+        <div id="paddingAlerts"></div>
+      </div>
+      <div id="guardrailInfo" class="section">
+        <div class="label">高危区域防护</div>
+        <div id="guardrailStatus" class="value">检测中...</div>
+        <div id="guardrailAlerts"></div>
+      </div>
+      <div id="collisionInfo" class="section">
+        <div class="label">实时碰撞检测</div>
+        <div id="collisionStatus" class="value safe">正常</div>
+        <div id="collisionAlerts"></div>
+      </div>
+    </div>
+    <div id="legend">
+      <div style="font-weight:600;margin-bottom:8px;">图例</div>
+      <div class="legend-item"><div class="legend-color" style="background:#ef4444"></div>碰撞高风险锐角</div>
+      <div class="legend-item"><div class="legend-color" style="background:#f59e0b"></div>中等风险边角</div>
+      <div class="legend-item"><div class="legend-color" style="background:#4ade80;opacity:0.6"></div>建议软包区域</div>
+      <div class="legend-item"><div class="legend-color" style="background:#3b82f6"></div>儿童碰撞体</div>
+      <div class="legend-item"><div class="legend-color" style="background:#a855f7"></div>运动轨迹</div>
+      <div class="legend-item"><div class="legend-color" style="background:#64748b;border:2px dashed #fbbf24"></div>护栏安装位</div>
+    </div>
+    <div id="controls">
+      <button id="toggleSim">⏸ 暂停模拟</button>
+      <button id="toggleTraj">👁 显示轨迹</button>
+      <button id="runAudit">🔍 重新检测</button>
+      <button id="resetView">🎥 重置视角</button>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

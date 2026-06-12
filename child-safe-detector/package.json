@@ -1,0 +1,19 @@
+{
+  "name": "child-safe-detector",
+  "version": "1.0.0",
+  "description": "儿童房安全隐患排查工具 - 基于 Three.js 的碰撞体与包围盒检测",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.160.0",
+    "@types/three": "^0.160.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10"
+  }
+}
