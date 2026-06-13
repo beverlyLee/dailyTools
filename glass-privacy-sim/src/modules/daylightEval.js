@@ -8,14 +8,14 @@ const DEFAULT_ROOM_AREA = 4.0 * 3.5;
 
 function evaluateDaylight(glassType, windowArea, sunDirection, glassPlane, roomArea = DEFAULT_ROOM_AREA) {
   const glass = GLASS_TYPES[glassType];
-  const baseTransmittance = glass.lightTransmittance;
+  const baseTransmittance = Math.min(1.0, Math.max(0.0, glass.lightTransmittance));
 
   const glassNormal = new THREE.Vector3(0, 0, 1);
-  const cosIncidence = Math.abs(sunDirection.dot(glassNormal));
+  const cosIncidence = Math.min(1.0, Math.max(0.0, Math.abs(sunDirection.dot(glassNormal))));
   const angleFactor = cosIncidence;
 
-  const normalLoss = glass.normalStrength * 0.25;
-  const effectiveTransmittance = baseTransmittance * angleFactor * (1.0 - normalLoss);
+  const normalLoss = Math.min(0.9, Math.max(0.0, glass.normalStrength * 0.25));
+  const effectiveTransmittance = Math.min(1.0, Math.max(0.0, baseTransmittance * angleFactor * (1.0 - normalLoss)));
 
   const sampleOrigin = new THREE.Vector3(0, 1.5, 3);
   const refractionResult = computeBatchRefraction(
@@ -24,16 +24,20 @@ function evaluateDaylight(glassType, windowArea, sunDirection, glassPlane, roomA
 
   let scatterLoss = 0;
   if (refractionResult) {
-    scatterLoss = refractionResult.avgLightLoss * 0.15;
+    scatterLoss = Math.min(0.8, Math.max(0.0, refractionResult.avgLightLoss * 0.15));
   }
 
-  const totalTransmittance = Math.max(0, effectiveTransmittance - scatterLoss);
+  const totalTransmittance = Math.min(1.0, Math.max(0.0, effectiveTransmittance - scatterLoss));
 
-  const windowToFloorRatio = windowArea / roomArea;
-  const wallReflectionFactor = 0.35;
-  const daylightFactor = totalTransmittance * windowToFloorRatio * (1.0 + wallReflectionFactor) * 0.06;
+  const safeWindowArea = Math.max(0.01, windowArea);
+  const safeRoomArea = Math.max(0.01, roomArea);
+  const windowToFloorRatio = Math.min(1.0, Math.max(0.0, safeWindowArea / safeRoomArea));
+  const wallReflectionFactor = Math.min(0.9, Math.max(0.0, 0.35));
+  const daylightFactor = Math.min(1.0, Math.max(0.0,
+    totalTransmittance * windowToFloorRatio * (1.0 + wallReflectionFactor) * 0.06
+  ));
 
-  const luxIndoor = OUTDOOR_ILLUMINANCE * daylightFactor;
+  const luxIndoor = Math.max(0, OUTDOOR_ILLUMINANCE * daylightFactor);
   let daylightGrade;
   if (luxIndoor >= 300) daylightGrade = '优秀';
   else if (luxIndoor >= 150) daylightGrade = '良好';
@@ -42,8 +46,9 @@ function evaluateDaylight(glassType, windowArea, sunDirection, glassPlane, roomA
   else daylightGrade = '严重不足';
 
   const needsAuxLight = luxIndoor < 150;
+  const luxDeficit = Math.max(0, Math.round(150 - luxIndoor));
   const auxLightSuggestion = needsAuxLight
-    ? `建议增加 ${Math.round(150 - luxIndoor)} lux 辅助照明`
+    ? `建议增加 ${luxDeficit} lux 辅助照明`
     : '采光充足，无需辅助光源';
 
   return {
@@ -54,8 +59,8 @@ function evaluateDaylight(glassType, windowArea, sunDirection, glassPlane, roomA
     scatterLoss,
     outdoorIlluminance: OUTDOOR_ILLUMINANCE,
     daylightFactor: (daylightFactor * 100).toFixed(2),
-    roomArea,
-    windowArea,
+    roomArea: safeRoomArea,
+    windowArea: safeWindowArea,
     windowToFloorRatio: (windowToFloorRatio * 100).toFixed(1),
     luxIndoor: Math.round(luxIndoor),
     daylightGrade,

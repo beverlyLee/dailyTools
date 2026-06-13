@@ -15,6 +15,8 @@ let privacyDynamicLevel = 0;
 let glassPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 let windowArea = 2.0 * 2.5;
 let sunDirection = new THREE.Vector3(0.3, -0.5, -0.8).normalize();
+let lastAnalysisTime = 0;
+const ANALYSIS_THROTTLE_MS = 80;
 
 function init() {
   scene = new THREE.Scene();
@@ -49,6 +51,8 @@ function init() {
   createGlassWindow();
   createLighting();
   setupUI();
+
+  controls.addEventListener('change', onControlsChange);
 
   updateAnalysis();
 
@@ -289,6 +293,14 @@ function setupUI() {
   });
 }
 
+function onControlsChange() {
+  const now = performance.now();
+  if (now - lastAnalysisTime >= ANALYSIS_THROTTLE_MS) {
+    lastAnalysisTime = now;
+    updateAnalysis();
+  }
+}
+
 function switchGlass(type) {
   scene.remove(glassMesh);
   glassMaterial.dispose();
@@ -317,8 +329,9 @@ function updateAnalysis() {
     min: new THREE.Vector3(-0.3, 0, -1.2),
     max: new THREE.Vector3(0.3, 1.85, -0.4)
   };
-  const observerOrigin = new THREE.Vector3(0, 1.7, 4);
-  const observerDir = new THREE.Vector3(0, 0, -1);
+  const observerOrigin = camera.position.clone();
+  const observerDir = new THREE.Vector3();
+  camera.getWorldDirection(observerDir);
   const privacyResult = performPrivacyCheck(
     observerOrigin, observerDir, glassPlane, humanBounds, currentGlassType
   );
@@ -354,8 +367,8 @@ function updateAnalysis() {
   else silhouetteVisEl.className = 'metric-value danger';
 
   const refractionResult = computeBatchRefraction(
-    new THREE.Vector3(0, 1.5, 3),
-    new THREE.Vector3(0, 0, -1),
+    camera.position.clone(),
+    observerDir.clone(),
     glassPlane,
     currentGlassType,
     32,
@@ -368,11 +381,13 @@ function updateAnalysis() {
 
   blurRadiusEl.textContent = `${glass.blurRadius.toFixed(1)}px`;
 
-  const camAngle = Math.atan2(
-    camera.position.x - 0,
-    camera.position.z - 0
-  ) * 180 / Math.PI;
-  viewAngleEl.textContent = `${Math.abs(camAngle).toFixed(0)}°`;
+  const glassNormal = new THREE.Vector3(0, 0, 1);
+  const camToGlass = new THREE.Vector3().subVectors(
+    new THREE.Vector3(0, 1.25, 0),
+    camera.position
+  ).normalize();
+  const incidenceAngle = Math.acos(Math.min(1, Math.max(-1, camToGlass.dot(glassNormal)))) * 180 / Math.PI;
+  viewAngleEl.textContent = `${incidenceAngle.toFixed(0)}°`;
 
   penetrationProbEl.textContent = `${(privacyResult.penetrationRatio * 100).toFixed(1)}%`;
   if (privacyResult.penetrationRatio <= 0.1) penetrationProbEl.className = 'metric-value safe';
@@ -431,3 +446,9 @@ function onResize() {
 }
 
 init();
+
+window.__glassSim = {
+  get camera() { return camera; },
+  get controls() { return controls; },
+  updateAnalysis
+};

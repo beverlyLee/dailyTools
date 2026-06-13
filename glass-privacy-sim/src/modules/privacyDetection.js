@@ -29,26 +29,20 @@ function createViewCone(origin, direction, halfAngle, rayCount = 24, determinist
 
   rays.push({ origin: origin.clone(), direction: direction.clone() });
 
-  const rng = deterministic
-    ? mulberry32(deterministicHash('cone:' + origin.x.toFixed(2) + ':' + origin.y.toFixed(2)))
-    : null;
-
-  for (let i = 0; i < rayCount - 1; i++) {
-    const theta = (i / (rayCount - 1)) * Math.PI * 2;
-    let phi;
-    if (deterministic) {
-      phi = halfAngle * (0.3 + rng() * 0.7);
-    } else {
-      phi = halfAngle * (0.3 + Math.random() * 0.7);
+  const rings = Math.max(1, Math.floor(Math.sqrt(rayCount / 2)));
+  let idx = 1;
+  for (let ring = 1; ring <= rings; ring++) {
+    const phi = halfAngle * (ring / rings);
+    const raysInRing = Math.max(3, Math.floor((rayCount - 1) / rings));
+    for (let k = 0; k < raysInRing && idx < rayCount; k++, idx++) {
+      const theta = (k / raysInRing) * Math.PI * 2;
+      const rayDir = direction.clone()
+        .add(right.clone().multiplyScalar(Math.sin(phi) * Math.cos(theta)))
+        .add(adjustedUp.clone().multiplyScalar(Math.sin(phi) * Math.sin(theta)))
+        .add(direction.clone().multiplyScalar(Math.cos(phi)));
+      rayDir.normalize();
+      rays.push({ origin: origin.clone(), direction: rayDir });
     }
-
-    const rayDir = direction.clone()
-      .add(right.clone().multiplyScalar(Math.sin(phi) * Math.cos(theta)))
-      .add(adjustedUp.clone().multiplyScalar(Math.sin(phi) * Math.sin(theta)))
-      .add(direction.clone().multiplyScalar(Math.cos(phi)));
-    rayDir.normalize();
-
-    rays.push({ origin: origin.clone(), direction: rayDir });
   }
 
   return rays;
@@ -91,7 +85,7 @@ function isRayBlockedByGlass(origin, direction, glassPlane, glassType, determini
   const intersectionPoint = new THREE.Vector3();
 
   if (!ray.intersectPlane(glassPlane, intersectionPoint)) {
-    return { blocked: false, transparency: 1.0 };
+    return { blocked: false, transparency: 1.0, penetrationProbability: 1.0 };
   }
 
   const toGlass = intersectionPoint.clone().sub(origin);
@@ -99,30 +93,21 @@ function isRayBlockedByGlass(origin, direction, glassPlane, glassType, determini
   const glassNormal = new THREE.Vector3(0, 0, 1);
   const cosAngle = Math.abs(direction.dot(glassNormal));
 
-  const effectiveOpacity = (1.0 - glass.transmission) + glass.normalStrength * 0.6;
-  const viewAngle = Math.acos(cosAngle);
-  const angleFactor = 1.0 + viewAngle * 0.5;
+  const effectiveOpacity = Math.min(1.0, (1.0 - glass.transmission) + glass.normalStrength * 0.5);
+  const viewAngle = Math.acos(Math.min(1, Math.max(-1, cosAngle)));
+  const angleFactor = 1.0 + Math.pow(viewAngle / Math.PI, 1.5) * 1.2;
 
-  const blockedProbability = Math.min(1.0, effectiveOpacity * angleFactor);
-
-  let isBlocked;
-  if (deterministic) {
-    const rng = mulberry32(deterministicHash(
-      'block:' + glassType + ':' + intersectionPoint.x.toFixed(3) + ':' +
-      intersectionPoint.y.toFixed(3) + ':' + seedIndex
-    ));
-    isBlocked = rng() < blockedProbability;
-  } else {
-    isBlocked = Math.random() < blockedProbability;
-  }
+  const blockedProbability = Math.min(0.98, Math.max(0.0, effectiveOpacity * angleFactor));
+  const penetrationProbability = Math.max(0.0, 1.0 - blockedProbability);
 
   return {
-    blocked: isBlocked,
+    blocked: false,
+    penetrationProbability,
+    blockedProbability,
     transparency: glass.transmission * cosAngle,
     intersectionPoint,
     distToGlass,
-    effectiveOpacity,
-    blockedProbability
+    effectiveOpacity
   };
 }
 
@@ -141,7 +126,8 @@ function performPrivacyCheck(
 
   let totalRays = viewCone.length;
   let raysReachingHuman = 0;
-  let raysBlockedByGlass = 0;
+  let weightedPenetration = 0;
+  let weightedBlock = 0;
   let penetrationDistances = [];
   let transparencyValues = [];
 
@@ -149,23 +135,24 @@ function performPrivacyCheck(
     const ray = viewCone[i];
     const glassResult = isRayBlockedByGlass(ray.origin, ray.direction, glassPlane, glassType, deterministic, i);
 
-    if (glassResult.blocked) {
-      raysBlockedByGlass++;
-      continue;
-    }
+    weightedBlock += glassResult.blockedProbability;
 
     const humanHit = rayIntersectsHumanSilhouette(ray, humanBounds);
     if (humanHit) {
       if (!glassResult.intersectionPoint || humanHit.distance > glassResult.distToGlass) {
         raysReachingHuman++;
+        weightedPenetration += glassResult.penetrationProbability;
         penetrationDistances.push(humanHit.distance);
-        transparencyValues.push(glassResult.transparency);
+        transparencyValues.push(glassResult.transparency * glassResult.penetrationProbability);
       }
     }
   }
 
-  const penetrationRatio = raysReachingHuman / totalRays;
-  const blockRatio = raysBlockedByGlass / totalRays;
+  const rawPenetrationRatio = raysReachingHuman / totalRays;
+  const penetrationRatio = Math.min(1.0, Math.max(0.0,
+    rawPenetrationRatio > 0 ? (weightedPenetration / totalRays) / Math.max(0.1, rawPenetrationRatio) * rawPenetrationRatio : 0
+  ));
+  const blockRatio = weightedBlock / totalRays;
 
   const avgTransparency = transparencyValues.length > 0
     ? transparencyValues.reduce((a, b) => a + b, 0) / transparencyValues.length
@@ -175,9 +162,9 @@ function performPrivacyCheck(
   if (penetrationRatio < 0.05) {
     privacyScore = 0.95 + (0.05 - penetrationRatio) * 1.0;
   } else if (penetrationRatio < 0.2) {
-    privacyScore = 0.7 + (0.2 - penetrationRatio) * 1.5;
+    privacyScore = 0.7 + (0.2 - penetrationRatio) * 1.67;
   } else if (penetrationRatio < 0.5) {
-    privacyScore = 0.3 + (0.5 - penetrationRatio) * 1.3;
+    privacyScore = 0.3 + (0.5 - penetrationRatio) * 1.33;
   } else {
     privacyScore = Math.max(0, 0.3 - (penetrationRatio - 0.5) * 0.6);
   }
@@ -203,7 +190,8 @@ function performPrivacyCheck(
     totalRays,
     penetrationDistances,
     glassType,
-    deterministic
+    deterministic,
+    rawPenetrationRatio
   };
 }
 
