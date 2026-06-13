@@ -69,15 +69,22 @@ export class RoomSceneBuilder {
 
   private createWalls(): void {
     const { width, depth, height } = this.dimensions;
-    const wallMaterial = new THREE.MeshStandardMaterial({
+    const solidWallMaterial = new THREE.MeshStandardMaterial({
       color: 0xfdf6e3,
       roughness: 0.9,
       side: THREE.DoubleSide,
     });
+    const transparentWallMaterial = new THREE.MeshStandardMaterial({
+      color: 0xfdf6e3,
+      roughness: 0.9,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.15,
+    });
 
     const backWall = new THREE.Mesh(
       new THREE.PlaneGeometry(width, height),
-      wallMaterial
+      solidWallMaterial
     );
     backWall.position.set(0, height / 2, -depth / 2);
     backWall.name = 'BackWall';
@@ -85,16 +92,15 @@ export class RoomSceneBuilder {
 
     const frontWall = new THREE.Mesh(
       new THREE.PlaneGeometry(width, height),
-      wallMaterial
+      transparentWallMaterial
     );
     frontWall.position.set(0, height / 2, depth / 2);
     frontWall.name = 'FrontWall';
     this.group.add(frontWall);
 
-    const leftWallMaterial = wallMaterial.clone();
     const leftWall = new THREE.Mesh(
       new THREE.PlaneGeometry(depth, height),
-      leftWallMaterial
+      solidWallMaterial
     );
     leftWall.rotation.y = Math.PI / 2;
     leftWall.position.set(-width / 2, height / 2, 0);
@@ -103,7 +109,7 @@ export class RoomSceneBuilder {
 
     const rightWall = new THREE.Mesh(
       new THREE.PlaneGeometry(depth, height),
-      wallMaterial.clone()
+      transparentWallMaterial
     );
     rightWall.rotation.y = -Math.PI / 2;
     rightWall.position.set(width / 2, height / 2, 0);
@@ -141,6 +147,8 @@ export class RoomSceneBuilder {
       color: 0xffffff,
       roughness: 0.95,
       side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.15,
     });
     const ceiling = new THREE.Mesh(geometry, material);
     ceiling.rotation.x = Math.PI / 2;
@@ -304,7 +312,9 @@ export class RoomSceneBuilder {
     glass.position.set(0, winY, -winZOffset);
 
     bayGroup.add(seatGroup, cushion, topFrame, bottomFrame, leftFrame, rightFrame, glass);
-    bayGroup.position.set(-this.dimensions.width / 2 + seatDepth / 2 + 0.2, 0, 0);
+    const margin = 0.15;
+    const bayX = -this.dimensions.width / 2 + seatWidth / 2 + margin;
+    bayGroup.position.set(bayX, 0, 0);
     bayGroup.userData = { isWindow: true, isBayWindow: true };
 
     this.group.add(bayGroup);

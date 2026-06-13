@@ -181,40 +181,34 @@ class ChildSafeDetectorApp {
 
       if (cornerAlertsEl) {
         cornerAlertsEl.innerHTML = '';
-        if (highRiskCount > 0) {
-          const seenNames = new Set<string>();
-          for (const corner of this.sharpCornerResult.corners) {
-            if (corner.riskLevel !== 'high') continue;
-            const name = corner.objectName || '家具';
-            if (seenNames.has(name)) continue;
-            seenNames.add(name);
-            const heightCm = (corner.height * 100).toFixed(0);
-            const alert = document.createElement('div');
-            alert.className = 'alert';
-            alert.innerHTML = `🔴 ${name}边角高度${heightCm}cm，碰撞风险高，建议倒圆角或加装防撞条`;
-            cornerAlertsEl.appendChild(alert);
-          }
-        }
-        if (mediumRiskCount > 0) {
+        const seenNames = new Set<string>();
+        for (const corner of this.sharpCornerResult.corners) {
+          if (corner.riskLevel !== 'high' && corner.riskLevel !== 'medium') continue;
+          const name = corner.objectName || '家具';
+          if (seenNames.has(name)) continue;
+          seenNames.add(name);
+          const heightCm = (corner.height * 100).toFixed(0);
+          const angleDeg = (corner.angle * 180 / Math.PI).toFixed(0);
           const alert = document.createElement('div');
-          alert.className = 'alert warn';
-          alert.textContent = '🟡 存在中等风险边角，建议评估后加装防护';
+          alert.className = corner.riskLevel === 'high' ? 'alert' : 'alert warn';
+          alert.innerHTML = `🔴 ${name}边角高度${heightCm}cm，碰撞风险高，建议倒圆角或加装防撞条`;
           cornerAlertsEl.appendChild(alert);
         }
       }
     }
 
     if (this.paddingResult) {
-      const { totalArea, estimatedCost, highRiskCount, suggestions } = this.paddingResult;
+      const { totalArea, estimatedCost, suggestions } = this.paddingResult;
       const paddingAreaEl = this.hudElements['paddingArea'];
       const paddingAlertsEl = this.hudElements['paddingAlerts'];
+      const hasSuggestions = suggestions.length > 0;
 
       paddingAreaEl.innerHTML =
-        highRiskCount > 0
+        hasSuggestions
           ? `建议软包覆盖 <b>${(totalArea * 10000).toFixed(1)} cm²</b>`
           : `<span class="safe">✅ 无需额外软包</span>`;
 
-      if (paddingAlertsEl && suggestions.length > 0) {
+      if (paddingAlertsEl && hasSuggestions) {
         paddingAlertsEl.innerHTML = '';
 
         const costAlert = document.createElement('div');
@@ -236,6 +230,8 @@ class ChildSafeDetectorApp {
         typeAlert.className = 'alert ok';
         typeAlert.innerHTML = `🛠 方案：${typeText}`;
         paddingAlertsEl.appendChild(typeAlert);
+      } else if (paddingAlertsEl && !hasSuggestions) {
+        paddingAlertsEl.innerHTML = '';
       }
     }
 

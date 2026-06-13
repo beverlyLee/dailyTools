@@ -272,11 +272,8 @@ export class SharpCornerDetector {
   ): 'high' | 'medium' | 'low' {
     const angleDeg = (angle * 180) / Math.PI;
 
-    const headZoneMin = 0.7;
-    const inHeadZone = worldPos.y >= headZoneMin && worldPos.y <= childHeightRange.max;
-
     if (angleDeg < 90) {
-      return inHeadZone ? 'high' : 'medium';
+      return 'high';
     }
 
     if (angleDeg < 100) {
