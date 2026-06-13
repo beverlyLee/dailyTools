@@ -59,30 +59,18 @@ export class SoftPaddingSystem {
       const corner = corners[0];
       const mesh = corner.mesh;
 
-      if (corners.length >= 3) {
+      const box = new THREE.Box3().setFromObject(mesh);
+      const boxSize = new THREE.Vector3();
+      box.getSize(boxSize);
+      const meshHeight = boxSize.y;
+      const isShortFurniture = meshHeight < 0.5;
+
+      if (corners.length >= 3 && !isShortFurniture) {
         const result = this.applyFullWrap(mesh, corners);
         if (result) {
-          this.suggestions.push(...result.suggestions);
+          this.suggestions.push(result.suggestion);
           totalArea += result.area;
           totalCost += result.cost;
-        }
-      } else if (corners.length === 2) {
-        for (const c of corners) {
-          const result = this.applyCornerGuard(c);
-          if (result) {
-            this.suggestions.push(result);
-            totalArea += result.area;
-            totalCost += this.calculateSuggestionCost(result);
-          }
-        }
-        const edges = this.detectDangerousEdges(mesh, corners);
-        for (const edge of edges) {
-          const result = this.applyEdgeTrim(edge.start, edge.end, mesh);
-          if (result) {
-            this.suggestions.push(result);
-            totalArea += result.area;
-            totalCost += this.calculateSuggestionCost(result);
-          }
         }
       } else {
         for (const c of corners) {
@@ -91,6 +79,17 @@ export class SoftPaddingSystem {
             this.suggestions.push(result);
             totalArea += result.area;
             totalCost += this.calculateSuggestionCost(result);
+          }
+        }
+        if (corners.length >= 2) {
+          const edges = this.detectDangerousEdges(mesh, corners);
+          for (const edge of edges) {
+            const result = this.applyEdgeTrim(edge.start, edge.end, mesh);
+            if (result) {
+              this.suggestions.push(result);
+              totalArea += result.area;
+              totalCost += this.calculateSuggestionCost(result);
+            }
           }
         }
       }
@@ -184,7 +183,7 @@ export class SoftPaddingSystem {
   private applyFullWrap(
     mesh: THREE.Object3D,
     corners: DetectedCorner[]
-  ): { suggestions: PaddingSuggestion[]; area: number; cost: number } | null {
+  ): { suggestion: PaddingSuggestion; area: number; cost: number } | null {
     const box = new THREE.Box3().setFromObject(mesh);
     const size = new THREE.Vector3();
     box.getSize(size);
@@ -225,18 +224,19 @@ export class SoftPaddingSystem {
     const area = 2 * (size.x * size.y + size.y * size.z + size.x * size.z);
     const cost = area * SoftPaddingSystem.MATERIAL_COST_PER_SQ_M;
 
-    const suggestions: PaddingSuggestion[] = corners.map((c) => ({
-      objectName: c.objectName,
-      cornerPosition: c.position.clone(),
+    const firstCorner = corners[0];
+    const suggestion: PaddingSuggestion = {
+      objectName: firstCorner.objectName,
+      cornerPosition: firstCorner.position.clone(),
       paddingMesh: padding,
       paddingType: 'full_wrap',
-      area: area / corners.length,
+      area,
       thickness,
-      materialCost: cost / corners.length,
+      materialCost: cost,
       installationAdvice: '建议整体包裹软包海绵（厚度≥2cm），外包皮革或布艺',
-    }));
+    };
 
-    return { suggestions, area, cost };
+    return { suggestion, area, cost };
   }
 
   private detectDangerousEdges(

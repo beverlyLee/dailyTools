@@ -27,7 +27,7 @@ echo ""
 
 # 1. 移动到工程目录
 echo "➡️  切换到工程目录..."
-cd "$PROJECT_PATH" || {
+cd "$PROJECT_PATH" 2>&1 || {
     echo "❌ 工程目录不存在: $PROJECT_PATH"
     exit 1
 }
@@ -43,9 +43,23 @@ fi
 echo "✅ 确认是 git 仓库"
 echo ""
 
-# 3. 检查是否有更改
+# 3. 检查 git 配置
+echo "🔍 检查 git 配置..."
+GIT_USER_NAME=$(git config user.name 2>&1)
+GIT_USER_EMAIL=$(git config user.email 2>&1)
+if [ -z "$GIT_USER_NAME" ] || [ -z "$GIT_USER_EMAIL" ]; then
+    echo "❌ Git 用户配置未设置"
+    echo "请先执行以下命令配置 Git 用户："
+    echo "  git config --global user.name \"你的名字\""
+    echo "  git config --global user.email \"你的邮箱\""
+    exit 1
+fi
+echo "✅ 用户: $GIT_USER_NAME <$GIT_USER_EMAIL>"
+echo ""
+
+# 4. 检查是否有更改
 echo "🔍 检查文件更改..."
-CHANGED_FILES=$(git status --porcelain)
+CHANGED_FILES=$(git status --porcelain 2>&1)
 if [ -z "$CHANGED_FILES" ]; then
     echo "ℹ️  没有需要提交的更改"
     exit 0
@@ -56,27 +70,32 @@ echo "$CHANGED_FILES" | while read -r line; do
 done
 echo ""
 
-# 4. 执行 git add .
+# 5. 执行 git add .
 echo "➕ 执行 git add . ..."
-git add . || {
+git add . 2>&1 || {
     echo "❌ git add 失败"
     exit 1
 }
 echo "✅ 已添加所有文件到暂存区"
 echo ""
 
-# 5. 执行 git commit
+# 6. 执行 git commit
 echo "📝 执行 git commit ..."
-git commit -m "$COMMIT_MESSAGE" || {
-    echo "❌ git commit 失败"
-    exit 1
-}
+COMMIT_OUTPUT=$(git commit -m "$COMMIT_MESSAGE" 2>&1)
+COMMIT_EXIT_CODE=$?
+if [ $COMMIT_EXIT_CODE -ne 0 ]; then
+    echo "❌ git commit 失败 (退出码: $COMMIT_EXIT_CODE)"
+    echo "📋 错误输出:"
+    echo "$COMMIT_OUTPUT"
+    exit $COMMIT_EXIT_CODE
+fi
+echo "$COMMIT_OUTPUT"
 echo ""
 
-# 6. 获取 commit id
-COMMIT_ID=$(git rev-parse HEAD)
+# 7. 获取 commit id
+COMMIT_ID=$(git rev-parse HEAD 2>&1)
 echo "🎉 提交成功！"
 echo "✅ Commit ID: $COMMIT_ID"
 echo ""
 echo "📋 提交信息:"
-git log -1 --oneline
+git log -1 --oneline 2>&1

@@ -250,11 +250,13 @@ export class RoomSceneBuilder {
     const seatDepth = 0.7;
 
     const seatGroup = new THREE.Group();
+    seatGroup.name = 'BayWindowSeat';
 
     const seatTop = new THREE.Mesh(
       new THREE.BoxGeometry(seatWidth, 0.05, seatDepth),
       new THREE.MeshStandardMaterial({ color: 0xd4a574, roughness: 0.7 })
     );
+    seatTop.name = 'BayWindowTabletop';
     seatTop.position.y = seatHeight;
     seatTop.userData = { isFurniture: true };
     this.furnitureObjects.push(seatTop);
@@ -263,6 +265,7 @@ export class RoomSceneBuilder {
       new THREE.BoxGeometry(seatWidth, seatHeight - 0.05, seatDepth),
       new THREE.MeshStandardMaterial({ color: 0xc4956a, roughness: 0.8 })
     );
+    seatBody.name = 'BayWindowBase';
     seatBody.position.y = (seatHeight - 0.05) / 2;
 
     seatGroup.add(seatTop, seatBody);
@@ -345,6 +348,7 @@ export class RoomSceneBuilder {
       new THREE.BoxGeometry(topWidth, topHeight, topDepth),
       woodMaterial
     );
+    tableTop.name = 'CoffeeTable';
     tableTop.position.y = tableHeight;
     tableTop.userData = { isFurniture: true };
     this.furnitureObjects.push(tableTop);
@@ -400,6 +404,7 @@ export class RoomSceneBuilder {
       new THREE.BoxGeometry(bedWidth, frameHeight, bedLength),
       frameMaterial
     );
+    bedFrame.name = 'ChildBed';
     bedFrame.position.y = frameHeight / 2;
     bedFrame.userData = { isFurniture: true };
     this.furnitureObjects.push(bedFrame);
@@ -461,6 +466,7 @@ export class RoomSceneBuilder {
       new THREE.BoxGeometry(width, height, depth),
       woodMaterial
     );
+    body.name = 'Wardrobe';
     body.position.y = height / 2;
     body.userData = { isFurniture: true };
     this.furnitureObjects.push(body);
@@ -526,6 +532,7 @@ export class RoomSceneBuilder {
         new THREE.BoxGeometry(width - 0.06, shelfThickness, depth - 0.02),
         woodMaterial.clone()
       );
+      shelf.name = 'Bookshelf';
       const y = shelfSpacing * i + shelfThickness / 2;
       shelf.position.set(0, y, 0);
       shelf.userData = { isFurniture: true };
@@ -583,6 +590,7 @@ export class RoomSceneBuilder {
       new THREE.BoxGeometry(width, height * 0.85, depth),
       bodyMaterial
     );
+    body.name = 'ToyChest';
     body.position.y = height * 0.85 / 2;
     body.userData = { isFurniture: true };
     this.furnitureObjects.push(body);
@@ -591,6 +599,7 @@ export class RoomSceneBuilder {
       new THREE.BoxGeometry(width, height * 0.18, depth),
       lidMaterial
     );
+    lid.name = 'ToyChestLid';
     lid.position.y = height * 0.85 + height * 0.09;
     lid.userData = { isFurniture: true };
     this.furnitureObjects.push(lid);
@@ -619,6 +628,7 @@ export class RoomSceneBuilder {
       new THREE.BoxGeometry(seatSize, seatHeight, seatSize),
       material
     );
+    seat.name = 'SmallStool';
     seat.position.y = totalHeight;
     seat.userData = { isFurniture: true };
     this.furnitureObjects.push(seat);

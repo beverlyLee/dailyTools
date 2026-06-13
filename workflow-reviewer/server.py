@@ -939,22 +939,31 @@ async def git_commit(request: GitCommitRequest):
 
             output = result.stdout.strip()
             error_output = result.stderr.strip()
+            returncode = result.returncode
             commit_id = None
 
             match = re.search(r'Commit ID:\s*([a-f0-9]+)', output)
             if match:
                 commit_id = match.group(1)
 
-            if commit_id:
-                return {"success": True, "commit_id": commit_id, "output": output, "status": 200}
-
-            if "没有需要提交的更改" in output or "no changes added to commit" in output:
-                return {"success": True, "commit_id": None, "output": output, "status": 200}
+            if returncode == 0:
+                if commit_id:
+                    return {"success": True, "commit_id": commit_id, "output": output, "status": 200}
+                if "没有需要提交的更改" in output or "no changes added to commit" in output:
+                    return {"success": True, "commit_id": None, "output": output, "status": 200}
 
             full_output = output
             if error_output:
-                full_output += "\n" + error_output
-            return {"error": "提交失败", "output": full_output, "commit_id": None, "status": 500}
+                full_output += ("\n\n[STDERR]\n" + error_output if full_output else error_output)
+
+            return {
+                "success": False,
+                "error": f"提交失败（退出码: {returncode}）",
+                "output": full_output,
+                "returncode": returncode,
+                "commit_id": None,
+                "status": 500
+            }
 
         except subprocess.TimeoutExpired:
             return {"error": "提交超时（120秒）", "status": 500}

@@ -6,6 +6,38 @@
     <title>验证工作流</title>
     <link rel="stylesheet" href="styles.css">
     <script>
+    function setFieldWritten(contentEl, fieldKey) {
+        if (!contentEl || !fieldKey) return;
+        const labelEl = contentEl.querySelector('label[data-field-label="' + fieldKey + '"]');
+        if (!labelEl) return;
+        let badge = labelEl.querySelector('.field-written-badge');
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'field-written-badge';
+            badge.textContent = '✅ 已写入';
+            labelEl.appendChild(badge);
+        }
+    }
+    
+    function clearFieldWritten(contentEl, fieldKey) {
+        if (!contentEl || !fieldKey) return;
+        const labelEl = contentEl.querySelector('label[data-field-label="' + fieldKey + '"]');
+        if (!labelEl) return;
+        const badge = labelEl.querySelector('.field-written-badge');
+        if (badge) badge.remove();
+    }
+    
+    function __bindFieldChangeListener(contentEl, fieldKey, inputEl) {
+        if (!contentEl || !fieldKey || !inputEl) return;
+        if (inputEl.__fieldChangeListenerBound) return;
+        inputEl.__fieldChangeListenerBound = true;
+        const handler = function() { clearFieldWritten(contentEl, fieldKey); };
+        inputEl.addEventListener('input', handler);
+        inputEl.addEventListener('change', handler);
+        inputEl.addEventListener('paste', handler);
+        inputEl.addEventListener('cut', handler);
+    }
+    
     // 内联全局函数 - 写入日志轨迹（不依赖main.js，确保一定能执行）
     window.__writeLogTrace = function(btn) {
         console.log('🔍 [写入日志轨迹] ===== 按钮被点击 =====');
@@ -110,6 +142,8 @@
         .then(function(result) {
             console.log('🔍 [写入日志轨迹] 接口返回:', result);
             if (result.success) {
+                setFieldWritten(contentEl, 'currentProcess');
+                setFieldWritten(contentEl, 'roundNum');
                 if (result.is_new) {
                     alert('✅ 写入成功（新建记录）');
                 } else {
@@ -237,6 +271,11 @@
         .then(function(result) {
             console.log('📤 [一键写入第一步] 接口返回:', result);
             if (result.success) {
+                setFieldWritten(contentEl, 'wpsSessionValue');
+                setFieldWritten(contentEl, 'wpsCommitId');
+                setFieldWritten(contentEl, 'stage');
+                setFieldWritten(contentEl, 'currentProcess');
+                setFieldWritten(contentEl, 'roundNum');
                 if (result.is_new) {
                     alert('✅ 一键写入成功（新建记录）\n\n' +
                         '• Session ID: ' + sessionId.substring(0, 20) + '...\n' +
@@ -961,6 +1000,38 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🔍 [内联初始化] DOMContentLoaded 触发');
         
+        // ===== 字段变更事件委托：清除"已写入"标记 =====
+        const fieldClassToKey = {
+            'field-wpsSessionValue': 'wpsSessionValue',
+            'field-wpsCommitId': 'wpsCommitId',
+            'field-stage': 'stage',
+            'field-currentProcess': 'currentProcess',
+            'field-roundNum': 'roundNum',
+            'field-dissatisfyRaw': 'dissatisfyRaw',
+            'field-dissatisfyResult': 'dissatisfyResult',
+            'field-promptRaw': 'promptRaw',
+            'field-promptResult': 'promptResult',
+            'field-testReportRaw': 'testReportRaw'
+        };
+        
+        function handleFieldChange(e) {
+            const target = e.target;
+            if (!target || !target.classList) return;
+            const contentEl = target.closest('[data-project-id]');
+            if (!contentEl) return;
+            for (const cls of Object.keys(fieldClassToKey)) {
+                if (target.classList.contains(cls)) {
+                    clearFieldWritten(contentEl, fieldClassToKey[cls]);
+                    break;
+                }
+            }
+        }
+        
+        document.addEventListener('input', handleFieldChange);
+        document.addEventListener('change', handleFieldChange);
+        document.addEventListener('paste', handleFieldChange);
+        document.addEventListener('cut', handleFieldChange);
+        
         // ===== 事件委托：所有按钮点击都能捕获到 =====
         document.addEventListener('click', function(e) {
             const btn = e.target.closest('button');
@@ -1206,17 +1277,17 @@
                         <div class="step-body">
                             <div class="form-row">
                                 <div class="form-group half">
-                                    <label for="roundNum">当前轮次</label>
+                                    <label for="roundNum" data-field-label="roundNum">当前轮次</label>
                                     <input type="number" class="field-roundNum" value="1" min="1" max="99">
                                 </div>
                                 <div class="form-group half">
-                                    <label for="stage">阶段描述</label>
+                                    <label for="stage" data-field-label="stage">阶段描述</label>
                                     <textarea class="field-stage" rows="2" placeholder="如：物理碰撞检测" autocomplete="off"></textarea>
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label>本轮过程 <span class="hint">（可选，记录本轮开发过程，用于测试验收）</span></label>
+                                <label data-field-label="currentProcess">本轮过程 <span class="hint">（可选，记录本轮开发过程，用于测试验收）</span></label>
                                 <textarea class="field-currentProcess" rows="5" placeholder="记录本轮的开发过程，如：修改了哪些文件、实现了哪些功能、遇到的问题等..."></textarea>
                             </div>
                             <div class="form-row" style="margin-top: -8px; margin-bottom: 16px;">
@@ -1277,11 +1348,11 @@
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group half">
-                                            <label>Session ID</label>
+                                            <label data-field-label="wpsSessionValue">Session ID</label>
                                             <input type="text" class="field-wpsSessionValue" placeholder="输入 sessionid" autocomplete="off">
                                         </div>
                                         <div class="form-group half">
-                                            <label>Commit ID</label>
+                                            <label data-field-label="wpsCommitId">Commit ID</label>
                                             <input type="text" class="field-wpsCommitId" placeholder="输入 Commit ID" autocomplete="off">
                                         </div>
                                     </div>
@@ -1336,7 +1407,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label>粘贴完整测试报告</label>
+                                    <label data-field-label="testReportRaw">粘贴完整测试报告</label>
                                     <textarea class="field-testReportRaw" rows="8" placeholder="粘贴完整的测试报告（包含验收结论、归因诊断、下一轮 Prompt 等）..."></textarea>
                                 </div>
                                 <div class="hint" style="font-size: 12px; color: #888; margin-top: -8px; margin-bottom: 8px;">
@@ -1354,11 +1425,11 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label>原始不满意原因</label>
+                                    <label data-field-label="dissatisfyRaw">原始不满意原因</label>
                                     <textarea class="field-dissatisfyRaw" rows="8" placeholder="粘贴包含产物不满意和过程不满意的原始文本..."></textarea>
                                 </div>
                                 <div class="form-group">
-                                    <label>处理后不满意原因（可编辑）</label>
+                                    <label data-field-label="dissatisfyResult">处理后不满意原因（可编辑）</label>
                                     <textarea class="field-dissatisfyResult" rows="5" placeholder="点击「提取精简」按钮生成处理后的内容..."></textarea>
                                 </div>
                             </div>
@@ -1373,11 +1444,11 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label>原始下一轮 Prompt</label>
+                                    <label data-field-label="promptRaw">原始下一轮 Prompt</label>
                                     <textarea class="field-promptRaw" rows="8" placeholder="粘贴包含任务1、任务2...的下一轮 Prompt 原始文本..."></textarea>
                                 </div>
                                 <div class="form-group">
-                                    <label>提取后 Prompt（可编辑）</label>
+                                    <label data-field-label="promptResult">提取后 Prompt（可编辑）</label>
                                     <textarea class="field-promptResult" rows="5" placeholder="点击「提取精简」按钮生成精简后的 Prompt..."></textarea>
                                 </div>
                             </div>

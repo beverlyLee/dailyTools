@@ -147,7 +147,7 @@ export class SharpCornerDetector {
         angle,
         height: worldPos.y,
         riskLevel,
-        objectName: mesh.name || mesh.parent?.name || 'Unknown',
+        objectName: this.getObjectName(mesh),
         edgeVectors: { v1, v2 },
         faces,
         mesh,
@@ -264,6 +264,17 @@ export class SharpCornerDetector {
     return `${pos.x.toFixed(precision)}-${pos.y.toFixed(precision)}-${pos.z.toFixed(precision)}`;
   }
 
+  private getObjectName(mesh: THREE.Object3D): string {
+    let current: THREE.Object3D | null = mesh;
+    while (current) {
+      if (current.name && current.name.length > 0) {
+        return current.name;
+      }
+      current = current.parent;
+    }
+    return 'Unknown';
+  }
+
   private classifyRisk(
     angle: number,
     worldPos: THREE.Vector3,
@@ -272,8 +283,12 @@ export class SharpCornerDetector {
   ): 'high' | 'medium' | 'low' {
     const angleDeg = (angle * 180) / Math.PI;
 
+    const coreZoneMin = 0.2;
+    const coreZoneMax = childHeightRange.max;
+    const inCoreZone = worldPos.y >= coreZoneMin && worldPos.y <= coreZoneMax;
+
     if (angleDeg < 90) {
-      return 'high';
+      return inCoreZone ? 'high' : 'medium';
     }
 
     if (angleDeg < 100) {

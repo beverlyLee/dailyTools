@@ -2082,6 +2082,8 @@ async function gitCommit(project, fields) {
     fields.gitCommitBtn.disabled = true;
     fields.gitCommitBtn.textContent = '📝 提交中...';
     
+    let lastResult = null;
+    
     try {
         const response = await fetch('/api/git-commit', {
             method: 'POST',
@@ -2093,9 +2095,12 @@ async function gitCommit(project, fields) {
         });
         
         const result = await response.json();
+        lastResult = result;
         
         if (!response.ok) {
-            throw new Error(result.error || result.output || '提交失败');
+            const err = new Error(result.error || result.output || '提交失败');
+            err.detailOutput = result.output || '';
+            throw err;
         }
         
         fields.gitOutput.textContent = '$ ' + commands.join('\n$ ') + '\n\n' + (result.output || '');
@@ -2121,7 +2126,15 @@ async function gitCommit(project, fields) {
         console.error('Git commit error:', error);
         fields.gitCommitId.textContent = '提交失败';
         fields.gitCommitId.style.color = '#ef4444';
-        fields.gitOutput.textContent += '\n❌ ' + error.message;
+        const detailOutput = error.detailOutput || lastResult?.output || '';
+        if (detailOutput) {
+            fields.gitOutput.textContent = '$ ' + commands.join('\n$ ') + '\n\n' + detailOutput + '\n\n❌ ' + error.message;
+        } else {
+            fields.gitOutput.textContent += '\n❌ ' + error.message;
+        }
+        fields.gitOutput.scrollTop = fields.gitOutput.scrollHeight;
+        const errMsg = detailOutput ? `${error.message}\n\n${detailOutput.substring(0, 1500)}` : error.message;
+        setTimeout(() => alert(`❌ Git 提交失败\n\n${errMsg}`), 50);
         showToast(`❌ 提交失败: ${error.message}`);
     } finally {
         fields.gitCommitBtn.disabled = false;
@@ -2467,6 +2480,36 @@ async function writeToWps(project, fields, fieldsData) {
         console.log('📝 [writeToWps] 接口返回:', result);
 
         if (result.success) {
+            if (typeof setFieldWritten === 'function') {
+                const wpsColumnToFieldKey = {
+                    'Trae Session ID': 'wpsSessionValue',
+                    'commit id': 'wpsCommitId',
+                    'User Prompt': 'stage',
+                    '日志轨迹': 'currentProcess',
+                    '轮次': 'roundNum',
+                    '不满意原因': 'dissatisfyResult',
+                    'AI审核意见': 'promptResult'
+                };
+                let contentEl = null;
+                const fieldSelectors = ['currentProcess', 'roundNum', 'stage', 'wpsSessionValue', 'wpsCommitId', 'dissatisfyResult', 'promptResult'];
+                for (const sel of fieldSelectors) {
+                    const fieldName = 'field-' + sel;
+                    const el = Object.values(fields).find(f => f && f.classList && f.classList.contains(fieldName)) ||
+                               fields[sel];
+                    if (el && el.closest) {
+                        contentEl = el.closest('[data-project-id]');
+                        if (contentEl) break;
+                    }
+                }
+                if (contentEl) {
+                    for (const colName of Object.keys(finalFields)) {
+                        const fieldKey = wpsColumnToFieldKey[colName];
+                        if (fieldKey) {
+                            setFieldWritten(contentEl, fieldKey);
+                        }
+                    }
+                }
+            }
             if (result.is_new) {
                 showToast('✅ 写入成功（新建记录）');
             } else {
