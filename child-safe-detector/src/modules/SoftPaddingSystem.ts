@@ -66,7 +66,7 @@ export class SoftPaddingSystem {
           totalArea += result.area;
           totalCost += result.cost;
         }
-      } else {
+      } else if (corners.length === 2) {
         for (const c of corners) {
           const result = this.applyCornerGuard(c);
           if (result) {
@@ -75,15 +75,23 @@ export class SoftPaddingSystem {
             totalCost += this.calculateSuggestionCost(result);
           }
         }
-      }
-
-      const edges = this.detectDangerousEdges(mesh, corners);
-      for (const edge of edges) {
-        const result = this.applyEdgeTrim(edge.start, edge.end, mesh);
-        if (result) {
-          this.suggestions.push(result);
-          totalArea += result.area;
-          totalCost += this.calculateSuggestionCost(result);
+        const edges = this.detectDangerousEdges(mesh, corners);
+        for (const edge of edges) {
+          const result = this.applyEdgeTrim(edge.start, edge.end, mesh);
+          if (result) {
+            this.suggestions.push(result);
+            totalArea += result.area;
+            totalCost += this.calculateSuggestionCost(result);
+          }
+        }
+      } else {
+        for (const c of corners) {
+          const result = this.applyCornerGuard(c);
+          if (result) {
+            this.suggestions.push(result);
+            totalArea += result.area;
+            totalCost += this.calculateSuggestionCost(result);
+          }
         }
       }
     }

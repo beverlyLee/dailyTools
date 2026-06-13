@@ -49,6 +49,8 @@ export class SharpCornerDetector {
     for (const obj of sceneObjects) {
       if (!obj.userData.isFurniture) continue;
 
+      obj.updateMatrixWorld(true);
+
       obj.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           const detected = this.analyzeMeshCorners(
@@ -271,16 +273,13 @@ export class SharpCornerDetector {
     const angleDeg = (angle * 180) / Math.PI;
 
     const headZoneMin = 0.7;
-    const headZoneMax = childHeightRange.max;
-    const inHeadZone = worldPos.y >= headZoneMin && worldPos.y <= headZoneMax;
+    const inHeadZone = worldPos.y >= headZoneMin && worldPos.y <= childHeightRange.max;
 
     if (angleDeg < 90) {
-      if (inHeadZone) return 'high';
-      return 'high';
+      return inHeadZone ? 'high' : 'medium';
     }
 
     if (angleDeg < 100) {
-      if (inHeadZone) return 'medium';
       return 'medium';
     }
 
