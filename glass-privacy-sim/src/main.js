@@ -446,9 +446,3 @@ function onResize() {
 }
 
 init();
-
-window.__glassSim = {
-  get camera() { return camera; },
-  get controls() { return controls; },
-  updateAnalysis
-};
