@@ -8,6 +8,7 @@ import type {
   LightingConfig,
   LightingAnalysis
 } from '../types'
+import { SeededRandom } from './seededRandom'
 
 const STANDARD_SEAT_HEIGHT = 42
 const MAX_COMFORT_SILL = 45
@@ -275,6 +276,7 @@ export function calculateLightingAnalysis(
 
   const gridSize = 10
   const windowCoverageMap: number[][] = []
+  const coverageRng = new SeededRandom(`coverage-${windowWidth}-${windowHeight}-${Math.round(totalShadowRatio * 100)}`)
   for (let y = 0; y < gridSize; y++) {
     const row: number[] = []
     for (let x = 0; x < gridSize; x++) {
@@ -286,7 +288,7 @@ export function calculateLightingAnalysis(
       } else if (normalizedY < totalShadowRatio) {
         coverage = 0.7 - ((normalizedY - totalShadowRatio * 0.5) / (totalShadowRatio * 0.5)) * 0.4
       } else {
-        coverage = 0.1 + Math.random() * 0.1
+        coverage = 0.1 + coverageRng.next() * 0.1
       }
 
       row.push(Math.round(coverage * 100) / 100)

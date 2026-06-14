@@ -1,10 +1,11 @@
 import { useMemo } from 'react'
-import type { BayWindowConfig, StorageConfig, StorageDrawer } from '../../types'
+import type { BayWindowConfig, StorageConfig, StorageDrawer, StorageAnalysis as StorageAnalysisType } from '../../types'
 import { toMeters } from '../../utils/calculations'
 
 interface StorageBoxVisualizationProps {
   bayConfig: BayWindowConfig
   storageConfig: StorageConfig
+  storageAnalysis: StorageAnalysisType
   animateDrawers: boolean
   drawerMaterial: string
 }
@@ -12,40 +13,26 @@ interface StorageBoxVisualizationProps {
 export function StorageBoxVisualization({
   bayConfig,
   storageConfig,
+  storageAnalysis,
   animateDrawers,
   drawerMaterial
 }: StorageBoxVisualizationProps) {
   const SH = toMeters(bayConfig.sillHeight)
   const SD = toMeters(bayConfig.sillDepth)
 
-  const conflictedDrawers = useMemo(() => {
+  const conflictedDrawerIds = useMemo(() => {
     const ids = new Set<string>()
-    if (bayConfig.hasCurtainBox && storageConfig.enabled) {
-      storageConfig.drawers.forEach(d => {
-        const openDepth = d.depth * 0.8
-        if (openDepth > bayConfig.curtainBoxDepth - 2) {
-          ids.add(d.id)
-        }
-      })
-    }
-    if (bayConfig.hasRadiator && storageConfig.enabled) {
-      const radStartX = bayConfig.radiatorOffsetX - bayConfig.radiatorWidth / 2
-      const radEndX = bayConfig.radiatorOffsetX + bayConfig.radiatorWidth / 2
-      storageConfig.drawers.forEach(d => {
-        const dStartX = d.x - d.width / 2
-        const dEndX = d.x + d.width / 2
-        const xOverlap = Math.max(0, Math.min(dEndX, radEndX) - Math.max(dStartX, radStartX))
-        if (xOverlap > 0 && d.depth > bayConfig.radiatorDepth + 2) {
-          ids.add(d.id)
-        }
-      })
-    }
+    storageAnalysis.conflicts.forEach(c => {
+      ids.add(c.drawerId)
+    })
     return ids
-  }, [bayConfig, storageConfig])
+  }, [storageAnalysis.conflicts])
 
   if (!storageConfig.enabled || storageConfig.drawers.length === 0) {
     return null
   }
+
+  const hasAnyConflict = storageAnalysis.hasConflicts
 
   return (
     <group position={[0, 0, -SD / 2]}>
@@ -55,15 +42,14 @@ export function StorageBoxVisualization({
           toMeters(storageConfig.drawerHeight * storageConfig.drawers.length) + 0.02,
           toMeters(storageConfig.drawerDepth) + 0.02
         ]} />
-        <meshStandardMaterial color="#e8dcc8" roughness={0.8} />
+        <meshStandardMaterial color={hasAnyConflict ? '#fde2e2' : '#e8dcc8'} roughness={0.8} />
       </mesh>
 
       {storageConfig.drawers.map((drawer, idx) => {
+        const isConflicted = conflictedDrawerIds.has(drawer.id)
         const openOffset = animateDrawers
-          ? (conflictedDrawers.has(drawer.id) ? 0.02 : toMeters(drawer.depth) * 0.6)
+          ? (isConflicted ? 0.02 : toMeters(drawer.depth) * 0.6)
           : 0
-
-        const isConflicted = conflictedDrawers.has(drawer.id)
 
         return (
           <DrawerUnit
@@ -78,7 +64,7 @@ export function StorageBoxVisualization({
         )
       })}
 
-      {animateDrawers && Array.from(conflictedDrawers).length > 0 && (
+      {animateDrawers && hasAnyConflict && (
         <mesh position={[0, SH / 2, toMeters(bayConfig.sillDepth) / 2 + 0.1]}>
           <boxGeometry args={[toMeters(bayConfig.windowWidth), SH, 0.01]} />
           <meshBasicMaterial color="#ef4444" transparent opacity={0.15} />

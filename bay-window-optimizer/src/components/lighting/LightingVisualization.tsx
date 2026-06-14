@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import * as THREE from 'three'
 import type { BayWindowConfig, LightingAnalysis as LightingAnalysisType } from '../../types'
 import { toMeters } from '../../utils/calculations'
+import { SeededRandom } from '../../utils/seededRandom'
 
 interface LightingVisualizationProps {
   bayConfig: BayWindowConfig
@@ -35,14 +36,21 @@ export function LightingVisualization({
     const rayCount = 12
     const sunHeight = 8
     const sunDistance = 6
+    const rayRng = new SeededRandom(`rays-${bayConfig.windowWidth}-${bayConfig.windowHeight}-${lightingAnalysis.lightBlockagePercentage}`)
 
     for (let i = 0; i < rayCount; i++) {
       for (let j = 0; j < 6; j++) {
-        const startX = -W / 2 + (i / (rayCount - 1)) * W + (Math.random() - 0.5) * 0.05
-        const startY = SH + WH - (j / 5) * WH * 0.8 + (Math.random() - 0.5) * 0.05
+        const seedKey1 = (i * 6 + j) * 3
+        const seedKey2 = (i * 6 + j) * 3 + 1
+        const seedKey3 = (i * 6 + j) * 3 + 2
+        rayRng.reset(seedKey1)
+        const startX = -W / 2 + (i / (rayCount - 1)) * W + (rayRng.next() - 0.5) * 0.05
+        rayRng.reset(seedKey2)
+        const startY = SH + WH - (j / 5) * WH * 0.8 + (rayRng.next() - 0.5) * 0.05
         const startZ = -SD + 0.1
 
-        const dirX = (Math.random() - 0.5) * 0.3
+        rayRng.reset(seedKey3)
+        const dirX = (rayRng.next() - 0.5) * 0.3
         const dirY = -sunHeight
         const dirZ = sunDistance
 
@@ -52,7 +60,7 @@ export function LightingVisualization({
 
         let intensity = 1
         const normalizedY = (startY - SH) / WH
-        if (normalizedY < lightingAnalysis.lightBlockagePercentage / 100) {
+        if (lightingAnalysis.lightBlockagePercentage > 0 && normalizedY < lightingAnalysis.lightBlockagePercentage / 100) {
           intensity = 0.4 + (normalizedY / (lightingAnalysis.lightBlockagePercentage / 100)) * 0.6
         }
 
@@ -64,7 +72,7 @@ export function LightingVisualization({
       }
     }
     return rays
-  }, [W, WH, SH, SD, lightingAnalysis.lightBlockagePercentage])
+  }, [W, WH, SH, SD, bayConfig.windowWidth, bayConfig.windowHeight, lightingAnalysis.lightBlockagePercentage])
 
   return (
     <group>

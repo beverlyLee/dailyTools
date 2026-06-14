@@ -116,6 +116,7 @@ function App() {
             bayConfig={bayConfig}
             comfortAnalysis={comfortAnalysis}
             storageConfig={currentStorageConfig}
+            storageAnalysis={storageAnalysis}
             lightingAnalysis={lightingAnalysis}
             decorConfig={decorConfig}
             showPerson={showPerson}

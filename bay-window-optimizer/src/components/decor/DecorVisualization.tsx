@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { BayWindowConfig, DecorItem, MaterialOption } from '../../types'
 import { toMeters } from '../../utils/calculations'
+import { SeededRandom } from '../../utils/seededRandom'
 
 interface DecorVisualizationProps {
   bayConfig: BayWindowConfig
@@ -165,36 +166,46 @@ function PlantMesh({
   rotation: [number, number, number]
   scale: [number, number, number]
 }) {
+  const leafData = useMemo(() => {
+    const seedStr = `plant-${position[0].toFixed(4)}-${position[1].toFixed(4)}-${position[2].toFixed(4)}`
+    const plantRng = new SeededRandom(seedStr)
+    const data: { angle: number; height: number; tilt: number }[] = []
+    for (let i = 0; i < 8; i++) {
+      plantRng.reset(1000 + i)
+      const angle = (i / 8) * Math.PI * 2
+      const height = 0.15 + plantRng.next() * 0.1
+      plantRng.reset(2000 + i)
+      const tilt = 0.2 + plantRng.next() * 0.2
+      data.push({ angle, height, tilt })
+    }
+    return data
+  }, [position[0], position[1], position[2]])
+
   return (
     <group position={position} rotation={rotation} scale={scale}>
       <mesh position={[0, 0.04, 0]} castShadow>
         <cylinderGeometry args={[0.05, 0.04, 0.08, 24]} />
         <meshStandardMaterial color="#d97706" roughness={0.8} />
       </mesh>
-      {Array.from({ length: 8 }).map((_, i) => {
-        const angle = (i / 8) * Math.PI * 2
-        const height = 0.15 + Math.random() * 0.1
-        const tilt = 0.2 + Math.random() * 0.2
-        return (
-          <mesh
-            key={i}
-            position={[
-              Math.cos(angle) * 0.02,
-              0.08 + height / 2,
-              Math.sin(angle) * 0.02
-            ]}
-            rotation={[
-              Math.sin(angle) * tilt,
-              angle,
-              Math.cos(angle) * tilt
-            ]}
-            castShadow
-          >
-            <sphereGeometry args={[0.012, 8, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
-            <meshStandardMaterial color="#16a34a" roughness={0.8} />
-          </mesh>
-        )
-      })}
+      {leafData.map(({ angle, height, tilt }, i) => (
+        <mesh
+          key={i}
+          position={[
+            Math.cos(angle) * 0.02,
+            0.08 + height / 2,
+            Math.sin(angle) * 0.02
+          ]}
+          rotation={[
+            Math.sin(angle) * tilt,
+            angle,
+            Math.cos(angle) * tilt
+          ]}
+          castShadow
+        >
+          <sphereGeometry args={[0.012, 8, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
+          <meshStandardMaterial color="#16a34a" roughness={0.8} />
+        </mesh>
+      ))}
       <mesh position={[0, 0.18, 0]} castShadow>
         <sphereGeometry args={[0.05, 20, 20]} />
         <meshStandardMaterial color="#22c55e" roughness={0.85} />
