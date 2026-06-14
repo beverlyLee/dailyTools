@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>楼板撞击声模拟 - Floor Impact Sound Simulator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      overflow: hidden;
+      background: #1a1a2e;
+      font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      color: #e0e0e0;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    .control-panel {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(26, 26, 46, 0.92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(100, 100, 150, 0.3);
+      border-radius: 14px;
+      padding: 18px 20px;
+      z-index: 100;
+      width: 300px;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+    }
+
+    .control-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .control-panel::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+    }
+
+    .control-panel::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #7dd3fc;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(125, 211, 252, 0.2);
+    }
+
+    .section {
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .spl-display {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .spl-card {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .spl-card .label {
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .spl-card .value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .spl-bar {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .spl-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2ed573, #7bed9f);
+      border-radius: 4px;
+      transition: width 0.2s ease, background 0.3s ease;
+    }
+
+    .insulation-level {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+
+    .structure-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .structure-item {
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .structure-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .structure-item.active {
+      background: rgba(125, 211, 252, 0.15);
+      border-color: rgba(125, 211, 252, 0.5);
+    }
+
+    .structure-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .structure-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    .structure-insulation {
+      color: #7dd3fc;
+      font-weight: 600;
+    }
+
+    .structure-layers {
+      display: flex;
+      gap: 3px;
+    }
+
+    .layer-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .source-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .source-item {
+      flex: 1 1 calc(50% - 3px);
+      padding: 10px 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      font-size: 12px;
+    }
+
+    .source-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .source-item.active {
+      background: rgba(255, 107, 107, 0.15);
+      border-color: rgba(255, 107, 107, 0.5);
+    }
+
+    .source-icon {
+      font-size: 20px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .source-name {
+      color: #ddd;
+    }
+
+    .control-buttons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ddd;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn.active {
+      background: linear-gradient(135deg, #f093fb, #f5576c);
+    }
+
+    .slider-container {
+      margin-bottom: 12px;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 6px;
+    }
+
+    .slider {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      outline: none;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #7dd3fc;
+      cursor: pointer;
+    }
+
+    .solutions-panel {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(26, 26, 46, 0.92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(100, 100, 150, 0.3);
+      border-radius: 14px;
+      padding: 16px 18px;
+      z-index: 100;
+      width: 320px;
+    }
+
+    .solutions-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffa502;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .solutions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .solution-item {
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 8px;
+      border-left: 3px solid #ffa502;
+    }
+
+    .solution-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .solution-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .solution-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .solution-desc {
+      font-size: 11px;
+      color: #aaa;
+      line-height: 1.4;
+      margin-bottom: 6px;
+    }
+
+    .solution-meta {
+      display: flex;
+      gap: 8px;
+      font-size: 10px;
+    }
+
+    .solution-improvement {
+      color: #2ed573;
+      font-weight: 600;
+      background: rgba(46, 213, 115, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .solution-cost {
+      color: #ffa502;
+    }
+
+    .solution-empty {
+      text-align: center;
+      color: #2ed573;
+      padding: 20px;
+      font-size: 14px;
+    }
+
+    .controls-hint {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(26, 26, 46, 0.85);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(100, 100, 150, 0.3);
+      border-radius: 20px;
+      padding: 8px 18px;
+      color: #aaa;
+      font-size: 12px;
+      z-index: 100;
+    }
+
+    .controls-hint kbd {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin: 0 3px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #ddd;
+    }
+
+    .legend {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(26, 26, 46, 0.92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(100, 100, 150, 0.3);
+      border-radius: 14px;
+      padding: 14px 18px;
+      z-index: 100;
+    }
+
+    .legend-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #7dd3fc;
+      margin-bottom: 10px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #ccc;
+      margin-bottom: 4px;
+    }
+
+    .legend-color {
+      width: 30px;
+      height: 12px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div class="control-panel">
+    <div class="panel-title">🔊 楼板撞击声模拟</div>
+
+    <div class="section">
+      <div class="section-title">噪音强度</div>
+      <div class="spl-display">
+        <div class="spl-card">
+          <div class="label">平均声压</div>
+          <div class="value" id="avgSPL">0 dB</div>
+        </div>
+        <div class="spl-card">
+          <div class="label">峰值声压</div>
+          <div class="value" id="peakSPL">0 dB</div>
+        </div>
+      </div>
+      <div class="spl-bar">
+        <div class="spl-bar-fill" id="splBarFill"></div>
+      </div>
+      <div class="insulation-level" id="insulationLevel">🔇 检测中...</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">楼板结构</div>
+      <div class="structure-list" id="structureList"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">撞击源</div>
+      <div class="source-list" id="sourceList"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">强度控制</div>
+      <div class="slider-container">
+        <div class="slider-label">
+          <span>撞击强度</span>
+          <span id="intensityValue">100%</span>
+        </div>
+        <input type="range" class="slider" id="intensitySlider" min="0.2" max="2" step="0.1" value="1">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="control-buttons">
+        <button class="btn btn-primary" id="btnTrigger">💥 触发撞击</button>
+      </div>
+      <div class="control-buttons">
+        <button class="btn btn-secondary active" id="btnAutoWalk">▶ 高跟鞋走动</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-title">🌡️ 声压级热力图</div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #ff4757;"></div>
+      <span>危险 (&gt; 60dB)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #ffa502;"></div>
+      <span>警告 (45-60dB)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #2ed573;"></div>
+      <span>安全 (&lt; 45dB)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #1e90ff;"></div>
+      <span>优秀 (&lt; 30dB)</span>
+    </div>
+  </div>
+
+  <div class="solutions-panel">
+    <div class="solutions-title">💡 隔音解决方案</div>
+    <div class="solutions-list" id="solutionsList">
+      <div class="solution-empty">选择不同撞击源和楼板结构查看建议</div>
+    </div>
+  </div>
+
+  <div class="controls-hint">
+    <kbd>鼠标左键</kbd> 旋转 | <kbd>滚轮</kbd> 缩放 | <kbd>右键</kbd> 平移 | <kbd>点击楼板</kbd> 触发撞击
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
