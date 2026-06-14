@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { PlacedFurniture, AlertItem, CatPerchPoint, CatPath } from '../types';
 import { SceneManager } from '../core/SceneManager';
+import { PathDrawingUtils } from '../utils/PathDrawingUtils';
 
 export class CatPathSimulator {
   private sceneManager: SceneManager;
@@ -235,19 +236,26 @@ export class CatPathSimulator {
 
   private drawPath(path: CatPath, color: number): void {
     const pts = path.points.map((p) => p.position.clone());
-    const geom = new THREE.BufferGeometry().setFromPoints(pts);
-    const mat = new THREE.LineDashedMaterial({
-      color,
-      linewidth: 2,
-      dashSize: 0.15,
-      gapSize: 0.1,
-      transparent: true,
-      opacity: 0.85,
-    });
-    const line = new THREE.Line(geom, mat);
-    line.computeLineDistances();
+
+    const tube = PathDrawingUtils.createTubePath(pts, color, 0.04, true);
+    this.sceneManager.addVisualization(tube);
+    this.visualObjects.push(tube);
+
+    const line = PathDrawingUtils.createDashedLine(pts, color, 0.2, 0.12, 0.9);
     this.sceneManager.addVisualization(line);
     this.visualObjects.push(line);
+
+    const arrows = PathDrawingUtils.createPathArrows(pts, color, 1.2);
+    this.sceneManager.addVisualization(arrows);
+    this.visualObjects.push(arrows);
+
+    const label = PathDrawingUtils.createPathLabel(
+      new THREE.Vector3(pts[0].x, Math.max(...pts.map(p => p.y)) + 0.6, pts[0].z),
+      '🐱 猫行动线',
+      color
+    );
+    this.sceneManager.addVisualization(label);
+    this.visualObjects.push(label);
 
     path.points.forEach((p) => this.drawPerchPoint(p, color));
   }
@@ -257,19 +265,17 @@ export class CatPathSimulator {
       for (let j = i + 1; j < group.length; j++) {
         if (this.canReach(group[i], group[j])) {
           const pts = [group[i].position.clone(), group[j].position.clone()];
-          const geom = new THREE.BufferGeometry().setFromPoints(pts);
-          const mat = new THREE.LineDashedMaterial({
-            color,
-            linewidth: 2,
-            dashSize: 0.15,
-            gapSize: 0.1,
-            transparent: true,
-            opacity: 0.6,
-          });
-          const line = new THREE.Line(geom, mat);
-          line.computeLineDistances();
+          const tube = PathDrawingUtils.createTubePath(pts, color, 0.03, true);
+          this.sceneManager.addVisualization(tube);
+          this.visualObjects.push(tube);
+
+          const line = PathDrawingUtils.createDashedLine(pts, color, 0.15, 0.1, 0.6);
           this.sceneManager.addVisualization(line);
           this.visualObjects.push(line);
+
+          const arrows = PathDrawingUtils.createPathArrows(pts, color, 1.0);
+          this.sceneManager.addVisualization(arrows);
+          this.visualObjects.push(arrows);
         }
       }
     }
@@ -277,23 +283,18 @@ export class CatPathSimulator {
   }
 
   private drawPerchPoint(p: CatPerchPoint, color: number): void {
-    const marker = new THREE.Mesh(
-      new THREE.SphereGeometry(0.08, 12, 12),
-      new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9 })
-    );
-    marker.position.copy(p.position);
+    const marker = PathDrawingUtils.createNodeMarker(p.position, color, 0.1);
     this.sceneManager.addVisualization(marker);
     this.visualObjects.push(marker);
 
-    const ring = new THREE.Mesh(
-      new THREE.RingGeometry(0.12, 0.16, 24),
-      new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide, transparent: true, opacity: 0.7 })
+    const heightLabel = PathDrawingUtils.createPathLabel(
+      new THREE.Vector3(p.position.x, p.position.y + 0.25, p.position.z),
+      `${p.source} ${p.height.toFixed(1)}m`,
+      color
     );
-    ring.rotation.x = -Math.PI / 2;
-    ring.position.copy(p.position);
-    ring.position.y += 0.001;
-    this.sceneManager.addVisualization(ring);
-    this.visualObjects.push(ring);
+    heightLabel.scale.set(1.2, 0.45, 1);
+    this.sceneManager.addVisualization(heightLabel);
+    this.visualObjects.push(heightLabel);
   }
 
   clearVisualizations(): void {

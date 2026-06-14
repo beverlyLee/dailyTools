@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { PlacedFurniture, AlertItem } from '../types';
 import { SceneManager } from '../core/SceneManager';
+import { PathDrawingUtils } from '../utils/PathDrawingUtils';
 
 export class WalkwayAnalyzer {
   private sceneManager: SceneManager;
@@ -95,6 +96,8 @@ export class WalkwayAnalyzer {
         message: `当前有 ${mainWalkwayObstructed} 处主通道障碍。通行原则：① 主通道净宽 ≥ 1.2m；② 大件家具（猫爬架/沙发/餐桌）长边平行于通道靠墙放置；③ 转角预留 ≥ 1.5m 回转空间；④ 消防疏散方向（玄关→厨房→出口）保持畅通。`,
       });
     }
+
+    this.drawWalkwayPaths();
 
     return alerts;
   }
@@ -293,6 +296,43 @@ export class WalkwayAnalyzer {
           });
         }
       });
+    });
+  }
+
+  private drawWalkwayPaths(): void {
+    const room = this.sceneManager.getRoom();
+    room.walkways.forEach((walkway: { start: THREE.Vector2; end: THREE.Vector2; width: number; isMain: boolean; name: string }) => {
+      const color = walkway.isMain ? 0xff7043 : 0xffa726;
+      const startPt = new THREE.Vector3(walkway.start.x, 0.08, walkway.start.y);
+      const endPt = new THREE.Vector3(walkway.end.x, 0.08, walkway.end.y);
+      const pts = [startPt, endPt];
+
+      const tube = PathDrawingUtils.createTubePath(pts, color, 0.05, false);
+      this.sceneManager.addVisualization(tube);
+      this.visualObjects.push(tube);
+
+      const arrows = PathDrawingUtils.createPathArrows(pts, color, 2.0);
+      this.sceneManager.addVisualization(arrows);
+      this.visualObjects.push(arrows);
+
+      const midX = (walkway.start.x + walkway.end.x) / 2;
+      const midZ = (walkway.start.y + walkway.end.y) / 2;
+      const label = PathDrawingUtils.createPathLabel(
+        new THREE.Vector3(midX, 0.5, midZ),
+        `🚶 ${walkway.name}`,
+        color
+      );
+      label.scale.set(2.5, 0.9, 1);
+      this.sceneManager.addVisualization(label);
+      this.visualObjects.push(label);
+
+      const startMarker = PathDrawingUtils.createNodeMarker(startPt, color, 0.12);
+      this.sceneManager.addVisualization(startMarker);
+      this.visualObjects.push(startMarker);
+
+      const endMarker = PathDrawingUtils.createNodeMarker(endPt, color, 0.12);
+      this.sceneManager.addVisualization(endMarker);
+      this.visualObjects.push(endMarker);
     });
   }
 

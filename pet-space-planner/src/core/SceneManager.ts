@@ -196,26 +196,32 @@ export class SceneManager {
 
       let color = 0;
       let opacity = 0;
+      let icon = '';
       switch (zone.type) {
         case 'living':
           color = 0xffb347;
           opacity = 0.06;
+          icon = '🛋️';
           break;
         case 'dining':
           color = 0x64b5f6;
           opacity = 0.06;
+          icon = '🍽️';
           break;
         case 'kitchen':
           color = 0xef5350;
           opacity = 0.06;
+          icon = '🍳';
           break;
         case 'entry':
           color = 0xba68c8;
           opacity = 0.06;
+          icon = '🚪';
           break;
         case 'hallway':
           color = 0x66bb6a;
           opacity = 0.06;
+          icon = '🚶';
           break;
       }
 
@@ -242,7 +248,57 @@ export class SceneManager {
       border.rotation.x = -Math.PI / 2;
       border.position.set(cx, 0.015, cz);
       this.scene.add(border);
+
+      this.createZoneLabel(cx, cz, zone.name, icon, color);
     });
+  }
+
+  private createZoneLabel(cx: number, cz: number, name: string, icon: string, color: number): void {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d')!;
+
+    ctx.clearRect(0, 0, 512, 256);
+
+    const r = ((color >> 16) & 0xff);
+    const g = ((color >> 8) & 0xff);
+    const b = (color & 0xff);
+
+    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.2)`;
+    ctx.beginPath();
+    ctx.roundRect(20, 20, 472, 216, 24);
+    ctx.fill();
+
+    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.5)`;
+    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.4)`;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(20, 20, 472, 216, 24);
+    ctx.stroke();
+
+    ctx.font = '80px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(icon, 256, 95);
+
+    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.85)`;
+    ctx.font = 'bold 56px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillText(name, 256, 185);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    const material = new THREE.SpriteMaterial({
+      map: texture,
+      transparent: true,
+      opacity: 0.9,
+      depthTest: false,
+    });
+    const sprite = new THREE.Sprite(material);
+    sprite.position.set(cx, 2.8, cz);
+    sprite.scale.set(4, 2, 1);
+    sprite.renderOrder = -1;
+    this.scene.add(sprite);
   }
 
   drawWalkways(): void {
