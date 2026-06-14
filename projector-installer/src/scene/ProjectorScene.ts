@@ -12,6 +12,7 @@ export class ProjectorScene {
   screenGroup: THREE.Group
   lightConeGroup: THREE.Group
   personGroup: THREE.Group
+  furnitureGroup: THREE.Group
   
   private raycaster: THREE.Raycaster
   private mouse: THREE.Vector2
@@ -31,6 +32,14 @@ export class ProjectorScene {
   private currentZoom: number = 0
   private lensHeight: number = 0.45
   private horizontalShift: number = 0
+  private verticalShift: number = 0
+  
+  private canShelfMount: boolean = true
+  private canCeilingMount: boolean = true
+  
+  private tvStand: THREE.Group | null = null
+  private sofa: THREE.Group | null = null
+  private ceilingWarning: THREE.Mesh | null = null
   
   private animationId: number = 0
   
@@ -56,15 +65,18 @@ export class ProjectorScene {
     this.screenGroup = new THREE.Group()
     this.lightConeGroup = new THREE.Group()
     this.personGroup = new THREE.Group()
+    this.furnitureGroup = new THREE.Group()
     
     this.scene.add(this.roomGroup)
     this.scene.add(this.projectorGroup)
     this.scene.add(this.screenGroup)
     this.scene.add(this.lightConeGroup)
     this.scene.add(this.personGroup)
+    this.scene.add(this.furnitureGroup)
     
     this.setupLights()
     this.createRoom()
+    this.createFurniture()
     this.updateCameraPosition()
     this.bindEvents(container)
     this.animate()
@@ -131,9 +143,225 @@ export class ProjectorScene {
     
     const gridHelper = new THREE.GridHelper(this.roomWidth, 12, 0x555566, 0x444455)
     this.roomGroup.add(gridHelper)
+  }
+  
+  private createFurniture() {
+    this.tvStand = this.createTVStand()
+    this.sofa = this.createSofa()
+    this.ceilingWarning = this.createCeilingWarning()
     
-    const sizeLabel = new THREE.Group()
-    this.roomGroup.add(sizeLabel)
+    this.furnitureGroup.add(this.tvStand)
+    this.furnitureGroup.add(this.sofa)
+    this.furnitureGroup.add(this.ceilingWarning)
+  }
+  
+  private createTVStand(): THREE.Group {
+    const group = new THREE.Group()
+    
+    const standWidth = 1.2
+    const standHeight = 0.4
+    const standDepth = 0.4
+    const standY = standHeight / 2
+    
+    const bodyGeo = new THREE.BoxGeometry(standWidth, standHeight, standDepth)
+    const bodyMat = new THREE.MeshStandardMaterial({ 
+      color: 0x5a4a3a,
+      roughness: 0.6,
+      metalness: 0.1
+    })
+    const body = new THREE.Mesh(bodyGeo, bodyMat)
+    body.position.y = standY
+    body.castShadow = true
+    body.receiveShadow = true
+    group.add(body)
+    
+    const topGeo = new THREE.BoxGeometry(standWidth + 0.05, 0.03, standDepth + 0.05)
+    const topMat = new THREE.MeshStandardMaterial({ 
+      color: 0x4a3a2a,
+      roughness: 0.4,
+      metalness: 0.2
+    })
+    const top = new THREE.Mesh(topGeo, topMat)
+    top.position.y = standHeight + 0.015
+    top.castShadow = true
+    group.add(top)
+    
+    const legGeo = new THREE.BoxGeometry(0.05, standHeight + 0.03, 0.05)
+    const legMat = new THREE.MeshStandardMaterial({ 
+      color: 0x3a2a1a,
+      metalness: 0.3,
+      roughness: 0.5
+    })
+    const legPositions = [
+      [-standWidth / 2 + 0.03, standY, -standDepth / 2 + 0.03],
+      [standWidth / 2 - 0.03, standY, -standDepth / 2 + 0.03],
+      [-standWidth / 2 + 0.03, standY, standDepth / 2 - 0.03],
+      [standWidth / 2 - 0.03, standY, standDepth / 2 - 0.03]
+    ]
+    legPositions.forEach(pos => {
+      const leg = new THREE.Mesh(legGeo, legMat)
+      leg.position.set(pos[0], pos[1], pos[2])
+      leg.castShadow = true
+      group.add(leg)
+    })
+    
+    const drawerGeo = new THREE.BoxGeometry(standWidth * 0.4, 0.12, standDepth - 0.05)
+    const drawerMat = new THREE.MeshStandardMaterial({ 
+      color: 0x4a3a2a,
+      roughness: 0.5,
+      metalness: 0.1
+    })
+    const drawer = new THREE.Mesh(drawerGeo, drawerMat)
+    drawer.position.set(0, standY, 0)
+    group.add(drawer)
+    
+    const handleGeo = new THREE.BoxGeometry(0.08, 0.015, 0.015)
+    const handleMat = new THREE.MeshStandardMaterial({ 
+      color: 0x999999,
+      metalness: 0.8,
+      roughness: 0.2
+    })
+    const handle = new THREE.Mesh(handleGeo, handleMat)
+    handle.position.set(0, standY, standDepth / 2 - 0.04)
+    group.add(handle)
+    
+    group.position.z = this.roomDepth - 0.15
+    group.position.y = 0
+    group.visible = true
+    
+    return group
+  }
+  
+  private createSofa(): THREE.Group {
+    const group = new THREE.Group()
+    
+    const sofaWidth = 1.8
+    const seatHeight = 0.4
+    const seatDepth = 0.6
+    const backHeight = 0.5
+    
+    const seatGeo = new THREE.BoxGeometry(sofaWidth, seatHeight, seatDepth)
+    const sofaMat = new THREE.MeshStandardMaterial({ 
+      color: 0x7a6b5c,
+      roughness: 0.9,
+      metalness: 0
+    })
+    const seat = new THREE.Mesh(seatGeo, sofaMat)
+    seat.position.y = seatHeight / 2
+    seat.castShadow = true
+    seat.receiveShadow = true
+    group.add(seat)
+    
+    const backGeo = new THREE.BoxGeometry(sofaWidth, backHeight, 0.12)
+    const back = new THREE.Mesh(backGeo, sofaMat)
+    back.position.y = seatHeight + backHeight / 2
+    back.position.z = -seatDepth / 2 + 0.06
+    back.castShadow = true
+    group.add(back)
+    
+    const armGeo = new THREE.BoxGeometry(0.15, backHeight, seatDepth)
+    const leftArm = new THREE.Mesh(armGeo, sofaMat)
+    leftArm.position.set(-sofaWidth / 2 + 0.075, seatHeight + backHeight / 2 - 0.05, 0)
+    leftArm.castShadow = true
+    group.add(leftArm)
+    
+    const rightArm = new THREE.Mesh(armGeo, sofaMat)
+    rightArm.position.set(sofaWidth / 2 - 0.075, seatHeight + backHeight / 2 - 0.05, 0)
+    rightArm.castShadow = true
+    group.add(rightArm)
+    
+    const cushionGeo = new THREE.BoxGeometry(sofaWidth * 0.85, 0.08, seatDepth - 0.1)
+    const cushionMat = new THREE.MeshStandardMaterial({ 
+      color: 0x8a7b6c,
+      roughness: 0.95,
+      metalness: 0
+    })
+    const cushion = new THREE.Mesh(cushionGeo, cushionMat)
+    cushion.position.y = seatHeight + 0.04
+    cushion.position.z = 0.03
+    cushion.castShadow = true
+    group.add(cushion)
+    
+    const legGeo = new THREE.BoxGeometry(0.05, 0.08, 0.05)
+    const legMat = new THREE.MeshStandardMaterial({ 
+      color: 0x3a2a1a,
+      metalness: 0.2,
+      roughness: 0.6
+    })
+    const legPositions = [
+      [-sofaWidth / 2 + 0.1, 0.04, seatDepth / 2 - 0.03],
+      [sofaWidth / 2 - 0.1, 0.04, seatDepth / 2 - 0.03],
+      [-sofaWidth / 2 + 0.1, 0.04, -seatDepth / 2 + 0.03],
+      [sofaWidth / 2 - 0.1, 0.04, -seatDepth / 2 + 0.03]
+    ]
+    legPositions.forEach(pos => {
+      const leg = new THREE.Mesh(legGeo, legMat)
+      leg.position.set(pos[0], pos[1], pos[2])
+      leg.castShadow = true
+      group.add(leg)
+    })
+    
+    group.position.z = this.roomDepth - 3.0
+    group.visible = true
+    
+    return group
+  }
+  
+  private createCeilingWarning(): THREE.Mesh {
+    const warnGeo = new THREE.PlaneGeometry(1.5, 0.8)
+    const warnMat = new THREE.MeshBasicMaterial({
+      color: 0xff3333,
+      transparent: true,
+      opacity: 0,
+      side: THREE.DoubleSide
+    })
+    const warning = new THREE.Mesh(warnGeo, warnMat)
+    warning.rotation.x = Math.PI / 2
+    warning.position.y = this.roomHeight - 0.01
+    warning.position.z = this.roomDepth - 1.2
+    return warning
+  }
+  
+  private updateFurniture() {
+    if (!this.tvStand) return
+    
+    this.tvStand.traverse(child => {
+      if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+        if (!this.canShelfMount) {
+          child.material.color.setHex(0xaa3333)
+          child.material.emissive = new THREE.Color(0x330000)
+          child.material.emissiveIntensity = 0.3
+        } else {
+          const originalColor = child.geometry.type.includes('Box') && child.position.y > 0.3 ? 0x4a3a2a : 0x5a4a3a
+          if (child.geometry instanceof THREE.BoxGeometry) {
+            if (child.position.y > 0.39) {
+              child.material.color.setHex(0x4a3a2a)
+            } else if (Math.abs(child.position.x) > 0.5) {
+              child.material.color.setHex(0x3a2a1a)
+            } else {
+              child.material.color.setHex(0x5a4a3a)
+            }
+          }
+          child.material.emissive = new THREE.Color(0x000000)
+          child.material.emissiveIntensity = 0
+        }
+      }
+    })
+    
+    if (this.ceilingWarning && this.ceilingWarning.material instanceof THREE.MeshBasicMaterial) {
+      if (!this.canCeilingMount) {
+        this.ceilingWarning.material.opacity = 0.4
+      } else {
+        this.ceilingWarning.material.opacity = 0
+      }
+    }
+    
+    if (this.currentScreen) {
+      const viewerDistance = this.currentScreen.width * 1.2
+      if (this.sofa) {
+        this.sofa.position.z = this.roomDepth - viewerDistance - 0.3
+      }
+    }
   }
   
   private updateCameraPosition() {
@@ -152,6 +380,7 @@ export class ProjectorScene {
   setScreen(screen: ScreenSize) {
     this.currentScreen = screen
     this.updateScreen()
+    this.updateFurniture()
   }
   
   setDistance(distance: number) {
@@ -176,6 +405,17 @@ export class ProjectorScene {
     this.horizontalShift = shift
     this.updateProjector()
     this.updateLightCone()
+  }
+  
+  setVerticalShift(shift: number) {
+    this.verticalShift = shift
+    this.updateLightCone()
+  }
+  
+  setInstallationState(canShelf: boolean, canCeiling: boolean) {
+    this.canShelfMount = canShelf
+    this.canCeilingMount = canCeiling
+    this.updateFurniture()
   }
   
   private clearGroup(group: THREE.Group) {
@@ -287,11 +527,40 @@ export class ProjectorScene {
     ctx.fillText(this.currentScreen.name, 128, 32)
     
     const labelTex = new THREE.CanvasTexture(labelCanvas)
-    const labelMat = new THREE.SpriteMaterial({ map: labelTex, transparent: true })
-    const label = new THREE.Sprite(labelMat)
-    label.position.set(0, 0.6 - 0.15, this.roomDepth + 0.01)
-    label.scale.set(0.8, 0.2, 1)
+    const labelGeo = new THREE.PlaneGeometry(0.8, 0.2)
+    const labelMat = new THREE.MeshBasicMaterial({ 
+      map: labelTex, 
+      transparent: true,
+      side: THREE.DoubleSide
+    })
+    const label = new THREE.Mesh(labelGeo, labelMat)
+    label.position.set(0, 0.6 - 0.15, this.roomDepth + 0.02)
     this.screenGroup.add(label)
+    
+    const sizeLabelCanvas = document.createElement('canvas')
+    sizeLabelCanvas.width = 300
+    sizeLabelCanvas.height = 40
+    const sizeCtx = sizeLabelCanvas.getContext('2d')!
+    sizeCtx.fillStyle = 'rgba(0,0,0,0.6)'
+    sizeCtx.fillRect(0, 0, 300, 40)
+    sizeCtx.fillStyle = '#aaccff'
+    sizeCtx.font = '14px sans-serif'
+    sizeCtx.textAlign = 'center'
+    sizeCtx.textBaseline = 'middle'
+    const sizeText = `${(this.currentScreen.width * 100).toFixed(0)} × ${(this.currentScreen.height * 100).toFixed(0)} cm`
+    sizeCtx.fillText(sizeText, 150, 20)
+    
+    const sizeLabelTex = new THREE.CanvasTexture(sizeLabelCanvas)
+    const sizeLabelGeo = new THREE.PlaneGeometry(0.9, 0.12)
+    const sizeLabelMat = new THREE.MeshBasicMaterial({ 
+      map: sizeLabelTex, 
+      transparent: true,
+      side: THREE.DoubleSide
+    })
+    const sizeLabel = new THREE.Mesh(sizeLabelGeo, sizeLabelMat)
+    sizeLabel.position.set(this.currentScreen.width / 2 + 0.15, 0.6 + this.currentScreen.height / 2, this.roomDepth + 0.02)
+    sizeLabel.rotation.y = -Math.PI / 2
+    this.screenGroup.add(sizeLabel)
   }
   
   private updateLightCone() {
@@ -302,7 +571,7 @@ export class ProjectorScene {
     const projection = calculateProjection(this.currentProjector, this.currentDistance, this.currentZoom)
     
     const projX = this.horizontalShift
-    const projY = this.lensHeight
+    const projY = this.lensHeight + this.verticalShift
     const projZ = this.roomDepth - this.currentDistance
     
     const screenZ = this.roomDepth
@@ -496,6 +765,11 @@ export class ProjectorScene {
           }
         }
       })
+    }
+    
+    if (this.ceilingWarning && !this.canCeilingMount && this.ceilingWarning.material instanceof THREE.MeshBasicMaterial) {
+      const time = Date.now() * 0.003
+      this.ceilingWarning.material.opacity = 0.3 + Math.sin(time * 2) * 0.15
     }
     
     this.renderer.render(this.scene, this.camera)

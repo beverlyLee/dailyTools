@@ -28,6 +28,7 @@
   let zoomPosition = 0
   let lensHeight = 0.48
   let horizontalShift = 0
+  let verticalShift = 0
   
   let ceilingHeight = DEFAULT_CEILING_HEIGHT
   let screenBottomHeight = DEFAULT_SCREEN_BOTTOM_HEIGHT
@@ -64,7 +65,7 @@
   $: keystoneResult = analyzeKeystone(
     {
       horizontalShift,
-      verticalShift: 0,
+      verticalShift,
       angle: 0,
       maxKeystone: selectedProjector.maxKeystoneAngle
     },
@@ -73,6 +74,10 @@
   )
   
   $: keystoneSeverity = getKeystoneSeverity(keystoneResult.distortionPercentage)
+  
+  $: if (scene && installationResult) {
+    scene.setInstallationState(installationResult.canShelfMount, installationResult.canCeilingMount)
+  }
   
   $: idealDistance = selectedScreen 
     ? calculateDistanceForScreen(selectedProjector, selectedScreen.diagonalInches * 0.0254, zoomPosition)
@@ -124,6 +129,13 @@
     horizontalShift = value
     if (scene) {
       scene.setHorizontalShift(value)
+    }
+  }
+  
+  function updateVerticalShift(value: number) {
+    verticalShift = value
+    if (scene) {
+      scene.setVerticalShift(value)
     }
   }
   
@@ -185,6 +197,20 @@
     }
   }
   
+  function handleProjectorKeydown(event: KeyboardEvent, proj: Projector) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      selectProjector(proj)
+    }
+  }
+  
+  function handleScreenKeydown(event: KeyboardEvent, screen: ScreenSize) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      selectScreen(screen)
+    }
+  }
+  
   onMount(() => {
     if (container) {
       scene = new ProjectorScene(container)
@@ -196,6 +222,10 @@
       scene.setZoom(zoomPosition)
       scene.setLensHeight(lensHeight)
       scene.setHorizontalShift(horizontalShift)
+      scene.setVerticalShift(verticalShift)
+      if (installationResult) {
+        scene.setInstallationState(installationResult.canShelfMount, installationResult.canCeilingMount)
+      }
     }
   })
   
@@ -235,12 +265,15 @@
         <div class="section">
           <h3>选择投影仪型号</h3>
           
-          <div class="projector-list">
+          <div class="projector-list" role="list">
             {#each projectors as proj}
               <div 
                 class="projector-card"
                 class:selected={selectedProjector.id === proj.id}
+                role="button"
+                tabindex="0"
                 on:click={() => selectProjector(proj)}
+                on:keydown={(e) => handleProjectorKeydown(e, proj)}
               >
                 <div class="projector-brand">{proj.brand}</div>
                 <div class="projector-name">{proj.name}</div>
@@ -265,8 +298,9 @@
             {#if showCustomProjector}
               <div class="custom-inputs">
                 <div class="input-group">
-                  <label>投射比</label>
+                  <label for="custom-throw-ratio">投射比</label>
                   <input 
+                    id="custom-throw-ratio"
                     type="number" 
                     bind:value={customThrowRatio} 
                     step="0.01"
@@ -276,8 +310,9 @@
                   />
                 </div>
                 <div class="input-group">
-                  <label>镜头偏移</label>
+                  <label for="custom-offset">镜头偏移</label>
                   <input 
+                    id="custom-offset"
                     type="number" 
                     bind:value={customOffset} 
                     step="0.01"
@@ -287,8 +322,9 @@
                   />
                 </div>
                 <div class="input-group">
-                  <label>最大梯形校正角</label>
+                  <label for="custom-max-keystone">最大梯形校正角</label>
                   <input 
+                    id="custom-max-keystone"
                     type="number" 
                     bind:value={customMaxKeystone} 
                     step="1"
@@ -342,8 +378,9 @@
           </div>
           
           <div class="distance-control">
-            <label>投射距离: {distance.toFixed(2)} m</label>
+            <label for="distance-slider">投射距离: {distance.toFixed(2)} m</label>
             <input 
+              id="distance-slider"
               type="range" 
               min="0.5" 
               max="5" 
@@ -360,8 +397,9 @@
           
           {#if selectedProjector.zoomType === 'optical'}
             <div class="distance-control">
-              <label>变焦位置: {(zoomPosition * 100).toFixed(0)}%</label>
+              <label for="zoom-slider">变焦位置: {(zoomPosition * 100).toFixed(0)}%</label>
               <input 
+                id="zoom-slider"
                 type="range" 
                 min="0" 
                 max="1" 
@@ -400,14 +438,17 @@
             {/if}
           </div>
           
-          <div class="screen-size-list">
+          <div class="screen-size-list" role="list">
             <h4>📏 标准幕布尺寸</h4>
             {#each standardScreens as screen}
               <div 
                 class="screen-item"
                 class:selected={selectedScreen?.name === screen.name}
                 class:can-fill={projectionResult.imageDiagonalInches >= screen.diagonalInches * 0.95}
+                role="button"
+                tabindex="0"
                 on:click={() => selectScreen(screen)}
+                on:keydown={(e) => handleScreenKeydown(e, screen)}
               >
                 <span class="screen-name">{screen.name}</span>
                 <span class="screen-size">
@@ -434,8 +475,9 @@
           
           <div class="height-controls">
             <div class="input-group">
-              <label>投影仪镜头高度</label>
+              <label for="lens-height-slider">投影仪镜头高度</label>
               <input 
+                id="lens-height-slider"
                 type="range" 
                 min="0.2" 
                 max="2.6" 
@@ -447,8 +489,9 @@
             </div>
             
             <div class="input-group">
-              <label>天花板高度</label>
+              <label for="ceiling-height-slider">天花板高度</label>
               <input 
+                id="ceiling-height-slider"
                 type="range" 
                 min="2.4" 
                 max="3.5" 
@@ -459,8 +502,9 @@
             </div>
             
             <div class="input-group">
-              <label>幕布下沿高度</label>
+              <label for="screen-bottom-slider">幕布下沿高度</label>
               <input 
+                id="screen-bottom-slider"
                 type="range" 
                 min="0.3" 
                 max="1.2" 
@@ -530,8 +574,9 @@
           <h3>📐 梯形校正分析</h3>
           
           <div class="shift-control">
-            <label>水平偏移: {(horizontalShift * 100).toFixed(0)} cm</label>
+            <label for="horizontal-shift-slider">水平偏移: {(horizontalShift * 100).toFixed(0)} cm</label>
             <input 
+              id="horizontal-shift-slider"
               type="range" 
               min="-1.5" 
               max="1.5" 
@@ -543,6 +588,24 @@
               <span>-150cm</span>
               <button class="btn-mini" on:click={() => updateHorizontalShift(0)}>居中</button>
               <span>+150cm</span>
+            </div>
+          </div>
+          
+          <div class="shift-control">
+            <label for="vertical-shift-slider">垂直偏移: {(verticalShift * 100).toFixed(0)} cm</label>
+            <input 
+              id="vertical-shift-slider"
+              type="range" 
+              min="-1" 
+              max="1" 
+              step="0.01"
+              bind:value={verticalShift}
+              on:input={() => updateVerticalShift(verticalShift)}
+            />
+            <div class="range-labels">
+              <span>-100cm</span>
+              <button class="btn-mini" on:click={() => updateVerticalShift(0)}>居中</button>
+              <span>+100cm</span>
             </div>
           </div>
           

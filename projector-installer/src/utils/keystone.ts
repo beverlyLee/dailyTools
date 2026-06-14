@@ -8,10 +8,13 @@ export function analyzeKeystone(
 ): KeystoneResult {
   const maxShift = projector.maxKeystoneAngle
   
-  const horizontalShiftDeg = (params.horizontalShift / distance) * (180 / Math.PI)
-  const verticalShiftDeg = (params.verticalShift / distance) * (180 / Math.PI)
+  const horizontalShiftRad = Math.atan2(params.horizontalShift, distance)
+  const verticalShiftRad = Math.atan2(params.verticalShift, distance)
+  const horizontalShiftDeg = horizontalShiftRad * (180 / Math.PI)
+  const verticalShiftDeg = verticalShiftRad * (180 / Math.PI)
   
-  const totalAngle = Math.sqrt(horizontalShiftDeg ** 2 + verticalShiftDeg ** 2)
+  const totalAngleRad = Math.sqrt(horizontalShiftRad ** 2 + verticalShiftRad ** 2)
+  const totalAngle = totalAngleRad * (180 / Math.PI)
   
   const withinRange = totalAngle <= maxShift
   
