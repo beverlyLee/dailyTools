@@ -173,6 +173,7 @@ export class ProjectorScene {
     body.position.y = standY
     body.castShadow = true
     body.receiveShadow = true
+    body.userData.originalColor = 0x5a4a3a
     group.add(body)
     
     const topGeo = new THREE.BoxGeometry(standWidth + 0.05, 0.03, standDepth + 0.05)
@@ -184,6 +185,7 @@ export class ProjectorScene {
     const top = new THREE.Mesh(topGeo, topMat)
     top.position.y = standHeight + 0.015
     top.castShadow = true
+    top.userData.originalColor = 0x4a3a2a
     group.add(top)
     
     const legGeo = new THREE.BoxGeometry(0.05, standHeight + 0.03, 0.05)
@@ -202,6 +204,7 @@ export class ProjectorScene {
       const leg = new THREE.Mesh(legGeo, legMat)
       leg.position.set(pos[0], pos[1], pos[2])
       leg.castShadow = true
+      leg.userData.originalColor = 0x3a2a1a
       group.add(leg)
     })
     
@@ -213,6 +216,7 @@ export class ProjectorScene {
     })
     const drawer = new THREE.Mesh(drawerGeo, drawerMat)
     drawer.position.set(0, standY, 0)
+    drawer.userData.originalColor = 0x4a3a2a
     group.add(drawer)
     
     const handleGeo = new THREE.BoxGeometry(0.08, 0.015, 0.015)
@@ -223,6 +227,7 @@ export class ProjectorScene {
     })
     const handle = new THREE.Mesh(handleGeo, handleMat)
     handle.position.set(0, standY, standDepth / 2 - 0.04)
+    handle.userData.originalColor = 0x999999
     group.add(handle)
     
     group.position.z = this.roomDepth - 0.15
@@ -332,15 +337,9 @@ export class ProjectorScene {
           child.material.emissive = new THREE.Color(0x330000)
           child.material.emissiveIntensity = 0.3
         } else {
-          const originalColor = child.geometry.type.includes('Box') && child.position.y > 0.3 ? 0x4a3a2a : 0x5a4a3a
-          if (child.geometry instanceof THREE.BoxGeometry) {
-            if (child.position.y > 0.39) {
-              child.material.color.setHex(0x4a3a2a)
-            } else if (Math.abs(child.position.x) > 0.5) {
-              child.material.color.setHex(0x3a2a1a)
-            } else {
-              child.material.color.setHex(0x5a4a3a)
-            }
+          const original = child.userData.originalColor
+          if (original !== undefined) {
+            child.material.color.setHex(original)
           }
           child.material.emissive = new THREE.Color(0x000000)
           child.material.emissiveIntensity = 0
@@ -349,18 +348,12 @@ export class ProjectorScene {
     })
     
     if (this.ceilingWarning && this.ceilingWarning.material instanceof THREE.MeshBasicMaterial) {
-      if (!this.canCeilingMount) {
-        this.ceilingWarning.material.opacity = 0.4
-      } else {
-        this.ceilingWarning.material.opacity = 0
-      }
+      this.ceilingWarning.material.opacity = this.canCeilingMount ? 0 : 0.4
     }
     
-    if (this.currentScreen) {
+    if (this.currentScreen && this.sofa) {
       const viewerDistance = this.currentScreen.width * 1.2
-      if (this.sofa) {
-        this.sofa.position.z = this.roomDepth - viewerDistance - 0.3
-      }
+      this.sofa.position.z = this.roomDepth - viewerDistance - 0.3
     }
   }
   
@@ -558,8 +551,7 @@ export class ProjectorScene {
       side: THREE.DoubleSide
     })
     const sizeLabel = new THREE.Mesh(sizeLabelGeo, sizeLabelMat)
-    sizeLabel.position.set(this.currentScreen.width / 2 + 0.15, 0.6 + this.currentScreen.height / 2, this.roomDepth + 0.02)
-    sizeLabel.rotation.y = -Math.PI / 2
+    sizeLabel.position.set(this.currentScreen.width / 2 - 0.45, 0.6 + this.currentScreen.height / 2, this.roomDepth + 0.02)
     this.screenGroup.add(sizeLabel)
   }
   

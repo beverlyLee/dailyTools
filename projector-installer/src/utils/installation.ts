@@ -63,24 +63,33 @@ export function verifyInstallation(
                      fullParams.viewerDistance < distance &&
                      fullParams.viewerDistance > 0.5
   
+  const ceilingDistanceFromTop = fullParams.ceilingHeight - ceilingMountProjectorTop
+
+  const shelfHeight = Math.max(SHELF_MIN_HEIGHT, Math.min(SHELF_MAX_HEIGHT, idealShelfHeight))
+  const ceilingClearanceCm = (ceilingDistanceFromTop * 100).toFixed(0)
+  const screenDiagStr = screen.diagonalInches.toFixed(0)
+  const projDiagStr = projection.imageDiagonalInches.toFixed(0)
+  const shelfCm = (shelfHeight * 100).toFixed(0)
+  const idealCm = (idealShelfHeight * 100).toFixed(0)
+
   let recommendation = ''
-  
+
   if (canShelfMount && !shelfBlocksView && imageFillsScreen) {
-    recommendation = `无需吊顶，放在柜子上即可。建议放置高度约 ${(idealShelfHeight * 100).toFixed(0)} cm，画面可完整覆盖 ${(screen.diagonalInches).toFixed(0)} 寸幕布。`
+    recommendation = `无需吊顶，放在柜子上即可。建议放置高度约 ${shelfCm} cm，画面可完整覆盖 ${screenDiagStr} 寸幕布。`
   } else if (canShelfMount && shelfBlocksView && imageFillsScreen) {
-    recommendation = `可放置在电视柜上（建议高度 ${(idealShelfHeight * 100).toFixed(0)} cm），但可能遮挡观众视线。建议将投影仪侧移或抬高观看位置。`
+    recommendation = `可放置在电视柜上（建议高度 ${shelfCm} cm），但可能遮挡观众视线。建议将投影仪侧移或抬高观看位置。`
   } else if (canShelfMount && !imageFillsScreen) {
     if (sizeMatchRatio < 0.95) {
-      recommendation = `可放置在柜子上（建议高度 ${(idealShelfHeight * 100).toFixed(0)} cm），但当前距离下画面偏小（${projection.imageDiagonalInches.toFixed(0)} 寸），无法投满 ${screen.diagonalInches} 寸幕布。建议增大投射距离或选择更小尺寸的幕布。`
+      recommendation = `可放置在柜子上（建议高度 ${shelfCm} cm），但当前距离下画面偏小（${projDiagStr} 寸），无法投满 ${screenDiagStr} 寸幕布。建议增大投射距离或选择更小尺寸的幕布。`
     } else {
-      recommendation = `可放置在柜子上（建议高度 ${(idealShelfHeight * 100).toFixed(0)} cm），当前距离下画面大于幕布（${projection.imageDiagonalInches.toFixed(0)} 寸）。可减小距离或使用更大尺寸的幕布。`
+      recommendation = `可放置在柜子上（建议高度 ${shelfCm} cm），当前距离下画面大于幕布（${projDiagStr} 寸）。可减小距离或使用更大尺寸的幕布。`
     }
   } else if (canCeilingMount) {
-    recommendation = `建议吊顶安装，投影仪距天花板约 ${((fullParams.ceilingHeight - ceilingMountProjectorTop) * 100).toFixed(0)} cm，可完整覆盖幕布。`
+    recommendation = `建议吊顶安装，投影仪距天花板约 ${ceilingClearanceCm} cm，可完整覆盖幕布。`
   } else if (!canShelfMount && idealShelfHeight < SHELF_MIN_HEIGHT) {
-    recommendation = `投影仪需要放置在较低位置（约 ${(idealShelfHeight * 100).toFixed(0)} cm），低于常规电视柜高度。建议使用矮柜或地面放置，或考虑吊顶安装。`
+    recommendation = `投影仪需要放置在较低位置（约 ${idealCm} cm），低于常规电视柜高度。建议使用矮柜或地面放置，或考虑吊顶安装。`
   } else if (!canShelfMount && idealShelfHeight > SHELF_MAX_HEIGHT) {
-    recommendation = `投影仪需要放置在较高位置（约 ${(idealShelfHeight * 100).toFixed(0)} cm），高于常规电视柜。建议吊顶安装或使用高架。`
+    recommendation = `投影仪需要放置在较高位置（约 ${idealCm} cm），高于常规电视柜。建议吊顶安装或使用高架。`
   } else {
     recommendation = '当前配置下安装较为困难，建议调整投射距离、幕布尺寸或安装方式。'
   }
@@ -90,8 +99,10 @@ export function verifyInstallation(
   return {
     canShelfMount,
     canCeilingMount,
-    shelfHeight: Math.max(SHELF_MIN_HEIGHT, Math.min(SHELF_MAX_HEIGHT, idealShelfHeight)),
+    shelfHeight,
+    idealShelfHeight,
     ceilingMountHeight: ceilingProjectorBottom,
+    ceilingDistanceFromTop,
     blocksView,
     clearance,
     recommendation

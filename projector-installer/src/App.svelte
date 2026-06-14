@@ -270,7 +270,7 @@
               <div 
                 class="projector-card"
                 class:selected={selectedProjector.id === proj.id}
-                role="button"
+                role="listitem"
                 tabindex="0"
                 on:click={() => selectProjector(proj)}
                 on:keydown={(e) => handleProjectorKeydown(e, proj)}
@@ -445,7 +445,7 @@
                 class="screen-item"
                 class:selected={selectedScreen?.name === screen.name}
                 class:can-fill={projectionResult.imageDiagonalInches >= screen.diagonalInches * 0.95}
-                role="button"
+                role="listitem"
                 tabindex="0"
                 on:click={() => selectScreen(screen)}
                 on:keydown={(e) => handleScreenKeydown(e, screen)}
@@ -535,7 +535,7 @@
                   {installationResult.canCeilingMount ? '✅ 可行' : '❌ 不可行'}
                 </div>
                 <div class="install-detail">
-                  距顶: {formatMeters(ceilingHeight - installationResult.ceilingMountHeight)}
+                  距顶: {formatMeters(installationResult.ceilingDistanceFromTop)}
                 </div>
               </div>
             </div>

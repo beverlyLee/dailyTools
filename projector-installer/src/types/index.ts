@@ -52,7 +52,9 @@ export interface InstallationResult {
   canShelfMount: boolean
   canCeilingMount: boolean
   shelfHeight: number
+  idealShelfHeight: number
   ceilingMountHeight: number
+  ceilingDistanceFromTop: number
   blocksView: boolean
   clearance: number
   recommendation: string
