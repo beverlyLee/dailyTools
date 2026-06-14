@@ -141,6 +141,7 @@ function updateSourceList() {
       const id = item.getAttribute('data-id')
       if (id) {
         selectedSourceId = id
+        scene.setSourceId(id)
         container.querySelectorAll('.source-item').forEach(i => i.classList.remove('active'))
         item.classList.add('active')
       }
@@ -149,35 +150,36 @@ function updateSourceList() {
 }
 
 function setupUI() {
+  const intensitySlider = document.getElementById('intensitySlider') as HTMLInputElement
+  const intensityValue = document.getElementById('intensityValue')
   const btnTrigger = document.getElementById('btnTrigger')
+  const btnAutoWalk = document.getElementById('btnAutoWalk')
+
+  if (intensitySlider && intensityValue) {
+    const updateIntensity = () => {
+      const val = parseFloat(intensitySlider.value)
+      intensityValue.textContent = (val * 100).toFixed(0) + '%'
+      scene.setIntensity(val)
+    }
+    intensitySlider.addEventListener('input', updateIntensity)
+    updateIntensity()
+  }
+
   if (btnTrigger) {
     btnTrigger.addEventListener('click', () => {
-      scene.triggerImpact(selectedSourceId, 1.0)
+      const intensity = intensitySlider ? parseFloat(intensitySlider.value) : 1.0
+      scene.triggerImpact(selectedSourceId, intensity)
     })
   }
 
-  const btnAutoWalk = document.getElementById('btnAutoWalk')
   if (btnAutoWalk) {
+    btnAutoWalk.textContent = autoWalkEnabled ? '⏸ 暂停走动' : '▶ 开始走动'
+    btnAutoWalk.classList.toggle('active', autoWalkEnabled)
     btnAutoWalk.addEventListener('click', () => {
       autoWalkEnabled = !autoWalkEnabled
       scene.setAutoWalk(autoWalkEnabled)
       btnAutoWalk.textContent = autoWalkEnabled ? '⏸ 暂停走动' : '▶ 开始走动'
       btnAutoWalk.classList.toggle('active', autoWalkEnabled)
-    })
-  }
-
-  const btnClear = document.getElementById('btnClear')
-  if (btnClear) {
-    btnClear.addEventListener('click', () => {
-      // Clear impacts by waiting for them to fade
-    })
-  }
-
-  const intensitySlider = document.getElementById('intensitySlider') as HTMLInputElement
-  const intensityValue = document.getElementById('intensityValue')
-  if (intensitySlider && intensityValue) {
-    intensitySlider.addEventListener('input', () => {
-      intensityValue.textContent = (parseFloat(intensitySlider.value) * 100).toFixed(0) + '%'
     })
   }
 }

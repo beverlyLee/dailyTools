@@ -32,6 +32,8 @@ export class FloorImpactSoundScene {
   private particleCount: number = 5000
   private isRunning: boolean = true
   private currentStructureId: string = 'bareConcrete'
+  private currentSourceId: string = 'highHeel'
+  private currentIntensity: number = 1.0
   private autoWalkTimer: number = 0
   private walkPath: { x: number; z: number }[] = []
   private walkIndex: number = 0
@@ -502,7 +504,7 @@ export class FloorImpactSoundScene {
       this.autoWalkTimer = 0
 
       const pos = this.walkPath[this.walkIndex]
-      this.impactGenerator.createImpact('highHeel', pos, 0.8)
+      this.impactGenerator.createImpact(this.currentSourceId, pos, this.currentIntensity * 0.8)
 
       this.walkIndex = (this.walkIndex + 1) % this.walkPath.length
     }
@@ -515,14 +517,14 @@ export class FloorImpactSoundScene {
     const avgSPL = this.vibrationCalc.getAverageSPL(activeImpacts, currentTime)
     const peakSPL = this.vibrationCalc.getPeakSPL(activeImpacts, currentTime)
 
-    const level = this.floorManager.getInsulationLevel('highHeel')
+    const level = this.floorManager.getInsulationLevel(this.currentSourceId)
 
     if (this.onSPLUpdate) {
       this.onSPLUpdate(avgSPL, peakSPL, level)
     }
 
     if (peakSPL > 45 && this.onSolutionsUpdate) {
-      const solutions = this.solutionAdvisor.getTopSuggestions('highHeel', peakSPL, 3)
+      const solutions = this.solutionAdvisor.getTopSuggestions(this.currentSourceId, peakSPL, 3)
       this.onSolutionsUpdate(solutions)
     }
   }
@@ -546,11 +548,10 @@ export class FloorImpactSoundScene {
     raycaster.ray.intersectPlane(plane, intersect)
 
     if (intersect && Math.abs(intersect.x) < this.gridSize / 2 && Math.abs(intersect.z) < this.gridSize / 2) {
-      const selectedSource = this.currentStructureId ? impactSources[0] : impactSources[0]
       this.impactGenerator.createImpact(
-        'highHeel',
+        this.currentSourceId,
         { x: intersect.x, z: intersect.z },
-        1.0
+        this.currentIntensity
       )
     }
   }
@@ -587,12 +588,13 @@ export class FloorImpactSoundScene {
     }
   }
 
-  triggerImpact(sourceId: string, intensity: number = 1.0): void {
+  triggerImpact(sourceId: string, intensity?: number): void {
     const pos = {
       x: (Math.random() - 0.5) * 4,
       z: (Math.random() - 0.5) * 4
     }
-    this.impactGenerator.createImpact(sourceId, pos, intensity)
+    const impactIntensity = intensity !== undefined ? intensity : this.currentIntensity
+    this.impactGenerator.createImpact(sourceId, pos, impactIntensity)
   }
 
   triggerImpactAtPosition(sourceId: string, x: number, z: number, intensity: number = 1.0): void {
@@ -601,6 +603,14 @@ export class FloorImpactSoundScene {
 
   setAutoWalk(enabled: boolean): void {
     this.isRunning = enabled
+  }
+
+  setSourceId(sourceId: string): void {
+    this.currentSourceId = sourceId
+  }
+
+  setIntensity(intensity: number): void {
+    this.currentIntensity = Math.max(0.2, Math.min(2.0, intensity))
   }
 
   setOnSPLUpdate(callback: (avg: number, peak: number, level: string) => void): void {
