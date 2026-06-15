@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { PlacedFurniture, AlertItem, CatPerchPoint, CatPath } from '../types';
+import { PlacedFurniture, AlertItem, CatPerchPoint } from '../types';
 import { SceneManager } from '../core/SceneManager';
 import { PathDrawingUtils, PATH_COLORS, PATH_STYLES } from '../utils/PathDrawingUtils';
 
@@ -36,28 +36,27 @@ export class CatPathSimulator {
       return alerts;
     }
 
-    const path = this.computePath(perches);
+    const groups = this.findDisconnectedGroups(perches);
+    const sortedGroups = groups.sort((a, b) => b.length - a.length);
 
-    if (path.continuous) {
-      alerts.push({
-        level: 'success',
-        title: '🐱 行动线连续',
-        message: `检测到 ${path.points.length} 个连续落脚点！从 ${path.points[0].source} → ... → ${path.points[path.points.length - 1].source}，最大跳跃间距 ${path.maxJumpGap.toFixed(1)}m，符合猫咪跳跃能力（≤ 1.2m）。`,
-      });
-      this.drawPath(path, PATH_COLORS.CAT_PATH);
-    } else {
-      const disconnected = this.findDisconnectedGroups(perches);
-      alerts.push({
-        level: 'warning',
-        title: '🐱 行动线不连续',
-        message: `检测到 ${disconnected.length} 组独立的登高路径（共 ${perches.length} 个落脚点），其中最大跳跃间距 ${path.maxJumpGap.toFixed(1)}m 超过猫咪舒适跳跃范围（≤ 1.2m）。建议在高处设施之间增加衔接平台。`,
-      });
-      disconnected.forEach((group, i) => {
-        const hue = (i * 0.3) % 1;
-        const color = new THREE.Color().setHSL(hue, 0.8, 0.55).getHex();
-        this.drawGroupPath(group, color);
-      });
+    const groupColors = this.generateGroupColors(sortedGroups.length);
+
+    sortedGroups.forEach((group, groupIdx) => {
+      const groupAlert = this.generateGroupAlert(group, groupIdx, groupColors[groupIdx]);
+      alerts.push(groupAlert);
+    });
+
+    if (sortedGroups.length > 1) {
+      const gapAlerts = this.generateGapAlerts(sortedGroups, groupColors);
+      alerts.push(...gapAlerts);
     }
+
+    const totalSummary = this.generateSummaryAlert(sortedGroups, perches);
+    alerts.push(totalSummary);
+
+    sortedGroups.forEach((group, groupIdx) => {
+      this.drawGroupPath(group, groupColors[groupIdx], groupIdx + 1);
+    });
 
     const totalHeight = perches.reduce((s, p) => s + p.height, 0) / perches.length;
     if (totalHeight < 1.0) {
@@ -69,6 +68,136 @@ export class CatPathSimulator {
     }
 
     return alerts;
+  }
+
+  private generateGroupColors(count: number): number[] {
+    const colors: number[] = [];
+    const hueStep = 0.27;
+    for (let i = 0; i < count; i++) {
+      const hue = (i * hueStep + 0.95) % 1;
+      colors.push(new THREE.Color().setHSL(hue, 0.82, 0.58).getHex());
+    }
+    return colors;
+  }
+
+  private generateGroupAlert(group: CatPerchPoint[], groupIdx: number, _color: number): AlertItem {
+    const furnitureNames = this.getUniqueFurnitureNames(group);
+    const shortNames = this.abbreviateNames(furnitureNames);
+    const heights = group.map(p => p.height);
+    const minH = Math.min(...heights);
+    const maxH = Math.max(...heights);
+    const avgH = heights.reduce((s, h) => s + h, 0) / heights.length;
+
+    return {
+      level: group.length >= 3 ? 'success' : 'info',
+      title: `🐱 Group ${groupIdx + 1}｜${group.length}个落脚点｜${shortNames.join('+')}`,
+      message: `共 ${group.length} 个落脚点，涉及 ${furnitureNames.length} 件家具（${furnitureNames.join('、')}）。高度范围 ${minH.toFixed(1)}m ~ ${maxH.toFixed(1)}m，平均高度 ${avgH.toFixed(1)}m。${group.length >= 3 ? '组内路径连续，猫咪可自由穿梭。' : '组内落脚点较少，建议增加同高度级别的设施。'}`,
+    };
+  }
+
+  private simplifySourceName(source: string): string {
+    if (source === '地面') return '地面';
+    const baseMatch = source.match(/^(.+?)\(/);
+    const layerMatch = source.match(/第(\d+)层/);
+    const baseName = baseMatch ? baseMatch[1] : source;
+    const layer = layerMatch ? `(${layerMatch[1]}层)` : '';
+    return baseName + layer;
+  }
+
+  private generateGapAlerts(groups: CatPerchPoint[][], _colors: number[]): AlertItem[] {
+    const alerts: AlertItem[] = [];
+
+    for (let i = 0; i < groups.length - 1; i++) {
+      const minGap = this.minDistanceBetweenGroups(groups[i], groups[i + 1]);
+      const nearestA = minGap.pointA;
+      const nearestB = minGap.pointB;
+
+      alerts.push({
+        level: 'warning',
+        title: `🔗 断裂点 G${i + 1}↔G${i + 2}｜${this.simplifySourceName(nearestA.source)} → ${this.simplifySourceName(nearestB.source)}`,
+        message: `两最近落脚点间距 ${minGap.distance.toFixed(1)}m，远超猫咪舒适跳跃范围 1.2m（超出 ${(minGap.distance - 1.2).toFixed(1)}m）。高度差 ${Math.abs(nearestA.height - nearestB.height).toFixed(1)}m。建议在两者之间增设衔接猫爬架或跳板（间距 ≤ 1.2m）。`,
+      });
+    }
+
+    return alerts;
+  }
+
+  private minDistanceBetweenGroups(groupA: CatPerchPoint[], groupB: CatPerchPoint[]): {
+    distance: number;
+    pointA: CatPerchPoint;
+    pointB: CatPerchPoint;
+  } {
+    let minDist = Infinity;
+    let bestA = groupA[0];
+    let bestB = groupB[0];
+
+    for (const a of groupA) {
+      for (const b of groupB) {
+        const dx = a.position.x - b.position.x;
+        const dz = a.position.z - b.position.z;
+        const dist = Math.sqrt(dx * dx + dz * dz);
+        if (dist < minDist) {
+          minDist = dist;
+          bestA = a;
+          bestB = b;
+        }
+      }
+    }
+
+    return { distance: minDist, pointA: bestA, pointB: bestB };
+  }
+
+  private generateSummaryAlert(groups: CatPerchPoint[][], allPerches: CatPerchPoint[]): AlertItem {
+    const totalPerches = allPerches.length;
+    const numGroups = groups.length;
+    const heights = allPerches.map(p => p.height);
+    const maxH = Math.max(...heights);
+    const avgH = heights.reduce((s, h) => s + h, 0) / heights.length;
+
+    const largestGroup = groups.reduce((a, b) => a.length >= b.length ? a : b);
+    const largestNames = this.getUniqueFurnitureNames(largestGroup);
+
+    if (numGroups === 1) {
+      return {
+        level: 'success',
+        title: '📊 猫咪动线总览｜路径完全连续',
+        message: `全场共 ${totalPerches} 个落脚点，${largestNames.length} 件家具全部连通。最高 ${maxH.toFixed(1)}m，平均 ${avgH.toFixed(1)}m。猫咪可在所有高处自由穿梭，空间利用充分。`,
+      };
+    }
+
+    return {
+      level: 'warning',
+      title: `📊 猫咪动线总览｜${numGroups}组路径·${totalPerches}个落脚点`,
+      message: `检测到 ${numGroups} 组独立登高路径（共 ${totalPerches} 个落脚点）。最大组含 ${largestGroup.length} 个落脚点（${this.abbreviateNames(largestNames).join('+')}）。全场最高 ${maxH.toFixed(1)}m，平均高度 ${avgH.toFixed(1)}m。各组间存在跳跃断裂，建议通过跳板/矮柜连接。`,
+    };
+  }
+
+  private getUniqueFurnitureNames(group: CatPerchPoint[]): string[] {
+    const names = new Set<string>();
+    group.forEach(p => {
+      if (p.source === '地面') return;
+      const baseName = p.source.replace(/\(第\d+层.*?\)/, '');
+      names.add(baseName);
+    });
+    return Array.from(names);
+  }
+
+  private abbreviateNames(names: string[]): string[] {
+    const nameMap: Record<string, string> = {
+      '沙发': '沙发',
+      '书架': '书架',
+      '储物柜': '柜子',
+      '餐桌': '餐桌',
+      '电视柜': '电视柜',
+      '大型猫爬架': '大猫架',
+      '小型猫爬架': '小猫架',
+      '猫抓柱': '猫抓柱',
+      '剑麻柱': '剑麻柱',
+      '自动猫砂盆': '猫砂盆',
+      '狗窝': '狗窝',
+      '狗碗': '狗碗',
+    };
+    return names.map(n => nameMap[n] || n.substring(0, 3));
   }
 
   private collectPerchPoints(furniture: PlacedFurniture[]): CatPerchPoint[] {
@@ -159,45 +288,6 @@ export class CatPathSimulator {
     return true;
   }
 
-  private computePath(perches: CatPerchPoint[]): CatPath {
-    const n = perches.length;
-    const groundIdx = perches.findIndex((p) => p.source === '地面');
-
-    const visited = new Set<number>([groundIdx]);
-    const points: CatPerchPoint[] = [perches[groundIdx]];
-    let maxGap = 0;
-
-    while (visited.size < n) {
-      let bestIdx = -1;
-      let bestDist = Infinity;
-      let bestGap = 0;
-
-      for (const vi of visited) {
-        for (let j = 0; j < n; j++) {
-          if (visited.has(j)) continue;
-          if (!this.canReach(perches[vi], perches[j])) continue;
-          const dx = perches[vi].position.x - perches[j].position.x;
-          const dz = perches[vi].position.z - perches[j].position.z;
-          const dh = perches[vi].height - perches[j].height;
-          const dist = Math.sqrt(dx * dx + dz * dz + dh * dh);
-          const gap = Math.sqrt(dx * dx + dz * dz);
-          if (dist < bestDist) {
-            bestDist = dist;
-            bestIdx = j;
-            bestGap = gap;
-          }
-        }
-      }
-
-      if (bestIdx < 0) break;
-      visited.add(bestIdx);
-      points.push(perches[bestIdx]);
-      if (bestGap > maxGap) maxGap = bestGap;
-    }
-
-    return { points, continuous: visited.size === n, maxJumpGap: maxGap };
-  }
-
   private findDisconnectedGroups(perches: CatPerchPoint[]): CatPerchPoint[][] {
     const n = perches.length;
     const parent = new Array(n).fill(0).map((_, i) => i);
@@ -234,34 +324,7 @@ export class CatPathSimulator {
     return Array.from(groups.values());
   }
 
-  private drawPath(path: CatPath, color: number): void {
-    const pts = path.points.map((p) => p.position.clone());
-    const style = PATH_STYLES.CAT_PATH;
-
-    const tube = PathDrawingUtils.createTubePath(pts, color, style.tubeRadius, true);
-    this.sceneManager.addVisualization(tube);
-    this.visualObjects.push(tube);
-
-    const line = PathDrawingUtils.createDashedLine(pts, color, style.dashSize, style.gapSize, 0.9);
-    this.sceneManager.addVisualization(line);
-    this.visualObjects.push(line);
-
-    const arrows = PathDrawingUtils.createPathArrows(pts, color, style.arrowSpacing, style.arrowSize);
-    this.sceneManager.addVisualization(arrows);
-    this.visualObjects.push(arrows);
-
-    const label = PathDrawingUtils.createPathLabel(
-      new THREE.Vector3(pts[0].x, Math.max(...pts.map(p => p.y)) + 0.8, pts[0].z),
-      '🐱 猫行动线',
-      color
-    );
-    this.sceneManager.addVisualization(label);
-    this.visualObjects.push(label);
-
-    path.points.forEach((p) => this.drawPerchPoint(p, color));
-  }
-
-  private drawGroupPath(group: CatPerchPoint[], color: number): void {
+  private drawGroupPath(group: CatPerchPoint[], color: number, groupNumber: number): void {
     const style = PATH_STYLES.CAT_PATH;
     for (let i = 0; i < group.length; i++) {
       for (let j = i + 1; j < group.length; j++) {
@@ -281,6 +344,17 @@ export class CatPathSimulator {
         }
       }
     }
+
+    const highestPoint = group.reduce((max, p) => p.height > max.height ? p : max, group[0]);
+    const groupLabel = PathDrawingUtils.createPathLabel(
+      new THREE.Vector3(highestPoint.position.x, highestPoint.position.y + 0.7, highestPoint.position.z),
+      `🐱 G${groupNumber} ${group.length}点`,
+      color
+    );
+    groupLabel.scale.set(2.4, 0.85, 1);
+    this.sceneManager.addVisualization(groupLabel);
+    this.visualObjects.push(groupLabel);
+
     group.forEach((p) => this.drawPerchPoint(p, color));
   }
 
