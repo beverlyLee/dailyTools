@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { PlacedFurniture, AlertItem, CatPerchPoint, CatPath } from '../types';
 import { SceneManager } from '../core/SceneManager';
-import { PathDrawingUtils } from '../utils/PathDrawingUtils';
+import { PathDrawingUtils, PATH_COLORS, PATH_STYLES } from '../utils/PathDrawingUtils';
 
 export class CatPathSimulator {
   private sceneManager: SceneManager;
@@ -32,7 +32,7 @@ export class CatPathSimulator {
         title: '🐱 落脚点单一',
         message: `仅检测到 1 个登高落脚点（${perches[0].source}），猫咪无法形成连续的活动路径。建议在相邻位置增设登高设施。`,
       });
-      this.drawPerchPoint(perches[0], 0xff9800);
+      this.drawPerchPoint(perches[0], PATH_COLORS.CAT_PATH);
       return alerts;
     }
 
@@ -44,7 +44,7 @@ export class CatPathSimulator {
         title: '🐱 行动线连续',
         message: `检测到 ${path.points.length} 个连续落脚点！从 ${path.points[0].source} → ... → ${path.points[path.points.length - 1].source}，最大跳跃间距 ${path.maxJumpGap.toFixed(1)}m，符合猫咪跳跃能力（≤ 1.2m）。`,
       });
-      this.drawPath(path, 0x66bb6a);
+      this.drawPath(path, PATH_COLORS.CAT_PATH);
     } else {
       const disconnected = this.findDisconnectedGroups(perches);
       alerts.push({
@@ -54,7 +54,7 @@ export class CatPathSimulator {
       });
       disconnected.forEach((group, i) => {
         const hue = (i * 0.3) % 1;
-        const color = new THREE.Color().setHSL(hue, 0.7, 0.5).getHex();
+        const color = new THREE.Color().setHSL(hue, 0.8, 0.55).getHex();
         this.drawGroupPath(group, color);
       });
     }
@@ -236,21 +236,22 @@ export class CatPathSimulator {
 
   private drawPath(path: CatPath, color: number): void {
     const pts = path.points.map((p) => p.position.clone());
+    const style = PATH_STYLES.CAT_PATH;
 
-    const tube = PathDrawingUtils.createTubePath(pts, color, 0.04, true);
+    const tube = PathDrawingUtils.createTubePath(pts, color, style.tubeRadius, true);
     this.sceneManager.addVisualization(tube);
     this.visualObjects.push(tube);
 
-    const line = PathDrawingUtils.createDashedLine(pts, color, 0.2, 0.12, 0.9);
+    const line = PathDrawingUtils.createDashedLine(pts, color, style.dashSize, style.gapSize, 0.9);
     this.sceneManager.addVisualization(line);
     this.visualObjects.push(line);
 
-    const arrows = PathDrawingUtils.createPathArrows(pts, color, 1.2);
+    const arrows = PathDrawingUtils.createPathArrows(pts, color, style.arrowSpacing, style.arrowSize);
     this.sceneManager.addVisualization(arrows);
     this.visualObjects.push(arrows);
 
     const label = PathDrawingUtils.createPathLabel(
-      new THREE.Vector3(pts[0].x, Math.max(...pts.map(p => p.y)) + 0.6, pts[0].z),
+      new THREE.Vector3(pts[0].x, Math.max(...pts.map(p => p.y)) + 0.8, pts[0].z),
       '🐱 猫行动线',
       color
     );
@@ -261,19 +262,20 @@ export class CatPathSimulator {
   }
 
   private drawGroupPath(group: CatPerchPoint[], color: number): void {
+    const style = PATH_STYLES.CAT_PATH;
     for (let i = 0; i < group.length; i++) {
       for (let j = i + 1; j < group.length; j++) {
         if (this.canReach(group[i], group[j])) {
           const pts = [group[i].position.clone(), group[j].position.clone()];
-          const tube = PathDrawingUtils.createTubePath(pts, color, 0.03, true);
+          const tube = PathDrawingUtils.createTubePath(pts, color, style.tubeRadius * 0.8, true);
           this.sceneManager.addVisualization(tube);
           this.visualObjects.push(tube);
 
-          const line = PathDrawingUtils.createDashedLine(pts, color, 0.15, 0.1, 0.6);
+          const line = PathDrawingUtils.createDashedLine(pts, color, style.dashSize * 0.8, style.gapSize * 0.8, 0.7);
           this.sceneManager.addVisualization(line);
           this.visualObjects.push(line);
 
-          const arrows = PathDrawingUtils.createPathArrows(pts, color, 1.0);
+          const arrows = PathDrawingUtils.createPathArrows(pts, color, style.arrowSpacing, style.arrowSize * 0.8);
           this.sceneManager.addVisualization(arrows);
           this.visualObjects.push(arrows);
         }

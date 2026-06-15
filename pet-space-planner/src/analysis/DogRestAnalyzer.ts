@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { PlacedFurniture, AlertItem, DogSize } from '../types';
 import { SceneManager } from '../core/SceneManager';
+import { PathDrawingUtils, PATH_COLORS, PATH_STYLES } from '../utils/PathDrawingUtils';
 
 export class DogRestAnalyzer {
   private sceneManager: SceneManager;
@@ -147,6 +148,8 @@ export class DogRestAnalyzer {
         message: `体型：${this.getDogSizeLabel(dogSize)}，建议窝尺寸 ≥ ${dogSizeDim.bedW.toFixed(1)}×${dogSizeDim.bedD.toFixed(1)}m，通道安全距 ≥ ${dogSizeDim.walkwaySafe.toFixed(1)}m。最佳位置：客厅靠墙角落，远离厨房噪音与餐厅食物刺激。`,
       });
     }
+
+    this.drawDogPaths(furniture, dogBeds, dogBowls);
 
     return alerts;
   }
@@ -363,6 +366,136 @@ export class DogRestAnalyzer {
     ring.position.set(f.position.x, 0.015, f.position.z);
     this.sceneManager.addVisualization(ring);
     this.visualObjects.push(ring);
+  }
+
+  private drawDogPaths(
+    _furniture: PlacedFurniture[],
+    dogBeds: PlacedFurniture[],
+    dogBowls: PlacedFurniture[]
+  ): void {
+    const color = PATH_COLORS.DOG_PATH;
+    const style = PATH_STYLES.DOG_PATH;
+    const room = this.sceneManager.getRoom();
+
+    const entryPoint = new THREE.Vector3(-room.width / 2 + 1.5, 0.08, -room.depth / 2 + 1.5);
+
+    dogBeds.forEach((bed) => {
+      const bedPos = new THREE.Vector3(bed.position.x, 0.08, bed.position.z);
+
+      dogBowls.forEach((bowl) => {
+        const bowlPos = new THREE.Vector3(bowl.position.x, 0.08, bowl.position.z);
+        const pts = [bedPos, bowlPos];
+
+        const tube = PathDrawingUtils.createTubePath(pts, color, style.tubeRadius, true);
+        this.sceneManager.addVisualization(tube);
+        this.visualObjects.push(tube);
+
+        const dashedLine = PathDrawingUtils.createDashedLine(pts, color, style.dashSize, style.gapSize, 0.85);
+        this.sceneManager.addVisualization(dashedLine);
+        this.visualObjects.push(dashedLine);
+
+        const arrows = PathDrawingUtils.createPathArrows(pts, color, style.arrowSpacing, style.arrowSize);
+        this.sceneManager.addVisualization(arrows);
+        this.visualObjects.push(arrows);
+
+        const midX = (bedPos.x + bowlPos.x) / 2;
+        const midZ = (bedPos.z + bowlPos.z) / 2;
+        const label = PathDrawingUtils.createPathLabel(
+          new THREE.Vector3(midX, 0.7, midZ),
+          '🐕 喂食动线',
+          color
+        );
+        this.sceneManager.addVisualization(label);
+        this.visualObjects.push(label);
+      });
+
+      const toDoorPts = [bedPos, entryPoint];
+      const doorTube = PathDrawingUtils.createTubePath(toDoorPts, color, style.tubeRadius * 0.9, true);
+      this.sceneManager.addVisualization(doorTube);
+      this.visualObjects.push(doorTube);
+
+      const doorDashed = PathDrawingUtils.createDashedLine(toDoorPts, color, style.dashSize * 1.2, style.gapSize * 1.2, 0.75);
+      this.sceneManager.addVisualization(doorDashed);
+      this.visualObjects.push(doorDashed);
+
+      const doorArrows = PathDrawingUtils.createPathArrows(toDoorPts, color, style.arrowSpacing * 1.2, style.arrowSize * 0.9);
+      this.sceneManager.addVisualization(doorArrows);
+      this.visualObjects.push(doorArrows);
+
+      const doorMidX = (bedPos.x + entryPoint.x) / 2;
+      const doorMidZ = (bedPos.z + entryPoint.z) / 2;
+      const doorLabel = PathDrawingUtils.createPathLabel(
+        new THREE.Vector3(doorMidX, 0.65, doorMidZ),
+        '🐕 出门动线',
+        color
+      );
+      this.sceneManager.addVisualization(doorLabel);
+      this.visualObjects.push(doorLabel);
+
+      const bedMarker = PathDrawingUtils.createNodeMarker(bedPos, color, 0.14);
+      this.sceneManager.addVisualization(bedMarker);
+      this.visualObjects.push(bedMarker);
+
+      const bedLabel = PathDrawingUtils.createPathLabel(
+        new THREE.Vector3(bedPos.x, 0.5, bedPos.z),
+        '🐕 狗窝',
+        color
+      );
+      bedLabel.scale.set(1.8, 0.65, 1);
+      this.sceneManager.addVisualization(bedLabel);
+      this.visualObjects.push(bedLabel);
+
+      const doorMarker = PathDrawingUtils.createNodeMarker(entryPoint, color, 0.12);
+      this.sceneManager.addVisualization(doorMarker);
+      this.visualObjects.push(doorMarker);
+
+      const doorMarkerLabel = PathDrawingUtils.createPathLabel(
+        new THREE.Vector3(entryPoint.x, 0.45, entryPoint.z),
+        '🚪 入口',
+        color
+      );
+      doorMarkerLabel.scale.set(1.5, 0.55, 1);
+      this.sceneManager.addVisualization(doorMarkerLabel);
+      this.visualObjects.push(doorMarkerLabel);
+
+      this.drawDogActivityZone(bed, color);
+    });
+  }
+
+  private drawDogActivityZone(bed: PlacedFurniture, color: number): void {
+    const dims = this.getDogDimensions('medium');
+    const activityRadius = dims.surroundingSpace + 0.5;
+
+    const segments = 32;
+    const positions = new Float32Array(segments * 3);
+    for (let i = 0; i < segments; i++) {
+      const angle = (i / segments) * Math.PI * 2;
+      positions[i * 3] = bed.position.x + Math.cos(angle) * activityRadius;
+      positions[i * 3 + 1] = 0.03;
+      positions[i * 3 + 2] = bed.position.z + Math.sin(angle) * activityRadius;
+    }
+    const zoneGeo = new THREE.BufferGeometry();
+    zoneGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const zoneMat = new THREE.LineDashedMaterial({
+      color,
+      transparent: true,
+      opacity: 0.5,
+      dashSize: 0.3,
+      gapSize: 0.2,
+    });
+    const zoneLine = new THREE.LineLoop(zoneGeo, zoneMat);
+    zoneLine.computeLineDistances();
+    this.sceneManager.addVisualization(zoneLine);
+    this.visualObjects.push(zoneLine);
+
+    const zoneLabel = PathDrawingUtils.createPathLabel(
+      new THREE.Vector3(bed.position.x + activityRadius * 0.7, 0.5, bed.position.z + activityRadius * 0.7),
+      '🐕 活动范围',
+      color
+    );
+    zoneLabel.scale.set(2.2, 0.75, 1);
+    this.sceneManager.addVisualization(zoneLabel);
+    this.visualObjects.push(zoneLabel);
   }
 
   clearVisualizations(): void {

@@ -255,49 +255,65 @@ export class SceneManager {
 
   private createZoneLabel(cx: number, cz: number, name: string, icon: string, color: number): void {
     const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 256;
+    canvas.width = 640;
+    canvas.height = 320;
     const ctx = canvas.getContext('2d')!;
 
-    ctx.clearRect(0, 0, 512, 256);
+    ctx.clearRect(0, 0, 640, 320);
 
     const r = ((color >> 16) & 0xff);
     const g = ((color >> 8) & 0xff);
     const b = (color & 0xff);
 
-    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.2)`;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 12;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 4;
+
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
     ctx.beginPath();
-    ctx.roundRect(20, 20, 472, 216, 24);
+    ctx.roundRect(24, 24, 592, 272, 32);
     ctx.fill();
 
-    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.5)`;
-    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.4)`;
-    ctx.lineWidth = 2;
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.9)`;
+    ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.roundRect(20, 20, 472, 216, 24);
+    ctx.roundRect(24, 24, 592, 272, 32);
     ctx.stroke();
 
-    ctx.font = '80px sans-serif';
+    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.85)`;
+    ctx.fillRect(24, 24, 592, 12);
+    ctx.fillRect(24, 284, 592, 12);
+
+    ctx.font = '110px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(icon, 256, 95);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(icon, 320, 110);
 
-    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.85)`;
-    ctx.font = 'bold 56px "PingFang SC", "Microsoft YaHei", sans-serif';
-    ctx.fillText(name, 256, 185);
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    ctx.shadowBlur = 6;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 2;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 72px "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif';
+    ctx.fillText(name, 320, 225);
 
     const texture = new THREE.CanvasTexture(canvas);
+    texture.anisotropy = 8;
     texture.needsUpdate = true;
     const material = new THREE.SpriteMaterial({
       map: texture,
       transparent: true,
-      opacity: 0.9,
+      opacity: 1.0,
       depthTest: false,
+      depthWrite: false,
     });
     const sprite = new THREE.Sprite(material);
-    sprite.position.set(cx, 2.8, cz);
-    sprite.scale.set(4, 2, 1);
-    sprite.renderOrder = -1;
+    sprite.position.set(cx, 5.0, cz);
+    sprite.scale.set(7.5, 3.75, 1);
+    sprite.renderOrder = 999;
     this.scene.add(sprite);
   }
 

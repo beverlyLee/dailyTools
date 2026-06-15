@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { PlacedFurniture, AlertItem } from '../types';
 import { SceneManager } from '../core/SceneManager';
-import { PathDrawingUtils } from '../utils/PathDrawingUtils';
+import { PathDrawingUtils, PATH_COLORS, PATH_STYLES } from '../utils/PathDrawingUtils';
 
 export class WalkwayAnalyzer {
   private sceneManager: SceneManager;
@@ -301,28 +301,28 @@ export class WalkwayAnalyzer {
 
   private drawWalkwayPaths(): void {
     const room = this.sceneManager.getRoom();
+    const style = PATH_STYLES.WALKWAY;
+    const color = PATH_COLORS.WALKWAY;
     room.walkways.forEach((walkway: { start: THREE.Vector2; end: THREE.Vector2; width: number; isMain: boolean; name: string }) => {
-      const color = walkway.isMain ? 0xff7043 : 0xffa726;
       const startPt = new THREE.Vector3(walkway.start.x, 0.08, walkway.start.y);
       const endPt = new THREE.Vector3(walkway.end.x, 0.08, walkway.end.y);
       const pts = [startPt, endPt];
 
-      const tube = PathDrawingUtils.createTubePath(pts, color, 0.05, false);
+      const tube = PathDrawingUtils.createTubePath(pts, color, walkway.isMain ? style.tubeRadius * 1.2 : style.tubeRadius, false);
       this.sceneManager.addVisualization(tube);
       this.visualObjects.push(tube);
 
-      const arrows = PathDrawingUtils.createPathArrows(pts, color, 2.0);
+      const arrows = PathDrawingUtils.createPathArrows(pts, color, style.arrowSpacing, style.arrowSize);
       this.sceneManager.addVisualization(arrows);
       this.visualObjects.push(arrows);
 
       const midX = (walkway.start.x + walkway.end.x) / 2;
       const midZ = (walkway.start.y + walkway.end.y) / 2;
       const label = PathDrawingUtils.createPathLabel(
-        new THREE.Vector3(midX, 0.5, midZ),
+        new THREE.Vector3(midX, 0.8, midZ),
         `🚶 ${walkway.name}`,
         color
       );
-      label.scale.set(2.5, 0.9, 1);
       this.sceneManager.addVisualization(label);
       this.visualObjects.push(label);
 

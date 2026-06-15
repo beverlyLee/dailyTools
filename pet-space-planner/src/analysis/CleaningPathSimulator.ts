@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { PlacedFurniture, AlertItem, RoomZone } from '../types';
 import { SceneManager } from '../core/SceneManager';
-import { PathDrawingUtils } from '../utils/PathDrawingUtils';
+import { PathDrawingUtils, PATH_COLORS, PATH_STYLES } from '../utils/PathDrawingUtils';
 
 type PathPoint = { x: number; z: number };
 
@@ -77,7 +77,8 @@ export class CleaningPathSimulator {
       const kitchenCrossed = crossedZones.filter((z) => z.type === 'kitchen');
       const livingCrossed = crossedZones.filter((z) => z.type === 'living');
 
-      this.drawPath(path, diningCrossed.length > 0 || kitchenCrossed.length > 0 ? 0xef5350 : 0x66bb6a);
+      const pathColor = diningCrossed.length > 0 || kitchenCrossed.length > 0 ? 0xef5350 : PATH_COLORS.CLEANING;
+      this.drawPath(path, pathColor);
 
       if (diningCrossed.length > 0) {
         alerts.push({
@@ -349,24 +350,25 @@ export class CleaningPathSimulator {
 
   private drawPath(path: PathPoint[], color: number): void {
     const pts: THREE.Vector3[] = path.map((p) => new THREE.Vector3(p.x, 0.08, p.z));
+    const style = PATH_STYLES.CLEANING;
 
     if (pts.length >= 2) {
-      const tube = PathDrawingUtils.createTubePath(pts, color, 0.05, true);
+      const tube = PathDrawingUtils.createTubePath(pts, color, style.tubeRadius, true);
       this.sceneManager.addVisualization(tube);
       this.visualObjects.push(tube);
 
-      const dashedLine = PathDrawingUtils.createDashedLine(pts, color, 0.2, 0.12, 0.9);
+      const dashedLine = PathDrawingUtils.createDashedLine(pts, color, style.dashSize, style.gapSize, 0.9);
       this.sceneManager.addVisualization(dashedLine);
       this.visualObjects.push(dashedLine);
 
-      const arrows = PathDrawingUtils.createPathArrows(pts, color, 1.5);
+      const arrows = PathDrawingUtils.createPathArrows(pts, color, style.arrowSpacing, style.arrowSize);
       this.sceneManager.addVisualization(arrows);
       this.visualObjects.push(arrows);
     }
 
     const labelPos = pts.length > 0
-      ? new THREE.Vector3(pts[0].x, 0.6, pts[0].z)
-      : new THREE.Vector3(0, 0.6, 0);
+      ? new THREE.Vector3(pts[0].x, 0.9, pts[0].z)
+      : new THREE.Vector3(0, 0.9, 0);
     const label = PathDrawingUtils.createPathLabel(labelPos, '🧹 清洁动线', color);
     this.sceneManager.addVisualization(label);
     this.visualObjects.push(label);
@@ -377,11 +379,11 @@ export class CleaningPathSimulator {
       this.visualObjects.push(startMarker);
 
       const startLabel = PathDrawingUtils.createPathLabel(
-        new THREE.Vector3(pts[0].x, 0.35, pts[0].z),
+        new THREE.Vector3(pts[0].x, 0.55, pts[0].z),
         '🚮 猫砂盆',
         color
       );
-      startLabel.scale.set(1.5, 0.55, 1);
+      startLabel.scale.set(1.8, 0.65, 1);
       this.sceneManager.addVisualization(startLabel);
       this.visualObjects.push(startLabel);
     }
@@ -392,11 +394,11 @@ export class CleaningPathSimulator {
       this.visualObjects.push(endMarker);
 
       const endLabel = PathDrawingUtils.createPathLabel(
-        new THREE.Vector3(pts[pts.length - 1].x, 0.35, pts[pts.length - 1].z),
+        new THREE.Vector3(pts[pts.length - 1].x, 0.55, pts[pts.length - 1].z),
         '🚰 清洁点',
         color
       );
-      endLabel.scale.set(1.5, 0.55, 1);
+      endLabel.scale.set(1.8, 0.65, 1);
       this.sceneManager.addVisualization(endLabel);
       this.visualObjects.push(endLabel);
     }
