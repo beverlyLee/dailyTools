@@ -199,7 +199,10 @@ const microMotionSignal = ref(0)
 const occlusionLevel = ref(0)
 const lightOn = ref(false)
 const delayCountdown = ref(0)
-const delayProgress = computed(() => lightOn.value ? 100 : Math.max(0, (1 - delayCountdown.value / lightDelay.value) * 100))
+const delayProgress = computed(() => {
+  if (humanDetected.value) return 100
+  return Math.max(0, (delayCountdown.value / lightDelay.value) * 100)
+})
 
 let scene: THREE.Scene
 let camera: THREE.PerspectiveCamera
@@ -396,26 +399,24 @@ function createRadar() {
   const domeGeo = radarType.value === 'sphere'
     ? new THREE.SphereGeometry(0.12, 32, 32)
     : new THREE.SphereGeometry(0.12, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2)
-  const domeMat = new THREE.MeshPhysicalMaterial({
+  const domeMat = new THREE.MeshStandardMaterial({
     color: 0x4fc3f7,
-    roughness: 0.1,
-    metalness: 0,
-    transmission: 0.3,
+    roughness: 0.15,
+    metalness: 0.1,
     transparent: true,
     opacity: 0.85,
     emissive: 0x1976d2,
-    emissiveIntensity: 0.4,
-    clearcoat: 1,
+    emissiveIntensity: 0.5,
   })
   const dome = new THREE.Mesh(domeGeo, domeMat)
-  dome.position.y = 0.08
+  dome.position.y = -0.08
   dome.castShadow = true
   radarMesh.add(dome)
 
   const ledGeo = new THREE.SphereGeometry(0.02, 16, 16)
   const ledMat = new THREE.MeshBasicMaterial({ color: 0x4caf50 })
   const led = new THREE.Mesh(ledGeo, ledMat)
-  led.position.set(0, 0.14, 0.08)
+  led.position.set(0, -0.14, -0.08)
   radarMesh.add(led)
 
   const antennaGroup = new THREE.Group()
@@ -430,8 +431,8 @@ function createRadar() {
         new THREE.ConeGeometry(0.015, 0.12, 8),
         antennaMat
       )
-      ant.position.set(i * 0.05, 0.14, 0.1)
-      ant.rotation.x = Math.PI / 3
+      ant.position.set(i * 0.05, -0.14, -0.1)
+      ant.rotation.x = -Math.PI / 3
       antennaGroup.add(ant)
     }
   }
@@ -456,15 +457,18 @@ function createRadar() {
   ctx.font = '16px sans-serif'
   ctx.fillText('60GHz FMCW', 128, 46)
   const labelTex = new THREE.CanvasTexture(labelCanvas)
+  labelTex.colorSpace = THREE.SRGBColorSpace
+  labelTex.format = THREE.RGBAFormat
+  labelTex.type = THREE.UnsignedByteType
   const labelMat = new THREE.SpriteMaterial({ map: labelTex, transparent: true })
   const label = new THREE.Sprite(labelMat)
   label.scale.set(1, 0.25, 1)
-  label.position.set(0, 0.55, 0)
+  label.position.set(0, -0.55, 0)
   radarMesh.add(label)
 
   radarMesh.position.copy(radarConfig.position)
   radarMesh.position.y = radarHeight.value
-  radarMesh.rotation.set(radarConfig.targetPitch, radarConfig.targetYaw, 0)
+  radarMesh.rotation.set(Math.PI + radarConfig.targetPitch, radarConfig.targetYaw, 0)
   scene.add(radarMesh)
 }
 
@@ -484,16 +488,12 @@ function createDetectionVolume() {
         24
       )
 
-  const mat = new THREE.MeshPhysicalMaterial({
+  const mat = new THREE.MeshBasicMaterial({
     color: 0x4fc3f7,
     transparent: true,
     opacity: 0.12,
-    roughness: 0,
-    metalness: 0,
     side: THREE.DoubleSide,
     depthWrite: false,
-    emissive: 0x2196f3,
-    emissiveIntensity: 0.15,
   })
   detectionVolumeMesh = new THREE.Mesh(geo, mat)
 
@@ -634,15 +634,15 @@ function createFurniture() {
     roughness: 0.75,
   })
 
-  const wBody = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.4, 0.55), wMat)
-  wBody.position.y = 1.2
+  const wBody = new THREE.Mesh(new THREE.BoxGeometry(1.2, 3.0, 0.8), wMat)
+  wBody.position.y = 1.5
   wBody.castShadow = true
   wBody.receiveShadow = true
   wardrobeGroup.add(wBody)
 
   for (let i = -1; i <= 1; i += 2) {
-    const door = new THREE.Mesh(new THREE.BoxGeometry(0.75, 2.3, 0.04), wDarkMat)
-    door.position.set(i * 0.4, 1.2, 0.3)
+    const door = new THREE.Mesh(new THREE.BoxGeometry(0.55, 2.9, 0.04), wDarkMat)
+    door.position.set(i * 0.3, 1.5, 0.42)
     door.castShadow = true
     wardrobeGroup.add(door)
 
@@ -651,11 +651,11 @@ function createFurniture() {
       new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9, roughness: 0.2 })
     )
     handle.rotation.z = Math.PI / 2
-    handle.position.set(i * 0.7, 1.2, 0.33)
+    handle.position.set(i * 0.5, 1.5, 0.45)
     wardrobeGroup.add(handle)
   }
 
-  wardrobeGroup.position.set(4.5, 0, 2)
+  wardrobeGroup.position.set(-3.5, 0, -4.5)
   scene.add(wardrobeGroup)
 
   const coffeeTable = new THREE.Mesh(
@@ -686,7 +686,7 @@ function updateOcclusionZones() {
   if (!wardrobeGroup) return
 
   const wPos = wardrobeGroup.position
-  const wSize = { x: 1.6, y: 2.4, z: 0.55 }
+  const wSize = { x: 1.2, y: 3.0, z: 0.8 }
 
   const radarPos = new THREE.Vector3(radarConfig.position.x, radarHeight.value, radarConfig.position.z)
   const wCenter = new THREE.Vector3(wPos.x, wSize.y / 2, wPos.z)
@@ -696,7 +696,7 @@ function updateOcclusionZones() {
   toWardrobe.normalize()
 
   if (distToWardrobe < detectionRange.value * 1.5) {
-    const shadowDepth = Math.min(detectionRange.value - distToWardrobe + 1, 4)
+    const shadowDepth = Math.min(detectionRange.value - distToWardrobe + 1, 7)
     if (shadowDepth > 0) {
       const shadowGeo = new THREE.BoxGeometry(wSize.x * 0.9, wSize.y * 0.95, shadowDepth)
       const shadowMat = new THREE.MeshBasicMaterial({
@@ -842,8 +842,7 @@ function createLightSystem() {
     depthWrite: false,
   })
   lightCone = new THREE.Mesh(coneGeo, coneMat)
-  lightCone.position.set(0, 3.2 - 1.6, 0)
-  lightCone.rotation.x = Math.PI
+  lightCone.position.set(0, 3.2 - 3.2 / 2, 0)
   scene.add(lightCone)
 }
 
@@ -878,7 +877,7 @@ function calculateOcclusion(humanPos: THREE.Vector3): number {
 
   const radarPos = new THREE.Vector3(radarConfig.position.x, radarHeight.value, radarConfig.position.z)
   const wPos = wardrobeGroup.position
-  const wSize = { x: 1.6, y: 2.4, z: 0.55 }
+  const wSize = { x: 1.2, y: 3.0, z: 0.8 }
 
   const dirToHuman = new THREE.Vector3().subVectors(humanPos, radarPos)
   const totalDist = dirToHuman.length()
@@ -974,7 +973,7 @@ function updateHumanAnimation(dt: number) {
   } else {
     humanConfig.basePosition.set(0, 0, -3)
     if (!humanOnSofa.value) {
-      humanConfig.basePosition.set(4, 0, 3)
+      humanConfig.basePosition.set(-4.5, 0, -2.5)
     }
     humanGroup.position.lerp(humanConfig.basePosition, 0.05)
     const lookDir = new THREE.Vector3().subVectors(new THREE.Vector3(0, 0, 0), humanGroup.position)
@@ -999,7 +998,9 @@ function updateLightLogic(dt: number, detected: boolean) {
   if (!lightMesh || !lightBulbMesh || !lightCone) return
 
   if (detected) {
-    delayCountdown.value = lightDelay.value
+    if (delayCountdown.value <= 0) {
+      delayCountdown.value = lightDelay.value
+    }
   } else {
     delayCountdown.value = Math.max(0, delayCountdown.value - dt)
   }
@@ -1065,7 +1066,7 @@ function animate() {
   controls.update()
   updateDetectionStatus(dt)
 
-  if (detectionVolumeMesh && detectionVolumeMesh.material instanceof THREE.MeshPhysicalMaterial) {
+  if (detectionVolumeMesh && detectionVolumeMesh.material instanceof THREE.MeshBasicMaterial) {
     const t = performance.now() * 0.001
     detectionVolumeMesh.material.opacity = 0.1 + Math.sin(t * 2) * 0.03
   }
