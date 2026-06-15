@@ -154,6 +154,8 @@ const statusClass = computed(() => {
 });
 
 const statusText = computed(() => {
+  if (temperature.value >= 35) return '超标';
+  if (temperature.value <= 12) return '极低';
   if (temperature.value >= warningHigh) return '偏高';
   if (temperature.value <= warningLow) return '偏低';
   if (temperature.value >= idealMin && temperature.value <= idealMax) return '适宜';

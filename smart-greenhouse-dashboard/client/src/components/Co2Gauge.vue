@@ -101,6 +101,8 @@ const idealMin = 600;
 const idealMax = 1000;
 const warningHigh = 1500;
 const warningLow = 400;
+const dangerHigh = 1800;
+const dangerLow = 350;
 
 const percentage = computed(() => {
   const range = max - min;
@@ -114,7 +116,7 @@ const dashOffset = computed(() => {
   return circumference - visibleLength * percentage.value;
 });
 
-const isDanger = computed(() => co2.value >= 1800);
+const isDanger = computed(() => co2.value >= dangerHigh || co2.value <= dangerLow);
 const isWarning = computed(() => co2.value >= warningHigh || co2.value <= warningLow);
 
 const statusClass = computed(() => {
@@ -124,6 +126,8 @@ const statusClass = computed(() => {
 });
 
 const statusText = computed(() => {
+  if (co2.value >= dangerHigh) return '超标';
+  if (co2.value <= dangerLow) return '极低';
   if (co2.value >= warningHigh) return '偏高';
   if (co2.value <= warningLow) return '偏低';
   if (co2.value >= idealMin && co2.value <= idealMax) return '适宜';

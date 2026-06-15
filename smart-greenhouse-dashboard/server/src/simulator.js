@@ -107,10 +107,10 @@ class EnvironmentSimulator {
     const effectedState = this.applyDeviceEffects(this.state);
     this.state = { ...effectedState, timestamp: Date.now() };
     
-    this.state.temperature = this.clamp(this.state.temperature, cfg.temperature.min - 2, cfg.temperature.max + 2);
-    this.state.humidity = this.clamp(this.state.humidity, cfg.humidity.min - 2, cfg.humidity.max + 2);
-    this.state.light = this.clamp(this.state.light, cfg.light.min, cfg.light.max + 2000);
-    this.state.co2 = this.clamp(this.state.co2, cfg.co2.min - 50, cfg.co2.max + 200);
+    this.state.temperature = this.clamp(this.state.temperature, cfg.temperature.min, cfg.temperature.max);
+    this.state.humidity = this.clamp(this.state.humidity, cfg.humidity.min, cfg.humidity.max);
+    this.state.light = this.clamp(this.state.light, cfg.light.min, cfg.light.max);
+    this.state.co2 = this.clamp(this.state.co2, cfg.co2.min, cfg.co2.max);
     
     if (this.forcedTemperature !== null && this.forceTempRemaining > 0) {
       this.state.temperature = this.forcedTemperature;

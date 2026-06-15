@@ -1,5 +1,5 @@
 <template>
-  <div class="gauge-card" :class="{ 'is-warning': isWarning }">
+  <div class="gauge-card" :class="{ 'is-warning': isWarning, 'is-danger': isDanger }">
     <div class="gauge-header">
       <span class="gauge-icon">☀️</span>
       <span class="gauge-label">光照</span>
@@ -51,7 +51,7 @@
           stroke-linecap="round"
           transform="rotate(135 100 100)"
           class="progress-circle"
-          :class="{ 'pulse-warning': isWarning }"
+          :class="{ 'pulse-danger': isDanger, 'pulse-warning': isWarning }"
         />
         
         <g class="sun-icon" :filter="isDaytime ? 'url(#lightGlow)' : ''">
@@ -119,6 +119,7 @@ const idealMin = 3000;
 const idealMax = 8000;
 const warningHigh = 9000;
 const warningLow = 1000;
+const dangerHigh = 9500;
 
 const percentage = computed(() => {
   const range = max - min;
@@ -134,21 +135,26 @@ const dashOffset = computed(() => {
 
 const isDaytime = computed(() => light.value > 500);
 
+const isDanger = computed(() => light.value >= dangerHigh);
 const isWarning = computed(() => light.value >= warningHigh || (light.value <= warningLow && light.value > 0));
 
 const statusClass = computed(() => {
+  if (isDanger.value) return 'status-danger';
   if (isWarning.value) return 'status-warning';
   return 'status-good';
 });
 
 const statusText = computed(() => {
+  if (light.value >= dangerHigh) return '极强';
   if (light.value >= warningHigh) return '过强';
-  if (light.value <= warningLow) return '不足';
+  if (light.value <= warningLow && light.value > 0) return '不足';
+  if (light.value === 0) return '夜间';
   if (light.value >= idealMin && light.value <= idealMax) return '适宜';
   return '正常';
 });
 
 const sunColor = computed(() => {
+  if (isDanger.value) return '#ef4444';
   if (light.value < 1000) return '#4b5563';
   if (isWarning.value) return '#f59e0b';
   return '#fbbf24';
@@ -191,6 +197,11 @@ function angle(i) {
   box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);
 }
 
+.gauge-card.is-danger {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
 .gauge-header {
   display: flex;
   align-items: center;
@@ -226,6 +237,11 @@ function angle(i) {
   color: #f59e0b;
 }
 
+.status-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
 .gauge-body {
   display: flex;
   justify-content: center;
@@ -238,6 +254,15 @@ function angle(i) {
 
 .pulse-warning {
   animation: pulse-orange 2s ease-in-out infinite;
+}
+
+.pulse-danger {
+  animation: pulse-red 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 @keyframes pulse-orange {

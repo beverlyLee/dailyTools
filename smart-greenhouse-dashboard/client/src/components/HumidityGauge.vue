@@ -1,5 +1,5 @@
 <template>
-  <div class="gauge-card" :class="{ 'is-warning': isWarning }">
+  <div class="gauge-card" :class="{ 'is-warning': isWarning, 'is-danger': isDanger }">
     <div class="gauge-header">
       <span class="gauge-icon">💧</span>
       <span class="gauge-label">湿度</span>
@@ -49,9 +49,9 @@
           :stroke-dashoffset="dashOffset"
           stroke-linecap="round"
           transform="rotate(135 100 100)"
-          :filter="isWarning ? 'url(#humidityGlow)' : ''"
+          :filter="isDanger || isWarning ? 'url(#humidityGlow)' : ''"
           class="progress-circle"
-          :class="{ 'pulse-warning': isWarning }"
+          :class="{ 'pulse-danger': isDanger, 'pulse-warning': isWarning }"
         />
         
         <g class="water-drop">
@@ -110,6 +110,8 @@ const idealMin = 50;
 const idealMax = 75;
 const warningHigh = 85;
 const warningLow = 40;
+const dangerHigh = 95;
+const dangerLow = 35;
 
 const percentage = computed(() => {
   const range = max - min;
@@ -123,14 +125,18 @@ const dashOffset = computed(() => {
   return circumference - visibleLength * percentage.value;
 });
 
+const isDanger = computed(() => humidity.value >= dangerHigh || humidity.value <= dangerLow);
 const isWarning = computed(() => humidity.value >= warningHigh || humidity.value <= warningLow);
 
 const statusClass = computed(() => {
+  if (isDanger.value) return 'status-danger';
   if (isWarning.value) return 'status-warning';
   return 'status-good';
 });
 
 const statusText = computed(() => {
+  if (humidity.value >= dangerHigh) return '极高';
+  if (humidity.value <= dangerLow) return '极低';
   if (humidity.value >= warningHigh) return '偏高';
   if (humidity.value <= warningLow) return '偏低';
   if (humidity.value >= idealMin && humidity.value <= idealMax) return '适宜';
@@ -138,6 +144,7 @@ const statusText = computed(() => {
 });
 
 const dropColor = computed(() => {
+  if (isDanger.value) return '#ef4444';
   if (isWarning.value) return '#f59e0b';
   return '#3b82f6';
 });
@@ -155,6 +162,11 @@ const dropColor = computed(() => {
 .gauge-card.is-warning {
   border-color: var(--color-warning);
   box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+}
+
+.gauge-card.is-danger {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
 }
 
 .gauge-header {
@@ -190,6 +202,11 @@ const dropColor = computed(() => {
 .status-warning {
   background: rgba(245, 158, 11, 0.15);
   color: #f59e0b;
+}
+
+.status-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
 }
 
 .gauge-body {

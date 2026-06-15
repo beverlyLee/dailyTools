@@ -88,9 +88,9 @@ const filterDate = ref('');
 const filterLevel = ref('');
 
 const filteredAlarms = computed(() => alarmStore.filteredAlarms);
-const warningCount = computed(() => alarmStore.warningCount);
-const infoCount = computed(() => alarmStore.infoCount);
-const todayCount = computed(() => alarmStore.todayCount);
+const warningCount = computed(() => filteredAlarms.value.filter(a => a.level === 'warning').length);
+const infoCount = computed(() => filteredAlarms.value.filter(a => a.level === 'info').length);
+const todayCount = computed(() => filteredAlarms.value.length);
 
 function handleDateChange() {
   alarmStore.setFilterDate(filterDate.value);
