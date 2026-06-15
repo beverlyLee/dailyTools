@@ -66,15 +66,15 @@ function updateSolutionPanel(solutions: any[], peakSPL: number) {
   if (!container) return
 
   if (solutions.length === 0) {
-    if (peakSPL <= 5) {
-      container.innerHTML = '<div class="solution-empty">选择不同撞击源和楼板结构查看建议</div>'
-    } else {
-      container.innerHTML = '<div class="solution-empty">✓ 当前隔音效果良好</div>'
-    }
+    container.innerHTML = '<div class="solution-empty">选择不同撞击源和楼板结构查看建议</div>'
     return
   }
 
-  container.innerHTML = solutions.map((s, i) => `
+  const preventiveHint = peakSPL <= 45
+    ? '<div class="solution-hint">💡 针对当前撞击源的预防性建议</div>'
+    : ''
+
+  container.innerHTML = preventiveHint + solutions.map((s, i) => `
     <div class="solution-item">
       <div class="solution-icon">${s.icon}</div>
       <div class="solution-content">
