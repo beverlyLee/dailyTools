@@ -34,6 +34,7 @@
   let ceilingHeight = DEFAULT_CEILING_HEIGHT
   let screenBottomHeight = DEFAULT_SCREEN_BOTTOM_HEIGHT
   let viewerEyeHeight = DEFAULT_VIEWER_EYE_HEIGHT
+  let customViewerDistance: number | null = null
   
   let activeTab = 'projector'
   let showCustomProjector = false
@@ -49,13 +50,15 @@
   
   $: screenMatchResult = matchScreen(projectionResult)
   
+  $: viewerDistance = customViewerDistance ?? idealViewerDistance
+  
   $: installationResult = selectedScreen ? verifyInstallation(
     {
       projectorHeight: lensHeight,
       ceilingHeight,
       screenBottomHeight,
       viewerEyeHeight,
-      viewerDistance: idealViewerDistance,
+      viewerDistance,
       isCeilingMount: installationMode === 'ceiling'
     },
     selectedProjector,
@@ -78,6 +81,10 @@
   
   $: if (scene && installationResult) {
     scene.setInstallationState(installationResult.canShelfMount, installationResult.canCeilingMount)
+  }
+  
+  $: if (scene && viewerDistance > 0) {
+    scene.setViewerDistance(viewerDistance)
   }
   
   $: idealDistance = selectedScreen 
@@ -160,6 +167,14 @@
     }
   }
   
+  function updateViewerDistance(value: number) {
+    customViewerDistance = value
+  }
+  
+  function resetViewerDistance() {
+    customViewerDistance = null
+  }
+  
   function useCustomProjector() {
     showCustomProjector = true
     const custom: Projector = {
@@ -219,15 +234,17 @@
   }
   
   function handleProjectorKeydown(event: KeyboardEvent, proj: Projector) {
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (event.key === 'Enter' || event.key === ' ' || event.code === 'Space') {
       event.preventDefault()
+      event.stopPropagation()
       selectProjector(proj)
     }
   }
   
   function handleScreenKeydown(event: KeyboardEvent, screen: ScreenSize) {
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (event.key === 'Enter' || event.key === ' ' || event.code === 'Space') {
       event.preventDefault()
+      event.stopPropagation()
       selectScreen(screen)
     }
   }
@@ -546,7 +563,7 @@
                 class:disabled={!installationResult.canShelfMount && installationMode !== 'shelf'}
                 on:click={() => updateInstallationMode('shelf')}
               >
-                🪑 电视柜放置
+                🪑 电视柜
               </button>
               <button 
                 class="mode-btn"
@@ -554,7 +571,7 @@
                 class:disabled={!installationResult.canCeilingMount && installationMode !== 'ceiling'}
                 on:click={() => updateInstallationMode('ceiling')}
               >
-                🔧 吊顶安装
+                🔧 吊顶
               </button>
             </div>
             
@@ -601,7 +618,7 @@
               </div>
               <div class="view-detail">
                 观众眼高: {formatMeters(viewerEyeHeight)} · 
-                观看距离: {formatMeters(distance * 0.6)}
+                观看距离: {formatMeters(installationResult ? installationResult.viewerDistance || idealViewerDistance : idealViewerDistance)}
               </div>
             </div>
             
@@ -612,10 +629,38 @@
           {/if}
           
           <div class="viewer-info">
-            <h4>👥 最佳观看距离</h4>
+            <h4>👥 观看距离调节</h4>
             {#if selectedScreen}
-              <p>对于 {selectedScreen.name} 幕布，推荐观看距离约 <strong>{formatMeters(idealViewerDistance)}</strong></p>
-              <p class="tip">💡 一般建议观看距离为幕布宽度的 1.2 倍</p>
+              <div class="slider-control">
+                <label for="viewer-distance-slider">
+                  沙发到幕布距离: {formatMeters(viewerDistance)}
+                  {#if customViewerDistance === null}
+                    <span class="default-badge">(推荐)</span>
+                  {/if}
+                </label>
+                <input 
+                  id="viewer-distance-slider"
+                  type="range" 
+                  min={Math.max(0.5, distance + 0.5)}
+                  max="4.5"
+                  step="0.01"
+                  value={customViewerDistance ?? idealViewerDistance}
+                  on:input={(e) => { customViewerDistance = parseFloat((e.target as HTMLInputElement).value) }}
+                />
+                <div class="slider-values">
+                  <span>最近</span>
+                  <span class="recommended-mark">推荐: {formatMeters(idealViewerDistance)}</span>
+                  <span>最远</span>
+                </div>
+              </div>
+              
+              {#if customViewerDistance !== null}
+                <button class="reset-btn" on:click={resetViewerDistance}>
+                  ↺ 恢复推荐距离
+                </button>
+              {/if}
+              
+              <p class="tip">💡 一般建议观看距离为幕布宽度的 1.2 倍，当前幕布推荐距离约 <strong>{formatMeters(idealViewerDistance)}</strong></p>
             {/if}
           </div>
         </div>
@@ -1384,6 +1429,93 @@
     font-size: 11px !important;
     color: #888 !important;
     margin-top: 8px !important;
+  }
+  
+  .slider-control {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+  
+  .slider-control label {
+    font-size: 13px;
+    color: #ddd;
+    font-weight: 500;
+  }
+  
+  .default-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    background: rgba(74, 158, 255, 0.2);
+    color: #4a9eff;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  
+  .slider-control input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
+  }
+  
+  .slider-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #4a9eff;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(74, 158, 255, 0.5);
+  }
+  
+  .slider-control input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #4a9eff;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 8px rgba(74, 158, 255, 0.5);
+  }
+  
+  .slider-values {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #888;
+  }
+  
+  .recommended-mark {
+    color: #4a9eff;
+    font-weight: 500;
+  }
+  
+  .reset-btn {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    margin-bottom: 12px;
+    background: rgba(74, 158, 255, 0.1);
+    color: #4a9eff;
+    border: 1px solid rgba(74, 158, 255, 0.3);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .reset-btn:hover {
+    background: rgba(74, 158, 255, 0.2);
   }
   
   .shift-control {

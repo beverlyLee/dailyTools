@@ -15,12 +15,15 @@ export function verifyInstallation(
   screen: ScreenSize,
   distance: number
 ): InstallationResult {
+  const RECOMMENDED_VIEWING_DISTANCE_TIMES_WIDTH = 1.2
+  const defaultViewerDistance = screen.width * RECOMMENDED_VIEWING_DISTANCE_TIMES_WIDTH
+  
   const fullParams: InstallationParams = {
     projectorHeight: params.projectorHeight ?? 0.45,
     screenHeight: screen.height,
     screenBottomHeight: params.screenBottomHeight ?? DEFAULT_SCREEN_BOTTOM_HEIGHT,
     ceilingHeight: params.ceilingHeight ?? DEFAULT_CEILING_HEIGHT,
-    viewerDistance: params.viewerDistance ?? distance * 0.6,
+    viewerDistance: params.viewerDistance ?? defaultViewerDistance,
     viewerEyeHeight: params.viewerEyeHeight ?? DEFAULT_VIEWER_EYE_HEIGHT,
     isCeilingMount: params.isCeilingMount ?? false
   }
@@ -155,6 +158,7 @@ export function verifyInstallation(
     blocksView,
     clearance,
     recommendation,
+    viewerDistance: fullParams.viewerDistance,
     shelfRiskLevel,
     ceilingRiskLevel,
     shelfRiskMessage,

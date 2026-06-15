@@ -58,6 +58,7 @@ export interface InstallationResult {
   blocksView: boolean
   clearance: number
   recommendation: string
+  viewerDistance: number
   shelfRiskLevel: 'safe' | 'caution' | 'danger'
   ceilingRiskLevel: 'safe' | 'caution' | 'danger'
   shelfRiskMessage: string

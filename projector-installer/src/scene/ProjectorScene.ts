@@ -30,6 +30,7 @@ export class ProjectorScene {
   private currentScreen: ScreenSize | null = null
   private currentDistance: number = 3
   private currentZoom: number = 0
+  private currentViewerDistance: number | null = null
   private lensHeight: number = 0.45
   private horizontalShift: number = 0
   private verticalShift: number = 0
@@ -426,8 +427,11 @@ export class ProjectorScene {
     }
     
     if (this.currentScreen && this.sofa) {
-      const viewerDistance = this.currentScreen.width * 1.2
-      this.sofa.position.z = this.roomDepth - viewerDistance - 0.3
+      const viewerDistance = this.currentViewerDistance ?? (this.currentScreen.width * 1.2)
+      const minSofaZ = 0.3
+      const maxSofaZ = this.roomDepth - this.currentDistance - 0.5
+      const sofaZ = Math.max(minSofaZ, Math.min(maxSofaZ, this.roomDepth - viewerDistance - 0.3))
+      this.sofa.position.z = sofaZ
       
       if (this.viewerGuideLine && this.viewerGuideLine.geometry) {
         const screenCenterY = 0.6 + this.currentScreen.height / 2
@@ -499,6 +503,15 @@ export class ProjectorScene {
     this.currentDistance = Math.max(0.5, Math.min(this.roomDepth - 0.5, distance))
     this.updateProjector()
     this.updateLightCone()
+    this.updatePerson()
+    this.updateFurniture()
+  }
+  
+  setViewerDistance(viewerDist: number) {
+    const maxDist = this.roomDepth - 0.5
+    const minDist = 0.5
+    this.currentViewerDistance = Math.max(minDist, Math.min(maxDist, viewerDist))
+    this.updateFurniture()
     this.updatePerson()
   }
   
@@ -853,8 +866,9 @@ export class ProjectorScene {
   private updatePerson() {
     this.clearGroup(this.personGroup)
     
-    const viewerDistance = this.currentScreen ? this.currentScreen.width * 1.2 : this.currentDistance * 0.6
+    const viewerDistance = this.currentViewerDistance ?? (this.currentScreen ? this.currentScreen.width * 1.2 : this.currentDistance * 0.6)
     const personDistance = viewerDistance + 0.3
+    const personZ = Math.max(0.5, Math.min(this.roomDepth - this.currentDistance - 0.7, this.roomDepth - personDistance))
     const eyeHeight = 1.2
     
     const headGeo = new THREE.SphereGeometry(0.12, 16, 16)
@@ -881,7 +895,7 @@ export class ProjectorScene {
     this.personGroup.add(leftEye)
     this.personGroup.add(rightEye)
     
-    this.personGroup.position.z = this.roomDepth - personDistance
+    this.personGroup.position.z = personZ
     
     const screenCenterY = this.currentScreen ? 0.6 + this.currentScreen.height / 2 : 1.1
     
