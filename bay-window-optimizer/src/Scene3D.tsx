@@ -1,4 +1,4 @@
-import { Suspense, useMemo } from 'react'
+import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
@@ -145,31 +145,21 @@ function LoadingFallback() {
 }
 
 export function Scene3D(props: Scene3DProps) {
-  const glConfig = useMemo(() => ({
-    antialias: true,
-    alpha: false,
-    powerPreference: 'high-performance' as const,
-    failIfMajorPerformanceCaveat: false,
-    shadowMap: {
-      enabled: true,
-      type: THREE.PCFShadowMap
-    }
-  }), [])
-
   return (
     <SceneErrorBoundary>
       <Suspense fallback={<LoadingFallback />}>
         <Canvas
+          shadows
           camera={{ position: [2.8, 1.8, 3.5], fov: 50 }}
           dpr={[1, 2]}
-          gl={glConfig as any}
-          onCreated={({ gl, scene }) => {
+          gl={{
+            antialias: true,
+            alpha: false,
+            powerPreference: 'high-performance',
+            failIfMajorPerformanceCaveat: false
+          }}
+          onCreated={({ gl }) => {
             gl.setClearColor('#f8fafc')
-            if (gl.shadowMap) {
-              gl.shadowMap.enabled = true
-              gl.shadowMap.type = THREE.PCFShadowMap
-            }
-            void scene
           }}
         >
           <SceneContent {...props} />

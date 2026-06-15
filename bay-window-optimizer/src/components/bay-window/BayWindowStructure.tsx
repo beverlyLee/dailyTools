@@ -168,8 +168,8 @@ export function BayWindowStructure({ config, frameColor }: BayWindowStructurePro
       {hasRadiator && (
         <group position={[
           toMeters(radiatorOffsetX),
-          SH + toMeters(radiatorHeight) / 2,
-          -SD / 2 - toMeters(radiatorDepth) / 2 - 0.02
+          toMeters(radiatorHeight) / 2 + 0.05,
+          SD / 2 - toMeters(radiatorDepth) / 2 - 0.02
         ]}>
           <mesh castShadow receiveShadow>
             <boxGeometry args={[toMeters(radiatorWidth), toMeters(radiatorHeight), toMeters(radiatorDepth)]} />
@@ -181,7 +181,7 @@ export function BayWindowStructure({ config, frameColor }: BayWindowStructurePro
               position={[
                 -toMeters(radiatorWidth) / 2 + 0.05 + i * 0.1,
                 0,
-                -toMeters(radiatorDepth) / 2 - 0.005
+                toMeters(radiatorDepth) / 2 + 0.005
               ]}
             >
               <boxGeometry args={[0.05, toMeters(radiatorHeight) - 0.04, 0.015]} />
@@ -193,12 +193,16 @@ export function BayWindowStructure({ config, frameColor }: BayWindowStructurePro
             <meshStandardMaterial color="#c0c0c0" roughness={0.3} metalness={0.6} />
           </mesh>
           <mesh position={[-toMeters(radiatorWidth) / 2 + 0.05, -toMeters(radiatorHeight) / 2 + 0.01, 0]}>
-            <cylinderGeometry args={[0.01, 0.01, 0.06, 8]} />
+            <boxGeometry args={[0.02, 0.06, 0.02]} />
             <meshStandardMaterial color="#909090" roughness={0.4} metalness={0.6} />
           </mesh>
           <mesh position={[toMeters(radiatorWidth) / 2 - 0.05, -toMeters(radiatorHeight) / 2 + 0.01, 0]}>
-            <cylinderGeometry args={[0.01, 0.01, 0.06, 8]} />
+            <boxGeometry args={[0.02, 0.06, 0.02]} />
             <meshStandardMaterial color="#909090" roughness={0.4} metalness={0.6} />
+          </mesh>
+          <mesh position={[0, toMeters(radiatorHeight) / 2 + 0.005, toMeters(radiatorDepth) / 2 + 0.02]}>
+            <boxGeometry args={[toMeters(radiatorWidth) - 0.1, 0.01, 0.06]} />
+            <meshStandardMaterial color="#808080" roughness={0.5} metalness={0.5} />
           </mesh>
         </group>
       )}

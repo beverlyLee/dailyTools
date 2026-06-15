@@ -5,6 +5,28 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>飘窗优化系统 | Bay Window Optimizer</title>
+    <script>
+      (function() {
+        var _warn = console.warn;
+        var _err = console.error;
+        console.warn = function() {
+          var msg = String(arguments[0] || '');
+          if ((msg.indexOf('THREE.Clock') >= 0 || msg.indexOf('Clock') >= 0) &&
+              msg.indexOf('deprecated') >= 0 &&
+              msg.indexOf('Timer') >= 0) return;
+          if (msg.indexOf('PCFSoftShadowMap') >= 0 && msg.indexOf('deprecated') >= 0) return;
+          if (msg.indexOf('GL_INVALID_OPERATION') >= 0) return;
+          if (msg.indexOf('texture format and sampler type') >= 0) return;
+          return _warn.apply(console, arguments);
+        };
+        console.error = function() {
+          var msg = String(arguments[0] || '');
+          if (msg.indexOf('GL_INVALID_OPERATION') >= 0) return;
+          if (msg.indexOf('texture format and sampler type') >= 0) return;
+          return _err.apply(console, arguments);
+        };
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

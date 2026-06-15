@@ -363,6 +363,11 @@ function StoragePanel({
               value={animateDrawers}
               onChange={setAnimateDrawers}
             />
+            {storageAnalysis.hasConflicts && (
+              <div className="mt-2 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                ⚠️ 存在 {storageAnalysis.conflicts.length} 个空间冲突，冲突的抽屉无法开启演示
+              </div>
+            )}
           </SectionCard>
 
           <SectionCard title="储物容量">
