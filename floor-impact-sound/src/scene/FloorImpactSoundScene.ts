@@ -39,7 +39,7 @@ export class FloorImpactSoundScene {
   private walkIndex: number = 0
 
   private onSPLUpdate?: (avg: number, peak: number, level: string) => void
-  private onSolutionsUpdate?: (solutions: any[]) => void
+  private onSolutionsUpdate?: (solutions: any[], peakSPL: number) => void
 
   constructor() {
     this.clock = new THREE.Clock()
@@ -523,9 +523,13 @@ export class FloorImpactSoundScene {
       this.onSPLUpdate(avgSPL, peakSPL, level)
     }
 
-    if (peakSPL > 45 && this.onSolutionsUpdate) {
-      const solutions = this.solutionAdvisor.getTopSuggestions(this.currentSourceId, peakSPL, 3)
-      this.onSolutionsUpdate(solutions)
+    if (this.onSolutionsUpdate) {
+      if (peakSPL > 45) {
+        const solutions = this.solutionAdvisor.getTopSuggestions(this.currentSourceId, peakSPL, 3)
+        this.onSolutionsUpdate(solutions, peakSPL)
+      } else {
+        this.onSolutionsUpdate([], peakSPL)
+      }
     }
   }
 
@@ -585,6 +589,7 @@ export class FloorImpactSoundScene {
       this.createFloorStructure()
       this.heatmapMesh.position.y = -this.getFloorTotalHeight() / 2 - 0.01
       this.waveParticles.position.y = -this.getFloorTotalHeight() / 2
+      this.refreshSolutions()
     }
   }
 
@@ -607,17 +612,31 @@ export class FloorImpactSoundScene {
 
   setSourceId(sourceId: string): void {
     this.currentSourceId = sourceId
+    this.refreshSolutions()
   }
 
   setIntensity(intensity: number): void {
     this.currentIntensity = Math.max(0.2, Math.min(2.0, intensity))
   }
 
+  private refreshSolutions(): void {
+    if (!this.onSolutionsUpdate) return
+    const currentTime = this.clock.getElapsedTime()
+    const activeImpacts = this.impactGenerator.getActiveImpacts(currentTime)
+    const peakSPL = this.vibrationCalc.getPeakSPL(activeImpacts, currentTime)
+    if (peakSPL > 45) {
+      const solutions = this.solutionAdvisor.getTopSuggestions(this.currentSourceId, peakSPL, 3)
+      this.onSolutionsUpdate(solutions, peakSPL)
+    } else {
+      this.onSolutionsUpdate([], peakSPL)
+    }
+  }
+
   setOnSPLUpdate(callback: (avg: number, peak: number, level: string) => void): void {
     this.onSPLUpdate = callback
   }
 
-  setOnSolutionsUpdate(callback: (solutions: any[]) => void): void {
+  setOnSolutionsUpdate(callback: (solutions: any[], peakSPL: number) => void): void {
     this.onSolutionsUpdate = callback
   }
 

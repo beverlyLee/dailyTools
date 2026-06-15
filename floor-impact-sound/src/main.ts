@@ -13,8 +13,8 @@ function init() {
     updateSPLDisplay(avg, peak, level)
   })
 
-  scene.setOnSolutionsUpdate((solutions) => {
-    updateSolutionPanel(solutions)
+  scene.setOnSolutionsUpdate((solutions, peakSPL) => {
+    updateSolutionPanel(solutions, peakSPL)
   })
 
   setupUI()
@@ -61,12 +61,16 @@ function updateSPLDisplay(avg: number, peak: number, level: string) {
   }
 }
 
-function updateSolutionPanel(solutions: any[]) {
+function updateSolutionPanel(solutions: any[], peakSPL: number) {
   const container = document.getElementById('solutionsList')
   if (!container) return
 
   if (solutions.length === 0) {
-    container.innerHTML = '<div class="solution-empty">✓ 当前隔音效果良好</div>'
+    if (peakSPL <= 5) {
+      container.innerHTML = '<div class="solution-empty">选择不同撞击源和楼板结构查看建议</div>'
+    } else {
+      container.innerHTML = '<div class="solution-empty">✓ 当前隔音效果良好</div>'
+    }
     return
   }
 
