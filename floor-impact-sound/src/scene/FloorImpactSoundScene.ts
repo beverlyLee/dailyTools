@@ -528,7 +528,8 @@ export class FloorImpactSoundScene {
         const solutions = this.solutionAdvisor.getTopSuggestions(this.currentSourceId, peakSPL, 3)
         this.onSolutionsUpdate(solutions, peakSPL)
       } else {
-        this.onSolutionsUpdate([], peakSPL)
+        const solutions = this.solutionAdvisor.getPreventiveSuggestions(this.currentSourceId, 3)
+        this.onSolutionsUpdate(solutions, peakSPL)
       }
     }
   }
@@ -624,8 +625,7 @@ export class FloorImpactSoundScene {
     const currentTime = this.clock.getElapsedTime()
     const activeImpacts = this.impactGenerator.getActiveImpacts(currentTime)
     const peakSPL = this.vibrationCalc.getPeakSPL(activeImpacts, currentTime)
-    const displaySPL = peakSPL > 45 ? peakSPL : 55
-    const solutions = this.solutionAdvisor.getTopSuggestions(this.currentSourceId, displaySPL, 3)
+    const solutions = this.solutionAdvisor.getPreventiveSuggestions(this.currentSourceId, 3)
     this.onSolutionsUpdate(solutions, peakSPL)
   }
 

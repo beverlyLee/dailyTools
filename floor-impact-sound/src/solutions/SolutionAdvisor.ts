@@ -237,6 +237,64 @@ export class SolutionAdvisor {
     return this.getSuggestions(impactType, currentSPL).slice(0, count)
   }
 
+  getPreventiveSuggestions(impactType: string, count: number = 3): SolutionSuggestion[] {
+    const existingFeatures = this.getExistingFeatures()
+    const suggestions: SolutionSuggestion[] = []
+
+    for (const suggestion of solutionSuggestions) {
+      if (this.isApplicable(suggestion, existingFeatures)) {
+        suggestions.push({ ...suggestion })
+      }
+    }
+
+    suggestions.sort((a, b) => {
+      const aScore = this.getPreventiveScore(a, impactType)
+      const bScore = this.getPreventiveScore(b, impactType)
+      if (aScore !== bScore) return bScore - aScore
+
+      const aValue = a.expectedImprovement / this.getCostMultiplier(a.cost)
+      const bValue = b.expectedImprovement / this.getCostMultiplier(b.cost)
+      return bValue - aValue
+    })
+
+    return suggestions.slice(0, count)
+  }
+
+  private getPreventiveScore(suggestion: SolutionSuggestion, impactType: string): number {
+    const highPriority = new Set<string>()
+    const lowPriority = new Set<string>()
+
+    switch (impactType) {
+      case 'highHeel':
+        highPriority.add('thickCarpet')
+        highPriority.add('slippersOnly')
+        highPriority.add('elasticUnderlay')
+        lowPriority.add('ceilingSuspended')
+        break
+      case 'slipper':
+        highPriority.add('thickCarpet')
+        highPriority.add('elasticUnderlay')
+        break
+      case 'heavyDrop':
+      case 'jump':
+        highPriority.add('floatingFloor')
+        highPriority.add('elasticUnderlay')
+        highPriority.add('mineralWool')
+        lowPriority.add('slippersOnly')
+        lowPriority.add('furniturePads')
+        break
+      case 'furnitureDrag':
+        highPriority.add('furniturePads')
+        highPriority.add('thickCarpet')
+        lowPriority.add('ceilingSuspended')
+        break
+    }
+
+    if (highPriority.has(suggestion.id)) return 2
+    if (lowPriority.has(suggestion.id)) return 0
+    return 1
+  }
+
   getQuickTips(): string[] {
     const tips: string[] = []
     const features = this.getExistingFeatures()
