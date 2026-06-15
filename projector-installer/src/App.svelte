@@ -26,9 +26,10 @@
   
   let distance = 2.0
   let zoomPosition = 0
-  let lensHeight = 0.48
+  let lensHeight = 0.45
   let horizontalShift = 0
   let verticalShift = 0
+  let installationMode: 'shelf' | 'ceiling' = 'shelf'
   
   let ceilingHeight = DEFAULT_CEILING_HEIGHT
   let screenBottomHeight = DEFAULT_SCREEN_BOTTOM_HEIGHT
@@ -54,8 +55,8 @@
       ceilingHeight,
       screenBottomHeight,
       viewerEyeHeight,
-      viewerDistance: distance * 0.6,
-      isCeilingMount: false
+      viewerDistance: idealViewerDistance,
+      isCeilingMount: installationMode === 'ceiling'
     },
     selectedProjector,
     selectedScreen,
@@ -121,7 +122,27 @@
   function updateLensHeight(value: number) {
     lensHeight = value
     if (scene) {
-      scene.setLensHeight(value)
+      if (installationMode === 'shelf') {
+        scene.setShelfHeight(value)
+      } else {
+        scene.setCeilingHeight(value)
+      }
+    }
+  }
+  
+  function updateInstallationMode(mode: 'shelf' | 'ceiling') {
+    installationMode = mode
+    if (scene) {
+      scene.setInstallationMode(mode)
+      if (installationResult) {
+        if (mode === 'shelf') {
+          lensHeight = installationResult.shelfHeight
+          scene.setShelfHeight(installationResult.shelfHeight)
+        } else {
+          lensHeight = installationResult.ceilingMountHeight
+          scene.setCeilingHeight(installationResult.ceilingMountHeight)
+        }
+      }
     }
   }
   
@@ -223,8 +244,10 @@
       scene.setLensHeight(lensHeight)
       scene.setHorizontalShift(horizontalShift)
       scene.setVerticalShift(verticalShift)
+      scene.setInstallationMode(installationMode)
       if (installationResult) {
         scene.setInstallationState(installationResult.canShelfMount, installationResult.canCeilingMount)
+        scene.setShelfHeight(installationResult.shelfHeight)
       }
     }
   })
@@ -516,6 +539,25 @@
           </div>
           
           {#if installationResult}
+            <div class="installation-mode-switch">
+              <button 
+                class="mode-btn"
+                class:active={installationMode === 'shelf'}
+                class:disabled={!installationResult.canShelfMount && installationMode !== 'shelf'}
+                on:click={() => updateInstallationMode('shelf')}
+              >
+                🪑 电视柜放置
+              </button>
+              <button 
+                class="mode-btn"
+                class:active={installationMode === 'ceiling'}
+                class:disabled={!installationResult.canCeilingMount && installationMode !== 'ceiling'}
+                on:click={() => updateInstallationMode('ceiling')}
+              >
+                🔧 吊顶安装
+              </button>
+            </div>
+            
             <div class="installation-result">
               <div class="install-card" class:good={installationResult.canShelfMount}>
                 <div class="install-icon">🪑</div>
@@ -526,6 +568,11 @@
                 <div class="install-detail">
                   建议高度: {formatMeters(installationResult.shelfHeight)}
                 </div>
+                {#if installationResult.canShelfMount && installationResult.shelfRiskMessage}
+                  <div class="risk-message" class:caution={installationResult.shelfRiskLevel === 'caution'} class:danger={installationResult.shelfRiskLevel === 'danger'}>
+                    {installationResult.shelfRiskMessage}
+                  </div>
+                {/if}
               </div>
               
               <div class="install-card" class:good={installationResult.canCeilingMount}>
@@ -537,6 +584,11 @@
                 <div class="install-detail">
                   距顶: {formatMeters(installationResult.ceilingDistanceFromTop)}
                 </div>
+                {#if installationResult.canCeilingMount && installationResult.ceilingRiskMessage}
+                  <div class="risk-message" class:caution={installationResult.ceilingRiskLevel === 'caution'} class:danger={installationResult.ceilingRiskLevel === 'danger'}>
+                    {installationResult.ceilingRiskMessage}
+                  </div>
+                {/if}
               </div>
             </div>
             
@@ -820,6 +872,12 @@
     border-color: #4a9eff;
   }
   
+  .projector-card:focus-visible {
+    outline: none;
+    border: 2px solid #4a9eff;
+    box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.2);
+  }
+  
   .projector-brand {
     font-size: 10px;
     color: #888;
@@ -1100,6 +1158,12 @@
     border-color: #4a9eff;
   }
   
+  .screen-item:focus-visible {
+    outline: none;
+    border: 2px solid #4a9eff;
+    box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.2);
+  }
+  
   .screen-name {
     font-size: 13px;
     color: #fff;
@@ -1151,6 +1215,49 @@
     align-self: flex-end;
   }
   
+  .installation-mode-switch {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0 12px 0;
+  }
+  
+  .mode-btn {
+    flex: 1;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #aaa;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .mode-btn:hover:not(.disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(74, 158, 255, 0.3);
+  }
+  
+  .mode-btn.active {
+    background: rgba(74, 158, 255, 0.2);
+    border-color: #4a9eff;
+    color: #fff;
+  }
+  
+  .mode-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: rgba(255, 68, 68, 0.1);
+    border-color: rgba(255, 68, 68, 0.3);
+    color: #ff8888;
+  }
+  
+  .mode-btn:focus-visible {
+    outline: none;
+    border: 2px solid #4a9eff;
+    box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.2);
+  }
+  
   .installation-result {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1192,6 +1299,27 @@
   .install-detail {
     font-size: 11px;
     color: #888;
+  }
+  
+  .risk-message {
+    margin-top: 8px;
+    padding: 6px 8px;
+    font-size: 10px;
+    border-radius: 4px;
+    line-height: 1.4;
+    text-align: left;
+  }
+  
+  .risk-message.caution {
+    background: rgba(255, 152, 0, 0.1);
+    color: #ffb74d;
+    border: 1px solid rgba(255, 152, 0, 0.3);
+  }
+  
+  .risk-message.danger {
+    background: rgba(244, 67, 54, 0.1);
+    color: #ef9a9a;
+    border: 1px solid rgba(244, 67, 54, 0.3);
   }
   
   .view-block-check {

@@ -54,14 +54,28 @@ export function verifyInstallation(
   const sizeMatchRatio = projection.imageDiagonalInches / screen.diagonalInches
   const imageFillsScreen = sizeMatchRatio >= 0.95 && sizeMatchRatio <= 1.1
   
-  const shelfBlocksView = idealShelfHeight + PROJECTOR_BODY_HEIGHT > fullParams.viewerEyeHeight + 0.1 &&
-                          fullParams.viewerDistance < distance &&
-                          fullParams.viewerDistance > 0.5
+  const viewerDistanceFromScreen = fullParams.viewerDistance
+  const projDistanceFromScreen = distance
   
-  const projectorTop = fullParams.projectorHeight + PROJECTOR_BODY_HEIGHT / 2
-  const blocksView = projectorTop > fullParams.viewerEyeHeight + 0.1 &&
-                     fullParams.viewerDistance < distance &&
-                     fullParams.viewerDistance > 0.5
+  const viewerIsInFrontOfProjector = viewerDistanceFromScreen > projDistanceFromScreen
+  
+  let blocksView = false
+  
+  if (viewerIsInFrontOfProjector) {
+    const eyeY = fullParams.viewerEyeHeight
+    const projBottomY = fullParams.projectorHeight - PROJECTOR_BODY_HEIGHT / 2
+    const projTopY = fullParams.projectorHeight + PROJECTOR_BODY_HEIGHT / 2
+    
+    const viewerToScreenDist = viewerDistanceFromScreen
+    const viewerToProjDist = viewerDistanceFromScreen - projDistanceFromScreen
+    
+    const viewLineSlope = (screenCenterY - eyeY) / viewerToScreenDist
+    const viewYAtProj = eyeY + viewLineSlope * viewerToProjDist
+    
+    blocksView = viewYAtProj >= projBottomY - 0.02 && viewYAtProj <= projTopY + 0.02
+  }
+  
+  const shelfBlocksView = canShelfMount && blocksView
   
   const ceilingDistanceFromTop = fullParams.ceilingHeight - ceilingMountProjectorTop
 
@@ -96,6 +110,41 @@ export function verifyInstallation(
   
   const clearance = fullParams.ceilingHeight - (fullParams.projectorHeight + PROJECTOR_BODY_HEIGHT / 2)
   
+  const SHELF_CAUTION_MARGIN = 0.1
+  const SHELF_DANGER_MARGIN = 0.05
+  const CEILING_CAUTION_MARGIN = 0.1
+  const CEILING_DANGER_MARGIN = 0.05
+  
+  let shelfRiskLevel: 'safe' | 'caution' | 'danger' = 'safe'
+  let shelfRiskMessage = ''
+  
+  if (canShelfMount) {
+    const distToMin = shelfHeight - SHELF_MIN_HEIGHT
+    const distToMax = SHELF_MAX_HEIGHT - shelfHeight
+    const minDist = Math.min(distToMin, distToMax)
+    
+    if (minDist < SHELF_DANGER_MARGIN) {
+      shelfRiskLevel = 'danger'
+      shelfRiskMessage = `⚠️ 接近${distToMin < distToMax ? '下限' : '上限'}，建议预留 ≥ 5cm 余量`
+    } else if (minDist < SHELF_CAUTION_MARGIN) {
+      shelfRiskLevel = 'caution'
+      shelfRiskMessage = `💡 接近${distToMin < distToMax ? '下限' : '上限'}，建议适当调整安装高度`
+    }
+  }
+  
+  let ceilingRiskLevel: 'safe' | 'caution' | 'danger' = 'safe'
+  let ceilingRiskMessage = ''
+  
+  if (canCeilingMount) {
+    if (ceilingDistanceFromTop < CEILING_DANGER_MARGIN) {
+      ceilingRiskLevel = 'danger'
+      ceilingRiskMessage = '⚠️ 距顶余量不足，考虑换用更薄吊架'
+    } else if (ceilingDistanceFromTop < CEILING_CAUTION_MARGIN) {
+      ceilingRiskLevel = 'caution'
+      ceilingRiskMessage = '💡 距顶余量较小，安装时注意预留散热空间'
+    }
+  }
+  
   return {
     canShelfMount,
     canCeilingMount,
@@ -105,7 +154,11 @@ export function verifyInstallation(
     ceilingDistanceFromTop,
     blocksView,
     clearance,
-    recommendation
+    recommendation,
+    shelfRiskLevel,
+    ceilingRiskLevel,
+    shelfRiskMessage,
+    ceilingRiskMessage
   }
 }
 

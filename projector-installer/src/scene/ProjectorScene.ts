@@ -36,10 +36,14 @@ export class ProjectorScene {
   
   private canShelfMount: boolean = true
   private canCeilingMount: boolean = true
+  private installationMode: 'shelf' | 'ceiling' = 'shelf'
+  private ceilingMountGroup: THREE.Group | null = null
   
   private tvStand: THREE.Group | null = null
   private sofa: THREE.Group | null = null
   private ceilingWarning: THREE.Mesh | null = null
+  private viewerGuideLine: THREE.Line | null = null
+  private bestSeatLabel: THREE.Mesh | null = null
   
   private animationId: number = 0
   
@@ -149,10 +153,61 @@ export class ProjectorScene {
     this.tvStand = this.createTVStand()
     this.sofa = this.createSofa()
     this.ceilingWarning = this.createCeilingWarning()
+    this.viewerGuideLine = this.createViewerGuideLine()
+    this.bestSeatLabel = this.createBestSeatLabel()
     
     this.furnitureGroup.add(this.tvStand)
     this.furnitureGroup.add(this.sofa)
     this.furnitureGroup.add(this.ceilingWarning)
+    this.furnitureGroup.add(this.viewerGuideLine)
+    this.furnitureGroup.add(this.bestSeatLabel)
+  }
+  
+  private createViewerGuideLine(): THREE.Line {
+    const points = [
+      new THREE.Vector3(0, 0.6, 0),
+      new THREE.Vector3(0, 1.1, 0)
+    ]
+    const geometry = new THREE.BufferGeometry().setFromPoints(points)
+    const material = new THREE.LineBasicMaterial({
+      color: 0x66aaff,
+      transparent: true,
+      opacity: 0.4,
+      linewidth: 2
+    })
+    const line = new THREE.Line(geometry, material)
+    return line
+  }
+  
+  private createBestSeatLabel(): THREE.Mesh {
+    const canvas = document.createElement('canvas')
+    canvas.width = 300
+    canvas.height = 70
+    const ctx = canvas.getContext('2d')!
+    ctx.fillStyle = 'rgba(74, 158, 255, 0.85)'
+    ctx.roundRect(0, 0, 300, 70, 12)
+    ctx.fill()
+    ctx.fillStyle = '#ffffff'
+    ctx.font = 'bold 18px sans-serif'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('🎬 最佳观看位', 150, 25)
+    ctx.font = '14px sans-serif'
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'
+    ctx.fillText('距离约 266 cm', 150, 50)
+    
+    const texture = new THREE.CanvasTexture(canvas)
+    texture.needsUpdate = true
+    const geometry = new THREE.PlaneGeometry(1.0, 0.25)
+    const material = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    })
+    const label = new THREE.Mesh(geometry, material)
+    label.position.y = 1.6
+    return label
   }
   
   private createTVStand(): THREE.Group {
@@ -351,9 +406,73 @@ export class ProjectorScene {
       this.ceilingWarning.material.opacity = this.canCeilingMount ? 0 : 0.4
     }
     
+    if (this.ceilingMountGroup && this.installationMode === 'ceiling') {
+      this.ceilingMountGroup.traverse(child => {
+        if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+          if (!this.canCeilingMount) {
+            child.material.color.setHex(0xaa3333)
+            child.material.emissive = new THREE.Color(0x330000)
+            child.material.emissiveIntensity = 0.3
+          } else {
+            const original = child.userData.originalColor
+            if (original !== undefined) {
+              child.material.color.setHex(original)
+            }
+            child.material.emissive = new THREE.Color(0x000000)
+            child.material.emissiveIntensity = 0
+          }
+        }
+      })
+    }
+    
     if (this.currentScreen && this.sofa) {
       const viewerDistance = this.currentScreen.width * 1.2
       this.sofa.position.z = this.roomDepth - viewerDistance - 0.3
+      
+      if (this.viewerGuideLine && this.viewerGuideLine.geometry) {
+        const screenCenterY = 0.6 + this.currentScreen.height / 2
+        const sofaEyeY = 1.2
+        
+        const positions = new Float32Array([
+          0, sofaEyeY, this.sofa.position.z,
+          0, screenCenterY, this.roomDepth - 0.05
+        ])
+        this.viewerGuideLine.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+        this.viewerGuideLine.geometry.attributes.position.needsUpdate = true
+        this.viewerGuideLine.geometry.computeBoundingSphere()
+      }
+      
+      if (this.bestSeatLabel) {
+        this.bestSeatLabel.position.x = 0
+        this.bestSeatLabel.position.z = this.sofa.position.z
+        this.bestSeatLabel.position.y = 1.6
+        
+        const canvas = document.createElement('canvas')
+        canvas.width = 300
+        canvas.height = 70
+        const ctx = canvas.getContext('2d')!
+        ctx.fillStyle = 'rgba(74, 158, 255, 0.85)'
+        ctx.roundRect(0, 0, 300, 70, 12)
+        ctx.fill()
+        ctx.fillStyle = '#ffffff'
+        ctx.font = 'bold 18px sans-serif'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText('🎬 最佳观看位', 150, 25)
+        ctx.font = '14px sans-serif'
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'
+        const distCm = (viewerDistance * 100).toFixed(0)
+        ctx.fillText(`距离约 ${distCm} cm`, 150, 50)
+        
+        const texture = new THREE.CanvasTexture(canvas)
+        if (this.bestSeatLabel.material instanceof THREE.MeshBasicMaterial) {
+          if (this.bestSeatLabel.material.map) {
+            this.bestSeatLabel.material.map.dispose()
+          }
+          this.bestSeatLabel.material.map = texture
+          this.bestSeatLabel.material.needsUpdate = true
+        }
+      }
     }
   }
   
@@ -411,6 +530,24 @@ export class ProjectorScene {
     this.updateFurniture()
   }
   
+  setInstallationMode(mode: 'shelf' | 'ceiling') {
+    this.installationMode = mode
+    this.updateProjector()
+    this.updateFurniture()
+  }
+  
+  setShelfHeight(height: number) {
+    this.lensHeight = height
+    this.updateProjector()
+    this.updateLightCone()
+  }
+  
+  setCeilingHeight(height: number) {
+    this.lensHeight = height
+    this.updateProjector()
+    this.updateLightCone()
+  }
+  
   private clearGroup(group: THREE.Group) {
     while (group.children.length > 0) {
       const child = group.children[0]
@@ -428,6 +565,11 @@ export class ProjectorScene {
   
   private updateProjector() {
     this.clearGroup(this.projectorGroup)
+    
+    if (this.ceilingMountGroup) {
+      this.furnitureGroup.remove(this.ceilingMountGroup)
+      this.ceilingMountGroup = null
+    }
     
     const bodyGeo = new THREE.BoxGeometry(0.4, 0.12, 0.3)
     const bodyMat = new THREE.MeshStandardMaterial({ 
@@ -453,9 +595,61 @@ export class ProjectorScene {
     this.projectorGroup.add(body)
     this.projectorGroup.add(lens)
     
+    if (this.installationMode === 'ceiling') {
+      this.projectorGroup.rotation.x = Math.PI
+      this.projectorGroup.rotation.y = Math.PI
+    } else {
+      this.projectorGroup.rotation.x = 0
+      this.projectorGroup.rotation.y = 0
+    }
+    
     this.projectorGroup.position.x = this.horizontalShift
     this.projectorGroup.position.y = this.lensHeight
     this.projectorGroup.position.z = this.roomDepth - this.currentDistance
+    
+    if (this.installationMode === 'ceiling') {
+      this.ceilingMountGroup = new THREE.Group()
+      
+      const mountPlateGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.02, 24)
+      const mountPlateMat = new THREE.MeshStandardMaterial({
+        color: this.canCeilingMount ? 0x444444 : 0xaa3333,
+        metalness: 0.7,
+        roughness: 0.3
+      })
+      const mountPlate = new THREE.Mesh(mountPlateGeo, mountPlateMat)
+      mountPlate.position.y = this.roomHeight - 0.01
+      mountPlate.userData.originalColor = 0x444444
+      this.ceilingMountGroup.add(mountPlate)
+      
+      const poleHeight = this.roomHeight - this.lensHeight - 0.06
+      const poleGeo = new THREE.CylinderGeometry(0.025, 0.025, poleHeight, 16)
+      const poleMat = new THREE.MeshStandardMaterial({
+        color: this.canCeilingMount ? 0x555555 : 0xaa3333,
+        metalness: 0.6,
+        roughness: 0.4
+      })
+      const pole = new THREE.Mesh(poleGeo, poleMat)
+      pole.position.y = this.roomHeight - poleHeight / 2 - 0.02
+      pole.userData.originalColor = 0x555555
+      this.ceilingMountGroup.add(pole)
+      
+      const bracketGeo = new THREE.BoxGeometry(0.15, 0.04, 0.35)
+      const bracketMat = new THREE.MeshStandardMaterial({
+        color: this.canCeilingMount ? 0x333333 : 0xaa3333,
+        metalness: 0.7,
+        roughness: 0.3
+      })
+      const bracket = new THREE.Mesh(bracketGeo, bracketMat)
+      bracket.position.y = this.lensHeight - 0.08
+      bracket.position.z = -0.02
+      bracket.userData.originalColor = 0x333333
+      this.ceilingMountGroup.add(bracket)
+      
+      this.ceilingMountGroup.position.x = this.horizontalShift
+      this.ceilingMountGroup.position.z = this.roomDepth - this.currentDistance
+      
+      this.furnitureGroup.add(this.ceilingMountGroup)
+    }
     
     const lensGlow = new THREE.PointLight(0x6688ff, 0.8, 5)
     lensGlow.position.set(0, 0, 0.18)
@@ -659,7 +853,8 @@ export class ProjectorScene {
   private updatePerson() {
     this.clearGroup(this.personGroup)
     
-    const personDistance = this.currentDistance * 0.6
+    const viewerDistance = this.currentScreen ? this.currentScreen.width * 1.2 : this.currentDistance * 0.6
+    const personDistance = viewerDistance + 0.3
     const eyeHeight = 1.2
     
     const headGeo = new THREE.SphereGeometry(0.12, 16, 16)
@@ -688,10 +883,12 @@ export class ProjectorScene {
     
     this.personGroup.position.z = this.roomDepth - personDistance
     
+    const screenCenterY = this.currentScreen ? 0.6 + this.currentScreen.height / 2 : 1.1
+    
     const sightLineGeo = new THREE.BufferGeometry()
     const sightVertices = new Float32Array([
       0, eyeHeight + 0.05, 0.12,
-      0, 1.1, personDistance
+      0, screenCenterY, personDistance
     ])
     sightLineGeo.setAttribute('position', new THREE.BufferAttribute(sightVertices, 3))
     const sightLineMat = new THREE.LineDashedMaterial({ 
@@ -762,6 +959,10 @@ export class ProjectorScene {
     if (this.ceilingWarning && !this.canCeilingMount && this.ceilingWarning.material instanceof THREE.MeshBasicMaterial) {
       const time = Date.now() * 0.003
       this.ceilingWarning.material.opacity = 0.3 + Math.sin(time * 2) * 0.15
+    }
+    
+    if (this.bestSeatLabel) {
+      this.bestSeatLabel.lookAt(this.camera.position)
     }
     
     this.renderer.render(this.scene, this.camera)

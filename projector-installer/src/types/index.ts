@@ -58,6 +58,10 @@ export interface InstallationResult {
   blocksView: boolean
   clearance: number
   recommendation: string
+  shelfRiskLevel: 'safe' | 'caution' | 'danger'
+  ceilingRiskLevel: 'safe' | 'caution' | 'danger'
+  shelfRiskMessage: string
+  ceilingRiskMessage: string
 }
 
 export interface KeystoneParams {
