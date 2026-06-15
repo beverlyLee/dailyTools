@@ -27,7 +27,6 @@ class PetSpacePlannerApp {
   private selectedId: string | null = null;
   private interaction: InteractionState = { mode: 'idle' };
   private dogSize: DogSize = 'medium';
-
   private nextId = 1;
 
   private dom!: {
@@ -37,6 +36,11 @@ class PetSpacePlannerApp {
     furnitureDamageBox: HTMLElement;
     cleaningPathBox: HTMLElement;
     scoreEl: HTMLElement;
+    actionToolbar: HTMLElement;
+    rotateLeftBtn: HTMLElement;
+    rotateRightBtn: HTMLElement;
+    deleteBtn: HTMLElement;
+    rotate90Btn: HTMLElement;
   };
 
   constructor() {
@@ -53,6 +57,7 @@ class PetSpacePlannerApp {
 
     this.initDOM();
     this.initEvents();
+    this.updateItemButtons();
     this.animate();
   }
 
@@ -64,6 +69,11 @@ class PetSpacePlannerApp {
       furnitureDamageBox: document.getElementById('furnitureDamageAnalysis')!,
       cleaningPathBox: document.getElementById('cleaningPathAnalysis')!,
       scoreEl: document.getElementById('overallScore')!,
+      actionToolbar: document.getElementById('actionToolbar')!,
+      rotateLeftBtn: document.getElementById('rotateLeftBtn')!,
+      rotateRightBtn: document.getElementById('rotateRightBtn')!,
+      deleteBtn: document.getElementById('deleteBtn')!,
+      rotate90Btn: document.getElementById('rotate90Btn')!,
     };
   }
 
@@ -71,6 +81,7 @@ class PetSpacePlannerApp {
     document.querySelectorAll('.item-btn[data-type]').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         const type = (e.currentTarget as HTMLElement).dataset.type as FurnitureType;
+        if (this.isTypePlaced(type)) return;
         this.startPlacing(type);
       });
     });
@@ -80,13 +91,26 @@ class PetSpacePlannerApp {
         document.querySelectorAll('.dog-size-btn').forEach((b) => b.classList.remove('active'));
         (e.currentTarget as HTMLElement).classList.add('active');
         this.dogSize = (e.currentTarget as HTMLElement).dataset.size as DogSize;
-        this.runAnalysis();
+        this.markAnalysisStale();
       });
     });
 
     document.getElementById('clearBtn')?.addEventListener('click', () => this.clearAll());
     document.getElementById('resetViewBtn')?.addEventListener('click', () => this.sceneManager.resetView());
     document.getElementById('analyzeBtn')?.addEventListener('click', () => this.runAnalysis());
+
+    this.dom.rotateLeftBtn.addEventListener('click', () => {
+      if (this.selectedId) this.rotateSelected(-Math.PI / 12);
+    });
+    this.dom.rotateRightBtn.addEventListener('click', () => {
+      if (this.selectedId) this.rotateSelected(Math.PI / 12);
+    });
+    this.dom.rotate90Btn.addEventListener('click', () => {
+      if (this.selectedId) this.rotateSelected(Math.PI / 2);
+    });
+    this.dom.deleteBtn.addEventListener('click', () => {
+      if (this.selectedId) this.removeFurniture(this.selectedId);
+    });
 
     const canvas = this.sceneManager.renderer.domElement;
 
@@ -107,6 +131,59 @@ class PetSpacePlannerApp {
     });
 
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+
+  private isTypePlaced(type: FurnitureType): boolean {
+    for (const f of this.furniture.values()) {
+      if (f.type === type) return true;
+    }
+    return false;
+  }
+
+  private updateItemButtons(): void {
+    document.querySelectorAll('.item-btn[data-type]').forEach((btn) => {
+      const type = (btn as HTMLElement).dataset.type as FurnitureType;
+      const placed = this.isTypePlaced(type);
+      btn.classList.toggle('placed', placed);
+      const label = btn.querySelector('.item-label');
+      if (label) {
+        const name = label.textContent?.replace(' ✓', '') || '';
+        label.textContent = placed ? `${name} ✓` : name.replace(' ✓', '');
+      }
+    });
+  }
+
+  private updateActionToolbar(): void {
+    const toolbar = this.dom.actionToolbar;
+    if (this.selectedId) {
+      toolbar.classList.add('visible');
+    } else {
+      toolbar.classList.remove('visible');
+    }
+  }
+
+  private markAnalysisStale(): void {
+    this.clearAnalysisVisualizations();
+    this.showStaleMessage();
+  }
+
+  private clearAnalysisVisualizations(): void {
+    this.catPathSimulator.clearVisualizations();
+    this.dogRestAnalyzer.clearVisualizations();
+    this.furnitureDamageDetector.clearVisualizations();
+    this.cleaningPathSimulator.clearVisualizations();
+    this.walkwayAnalyzer.clearVisualizations();
+  }
+
+  private showStaleMessage(): void {
+    const msg = '<div class="stale-state">家具已变更，请点击「🔍 全面分析」查看最新报告</div>';
+    this.dom.walkwayBox.innerHTML = msg;
+    this.dom.catPathBox.innerHTML = msg;
+    this.dom.dogRestBox.innerHTML = msg;
+    this.dom.furnitureDamageBox.innerHTML = msg;
+    this.dom.cleaningPathBox.innerHTML = msg;
+    this.dom.scoreEl.textContent = '--';
+    this.dom.scoreEl.classList.remove('good', 'medium', 'poor');
   }
 
   private startPlacing(type: FurnitureType): void {
@@ -147,9 +224,10 @@ class PetSpacePlannerApp {
       const pt = this.sceneManager.screenToGround(e.clientX, e.clientY);
       if (pt && this.isPlacable(pt.x, pt.z, this.interaction.type)) {
         this.placeFurniture(this.interaction.type, pt);
-        this.runAnalysis();
-        return;
+        this.cancelPlacing();
+        this.markAnalysisStale();
       }
+      return;
     }
 
     const objs = Array.from(this.furniture.values()).map((f) => f.mesh);
@@ -217,14 +295,14 @@ class PetSpacePlannerApp {
   private onPointerUp(_e: PointerEvent): void {
     if (this.interaction.mode === 'dragging') {
       this.interaction = { mode: 'idle' };
-      this.runAnalysis();
+      this.markAnalysisStale();
     }
   }
 
   private onPointerLeave(): void {
     if (this.interaction.mode === 'dragging') {
       this.interaction = { mode: 'idle' };
-      this.runAnalysis();
+      this.markAnalysisStale();
     }
   }
 
@@ -332,6 +410,7 @@ class PetSpacePlannerApp {
     this.updateBoundingBox(furniture);
     this.furniture.set(id, furniture);
     this.select(id);
+    this.updateItemButtons();
   }
 
   private updateBoundingBox(f: PlacedFurniture): void {
@@ -367,6 +446,7 @@ class PetSpacePlannerApp {
         }
       });
     }
+    this.updateActionToolbar();
   }
 
   private deselect(): void {
@@ -386,6 +466,7 @@ class PetSpacePlannerApp {
       }
     }
     this.selectedId = null;
+    this.updateActionToolbar();
   }
 
   private rotateSelected(delta: number): void {
@@ -395,7 +476,7 @@ class PetSpacePlannerApp {
     f.rotation += delta;
     f.mesh.rotation.y = f.rotation;
     this.updateBoundingBox(f);
-    this.runAnalysis();
+    this.markAnalysisStale();
   }
 
   private removeFurniture(id: string): void {
@@ -407,29 +488,30 @@ class PetSpacePlannerApp {
       if (mesh.geometry) mesh.geometry.dispose?.();
     });
     this.furniture.delete(id);
-    if (this.selectedId === id) this.selectedId = null;
-    this.runAnalysis();
+    if (this.selectedId === id) {
+      this.selectedId = null;
+      this.updateActionToolbar();
+    }
+    this.updateItemButtons();
+    this.markAnalysisStale();
   }
 
   private clearAll(): void {
-    this.catPathSimulator.clearVisualizations();
-    this.dogRestAnalyzer.clearVisualizations();
-    this.furnitureDamageDetector.clearVisualizations();
-    this.cleaningPathSimulator.clearVisualizations();
-    this.walkwayAnalyzer.clearVisualizations();
+    this.clearAnalysisVisualizations();
 
-    for (const [id, f] of this.furniture) {
+    for (const [, f] of this.furniture) {
       this.sceneManager.remove(f.mesh);
       f.mesh.traverse((c) => {
         const mesh = c as THREE.Mesh;
         if (mesh.geometry) mesh.geometry.dispose?.();
       });
-      void id;
     }
     this.furniture.clear();
     this.selectedId = null;
     this.cancelPlacing();
-    this.runAnalysis();
+    this.updateItemButtons();
+    this.updateActionToolbar();
+    this.markAnalysisStale();
   }
 
   private runAnalysis(): AnalysisResult {
@@ -455,7 +537,7 @@ class PetSpacePlannerApp {
 
   private renderAlerts(container: HTMLElement, alerts: AlertItem[]): void {
     if (alerts.length === 0) {
-      container.innerHTML = '<div class="empty-state">暂无相关数据，放置家具后自动分析</div>';
+      container.innerHTML = '<div class="empty-state">暂无相关数据，放置家具后点击全面分析</div>';
       return;
     }
     container.innerHTML = alerts
@@ -538,6 +620,7 @@ window.addEventListener('DOMContentLoaded', () => {
       };
       (app as unknown as { updateBoundingBox: (f: PlacedFurniture) => void }).updateBoundingBox(furniture);
       (app as unknown as { furniture: Map<string, PlacedFurniture> }).furniture.set(id, furniture);
+      (app as unknown as { updateItemButtons: () => void }).updateItemButtons();
       (app as unknown as { runAnalysis: () => void }).runAnalysis();
       return true;
     },

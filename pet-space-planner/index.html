@@ -98,10 +98,26 @@
       transform: scale(0.98);
     }
 
+    .item-btn.placed {
+      opacity: 0.45;
+      cursor: not-allowed;
+      border-color: rgba(102, 187, 106, 0.3);
+      background: rgba(102, 187, 106, 0.06);
+    }
+
+    .item-btn.placed:hover {
+      transform: none;
+      background: rgba(102, 187, 106, 0.06);
+    }
+
     .item-icon {
       font-size: 18px;
       width: 24px;
       text-align: center;
+    }
+
+    .item-label {
+      flex: 1;
     }
 
     .controls-panel {
@@ -246,6 +262,16 @@
       border: 1px dashed rgba(255, 255, 255, 0.08);
     }
 
+    .stale-state {
+      padding: 16px;
+      text-align: center;
+      color: #ffb347;
+      font-size: 12px;
+      background: rgba(255, 179, 71, 0.06);
+      border-radius: 8px;
+      border: 1px dashed rgba(255, 179, 71, 0.25);
+    }
+
     .controls-hint {
       position: fixed;
       bottom: 20px;
@@ -327,6 +353,56 @@
     .score-value.poor {
       color: #ef5350;
     }
+
+    .action-toolbar {
+      position: fixed;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      display: flex;
+      gap: 8px;
+      background: rgba(20, 20, 35, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(100, 180, 255, 0.2);
+      border-radius: 14px;
+      padding: 10px 16px;
+      z-index: 101;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+    }
+
+    .action-toolbar.visible {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .action-toolbar button {
+      padding: 8px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #e8e8e8;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .action-toolbar button:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .action-toolbar button.delete-action {
+      background: rgba(239, 83, 80, 0.12);
+      border-color: rgba(239, 83, 80, 0.3);
+      color: #ef5350;
+    }
+
+    .action-toolbar button.delete-action:hover {
+      background: rgba(239, 83, 80, 0.22);
+    }
   </style>
 </head>
 <body>
@@ -338,23 +414,23 @@
     <div class="item-list">
       <button class="item-btn" data-type="sofa">
         <span class="item-icon">🛋️</span>
-        <span>真皮沙发</span>
+        <span class="item-label">真皮沙发</span>
       </button>
       <button class="item-btn" data-type="bookshelf">
         <span class="item-icon">📚</span>
-        <span>书架</span>
+        <span class="item-label">书架</span>
       </button>
       <button class="item-btn" data-type="cabinet">
         <span class="item-icon">🗄️</span>
-        <span>储物柜</span>
+        <span class="item-label">储物柜</span>
       </button>
       <button class="item-btn" data-type="table">
         <span class="item-icon">🍽️</span>
-        <span>餐桌</span>
+        <span class="item-label">餐桌</span>
       </button>
       <button class="item-btn" data-type="tv-stand">
         <span class="item-icon">📺</span>
-        <span>电视柜</span>
+        <span class="item-label">电视柜</span>
       </button>
     </div>
 
@@ -362,23 +438,23 @@
     <div class="item-list">
       <button class="item-btn" data-type="cat-tree-large">
         <span class="item-icon">🌳</span>
-        <span>大型猫爬架</span>
+        <span class="item-label">大型猫爬架</span>
       </button>
       <button class="item-btn" data-type="cat-tree-small">
         <span class="item-icon">🌿</span>
-        <span>小型猫爬架</span>
+        <span class="item-label">小型猫爬架</span>
       </button>
       <button class="item-btn" data-type="cat-scratcher">
         <span class="item-icon">🪵</span>
-        <span>猫抓柱</span>
+        <span class="item-label">猫抓柱</span>
       </button>
       <button class="item-btn" data-type="sisal-post">
         <span class="item-icon">🧶</span>
-        <span>剑麻柱</span>
+        <span class="item-label">剑麻柱</span>
       </button>
       <button class="item-btn" data-type="litter-box">
         <span class="item-icon">📦</span>
-        <span>自动猫砂盆</span>
+        <span class="item-label">自动猫砂盆</span>
       </button>
     </div>
 
@@ -386,11 +462,11 @@
     <div class="item-list">
       <button class="item-btn" data-type="dog-bed">
         <span class="item-icon">🛏️</span>
-        <span>狗窝</span>
+        <span class="item-label">狗窝</span>
       </button>
       <button class="item-btn" data-type="dog-bowl">
         <span class="item-icon">🥣</span>
-        <span>狗食盆组合</span>
+        <span class="item-label">狗食盆组合</span>
       </button>
     </div>
 
@@ -421,41 +497,48 @@
     <div class="module-section">
       <div class="module-title">🚶 通行路径分析</div>
       <div id="walkwayAnalysis" class="empty-state">
-        请先放置家具进行分析
+        请先放置家具后点击全面分析
       </div>
     </div>
 
     <div class="module-section">
       <div class="module-title">🐱 猫咪行动线分析</div>
       <div id="catPathAnalysis" class="empty-state">
-        检测猫咪从地面到高处的连续落脚点
+        请先放置家具后点击全面分析
       </div>
     </div>
 
     <div class="module-section">
       <div class="module-title">🐕 狗休息区分析</div>
       <div id="dogRestAnalysis" class="empty-state">
-        根据体型推荐狗窝位置（通风+非过道）
+        请先放置家具后点击全面分析
       </div>
     </div>
 
     <div class="module-section">
       <div class="module-title">⚠️ 家具破坏性检测</div>
       <div id="furnitureDamageAnalysis" class="empty-state">
-        检测猫抓柱与贵重家具的距离
+        请先放置家具后点击全面分析
       </div>
     </div>
 
     <div class="module-section">
       <div class="module-title">🧹 清洁动线分析</div>
       <div id="cleaningPathAnalysis" class="empty-state">
-        模拟清理猫砂盆路径是否经过餐厅
+        请先放置家具后点击全面分析
       </div>
     </div>
   </div>
 
+  <div class="action-toolbar" id="actionToolbar">
+    <button id="rotateLeftBtn">↶ 左转</button>
+    <button id="rotateRightBtn">↷ 右转</button>
+    <button id="rotate90Btn">🔄 转90°</button>
+    <button id="deleteBtn" class="delete-action">🗑️ 删除</button>
+  </div>
+
   <div class="controls-hint">
-    <kbd>左键</kbd> 旋转 | <kbd>滚轮</kbd> 缩放 | <kbd>右键</kbd> 平移 | <kbd>点击物体</kbd> 选中 | <kbd>Delete</kbd> 删除 | <kbd>拖拽地面</kbd> 放置
+    <kbd>左键</kbd> 旋转 | <kbd>滚轮</kbd> 缩放 | <kbd>右键</kbd> 平移 | <kbd>点击物体</kbd> 选中 | <kbd>Delete</kbd> 删除
   </div>
 
   <script type="module" src="/src/main.ts"></script>
