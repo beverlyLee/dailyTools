@@ -1,0 +1,16 @@
+{
+  "name": "smart-greenhouse-server",
+  "version": "1.0.0",
+  "description": "智慧大棚后端服务 - 环境数据模拟与WebSocket推送",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "ws": "^8.16.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}
