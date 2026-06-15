@@ -10,6 +10,7 @@ import type {
 } from './types'
 import { DEFAULT_MATERIALS, DEFAULT_BAY_WINDOW } from './types'
 import { COMFORT_COLORS, ILLUMINATION_COLORS } from './utils/calculations'
+import { SeededRandom } from './utils/seededRandom'
 
 type TabType = 'structure' | 'comfort' | 'storage' | 'lighting' | 'decor'
 
@@ -524,6 +525,9 @@ function DecorPanel({
 }: ControlPanelProps) {
   const cushionMaterials = DEFAULT_MATERIALS.filter(m => m.type === 'cushion')
   const frameMaterials = DEFAULT_MATERIALS.filter(m => m.type === 'frame')
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(
+    decorConfig.items.length > 0 ? decorConfig.items[decorConfig.items.length - 1].id : null
+  )
 
   const decorTypes = [
     { type: 'pillow', label: '抱枕', icon: '🛏️', defaultColor: '#f5f0e6' },
@@ -534,29 +538,47 @@ function DecorPanel({
   ] as const
 
   const addDecorItem = (type: typeof decorTypes[number]['type'], color: string) => {
-    const itemCount = decorConfig.items.filter(i => i.type === type).length
+    const totalCount = decorConfig.items.length
+    const typeCount = decorConfig.items.filter(i => i.type === type).length
+    const seedStr = `${type}-${totalCount}-${typeCount}`
+    const rng = new SeededRandom(seedStr)
+
+    const layoutX = -100 + typeCount * 50
+    const x = layoutX + (rng.next() - 0.5) * 20
+    const z = 15 + rng.next() * 20
+    const rotY = (rng.next() - 0.5) * 20
+    const rotZ = (rng.next() - 0.5) * 6
+    const sc = 0.9 + rng.next() * 0.15
+
     const newItem = {
       id: `${type}-${Date.now()}`,
       type,
-      position: {
-        x: (Math.random() - 0.5) * 150,
-        y: 0,
-        z: 15 + Math.random() * 20
-      },
-      rotation: { x: 0, y: (Math.random() - 0.5) * 30, z: (Math.random() - 0.5) * 10 },
-      scale: { x: 0.85 + Math.random() * 0.3, y: 0.85 + Math.random() * 0.3, z: 0.85 + Math.random() * 0.3 },
+      position: { x, y: 0, z },
+      rotation: { x: 0, y: rotY, z: rotZ },
+      scale: { x: sc, y: sc, z: sc },
       color,
       material: (type === 'table' ? 'wood' : type === 'lamp' ? 'ceramic' : 'cotton') as DecorConfig['items'][number]['material']
     }
     setDecorConfig(p => ({ ...p, items: [...p.items, newItem] }))
-    void itemCount
+    setSelectedItemId(newItem.id)
   }
 
   const removeItem = (id: string) => {
     setDecorConfig(p => ({ ...p, items: p.items.filter(i => i.id !== id) }))
+    if (selectedItemId === id) {
+      const remaining = decorConfig.items.filter(i => i.id !== id)
+      setSelectedItemId(remaining.length > 0 ? remaining[remaining.length - 1].id : null)
+    }
   }
 
-  const selectedItem = decorConfig.items[decorConfig.items.length - 1]
+  const updateItem = (id: string, patch: Partial<DecorConfig['items'][number]>) => {
+    setDecorConfig(p => ({
+      ...p,
+      items: p.items.map(it => it.id === id ? { ...it, ...patch } : it)
+    }))
+  }
+
+  const selectedItem = decorConfig.items.find(i => i.id === selectedItemId) || null
 
   return (
     <>
@@ -620,8 +642,15 @@ function DecorPanel({
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {decorConfig.items.map((item, idx) => {
               const typeInfo = decorTypes.find(t => t.type === item.type)
+              const isSelected = item.id === selectedItemId
               return (
-                <div key={item.id} className="flex items-center justify-between bg-white rounded-lg p-2 border border-gray-100">
+                <div
+                  key={item.id}
+                  className={`flex items-center justify-between bg-white rounded-lg p-2 border cursor-pointer transition-all ${
+                    isSelected ? 'border-primary-400 bg-primary-50' : 'border-gray-100 hover:border-gray-200'
+                  }`}
+                  onClick={() => setSelectedItemId(item.id)}
+                >
                   <div className="flex items-center gap-2">
                     <span>{typeInfo?.icon}</span>
                     <div>
@@ -635,7 +664,7 @@ function DecorPanel({
                     </div>
                   </div>
                   <button
-                    onClick={() => removeItem(item.id)}
+                    onClick={(e) => { e.stopPropagation(); removeItem(item.id) }}
                     className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-all"
                   >
                     ✕
@@ -655,20 +684,12 @@ function DecorPanel({
               <input
                 type="color"
                 value={selectedItem.color}
-                onChange={e => {
-                  const newColor = e.target.value
-                  setDecorConfig(p => ({
-                    ...p,
-                    items: p.items.map((it, i) =>
-                      i === p.items.length - 1 ? { ...it, color: newColor } : it
-                    )
-                  }))
-                }}
+                onChange={e => updateItem(selectedItem.id, { color: e.target.value })}
                 className="w-full h-8 rounded cursor-pointer"
               />
             </div>
             <div>
-              <label className="text-xs text-gray-600 mb-1 block">缩放</label>
+              <label className="text-xs text-gray-600 mb-1 block">缩放 (%)</label>
               <input
                 type="range"
                 min={50}
@@ -676,17 +697,67 @@ function DecorPanel({
                 value={Math.round(selectedItem.scale.x * 100)}
                 onChange={e => {
                   const s = Number(e.target.value) / 100
-                  setDecorConfig(p => ({
-                    ...p,
-                    items: p.items.map((it, i) =>
-                      i === p.items.length - 1 ? { ...it, scale: { x: s, y: s, z: s } } : it
-                    )
-                  }))
+                  updateItem(selectedItem.id, { scale: { x: s, y: s, z: s } })
                 }}
                 className="w-full accent-primary-500"
               />
             </div>
           </div>
+
+          <div className="mt-3 space-y-2">
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-xs text-gray-600">横向位置 X (cm)</label>
+                <span className="text-xs font-medium text-primary-600">{Math.round(selectedItem.position.x)}cm</span>
+              </div>
+              <input
+                type="range"
+                min={-120}
+                max={120}
+                value={Math.round(selectedItem.position.x)}
+                onChange={e => {
+                  const v = Number(e.target.value)
+                  updateItem(selectedItem.id, { position: { ...selectedItem.position, x: v } })
+                }}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-500"
+              />
+            </div>
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-xs text-gray-600">前后位置 Z (cm)</label>
+                <span className="text-xs font-medium text-primary-600">{Math.round(selectedItem.position.z)}cm</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={60}
+                value={Math.round(selectedItem.position.z)}
+                onChange={e => {
+                  const v = Number(e.target.value)
+                  updateItem(selectedItem.id, { position: { ...selectedItem.position, z: v } })
+                }}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-500"
+              />
+            </div>
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-xs text-gray-600">旋转角度 (°)</label>
+                <span className="text-xs font-medium text-primary-600">{Math.round(selectedItem.rotation.y)}°</span>
+              </div>
+              <input
+                type="range"
+                min={-90}
+                max={90}
+                value={Math.round(selectedItem.rotation.y)}
+                onChange={e => {
+                  const v = Number(e.target.value)
+                  updateItem(selectedItem.id, { rotation: { ...selectedItem.rotation, y: v } })
+                }}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-500"
+              />
+            </div>
+          </div>
+
           <button
             onClick={() => setDecorConfig(p => ({ ...p, items: [] }))}
             className="w-full mt-3 py-2 text-xs text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-red-100"

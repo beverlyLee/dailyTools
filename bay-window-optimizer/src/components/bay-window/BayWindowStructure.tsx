@@ -168,8 +168,8 @@ export function BayWindowStructure({ config, frameColor }: BayWindowStructurePro
       {hasRadiator && (
         <group position={[
           toMeters(radiatorOffsetX),
-          toMeters(radiatorHeight) / 2 + 0.05,
-          -SD / 2 + 0.04
+          SH + toMeters(radiatorHeight) / 2,
+          -SD / 2 - toMeters(radiatorDepth) / 2 - 0.02
         ]}>
           <mesh castShadow receiveShadow>
             <boxGeometry args={[toMeters(radiatorWidth), toMeters(radiatorHeight), toMeters(radiatorDepth)]} />
@@ -181,7 +181,7 @@ export function BayWindowStructure({ config, frameColor }: BayWindowStructurePro
               position={[
                 -toMeters(radiatorWidth) / 2 + 0.05 + i * 0.1,
                 0,
-                toMeters(radiatorDepth) / 2 + 0.005
+                -toMeters(radiatorDepth) / 2 - 0.005
               ]}
             >
               <boxGeometry args={[0.05, toMeters(radiatorHeight) - 0.04, 0.015]} />
@@ -191,6 +191,14 @@ export function BayWindowStructure({ config, frameColor }: BayWindowStructurePro
           <mesh position={[0, toMeters(radiatorHeight) / 2 - 0.02, 0]}>
             <cylinderGeometry args={[0.015, 0.015, toMeters(radiatorWidth) - 0.05, 12]} />
             <meshStandardMaterial color="#c0c0c0" roughness={0.3} metalness={0.6} />
+          </mesh>
+          <mesh position={[-toMeters(radiatorWidth) / 2 + 0.05, -toMeters(radiatorHeight) / 2 + 0.01, 0]}>
+            <cylinderGeometry args={[0.01, 0.01, 0.06, 8]} />
+            <meshStandardMaterial color="#909090" roughness={0.4} metalness={0.6} />
+          </mesh>
+          <mesh position={[toMeters(radiatorWidth) / 2 - 0.05, -toMeters(radiatorHeight) / 2 + 0.01, 0]}>
+            <cylinderGeometry args={[0.01, 0.01, 0.06, 8]} />
+            <meshStandardMaterial color="#909090" roughness={0.4} metalness={0.6} />
           </mesh>
         </group>
       )}
