@@ -153,14 +153,14 @@ export function BayWindowStructure({ config, frameColor }: BayWindowStructurePro
       </group>
 
       {hasCurtainBox && (
-        <group position={[0, SH + WH + toMeters(curtainBoxHeight) / 2 + 0.02, -SD / 2 + toMeters(curtainBoxDepth) / 2 - 0.02]}>
+        <group position={[0, SH + WH - toMeters(curtainBoxHeight) / 2, -SD / 2 + toMeters(curtainBoxDepth) / 2 + 0.02]}>
           <mesh castShadow>
-            <boxGeometry args={[W + 0.1, toMeters(curtainBoxHeight), toMeters(curtainBoxDepth)]} />
-            <meshStandardMaterial color="#f8f5f0" roughness={0.8} />
+            <boxGeometry args={[W + 0.15, toMeters(curtainBoxHeight), toMeters(curtainBoxDepth)]} />
+            <meshStandardMaterial color="#ffffff" roughness={0.75} />
           </mesh>
-          <mesh position={[0, -toMeters(curtainBoxHeight) / 2 + 0.01, 0]}>
-            <boxGeometry args={[W + 0.08, 0.02, toMeters(curtainBoxDepth) + 0.02]} />
-            <meshStandardMaterial color="#e8e4dc" roughness={0.9} />
+          <mesh position={[0, 0, toMeters(curtainBoxDepth) / 2 + 0.005]}>
+            <boxGeometry args={[W + 0.12, toMeters(curtainBoxHeight) - 0.02, 0.01]} />
+            <meshStandardMaterial color="#d4cfc4" roughness={0.8} />
           </mesh>
         </group>
       )}
@@ -168,26 +168,30 @@ export function BayWindowStructure({ config, frameColor }: BayWindowStructurePro
       {hasRadiator && (
         <group position={[
           toMeters(radiatorOffsetX),
-          SH - toMeters(radiatorHeight) / 2,
-          -SD / 2 + toMeters(radiatorDepth) / 2 + 0.03
+          toMeters(radiatorHeight) / 2 + 0.05,
+          -SD / 2 + 0.04
         ]}>
-          <mesh castShadow>
+          <mesh castShadow receiveShadow>
             <boxGeometry args={[toMeters(radiatorWidth), toMeters(radiatorHeight), toMeters(radiatorDepth)]} />
-            <meshStandardMaterial color="#f5f5f5" roughness={0.6} metalness={0.2} />
+            <meshStandardMaterial color="#ffffff" roughness={0.5} metalness={0.3} />
           </mesh>
-          {Array.from({ length: Math.floor(radiatorWidth / 8) }).map((_, i) => (
+          {Array.from({ length: Math.floor(radiatorWidth / 10) }).map((_, i) => (
             <mesh
               key={i}
               position={[
-                -toMeters(radiatorWidth) / 2 + 0.03 + i * 0.08,
+                -toMeters(radiatorWidth) / 2 + 0.05 + i * 0.1,
                 0,
                 toMeters(radiatorDepth) / 2 + 0.005
               ]}
             >
-              <boxGeometry args={[0.04, toMeters(radiatorHeight) - 0.02, 0.01]} />
-              <meshStandardMaterial color="#e0e0e0" roughness={0.5} metalness={0.3} />
+              <boxGeometry args={[0.05, toMeters(radiatorHeight) - 0.04, 0.015]} />
+              <meshStandardMaterial color="#d0d0d0" roughness={0.4} metalness={0.5} />
             </mesh>
           ))}
+          <mesh position={[0, toMeters(radiatorHeight) / 2 - 0.02, 0]}>
+            <cylinderGeometry args={[0.015, 0.015, toMeters(radiatorWidth) - 0.05, 12]} />
+            <meshStandardMaterial color="#c0c0c0" roughness={0.3} metalness={0.6} />
+          </mesh>
         </group>
       )}
 

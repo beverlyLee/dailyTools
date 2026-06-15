@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
+import * as THREE from 'three'
 import type { BayWindowConfig, ComfortAnalysis, StorageConfig, LightingAnalysis, DecorConfig, StorageAnalysis as StorageAnalysisType } from './types'
 import { SceneErrorBoundary } from './components/SceneErrorBoundary'
 import { BayWindowStructure } from './components/bay-window/BayWindowStructure'
@@ -159,6 +160,7 @@ export function Scene3D(props: Scene3DProps) {
           }}
           onCreated={({ gl }) => {
             gl.setClearColor('#f8fafc')
+            gl.shadowMap.type = THREE.PCFShadowMap
           }}
         >
           <SceneContent {...props} />

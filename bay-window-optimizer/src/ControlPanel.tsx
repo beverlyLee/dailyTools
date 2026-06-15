@@ -383,16 +383,26 @@ function StoragePanel({
           <h4 className="text-sm font-semibold text-red-700 flex items-center">
             <span className="mr-2">⛔</span>冲突检测报告
           </h4>
-          {storageAnalysis.conflicts.map((c, i) => (
-            <div key={i} className="text-sm text-red-600 bg-white bg-opacity-60 rounded-lg p-2 flex items-start">
-              <span className="mr-2">•</span>
-              <span>
-                抽屉与<b>{c.conflictObject}</b>存在空间冲突
-                {c.conflictType === 'curtain' && '，抽屉开启会被窗帘盒阻挡'}
-                {c.conflictType === 'radiator' && '，抽屉开启会撞到暖气片'}
-              </span>
-            </div>
-          ))}
+          {(() => {
+            const grouped = storageAnalysis.conflicts.reduce((acc, c) => {
+              if (!acc[c.conflictType]) {
+                acc[c.conflictType] = { count: 0, object: c.conflictObject }
+              }
+              acc[c.conflictType].count++
+              return acc
+            }, {} as Record<string, { count: number; object: string }>)
+
+            return Object.entries(grouped).map(([type, info]) => (
+              <div key={type} className="text-sm text-red-600 bg-white bg-opacity-60 rounded-lg p-2 flex items-start">
+                <span className="mr-2">•</span>
+                <span>
+                  <b>{info.count}</b> 个抽屉与<b>{info.object}</b>存在空间冲突
+                  {type === 'curtain' && '，抽屉开启会被窗帘盒阻挡'}
+                  {type === 'radiator' && '，抽屉开启会撞到暖气片'}
+                </span>
+              </div>
+            ))
+          })()}
         </div>
       )}
 
