@@ -1,0 +1,28 @@
+{
+  "testTime": "2026-06-16T10:48:20.407Z",
+  "totalIssues": 4,
+  "issues": [
+    {
+      "category": "农艺验证",
+      "description": "尿素用量 13.02 公斤/亩，超出农艺常识范围（20-45公斤/亩）",
+      "severity": "high"
+    },
+    {
+      "category": "农艺验证",
+      "description": "中低产田尿素用量 11.39 公斤/亩异常",
+      "severity": "medium"
+    },
+    {
+      "category": "农艺验证",
+      "description": "高产田尿素用量 14.64 公斤/亩异常",
+      "severity": "medium"
+    },
+    {
+      "category": "输入验证",
+      "description": "空输入时无提示弹窗",
+      "severity": "low"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": []
+}

@@ -1,6 +1,8 @@
-import { CROPS, FERTILIZERS } from './agronomyData.js';
-import { calculateNutrientBalance } from './nutrientCalculator.js';
+import { CROPS, FERTILIZERS, FERTILIZER_EFFICIENCY } from './agronomyData.js';
+import { calculateNutrientBalance, calculateNutrientDemand } from './nutrientCalculator.js';
 import { generateFertilizerPlan } from './fertilizerConverter.js';
+
+export const FERTILIZER_PLAN_TYPE = 'traditional';
 
 export function splitFertilizerByStage(nutrientNeeded, cropType) {
   const crop = CROPS[cropType];
@@ -34,8 +36,8 @@ export function generateApplicationPlan(nutrientNeeded, cropType) {
   const split = splitFertilizerByStage(nutrientNeeded, cropType);
   const crop = CROPS[cropType];
 
-  const basePlan = generateFertilizerPlan(split.baseFertilizer, 'traditional');
-  const topPlan = generateFertilizerPlan(split.topDressing, 'traditional');
+  const basePlan = generateFertilizerPlan(split.baseFertilizer, FERTILIZER_PLAN_TYPE);
+  const topPlan = generateFertilizerPlan(split.topDressing, FERTILIZER_PLAN_TYPE);
 
   const format = (val) => val.toFixed(2);
 
@@ -79,66 +81,70 @@ export function generateApplicationPlan(nutrientNeeded, cropType) {
 
 export function generateBlindFertilizationPlan(cropType, targetYield) {
   const crop = CROPS[cropType];
-  const blindN = targetYield * 0.035;
-  const blindP2O5 = targetYield * 0.018;
-  const blindK2O = targetYield * 0.025;
-
-  const blindNutrients = {
-    N: blindN,
-    P2O5: blindP2O5,
-    K2O: blindK2O
+  const demand = calculateNutrientDemand(cropType, targetYield);
+  
+  const overApplicationRatio = 1.2;
+  
+  const blindNutrientsNeeded = {
+    N: (demand.N / FERTILIZER_EFFICIENCY.N) * overApplicationRatio,
+    P2O5: (demand.P2O5 / FERTILIZER_EFFICIENCY.P2O5) * overApplicationRatio,
+    K2O: (demand.K2O / FERTILIZER_EFFICIENCY.K2O) * overApplicationRatio
   };
 
-  const blindPlan = generateFertilizerPlan(blindNutrients, 'traditional');
+  const blindPlan = generateFertilizerPlan(blindNutrientsNeeded, FERTILIZER_PLAN_TYPE);
 
   const format = (val) => val.toFixed(2);
 
   return {
     title: '盲目施肥方案（传统经验）',
-    description: '基于传统经验的粗略估算，未考虑土壤实际供肥能力和肥料利用率',
-    nutrients: {
-      '氮(N)': format(blindN),
-      '磷(P₂O₅)': format(blindP2O5),
-      '钾(K₂O)': format(blindK2O)
-    },
+    description: '基于传统经验施肥，不考虑土壤供肥能力，习惯过量施用（约超量20%）',
+    nutrientsNeeded: blindNutrientsNeeded,
+    nutrientDemand: demand,
     fertilizers: blindPlan.items.map(item => ({
       name: item.fertilizer,
       amount: `${format(item.amount)} ${item.unit}`,
       cost: `${format(item.amount * item.price)} 元/亩`
     })),
     totalCost: `${format(blindPlan.totalCost)} 元/亩`,
-    rawCost: blindPlan.totalCost
+    rawCost: blindPlan.totalCost,
+    rawPlan: blindPlan
   };
 }
 
 export function compareFertilizationPlans(precisionPlan, blindPlan, fertilizerNeeded) {
   const format = (val) => val.toFixed(2);
-  const precisionTotal = precisionPlan.items.reduce((sum, item) => sum + item.amount * item.price, 0);
+  const precisionTotal = precisionPlan.totalCost;
   const blindTotal = blindPlan.rawCost;
 
   const costDifference = blindTotal - precisionTotal;
   const savingRate = ((costDifference / blindTotal) * 100).toFixed(1);
 
-  const ureaPrecision = precisionPlan.items.find(i => i.fertilizer === '尿素')?.amount || 0;
-  const ureaBlind = blindPlan.fertilizers.find(f => f.name === '尿素')?.amount;
-  const ureaBlindNum = ureaBlind ? parseFloat(ureaBlind) : 0;
-  const ureaSaving = Math.max(0, ureaBlindNum - ureaPrecision);
+  const getUreaAmount = (plan) => {
+    const item = plan.items?.find(i => i.fertilizer === '尿素');
+    return item ? item.amount : 0;
+  };
+
+  const ureaPrecision = getUreaAmount(precisionPlan);
+  const ureaBlind = getUreaAmount(blindPlan.rawPlan);
+  const ureaSaving = Math.max(0, ureaBlind - ureaPrecision);
+
+  const blindNutrients = blindPlan.nutrientsNeeded;
 
   const nutrientComparison = {
     '氮(N)': {
       精准施肥: format(fertilizerNeeded.N),
-      盲目施肥: blindPlan.nutrients['氮(N)'],
-      差异: format(parseFloat(blindPlan.nutrients['氮(N)']) - fertilizerNeeded.N)
+      盲目施肥: format(blindNutrients.N),
+      差异: format(blindNutrients.N - fertilizerNeeded.N)
     },
     '磷(P₂O₅)': {
       精准施肥: format(fertilizerNeeded.P2O5),
-      盲目施肥: blindPlan.nutrients['磷(P₂O₅)'],
-      差异: format(parseFloat(blindPlan.nutrients['磷(P₂O₅)']) - fertilizerNeeded.P2O5)
+      盲目施肥: format(blindNutrients.P2O5),
+      差异: format(blindNutrients.P2O5 - fertilizerNeeded.P2O5)
     },
     '钾(K₂O)': {
       精准施肥: format(fertilizerNeeded.K2O),
-      盲目施肥: blindPlan.nutrients['钾(K₂O)'],
-      差异: format(parseFloat(blindPlan.nutrients['钾(K₂O)']) - fertilizerNeeded.K2O)
+      盲目施肥: format(blindNutrients.K2O),
+      差异: format(blindNutrients.K2O - fertilizerNeeded.K2O)
     }
   };
 
@@ -166,7 +172,7 @@ export function compareFertilizationPlans(precisionPlan, blindPlan, fertilizerNe
 
 export function generateCompletePlan(cropType, targetYield, soilNutrients) {
   const nutrientResult = calculateNutrientBalance(cropType, targetYield, soilNutrients);
-  const fertilizerPlan = generateFertilizerPlan(nutrientResult.fertilizerNeeded, 'optimal');
+  const fertilizerPlan = generateFertilizerPlan(nutrientResult.fertilizerNeeded, FERTILIZER_PLAN_TYPE);
   const applicationPlan = generateApplicationPlan(nutrientResult.fertilizerNeeded, cropType);
   const blindPlan = generateBlindFertilizationPlan(cropType, targetYield);
   const comparison = compareFertilizationPlans(fertilizerPlan, blindPlan, nutrientResult.fertilizerNeeded);

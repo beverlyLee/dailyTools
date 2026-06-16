@@ -2,7 +2,7 @@ import './style.css';
 import { CROPS } from './agronomyData.js';
 import { calculateNutrientBalance, formatNutrientResult } from './nutrientCalculator.js';
 import { generateFertilizerPlan, formatFertilizerPlan } from './fertilizerConverter.js';
-import { generateApplicationPlan, generateBlindFertilizationPlan, compareFertilizationPlans, generateCompletePlan } from './applicationOptimizer.js';
+import { generateApplicationPlan, generateBlindFertilizationPlan, compareFertilizationPlans, generateCompletePlan, FERTILIZER_PLAN_TYPE } from './applicationOptimizer.js';
 
 const format = (val) => val.toFixed(2);
 
@@ -233,7 +233,7 @@ function handleCalculate(event) {
   const nutrientResult = calculateNutrientBalance(cropType, targetYield, soilNutrients);
   renderNutrientResult(nutrientResult);
 
-  const fertilizerPlan = generateFertilizerPlan(nutrientResult.fertilizerNeeded, 'optimal');
+  const fertilizerPlan = generateFertilizerPlan(nutrientResult.fertilizerNeeded, FERTILIZER_PLAN_TYPE);
   renderFertilizerPlan(fertilizerPlan);
 
   const applicationPlan = generateApplicationPlan(nutrientResult.fertilizerNeeded, cropType);
