@@ -145,9 +145,9 @@
 
 <div class="report-container">
   <div class="date-filter">
-    <label for="r-datefrom">统计周期:</label>
+    <label for="r-datefrom">起始日期:</label>
     <input id="r-datefrom" type="date" bind:value={reportDateFrom} on:change={calculateStats} />
-    <span>至</span>
+    <label for="r-dateto">结束日期:</label>
     <input id="r-dateto" type="date" bind:value={reportDateTo} on:change={calculateStats} />
     <button class="btn btn-primary" on:click={exportBatch}>
       📄 导出群体汇总报表

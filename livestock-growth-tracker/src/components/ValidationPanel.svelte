@@ -1,4 +1,5 @@
 <script>
+  import { createEventDispatcher } from 'svelte'
   import { STORES, add, getAll, remove } from '../lib/db.js'
   import {
     generateMockLivestock,
@@ -16,20 +17,14 @@
     BREED_CONFIG
   } from '../lib/growthModel.js'
 
+  const dispatch = createEventDispatcher()
+
   let isGenerating = false
   let isClearing = false
   let validationResults = []
   let showResults = false
   let livestockCount = 10
   let includeSlowGrowth = true
-
-  const dispatch = {
-    dataLoaded: null
-  }
-
-  export function onDataLoaded(callback) {
-    dispatch.dataLoaded = callback
-  }
 
   async function generateMockData() {
     isGenerating = true
@@ -65,7 +60,7 @@
       }
 
       alert(`成功生成 ${livestockCount} 条模拟数据，其中 ${slowCount} 条为生长迟缓个体。`)
-      if (dispatch.dataLoaded) dispatch.dataLoaded()
+      dispatch('dataLoaded')
     } catch (err) {
       alert('生成失败: ' + err.message)
     } finally {
@@ -89,7 +84,7 @@
       for (const v of vaccines) await remove(STORES.VACCINE_RECORDS, v.id)
 
       alert('所有数据已清空')
-      if (dispatch.dataLoaded) dispatch.dataLoaded()
+      dispatch('dataLoaded')
     } catch (err) {
       alert('清空失败: ' + err.message)
     } finally {
@@ -140,6 +135,9 @@
         )
       }
 
+      const fcrValid = fcrResult && fcrResult.fcr > 1.5 && fcrResult.fcr < 10
+      const deviationValid = deviation !== null && !isNaN(deviation)
+      const warningLogicValid = (deviation < -config.warningThreshold) === isWarning
       validationResults.push({
         earTag: l.earTag,
         breed: l.breed,
@@ -152,9 +150,10 @@
         dailyGain: fcrResult?.dailyGain,
         weightGain: fcrResult?.weightGain,
         totalFeed: fcrResult?.totalFeed,
-        fcrValid: fcrResult && fcrResult.fcr > 1.5 && fcrResult.fcr < 10,
-        deviationValid: deviation !== null && !isNaN(deviation),
-        warningLogicValid: (deviation < -config.warningThreshold) === isWarning
+        fcrValid,
+        deviationValid,
+        warningLogicValid,
+        allPass: fcrValid && deviationValid && warningLogicValid
       })
     }
 
@@ -287,8 +286,7 @@
           </thead>
           <tbody>
             {#each validationResults as r}
-              {@const allPass = r.fcrValid && r.deviationValid && r.warningLogicValid}
-              <tr class={allPass ? 'pass-row' : 'fail-row'}>
+              <tr class={r.allPass ? 'pass-row' : 'fail-row'}>
                 <td><strong>{r.earTag}</strong></td>
                 <td>{r.breed}</td>
                 <td>{r.age}天</td>
@@ -309,7 +307,7 @@
                   {/if}
                 </td>
                 <td>
-                  {#if allPass}
+                  {#if r.allPass}
                     <span class="result-pass">✓ 通过</span>
                   {:else}
                     <span class="result-fail">✗ 异常</span>

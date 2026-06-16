@@ -61,6 +61,24 @@
     }
   }
 
+  $: sortedWeightRecords = (() => {
+    if (!livestock) return []
+    const config = BREED_CONFIG[livestock.breed] || BREED_CONFIG['地方品种']
+    return [...weightRecords].sort((a, b) => new Date(b.recordDate) - new Date(a.recordDate)).map(r => {
+      const rAge = calculateAgeDays(livestock.birthDate, r.recordDate)
+      const stdW = getStandardWeight(livestock.breed, rAge)
+      const dev = calculateDeviation(r.weight, stdW)
+      const isW = checkWarning(dev, config.warningThreshold)
+      return {
+        ...r,
+        rAge,
+        stdW,
+        dev,
+        isW
+      }
+    })
+  })()
+
   async function loadData() {
     if (!livestock) return
     weightRecords = await getByIndex(STORES.WEIGHT_RECORDS, 'livestockId', livestock.id)
@@ -295,8 +313,10 @@
 
         {#if showWeightForm}
           <div class="inline-form">
-            <input type="date" bind:value={newWeight.recordDate} />
-            <input type="number" step="0.01" placeholder="体重 (kg)" bind:value={newWeight.weight} />
+            <label for="gw-date">日期:</label>
+            <input id="gw-date" type="date" bind:value={newWeight.recordDate} />
+            <label for="gw-weight">体重 (kg):</label>
+            <input id="gw-weight" type="number" step="0.01" bind:value={newWeight.weight} />
             <button class="btn btn-primary" on:click={saveWeight}>保存</button>
           </div>
         {/if}
@@ -317,19 +337,14 @@
                 </tr>
               </thead>
               <tbody>
-                {#each [...weightRecords].sort((a, b) => new Date(b.recordDate) - new Date(a.recordDate)) as r}
-                  {@const rAge = calculateAgeDays(livestock.birthDate, r.recordDate)}
-                  {@const stdW = getStandardWeight(livestock.breed, rAge)}
-                  {@const dev = calculateDeviation(r.weight, stdW)}
-                  {@const config = BREED_CONFIG[livestock.breed] || BREED_CONFIG['地方品种']}
-                  {@const isW = checkWarning(dev, config.warningThreshold)}
-                  <tr class:warning-row={isW}>
+                {#each sortedWeightRecords as r}
+                  <tr class:warning-row={r.isW}>
                     <td>{r.recordDate}</td>
-                    <td>{rAge}天</td>
+                    <td>{r.rAge}天</td>
                     <td class="strong">{r.weight.toFixed(2)} kg</td>
-                    <td>{stdW.toFixed(2)} kg</td>
-                    <td class={isW ? 'text-danger' : (dev < 0 ? 'text-warning' : 'text-success')}>
-                      {(dev * 100).toFixed(1)}%
+                    <td>{r.stdW.toFixed(2)} kg</td>
+                    <td class={r.isW ? 'text-danger' : (r.dev < 0 ? 'text-warning' : 'text-success')}>
+                      {(r.dev * 100).toFixed(1)}%
                     </td>
                     <td>
                       <button class="link-btn danger" on:click={() => deleteWeight(r.id)}>删除</button>
@@ -352,9 +367,12 @@
 
         {#if showFeedForm}
           <div class="inline-form">
-            <input type="date" bind:value={newFeed.recordDate} />
-            <input type="number" step="0.01" placeholder="投喂量 (kg)" bind:value={newFeed.feedAmount} />
-            <input type="text" placeholder="备注" bind:value={newFeed.notes} />
+            <label for="gf-date">日期:</label>
+            <input id="gf-date" type="date" bind:value={newFeed.recordDate} />
+            <label for="gf-amount">投喂量 (kg):</label>
+            <input id="gf-amount" type="number" step="0.01" bind:value={newFeed.feedAmount} />
+            <label for="gf-notes">备注:</label>
+            <input id="gf-notes" type="text" bind:value={newFeed.notes} />
             <button class="btn btn-primary" on:click={saveFeed}>保存</button>
           </div>
         {/if}
@@ -543,6 +561,13 @@
     padding: 16px;
     background: #f8f9fa;
     border-radius: 8px;
+    align-items: center;
+  }
+
+  .inline-form label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-light);
   }
 
   .inline-form input {
