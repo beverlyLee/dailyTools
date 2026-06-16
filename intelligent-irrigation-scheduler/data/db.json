@@ -1,0 +1,16 @@
+{
+  "irrigation_tasks": [],
+  "user_config": {
+    "id": "default",
+    "electricityPrice": 0.6,
+    "waterPrice": 2.5,
+    "pumpPower": 7.5,
+    "pumpFlow": 50,
+    "laborCost": 30,
+    "defaultCity": "北京",
+    "defaultCrop": "wheat",
+    "irrigationEfficiency": 0.85,
+    "plantingArea": 10,
+    "defaultSoilTexture": "loam"
+  }
+}
