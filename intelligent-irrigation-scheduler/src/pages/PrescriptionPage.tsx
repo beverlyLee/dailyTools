@@ -14,6 +14,7 @@ import {
 import { useAppStore, GROWTH_STAGES, CROP_NAME_MAP } from '@/store/appStore';
 import WeatherCard from '@/components/WeatherCard';
 import PrescriptionCard from '@/components/PrescriptionCard';
+import RainSimToggle from '@/components/RainSimToggle';
 import { cn } from '@/lib/utils';
 import dayjs from 'dayjs';
 import type { CropType } from '../../shared/types';
@@ -68,6 +69,8 @@ export default function PrescriptionPage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
+      <RainSimToggle />
+
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-3xl font-serif font-bold text-gray-800 dark:text-gray-100 mb-1">

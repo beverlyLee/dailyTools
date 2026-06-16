@@ -19,10 +19,10 @@ import dayjs from 'dayjs';
 import type { MoistureStatus, TaskStatus } from '../../shared/types';
 
 const STATUS_LABEL: Record<MoistureStatus, string> = {
-  sufficient: '充足',
-  moderate: '适中',
-  deficit: '亏缺',
-  severe: '严重',
+  sufficient: '充足 (>70%)',
+  moderate: '适中 (60-70%)',
+  deficit: '亏缺 (40-60%)',
+  severe: '严重 (<40%)',
 };
 
 const STATUS_CLASS: Record<MoistureStatus, string> = {

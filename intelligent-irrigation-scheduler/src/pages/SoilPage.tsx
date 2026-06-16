@@ -27,10 +27,10 @@ const SOIL_TEXTURE_LABEL: Record<SoilTexture, string> = {
 };
 
 const MOISTURE_STATUS_LABEL: Record<MoistureStatus, string> = {
-  sufficient: '墒情充足',
-  moderate: '墒情适中',
-  deficit: '墒情亏缺',
-  severe: '严重亏缺',
+  sufficient: '墒情充足 (>70%)',
+  moderate: '墒情适中 (60-70%)',
+  deficit: '墒情亏缺 (40-60%)',
+  severe: '严重亏缺 (<40%)',
 };
 
 const MOISTURE_STATUS_CLASS: Record<MoistureStatus, string> = {

@@ -15,6 +15,7 @@ import { MapPin, CloudRain, Droplets, Sun, CheckCircle2, Umbrella } from 'lucide
 import { useAppStore } from '@/store/appStore';
 import { cn } from '@/lib/utils';
 import dayjs from 'dayjs';
+import RainSimToggle from '@/components/RainSimToggle';
 
 const CITIES = ['北京', '郑州', '兰州', '石家庄', '济南'];
 
@@ -164,6 +165,8 @@ export default function WeatherPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      <RainSimToggle />
+
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-serif font-bold text-gray-800 dark:text-gray-100 mb-1">

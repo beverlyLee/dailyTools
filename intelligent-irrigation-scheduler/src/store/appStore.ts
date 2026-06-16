@@ -61,6 +61,7 @@ interface AppState {
   userConfig: UserConfig;
   tasks: CalendarTask[];
   tasksLoading: boolean;
+  forceRainMode: boolean;
 
   setWeather: (weather: WeatherResponse | null) => void;
   setSoilSim: (sim: SoilSimulationResponse | null) => void;
@@ -69,8 +70,9 @@ interface AppState {
   setSoilParams: (params: Partial<SoilParams>) => void;
   setUserConfig: (config: Partial<UserConfig>) => void;
   setTasks: (tasks: CalendarTask[]) => void;
+  setForceRainMode: (enabled: boolean) => void;
 
-  fetchWeather: (city?: string) => Promise<void>;
+  fetchWeather: (city?: string, forceRain?: boolean) => Promise<void>;
   fetchSoilSimulation: (overrides?: Partial<SoilSimulationRequest>) => Promise<void>;
   fetchPrescription: (overrides?: Partial<PrescriptionRequest>) => Promise<void>;
   fetchTasks: () => Promise<void>;
@@ -120,6 +122,7 @@ export const useAppStore = create<AppState>()(
       userConfig: DEFAULT_USER_CONFIG,
       tasks: [],
       tasksLoading: false,
+      forceRainMode: false,
 
       setWeather: (weather) => set({ weather }),
       setSoilSim: (sim) => set({ soilSim: sim }),
@@ -148,12 +151,14 @@ export const useAppStore = create<AppState>()(
       setUserConfig: (config) =>
         set((state) => ({ userConfig: { ...state.userConfig, ...config } })),
       setTasks: (tasks) => set({ tasks }),
+      setForceRainMode: (enabled) => set({ forceRainMode: enabled }),
 
-      fetchWeather: async (city) => {
+      fetchWeather: async (city, forceRain) => {
         const targetCity = city || get().userConfig.defaultCity;
+        const useForceRain = forceRain !== undefined ? forceRain : get().forceRainMode;
         set({ weatherLoading: true });
         try {
-          const data = await weatherApi.getWeather(targetCity);
+          const data = await weatherApi.getWeather(targetCity, useForceRain);
           if (data) {
             set({ weather: data as unknown as WeatherResponse });
           }
@@ -305,6 +310,7 @@ export const useAppStore = create<AppState>()(
         soilParams: state.soilParams,
         userConfig: state.userConfig,
         tasks: state.tasks,
+        forceRainMode: state.forceRainMode,
       }),
     }
   )

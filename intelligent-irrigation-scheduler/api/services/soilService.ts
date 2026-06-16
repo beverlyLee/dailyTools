@@ -11,8 +11,8 @@ import { generateMockWeather } from './weatherService.js';
 function getMoistureStatus(moisture: number, fieldCapacity: number): MoistureStatus {
   const ratio = moisture / fieldCapacity;
   if (ratio > 0.7) return 'sufficient';
-  if (ratio > 0.5) return 'moderate';
-  if (ratio > 0.3) return 'deficit';
+  if (ratio > 0.6) return 'moderate';
+  if (ratio > 0.4) return 'deficit';
   return 'severe';
 }
 
@@ -59,7 +59,7 @@ export function simulateMoisture(req: SoilSimulationRequest): SoilSimulationResp
   const moistureCurve: SoilMoisturePoint[] = [];
   const deficitDays: number[] = [];
   const start = dayjs(startDate);
-  const criticalMoisture = soil.fieldCapacity * 0.5;
+  const criticalMoisture = soil.fieldCapacity * 0.6;
 
   for (let d = 0; d < 7; d++) {
     const dateStr = start.add(d, 'day').format('YYYY-MM-DD');

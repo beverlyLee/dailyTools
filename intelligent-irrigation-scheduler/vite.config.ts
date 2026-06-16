@@ -25,11 +25,15 @@ export default defineConfig({
     tsconfigPaths(),
   ],
   server: {
+    hmr: {
+      overlay: false,
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false,
+        ws: false,
         configure: (proxy, _options) => {
           proxy.on('error', (err, _req, _res) => {
             console.log('proxy error', err);

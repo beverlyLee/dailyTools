@@ -1,7 +1,25 @@
 #!/usr/bin/env node
 import axios from 'axios';
 
-const BASE = 'http://localhost:3002/api';
+function parseArgs() {
+  const args = process.argv.slice(2);
+  let port = 3001;
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--port' && args[i + 1]) {
+      port = parseInt(args[i + 1], 10) || 3001;
+      i++;
+    } else if (args[i].startsWith('--port=')) {
+      port = parseInt(args[i].split('=')[1], 10) || 3001;
+    }
+  }
+  return { port };
+}
+
+const { port } = parseArgs();
+const BASE = `http://localhost:${port}/api`;
+
+console.log(`测试端口: ${port}`);
+console.log(`API地址: ${BASE}`);
 
 async function test() {
   console.log('='.repeat(60));

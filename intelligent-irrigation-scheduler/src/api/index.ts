@@ -18,17 +18,17 @@ import type {
 } from '../../shared/types';
 
 export const weatherApi = {
-  getWeather: (city: string) =>
-    apiClient.get<WeatherResponse>(`/weather?city=${encodeURIComponent(city)}`),
+  getWeather: (city: string, forceRain?: boolean) => {
+    const params = new URLSearchParams();
+    params.set('city', encodeURIComponent(city));
+    if (forceRain !== undefined) params.set('forceRain', String(forceRain));
+    return apiClient.get<WeatherResponse>(`/weather?${params.toString()}`);
+  },
 };
 
 export const soilApi = {
   simulate: (data: SoilSimulationRequest) =>
     apiClient.post<SoilSimulationResponse>('/soil/simulate', data),
-  getDefaultCropParams: (cropType: string) =>
-    apiClient.get<CropParams>(`/soil/crop-params?type=${cropType}`),
-  getDefaultSoilParams: (texture: string) =>
-    apiClient.get<SoilParams>(`/soil/soil-params?texture=${texture}`),
 };
 
 export const prescriptionApi = {

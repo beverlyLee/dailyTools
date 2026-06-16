@@ -30,17 +30,17 @@ const STATUS_COLORS: Record<MoistureStatus, string> = {
 };
 
 const STATUS_LABELS: Record<MoistureStatus, string> = {
-  sufficient: '墒情充足',
-  moderate: '墒情适中',
-  deficit: '墒情亏缺',
-  severe: '严重亏缺',
+  sufficient: '墒情充足 (>70%)',
+  moderate: '墒情适中 (60-70%)',
+  deficit: '墒情亏缺 (40-60%)',
+  severe: '严重亏缺 (<40%)',
 };
 
 function getStatusColor(moisture: number, sim: SoilSimulationResponse): MoistureStatus {
-  const range = sim.fieldCapacity - sim.wiltingPoint;
-  if (moisture >= sim.fieldCapacity * 0.8) return 'sufficient';
-  if (moisture >= sim.criticalMoisture) return 'moderate';
-  if (moisture >= sim.wiltingPoint + range * 0.15) return 'deficit';
+  const ratio = moisture / sim.fieldCapacity;
+  if (ratio > 0.7) return 'sufficient';
+  if (ratio > 0.6) return 'moderate';
+  if (ratio > 0.4) return 'deficit';
   return 'severe';
 }
 
