@@ -1,13 +1,31 @@
-import { CROPS, FERTILIZERS, FERTILIZER_EFFICIENCY } from './agronomyData.js';
-import { calculateNutrientBalance, calculateNutrientDemand } from './nutrientCalculator.js';
+import { CROPS, FERTILIZERS, FERTILIZER_EFFICIENCY, SOIL_TYPES } from './agronomyData.js';
+import { calculateNutrientBalance, calculateNutrientDemand, getCropData } from './nutrientCalculator.js';
 import { generateFertilizerPlan } from './fertilizerConverter.js';
 
 export const FERTILIZER_PLAN_TYPE = 'traditional';
 
-export function splitFertilizerByStage(nutrientNeeded, cropType) {
-  const crop = CROPS[cropType];
+export function splitFertilizerByStage(nutrientNeeded, cropType, customCrops = {}) {
+  const crop = getCropData(cropType, customCrops);
   if (!crop) {
     throw new Error(`未知作物类型: ${cropType}`);
+  }
+
+  if (crop.growthStages && Array.isArray(crop.growthStages) && crop.growthStages.length > 0) {
+    const stages = crop.growthStages.map((stage, index) => {
+      const isBase = index === 0;
+      return {
+        name: stage.name || (isBase ? '基肥' : `追肥${index}`),
+        timing: stage.timing || '',
+        ratio: stage.ratio || (1 / crop.growthStages.length),
+        method: isBase ? (crop.applicationMethod?.base || '深施') : (crop.applicationMethod?.top || '追肥'),
+        nutrients: {
+          N: nutrientNeeded.N * (stage.ratio || 0),
+          P2O5: nutrientNeeded.P2O5 * (stage.ratio || 0),
+          K2O: nutrientNeeded.K2O * (stage.ratio || 0)
+        }
+      };
+    });
+    return { stages, crop };
   }
 
   const { baseFertilizerRatio, topDressingRatio, topDressingStage, applicationMethod } = crop;
@@ -28,18 +46,49 @@ export function splitFertilizerByStage(nutrientNeeded, cropType) {
     baseFertilizer,
     topDressing,
     topDressingStage,
-    applicationMethod
+    applicationMethod,
+    crop
   };
 }
 
-export function generateApplicationPlan(nutrientNeeded, cropType) {
-  const split = splitFertilizerByStage(nutrientNeeded, cropType);
-  const crop = CROPS[cropType];
+export function generateApplicationPlan(nutrientNeeded, cropType, customCrops = {}) {
+  const split = splitFertilizerByStage(nutrientNeeded, cropType, customCrops);
+  const crop = split.crop;
+
+  const format = (val) => val.toFixed(2);
+
+  if (split.stages) {
+    const stages = split.stages.map(stage => {
+      const plan = generateFertilizerPlan(stage.nutrients, FERTILIZER_PLAN_TYPE);
+      return {
+        stage: stage.name,
+        timing: stage.timing,
+        method: stage.method,
+        nutrients: {
+          '氮(N)': format(stage.nutrients.N),
+          '磷(P₂O₅)': format(stage.nutrients.P2O5),
+          '钾(K₂O)': format(stage.nutrients.K2O)
+        },
+        fertilizers: plan.items.map(item => ({
+          name: item.fertilizer,
+          amount: `${format(item.amount)} ${item.unit}`
+        })),
+        cost: `${format(plan.totalCost)} ${plan.currencyUnit}`,
+        rawCost: plan.totalCost
+      };
+    });
+
+    const totalCost = stages.reduce((sum, s) => sum + s.rawCost, 0);
+
+    return {
+      crop: crop.name,
+      stages,
+      totalCost: `${format(totalCost)} 元/亩`
+    };
+  }
 
   const basePlan = generateFertilizerPlan(split.baseFertilizer, FERTILIZER_PLAN_TYPE);
   const topPlan = generateFertilizerPlan(split.topDressing, FERTILIZER_PLAN_TYPE);
-
-  const format = (val) => val.toFixed(2);
 
   return {
     crop: crop.name,
@@ -79,9 +128,9 @@ export function generateApplicationPlan(nutrientNeeded, cropType) {
   };
 }
 
-export function generateBlindFertilizationPlan(cropType, targetYield) {
-  const crop = CROPS[cropType];
-  const demand = calculateNutrientDemand(cropType, targetYield);
+export function generateBlindFertilizationPlan(cropType, targetYield, customCrops = {}) {
+  const crop = getCropData(cropType, customCrops);
+  const demand = calculateNutrientDemand(cropType, targetYield, customCrops);
   
   const overApplicationRatio = 1.2;
   
@@ -170,11 +219,14 @@ export function compareFertilizationPlans(precisionPlan, blindPlan, fertilizerNe
   };
 }
 
-export function generateCompletePlan(cropType, targetYield, soilNutrients) {
-  const nutrientResult = calculateNutrientBalance(cropType, targetYield, soilNutrients);
+export function generateCompletePlan(cropType, targetYield, soilNutrients, options = {}) {
+  const { customCrops = {}, soilType = null } = options;
+  
+  const calcOptions = { customCrops, soilType };
+  const nutrientResult = calculateNutrientBalance(cropType, targetYield, soilNutrients, calcOptions);
   const fertilizerPlan = generateFertilizerPlan(nutrientResult.fertilizerNeeded, FERTILIZER_PLAN_TYPE);
-  const applicationPlan = generateApplicationPlan(nutrientResult.fertilizerNeeded, cropType);
-  const blindPlan = generateBlindFertilizationPlan(cropType, targetYield);
+  const applicationPlan = generateApplicationPlan(nutrientResult.fertilizerNeeded, cropType, customCrops);
+  const blindPlan = generateBlindFertilizationPlan(cropType, targetYield, customCrops);
   const comparison = compareFertilizationPlans(fertilizerPlan, blindPlan, nutrientResult.fertilizerNeeded);
 
   return {

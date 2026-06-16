@@ -57,3 +57,15 @@ body {
 .warning-highlight {
   @apply bg-yellow-50 border-l-4 border-yellow-500;
 }
+
+.modal-backdrop {
+  @apply fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4;
+}
+
+.modal-content {
+  @apply bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto;
+}
+
+.hidden {
+  display: none !important;
+}

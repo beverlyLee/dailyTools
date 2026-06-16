@@ -1,7 +1,12 @@
-import { CROPS, FERTILIZER_EFFICIENCY, SOIL_NUTRIENT_COEFFICIENT } from './agronomyData.js';
+import { CROPS, FERTILIZER_EFFICIENCY, SOIL_NUTRIENT_COEFFICIENT, SOIL_TYPES } from './agronomyData.js';
 
-export function calculateNutrientDemand(cropType, targetYield) {
-  const crop = CROPS[cropType];
+export function getCropData(cropType, customCrops = {}) {
+  const allCrops = { ...CROPS, ...customCrops };
+  return allCrops[cropType] || null;
+}
+
+export function calculateNutrientDemand(cropType, targetYield, customCrops = {}) {
+  const crop = getCropData(cropType, customCrops);
   if (!crop) {
     throw new Error(`未知作物类型: ${cropType}`);
   }
@@ -15,17 +20,28 @@ export function calculateNutrientDemand(cropType, targetYield) {
   };
 }
 
-export function calculateSoilSupply(soilNutrients) {
+export function getSoilNutrientCoefficient(soilType) {
+  if (soilType && SOIL_TYPES[soilType]) {
+    return SOIL_TYPES[soilType].nutrientCoefficient;
+  }
+  return SOIL_NUTRIENT_COEFFICIENT;
+}
+
+export function calculateSoilSupply(soilNutrients, soilType = null) {
+  const coefficient = getSoilNutrientCoefficient(soilType);
+  
   return {
-    N: soilNutrients.N * SOIL_NUTRIENT_COEFFICIENT.N,
-    P2O5: soilNutrients.P2O5 * SOIL_NUTRIENT_COEFFICIENT.P2O5,
-    K2O: soilNutrients.K2O * SOIL_NUTRIENT_COEFFICIENT.K2O
+    N: soilNutrients.N * coefficient.N,
+    P2O5: soilNutrients.P2O5 * coefficient.P2O5,
+    K2O: soilNutrients.K2O * coefficient.K2O
   };
 }
 
-export function calculateNutrientBalance(cropType, targetYield, soilNutrients) {
-  const demand = calculateNutrientDemand(cropType, targetYield);
-  const supply = calculateSoilSupply(soilNutrients);
+export function calculateNutrientBalance(cropType, targetYield, soilNutrients, options = {}) {
+  const { customCrops = {}, soilType = null } = options;
+  
+  const demand = calculateNutrientDemand(cropType, targetYield, customCrops);
+  const supply = calculateSoilSupply(soilNutrients, soilType);
 
   const balance = {
     N: demand.N - supply.N,
@@ -45,14 +61,14 @@ export function calculateNutrientBalance(cropType, targetYield, soilNutrients) {
   };
 }
 
-export function formatNutrientResult(result, cropType, targetYield) {
-  const crop = CROPS[cropType];
+export function formatNutrientResult(result, cropType, targetYield, customCrops = {}) {
+  const crop = getCropData(cropType, customCrops);
   const { demand, supply, balance, fertilizerNeeded } = result;
 
   const format = (val) => val.toFixed(2);
 
   return {
-    cropInfo: `${crop.name} 目标产量：${targetYield} ${crop.unit}`,
+    cropInfo: `${crop ? crop.name : '未知作物'} 目标产量：${targetYield} ${crop ? crop.unit : '公斤/亩'}`,
     nutrientDemand: {
       title: '目标产量养分需求量（公斤/亩）',
       data: {
