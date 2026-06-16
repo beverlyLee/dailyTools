@@ -24,7 +24,7 @@
 
   $: filteredVaccineRecords = selectedLivestockId
     ? vaccineRecords
-        .filter(r => String(r.livestockId) === String(selectedLivestockId))
+        .filter(r => r.livestockId === parseInt(selectedLivestockId))
         .sort((a, b) => new Date(b.vaccineDate) - new Date(a.vaccineDate))
     : [...vaccineRecords].sort((a, b) => new Date(b.vaccineDate) - new Date(a.vaccineDate))
 
@@ -66,7 +66,7 @@
   }
 
   function getLivestockById(id) {
-    return livestockList.find(l => String(l.id) === String(id))
+    return livestockList.find(l => l.id === id)
   }
 
   function getLivestockRecords(id) {
@@ -81,9 +81,11 @@
 
   function getLivestockBreed() {
     if (!newVaccine.livestockId) return null
-    const l = getLivestockById(newVaccine.livestockId)
+    const l = getLivestockById(Number(newVaccine.livestockId))
     return l?.breed
   }
+
+  $: selectedBreed = newVaccine.livestockId ? getLivestockBreed() : null
 
   onMount(async () => {
     await loadVaccineRecords()
@@ -139,8 +141,8 @@
           <label for="v-name">疫苗名称</label>
           <select id="v-name" bind:value={newVaccine.vaccineName}>
             <option value="">-- 请选择 --</option>
-            {#if getLivestockBreed()}
-              {#each getVaccineOptions(getLivestockBreed()) as v}
+            {#if selectedBreed}
+              {#each getVaccineOptions(selectedBreed) as v}
                 <option value={v.name}>{v.name}</option>
               {/each}
             {/if}

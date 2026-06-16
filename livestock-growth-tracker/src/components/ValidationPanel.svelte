@@ -105,6 +105,7 @@
       return
     }
 
+    const results = []
     for (const l of livestock) {
       const lWeights = weights
         .filter(r => r.livestockId === l.id)
@@ -138,7 +139,7 @@
       const fcrValid = fcrResult && fcrResult.fcr > 1.5 && fcrResult.fcr < 10
       const deviationValid = deviation !== null && !isNaN(deviation)
       const warningLogicValid = (deviation < -config.warningThreshold) === isWarning
-      validationResults.push({
+      results.push({
         earTag: l.earTag,
         breed: l.breed,
         age,
@@ -157,6 +158,7 @@
       })
     }
 
+    validationResults = results
     showResults = true
   }
 
