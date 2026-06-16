@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>化肥配比计算器 - 精准施肥决策系统</title>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <header class="bg-gradient-to-r from-green-600 to-green-700 text-white py-8 shadow-lg">
+    <div class="max-w-6xl mx-auto px-4">
+      <h1 class="text-3xl font-bold mb-2">化肥配比计算器</h1>
+      <p class="text-green-100">精准施肥决策系统 · 基于测土数据的科学施肥方案</p>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-1">
+        <div class="result-card sticky top-8">
+          <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+            </svg>
+            输入参数
+          </h2>
+          
+          <form id="calculatorForm">
+            <div class="input-group">
+              <label class="input-label" for="cropType">作物类型</label>
+              <select id="cropType" class="input-field" required>
+                <option value="">请选择作物</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label" for="targetYield">目标产量（公斤/亩）</label>
+              <input type="number" id="targetYield" class="input-field" min="100" max="2000" step="50" placeholder="例如：500" required>
+              <p class="text-xs text-gray-500 mt-1">请输入您期望达到的亩产量</p>
+            </div>
+
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+              <h3 class="font-medium text-blue-800 mb-3">土壤养分数据（mg/kg）</h3>
+              <p class="text-xs text-blue-600 mb-4">输入测土仪检测的土壤养分含量数据</p>
+              
+              <div class="input-group">
+                <label class="input-label" for="soilN">碱解氮 (N)</label>
+                <input type="number" id="soilN" class="input-field" min="0" max="300" step="1" placeholder="例如：80" required>
+              </div>
+
+              <div class="input-group">
+                <label class="input-label" for="soilP">有效磷 (P₂O₅)</label>
+                <input type="number" id="soilP" class="input-field" min="0" max="100" step="1" placeholder="例如：20" required>
+              </div>
+
+              <div class="input-group">
+                <label class="input-label" for="soilK">速效钾 (K₂O)</label>
+                <input type="number" id="soilK" class="input-field" min="0" max="400" step="1" placeholder="例如：120" required>
+              </div>
+            </div>
+
+            <div class="flex gap-3">
+              <button type="submit" class="btn-primary flex-1">
+                开始计算
+              </button>
+              <button type="button" id="resetBtn" class="btn-secondary">
+                重置
+              </button>
+            </div>
+          </form>
+
+          <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <h4 class="font-medium text-yellow-800 mb-2">💡 农艺常识</h4>
+            <ul class="text-sm text-yellow-700 space-y-1">
+              <li>• 小麦亩产500公斤需纯氮约12-15公斤</li>
+              <li>• 尿素含氮量约46%，当季利用率约35%</li>
+              <li>• 基肥追肥比例约1:1，追肥在返青-拔节期</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-2" id="results">
+        <div id="nutrientResult" class="result-card">
+          <div class="text-center py-12 text-gray-400">
+            <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            <p>请输入参数后点击"开始计算"</p>
+          </div>
+        </div>
+
+        <div id="fertilizerResult" class="result-card"></div>
+        <div id="applicationResult" class="result-card"></div>
+        <div id="comparisonResult" class="result-card"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-400 py-8 mt-12">
+    <div class="max-w-6xl mx-auto px-4 text-center">
+      <p class="mb-2">化肥配比计算器 · 精准施肥决策系统</p>
+      <p class="text-sm">基于测土配方施肥技术规范 · 助力农业节本增效</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
