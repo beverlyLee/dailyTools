@@ -21,6 +21,12 @@
         <span class="status-value info">{{ microMotionSignal.toFixed(2) }} dB</span>
       </div>
       <div class="status-row">
+        <span class="status-label">信号语义</span>
+        <span class="status-value" :style="{ color: signalSemantic.color, fontWeight: 600 }">
+          {{ signalSemantic.text }}
+        </span>
+      </div>
+      <div class="status-row">
         <span class="status-label">遮挡程度</span>
         <span class="status-value" :class="occlusionLevel > 0.5 ? 'warn' : 'info'">
           {{ (occlusionLevel * 100).toFixed(0) }}%
@@ -203,6 +209,23 @@ const delayProgress = computed(() => {
   if (humanDetected.value) return 100
   return Math.max(0, (delayCountdown.value / lightDelay.value) * 100)
 })
+const signalSemantic = computed(() => {
+  if (!detectionVolumeMesh) return { text: '初始化中', color: '#90a4ae' }
+  if (!humanGroup) return { text: '—', color: '#90a4ae' }
+  const humanCenter = humanGroup.position.clone()
+  humanCenter.y += 1.2
+  const inVol = isPointInDetectionVolume(humanCenter)
+  if (!inVol) {
+    return { text: '超出探测范围', color: '#ef5350' }
+  }
+  if (occlusionLevel.value > 0.6) {
+    return { text: '强遮挡衰减', color: '#ff9800' }
+  } else if (occlusionLevel.value > 0.25) {
+    return { text: '部分遮挡', color: '#ffc107' }
+  } else {
+    return { text: '正常探测', color: '#66bb6a' }
+  }
+})
 
 let scene: THREE.Scene
 let camera: THREE.PerspectiveCamera
@@ -231,11 +254,11 @@ const humanConfig = reactive({
   breathPhase: 0,
   walkPhase: 0,
   walkPath: [
-    new THREE.Vector3(-0.6, 0, -4.6),
-    new THREE.Vector3(-1.4, 0, -3.6),
-    new THREE.Vector3(-2.4, 0, -2.9),
-    new THREE.Vector3(-3.5, 0, -2.0),
-    new THREE.Vector3(-4.6, 0, -0.6),
+    new THREE.Vector3(-0.8, 0, -4.2),
+    new THREE.Vector3(-1.6, 0, -3.6),
+    new THREE.Vector3(-2.5, 0, -3.1),
+    new THREE.Vector3(-3.2, 0, -2.6),
+    new THREE.Vector3(-4.2, 0, -1.5),
   ],
   walkIndex: 0,
   chestOriginalY: 1.3,
@@ -881,14 +904,28 @@ function calculateOcclusion(humanPos: THREE.Vector3): number {
   const wPos = wardrobeGroup.position
   const wSize = { x: 1.8, y: 2.8, z: 1.2 }
 
+  const dirToHuman = new THREE.Vector3().subVectors(humanPos, radarPos)
+  const totalDist = dirToHuman.length()
+  if (totalDist < 0.1) return 0
+  dirToHuman.normalize()
+
+  const wMin = new THREE.Vector3(wPos.x - wSize.x / 2, wPos.y, wPos.z - wSize.z / 2)
+  const wMax = new THREE.Vector3(wPos.x + wSize.x / 2, wPos.y + wSize.y, wPos.z + wSize.z / 2)
+  const rayHit = rayBoxIntersect(radarPos, dirToHuman, wMin, wMax)
+
+  let rayOcc = 0
+  let rayBlocked = false
+  if (rayHit.hit && rayHit.tHit < totalDist) {
+    rayBlocked = true
+    rayOcc = 1 - rayHit.tHit / totalDist
+  }
+
   const wCenter = new THREE.Vector3(wPos.x, wPos.y + wSize.y / 2, wPos.z)
   const toWCenter = new THREE.Vector3().subVectors(wCenter, radarPos)
   const distWC = toWCenter.length()
-  if (distWC < 0.1) return 0
 
   const toHuman = new THREE.Vector3().subVectors(humanPos, radarPos)
   const distH = toHuman.length()
-  if (distH < 0.1) return 0
 
   const wAngH = Math.atan2(toWCenter.x, toWCenter.z)
   const hAngH = Math.atan2(toHuman.x, toHuman.z)
@@ -898,7 +935,7 @@ function calculateOcclusion(humanPos: THREE.Vector3): number {
   diffH = Math.abs(diffH)
 
   const halfAngH = Math.atan2(wSize.x / 2, distWC)
-  const softBandH = halfAngH * 1.2
+  const softBandH = halfAngH * 2.2
   const normDiffH = diffH / halfAngH
 
   let hOcc = 0
@@ -906,15 +943,15 @@ function calculateOcclusion(humanPos: THREE.Vector3): number {
     hOcc = 1.0
   } else if (normDiffH < 1.0 + softBandH / halfAngH) {
     const t = (normDiffH - 1.0) / (softBandH / halfAngH)
-    hOcc = 1.0 - t
+    hOcc = 0.5 + 0.5 * Math.cos(Math.PI * t)
   }
 
   const wAngV = Math.asin(toWCenter.y / distWC)
-  const hAngV = Math.asin(toHuman.y / distH)
+  const hAngV = Math.asin(toHuman.y / Math.max(distH, 0.001))
   const diffV = Math.abs(hAngV - wAngV)
 
   const halfAngV = Math.atan2(wSize.y / 2, distWC)
-  const softBandV = halfAngV * 1.0
+  const softBandV = halfAngV * 2.0
   const normDiffV = diffV / halfAngV
 
   let vOcc = 0
@@ -922,14 +959,18 @@ function calculateOcclusion(humanPos: THREE.Vector3): number {
     vOcc = 1.0
   } else if (normDiffV < 1.0 + softBandV / halfAngV) {
     const t = (normDiffV - 1.0) / (softBandV / halfAngV)
-    vOcc = 1.0 - t
+    vOcc = 0.5 + 0.5 * Math.cos(Math.PI * t)
   }
 
-  const distRatio = distWC / distH
-  const distFactor = THREE.MathUtils.clamp(distRatio * 0.9 + 0.1, 0.3, 1.0)
+  const distRatio = distWC / Math.max(distH, 0.001)
+  const tDist = THREE.MathUtils.clamp(1.0 - distRatio, 0, 1)
+  const distFactor = 1.0 - 0.7 * (0.5 - 0.5 * Math.cos(Math.PI * tDist))
 
-  const baseOcc = hOcc * vOcc * distFactor
-  return THREE.MathUtils.clamp(baseOcc, 0, 1)
+  const angleOcc = hOcc * vOcc * distFactor
+  if (rayBlocked) {
+    return THREE.MathUtils.clamp(Math.max(angleOcc, rayOcc * 0.95), 0, 1)
+  }
+  return THREE.MathUtils.clamp(angleOcc, 0, 1)
 }
 
 function rayBoxIntersect(
@@ -1086,11 +1127,17 @@ function updateDetectionStatus(dt: number) {
     humanDetected.value = false
   }
 
-  if (humanDetected.value) {
-    const effectiveSignal = rawMotion * (1 - occlusion * 0.7)
-    microMotionSignal.value = -30 + effectiveSignal * 12
+  if (inVolume) {
+    const occludedFactor = 1 - occlusion * 0.85
+    const effectiveSignal = rawMotion * occludedFactor
+    if (humanDetected.value) {
+      microMotionSignal.value = -28 + effectiveSignal * 14
+    } else {
+      const targetSignal = -28 + effectiveSignal * 14 - (1 - occludedFactor) * 25
+      microMotionSignal.value += (targetSignal - microMotionSignal.value) * 0.15
+    }
   } else {
-    microMotionSignal.value = Math.max(-60, microMotionSignal.value - dt * 20)
+    microMotionSignal.value = Math.max(-60, microMotionSignal.value - dt * 40)
   }
 
   updateHumanAnimation(dt)
@@ -1121,6 +1168,14 @@ function animate() {
 
 function toggleHumanPosition() {
   humanOnSofa.value = !humanOnSofa.value
+  delayCountdown.value = lightDelay.value
+  detectionHysteresisCounter = humanOnSofa.value ? HYSTERESIS_FRAMES : -HYSTERESIS_FRAMES
+  if (humanGroup) {
+    const targetPos = humanOnSofa.value
+      ? new THREE.Vector3(0, 0, -3)
+      : new THREE.Vector3(-3.0, 0, -3.0)
+    humanGroup.position.copy(targetPos)
+  }
 }
 
 function resetView() {
