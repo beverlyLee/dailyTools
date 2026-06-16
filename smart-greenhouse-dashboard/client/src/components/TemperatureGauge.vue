@@ -127,10 +127,12 @@ const props = defineProps({
 const temperature = computed(() => envStore.state.temperature);
 const min = 10;
 const max = 40;
-const idealMin = 20;
-const idealMax = 28;
+const idealMin = 22;
+const idealMax = 32;
 const warningHigh = 32;
 const warningLow = 15;
+const dangerHigh = 35;
+const dangerLow = 12;
 
 const percentage = computed(() => {
   const range = max - min;
@@ -144,28 +146,33 @@ const dashOffset = computed(() => {
   return circumference - visibleLength * percentage.value;
 });
 
-const isDanger = computed(() => temperature.value >= 35 || temperature.value <= 12);
-const isWarning = computed(() => temperature.value >= warningHigh || temperature.value <= warningLow);
+const isDanger = computed(() => temperature.value >= dangerHigh || temperature.value <= dangerLow);
+const isWarning = computed(() =>
+  (temperature.value >= warningHigh && temperature.value < dangerHigh) ||
+  (temperature.value <= warningLow && temperature.value > dangerLow)
+);
+const isGood = computed(() => temperature.value >= idealMin && temperature.value <= idealMax);
 
 const statusClass = computed(() => {
   if (isDanger.value) return 'status-danger';
   if (isWarning.value) return 'status-warning';
-  return 'status-good';
+  if (isGood.value) return 'status-good';
+  return 'status-normal';
 });
 
 const statusText = computed(() => {
-  if (temperature.value >= 35) return '超标';
-  if (temperature.value <= 12) return '极低';
+  if (temperature.value >= dangerHigh) return '超标';
+  if (temperature.value <= dangerLow) return '极低';
   if (temperature.value >= warningHigh) return '偏高';
   if (temperature.value <= warningLow) return '偏低';
-  if (temperature.value >= idealMin && temperature.value <= idealMax) return '适宜';
+  if (isGood.value) return '适宜';
   return '正常';
 });
 
 const thermometerFill = computed(() => {
   if (isDanger.value) return '#ef4444';
   if (isWarning.value) return '#f59e0b';
-  if (temperature.value < 18) return '#3b82f6';
+  if (temperature.value < idealMin) return '#3b82f6';
   return '#10b981';
 });
 
@@ -248,6 +255,11 @@ function tickColor(i) {
 .status-good {
   background: rgba(16, 185, 129, 0.15);
   color: #10b981;
+}
+
+.status-normal {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
 }
 
 .status-warning {

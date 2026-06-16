@@ -17,6 +17,7 @@
         />
         <select v-model="filterLevel" class="level-select" @change="handleLevelChange">
           <option value="">全部级别</option>
+          <option value="danger">危险</option>
           <option value="warning">警告</option>
           <option value="info">提示</option>
         </select>
@@ -28,6 +29,11 @@
     </div>
     
     <div class="alarm-stats">
+      <div class="stat-item danger">
+        <span class="stat-icon">🚨</span>
+        <span class="stat-count">{{ dangerCount }}</span>
+        <span class="stat-label">危险</span>
+      </div>
       <div class="stat-item warning">
         <span class="stat-icon">⚠️</span>
         <span class="stat-count">{{ warningCount }}</span>
@@ -70,7 +76,7 @@
             </div>
           </div>
           <div class="alarm-badge" :class="alarm.level">
-            {{ alarm.level === 'warning' ? '警告' : '提示' }}
+            {{ alarm.level === 'danger' ? '危险' : alarm.level === 'warning' ? '警告' : '提示' }}
           </div>
         </div>
       </TransitionGroup>
@@ -88,6 +94,7 @@ const filterDate = ref('');
 const filterLevel = ref('');
 
 const filteredAlarms = computed(() => alarmStore.filteredAlarms);
+const dangerCount = computed(() => filteredAlarms.value.filter(a => a.level === 'danger').length);
 const warningCount = computed(() => filteredAlarms.value.filter(a => a.level === 'warning').length);
 const infoCount = computed(() => filteredAlarms.value.filter(a => a.level === 'info').length);
 const todayCount = computed(() => filteredAlarms.value.length);
@@ -239,6 +246,10 @@ onMounted(() => {
   color: var(--color-text-primary);
 }
 
+.stat-item.danger .stat-count {
+  color: var(--color-danger);
+}
+
 .stat-item.warning .stat-count {
   color: var(--color-warning);
 }
@@ -312,6 +323,10 @@ onMounted(() => {
   background: var(--color-info);
 }
 
+.alarm-item.danger .alarm-indicator {
+  background: var(--color-danger);
+}
+
 .alarm-item.warning .alarm-indicator {
   background: var(--color-warning);
 }
@@ -340,6 +355,11 @@ onMounted(() => {
   gap: 12px;
   font-size: 11px;
   color: var(--color-text-muted);
+}
+
+.alarm-badge.danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--color-danger);
 }
 
 .alarm-badge.warning {

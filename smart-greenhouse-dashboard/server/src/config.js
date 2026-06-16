@@ -2,10 +2,12 @@ const GREENHOUSE_CONFIG = {
   temperature: {
     min: 12,
     max: 38,
-    idealMin: 20,
-    idealMax: 28,
+    idealMin: 22,
+    idealMax: 32,
     warningHigh: 32,
     warningLow: 15,
+    dangerHigh: 35,
+    dangerLow: 12,
   },
   humidity: {
     min: 30,
@@ -14,6 +16,8 @@ const GREENHOUSE_CONFIG = {
     idealMax: 75,
     warningHigh: 85,
     warningLow: 40,
+    dangerHigh: 95,
+    dangerLow: 35,
   },
   light: {
     min: 0,
@@ -22,6 +26,8 @@ const GREENHOUSE_CONFIG = {
     idealMax: 8000,
     warningHigh: 9000,
     warningLow: 1000,
+    dangerHigh: 9500,
+    dangerLow: 0,
     unit: 'lux',
   },
   co2: {
@@ -31,6 +37,8 @@ const GREENHOUSE_CONFIG = {
     idealMax: 1000,
     warningHigh: 1500,
     warningLow: 400,
+    dangerHigh: 1800,
+    dangerLow: 350,
     unit: 'ppm',
   },
 };

@@ -70,6 +70,20 @@ export const useEnvironmentStore = defineStore('environment', () => {
       if (data.type === 'init' || data.type === 'state_update') {
         if (data.state) {
           state.value = data.state;
+          
+          if (data.type === 'state_update') {
+            const newPoint = {
+              temperature: data.state.temperature,
+              humidity: data.state.humidity,
+              light: data.state.light,
+              co2: data.state.co2,
+              timestamp: data.state.timestamp || Date.now(),
+            };
+            history.value.push(newPoint);
+            if (history.value.length > 600) {
+              history.value = history.value.slice(-600);
+            }
+          }
         }
       }
       

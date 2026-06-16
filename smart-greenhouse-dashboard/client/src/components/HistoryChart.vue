@@ -63,7 +63,7 @@ const legendItems = [
   { key: 'co2', label: 'CO2', color: '#8b5cf6', unit: 'ppm' },
 ];
 
-const visibleSeries = ref(new Set(['temperature', 'humidity']));
+const visibleSeries = ref(new Set(['temperature', 'humidity', 'light']));
 
 function toggleSeries(key) {
   if (visibleSeries.value.has(key)) {
@@ -82,6 +82,13 @@ function selectRange(hours) {
   updateChart();
 }
 
+function formatTime(timestamp) {
+  const date = new Date(timestamp);
+  const h = date.getHours().toString().padStart(2, '0');
+  const m = date.getMinutes().toString().padStart(2, '0');
+  return `${h}:${m}`;
+}
+
 const chartData = computed(() => {
   const history = envStore.history;
   const hours = selectedRange.value;
@@ -94,22 +101,14 @@ const chartData = computed(() => {
   
   const filtered = history.slice(-totalPoints);
   
-  const times = filtered.map((_, i) => {
-    const minutesAgo = (filtered.length - 1 - i) * 3;
-    const hoursAgo = Math.floor(minutesAgo / 60);
-    const mins = minutesAgo % 60;
-    if (hoursAgo > 0) {
-      return `-${hoursAgo}h${mins}m`;
-    }
-    return `-${mins}m`;
-  });
+  const times = filtered.map(p => formatTime(p.timestamp));
   
   const series = {};
   legendItems.forEach(item => {
     series[item.key] = filtered.map(p => p[item.key]);
   });
   
-  return { times: times.reverse(), series };
+  return { times, series };
 });
 
 function getChartOption() {
@@ -282,10 +281,11 @@ onMounted(() => {
 });
 
 watch(
-  () => envStore.history.length,
+  () => [envStore.history?.length || 0, envStore.state?.timestamp || 0],
   () => {
     updateChart();
-  }
+  },
+  { deep: false }
 );
 
 onUnmounted(() => {

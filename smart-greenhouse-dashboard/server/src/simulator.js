@@ -138,26 +138,51 @@ class EnvironmentSimulator {
     
     const alarms = [];
     
-    if (state.temperature > cfg.temperature.warningHigh) {
+    if (state.temperature >= cfg.temperature.dangerHigh) {
+      alarms.push({
+        type: 'temperature_high',
+        level: 'danger',
+        message: `温度超标危险: ${state.temperature.toFixed(1)}℃`,
+        value: state.temperature,
+        threshold: cfg.temperature.dangerHigh,
+      });
+    } else if (state.temperature >= cfg.temperature.warningHigh) {
       alarms.push({
         type: 'temperature_high',
         level: 'warning',
-        message: `温度过高: ${state.temperature.toFixed(1)}℃`,
+        message: `温度偏高: ${state.temperature.toFixed(1)}℃`,
         value: state.temperature,
         threshold: cfg.temperature.warningHigh,
       });
     }
-    if (state.temperature < cfg.temperature.warningLow) {
+    
+    if (state.temperature <= cfg.temperature.dangerLow) {
+      alarms.push({
+        type: 'temperature_low',
+        level: 'danger',
+        message: `温度极低危险: ${state.temperature.toFixed(1)}℃`,
+        value: state.temperature,
+        threshold: cfg.temperature.dangerLow,
+      });
+    } else if (state.temperature <= cfg.temperature.warningLow) {
       alarms.push({
         type: 'temperature_low',
         level: 'warning',
-        message: `温度过低: ${state.temperature.toFixed(1)}℃`,
+        message: `温度偏低: ${state.temperature.toFixed(1)}℃`,
         value: state.temperature,
         threshold: cfg.temperature.warningLow,
       });
     }
     
-    if (state.humidity > cfg.humidity.warningHigh) {
+    if (state.humidity >= cfg.humidity.dangerHigh) {
+      alarms.push({
+        type: 'humidity_high',
+        level: 'danger',
+        message: `湿度极高危险: ${state.humidity.toFixed(1)}%`,
+        value: state.humidity,
+        threshold: cfg.humidity.dangerHigh,
+      });
+    } else if (state.humidity >= cfg.humidity.warningHigh) {
       alarms.push({
         type: 'humidity_high',
         level: 'warning',
@@ -166,7 +191,16 @@ class EnvironmentSimulator {
         threshold: cfg.humidity.warningHigh,
       });
     }
-    if (state.humidity < cfg.humidity.warningLow) {
+    
+    if (state.humidity <= cfg.humidity.dangerLow) {
+      alarms.push({
+        type: 'humidity_low',
+        level: 'danger',
+        message: `湿度极低危险: ${state.humidity.toFixed(1)}%`,
+        value: state.humidity,
+        threshold: cfg.humidity.dangerLow,
+      });
+    } else if (state.humidity <= cfg.humidity.warningLow) {
       alarms.push({
         type: 'humidity_low',
         level: 'warning',
@@ -176,26 +210,42 @@ class EnvironmentSimulator {
       });
     }
     
-    if (state.light > cfg.light.warningHigh) {
+    if (state.light >= cfg.light.dangerHigh) {
       alarms.push({
         type: 'light_high',
-        level: 'info',
+        level: 'danger',
+        message: `光照极强危险: ${state.light.toFixed(0)}lux`,
+        value: state.light,
+        threshold: cfg.light.dangerHigh,
+      });
+    } else if (state.light >= cfg.light.warningHigh) {
+      alarms.push({
+        type: 'light_high',
+        level: 'warning',
         message: `光照过强: ${state.light.toFixed(0)}lux`,
         value: state.light,
         threshold: cfg.light.warningHigh,
       });
     }
-    if (state.light < cfg.light.warningLow && this.simulatedHour > 8 && this.simulatedHour < 16) {
+    if (state.light > cfg.light.dangerLow && state.light < cfg.light.warningLow && this.simulatedHour > 8 && this.simulatedHour < 16) {
       alarms.push({
         type: 'light_low',
-        level: 'info',
+        level: 'warning',
         message: `光照不足: ${state.light.toFixed(0)}lux`,
         value: state.light,
         threshold: cfg.light.warningLow,
       });
     }
     
-    if (state.co2 > cfg.co2.warningHigh) {
+    if (state.co2 >= cfg.co2.dangerHigh) {
+      alarms.push({
+        type: 'co2_high',
+        level: 'danger',
+        message: `CO2超标危险: ${state.co2.toFixed(0)}ppm`,
+        value: state.co2,
+        threshold: cfg.co2.dangerHigh,
+      });
+    } else if (state.co2 >= cfg.co2.warningHigh) {
       alarms.push({
         type: 'co2_high',
         level: 'warning',
@@ -204,10 +254,19 @@ class EnvironmentSimulator {
         threshold: cfg.co2.warningHigh,
       });
     }
-    if (state.co2 < cfg.co2.warningLow) {
+    
+    if (state.co2 <= cfg.co2.dangerLow) {
       alarms.push({
         type: 'co2_low',
-        level: 'info',
+        level: 'danger',
+        message: `CO2极低危险: ${state.co2.toFixed(0)}ppm`,
+        value: state.co2,
+        threshold: cfg.co2.dangerLow,
+      });
+    } else if (state.co2 <= cfg.co2.warningLow) {
+      alarms.push({
+        type: 'co2_low',
+        level: 'warning',
         message: `CO2浓度过低: ${state.co2.toFixed(0)}ppm`,
         value: state.co2,
         threshold: cfg.co2.warningLow,
