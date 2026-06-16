@@ -24,7 +24,7 @@
 
   $: filteredVaccineRecords = selectedLivestockId
     ? vaccineRecords
-        .filter(r => r.livestockId === parseInt(selectedLivestockId))
+        .filter(r => String(r.livestockId) === String(selectedLivestockId))
         .sort((a, b) => new Date(b.vaccineDate) - new Date(a.vaccineDate))
     : [...vaccineRecords].sort((a, b) => new Date(b.vaccineDate) - new Date(a.vaccineDate))
 
@@ -49,7 +49,7 @@
     }
     await add(STORES.VACCINE_RECORDS, {
       ...newVaccine,
-      livestockId: parseInt(newVaccine.livestockId)
+      livestockId: Number(newVaccine.livestockId)
     })
     newVaccine = {
       livestockId: '',
@@ -66,7 +66,7 @@
   }
 
   function getLivestockById(id) {
-    return livestockList.find(l => l.id === id)
+    return livestockList.find(l => String(l.id) === String(id))
   }
 
   function getLivestockRecords(id) {
@@ -81,7 +81,7 @@
 
   function getLivestockBreed() {
     if (!newVaccine.livestockId) return null
-    const l = getLivestockById(parseInt(newVaccine.livestockId))
+    const l = getLivestockById(newVaccine.livestockId)
     return l?.breed
   }
 

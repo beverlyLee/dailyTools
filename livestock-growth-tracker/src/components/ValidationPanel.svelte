@@ -160,13 +160,13 @@
     showResults = true
   }
 
+  let validationPassRate = 0
+
   $: if (validationResults.length > 0) {
-    const passed = validationResults.filter(r => r.fcrValid && r.deviationValid && r.warningLogicValid).length
+    const passed = validationResults.filter(r => r.allPass).length
     const total = validationResults.length
     validationPassRate = total > 0 ? (passed / total * 100).toFixed(1) : 0
   }
-
-  let validationPassRate = 0
 
   const testCases = generateValidationData()
 </script>
