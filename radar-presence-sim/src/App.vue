@@ -222,6 +222,8 @@ let lightBulbMesh: THREE.Mesh | null = null
 let lightCone: THREE.Mesh | null = null
 let occlusionZones: THREE.Mesh[] = []
 let radarBeamLines: THREE.Line[] = []
+let detectionHysteresisCounter = 0
+const HYSTERESIS_FRAMES = 3
 
 const humanConfig = reactive({
   basePosition: new THREE.Vector3(0, 0, -2),
@@ -229,11 +231,11 @@ const humanConfig = reactive({
   breathPhase: 0,
   walkPhase: 0,
   walkPath: [
-    new THREE.Vector3(-3, 0, -2),
-    new THREE.Vector3(0, 0, -2),
-    new THREE.Vector3(3, 0, -2),
-    new THREE.Vector3(3, 0, 2),
-    new THREE.Vector3(-3, 0, 2),
+    new THREE.Vector3(-0.6, 0, -4.6),
+    new THREE.Vector3(-1.4, 0, -3.6),
+    new THREE.Vector3(-2.4, 0, -2.9),
+    new THREE.Vector3(-3.5, 0, -2.0),
+    new THREE.Vector3(-4.6, 0, -0.6),
   ],
   walkIndex: 0,
   chestOriginalY: 1.3,
@@ -242,8 +244,8 @@ const humanConfig = reactive({
 
 const radarConfig = reactive({
   position: new THREE.Vector3(-5.5, 2.8, -5.5),
-  targetYaw: Math.PI / 4,
-  targetPitch: -0.3,
+  targetYaw: Math.PI / 3,
+  targetPitch: -0.4,
 })
 
 function initScene() {
@@ -634,28 +636,28 @@ function createFurniture() {
     roughness: 0.75,
   })
 
-  const wBody = new THREE.Mesh(new THREE.BoxGeometry(1.2, 3.0, 0.8), wMat)
-  wBody.position.y = 1.5
+  const wBody = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.8, 1.2), wMat)
+  wBody.position.y = 1.4
   wBody.castShadow = true
   wBody.receiveShadow = true
   wardrobeGroup.add(wBody)
 
   for (let i = -1; i <= 1; i += 2) {
-    const door = new THREE.Mesh(new THREE.BoxGeometry(0.55, 2.9, 0.04), wDarkMat)
-    door.position.set(i * 0.3, 1.5, 0.42)
+    const door = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2.7, 0.06), wDarkMat)
+    door.position.set(i * 0.45, 1.4, 0.63)
     door.castShadow = true
     wardrobeGroup.add(door)
 
     const handle = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.02, 0.02, 0.15, 12),
+      new THREE.CylinderGeometry(0.025, 0.025, 0.18, 12),
       new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9, roughness: 0.2 })
     )
     handle.rotation.z = Math.PI / 2
-    handle.position.set(i * 0.5, 1.5, 0.45)
+    handle.position.set(i * 0.65, 1.4, 0.67)
     wardrobeGroup.add(handle)
   }
 
-  wardrobeGroup.position.set(-3.5, 0, -4.5)
+  wardrobeGroup.position.set(-3.0, 0, -2.8)
   scene.add(wardrobeGroup)
 
   const coffeeTable = new THREE.Mesh(
@@ -686,7 +688,7 @@ function updateOcclusionZones() {
   if (!wardrobeGroup) return
 
   const wPos = wardrobeGroup.position
-  const wSize = { x: 1.2, y: 3.0, z: 0.8 }
+  const wSize = { x: 1.8, y: 2.8, z: 1.2 }
 
   const radarPos = new THREE.Vector3(radarConfig.position.x, radarHeight.value, radarConfig.position.z)
   const wCenter = new THREE.Vector3(wPos.x, wSize.y / 2, wPos.z)
@@ -877,26 +879,57 @@ function calculateOcclusion(humanPos: THREE.Vector3): number {
 
   const radarPos = new THREE.Vector3(radarConfig.position.x, radarHeight.value, radarConfig.position.z)
   const wPos = wardrobeGroup.position
-  const wSize = { x: 1.2, y: 3.0, z: 0.8 }
+  const wSize = { x: 1.8, y: 2.8, z: 1.2 }
 
-  const dirToHuman = new THREE.Vector3().subVectors(humanPos, radarPos)
-  const totalDist = dirToHuman.length()
-  if (totalDist < 0.01) return 0
-  dirToHuman.normalize()
+  const wCenter = new THREE.Vector3(wPos.x, wPos.y + wSize.y / 2, wPos.z)
+  const toWCenter = new THREE.Vector3().subVectors(wCenter, radarPos)
+  const distWC = toWCenter.length()
+  if (distWC < 0.1) return 0
 
-  const wMin = new THREE.Vector3(wPos.x - wSize.x / 2, wPos.y, wPos.z - wSize.z / 2)
-  const wMax = new THREE.Vector3(wPos.x + wSize.x / 2, wPos.y + wSize.y, wPos.z + wSize.z / 2)
+  const toHuman = new THREE.Vector3().subVectors(humanPos, radarPos)
+  const distH = toHuman.length()
+  if (distH < 0.1) return 0
 
-  const result = rayBoxIntersect(radarPos, dirToHuman, wMin, wMax)
-  if (!result.hit) return 0
+  const wAngH = Math.atan2(toWCenter.x, toWCenter.z)
+  const hAngH = Math.atan2(toHuman.x, toHuman.z)
+  let diffH = hAngH - wAngH
+  while (diffH > Math.PI) diffH -= Math.PI * 2
+  while (diffH < -Math.PI) diffH += Math.PI * 2
+  diffH = Math.abs(diffH)
 
-  if (result.tHit < totalDist) {
-    const blockerRatio = 1 - result.tHit / totalDist
-    const heightFactor = THREE.MathUtils.clamp((humanPos.y - wPos.y) / wSize.y + 0.3, 0.1, 1)
-    return blockerRatio * heightFactor
+  const halfAngH = Math.atan2(wSize.x / 2, distWC)
+  const softBandH = halfAngH * 1.2
+  const normDiffH = diffH / halfAngH
+
+  let hOcc = 0
+  if (normDiffH < 1.0) {
+    hOcc = 1.0
+  } else if (normDiffH < 1.0 + softBandH / halfAngH) {
+    const t = (normDiffH - 1.0) / (softBandH / halfAngH)
+    hOcc = 1.0 - t
   }
 
-  return 0
+  const wAngV = Math.asin(toWCenter.y / distWC)
+  const hAngV = Math.asin(toHuman.y / distH)
+  const diffV = Math.abs(hAngV - wAngV)
+
+  const halfAngV = Math.atan2(wSize.y / 2, distWC)
+  const softBandV = halfAngV * 1.0
+  const normDiffV = diffV / halfAngV
+
+  let vOcc = 0
+  if (normDiffV < 1.0) {
+    vOcc = 1.0
+  } else if (normDiffV < 1.0 + softBandV / halfAngV) {
+    const t = (normDiffV - 1.0) / (softBandV / halfAngV)
+    vOcc = 1.0 - t
+  }
+
+  const distRatio = distWC / distH
+  const distFactor = THREE.MathUtils.clamp(distRatio * 0.9 + 0.1, 0.3, 1.0)
+
+  const baseOcc = hOcc * vOcc * distFactor
+  return THREE.MathUtils.clamp(baseOcc, 0, 1)
 }
 
 function rayBoxIntersect(
@@ -973,7 +1006,7 @@ function updateHumanAnimation(dt: number) {
   } else {
     humanConfig.basePosition.set(0, 0, -3)
     if (!humanOnSofa.value) {
-      humanConfig.basePosition.set(-4.5, 0, -2.5)
+      humanConfig.basePosition.set(-3.0, 0, -3.0)
     }
     humanGroup.position.lerp(humanConfig.basePosition, 0.05)
     const lookDir = new THREE.Vector3().subVectors(new THREE.Vector3(0, 0, 0), humanGroup.position)
@@ -998,9 +1031,7 @@ function updateLightLogic(dt: number, detected: boolean) {
   if (!lightMesh || !lightBulbMesh || !lightCone) return
 
   if (detected) {
-    if (delayCountdown.value <= 0) {
-      delayCountdown.value = lightDelay.value
-    }
+    delayCountdown.value = lightDelay.value
   } else {
     delayCountdown.value = Math.max(0, delayCountdown.value - dt)
   }
@@ -1028,6 +1059,7 @@ function updateDetectionStatus(dt: number) {
     humanDetected.value = false
     microMotionSignal.value = 0
     occlusionLevel.value = 0
+    detectionHysteresisCounter = 0
     return
   }
 
@@ -1040,13 +1072,25 @@ function updateDetectionStatus(dt: number) {
 
   const rawMotion = calculateMicroMotionSignal(dt)
 
-  if (inVolume && (1 - occlusion) > 0.15 && rawMotion > sensitivity.value * 0.5) {
+  const rawDetected = inVolume && (1 - occlusion) > 0.15 && rawMotion > sensitivity.value * 0.5
+
+  if (rawDetected) {
+    detectionHysteresisCounter = Math.min(HYSTERESIS_FRAMES, detectionHysteresisCounter + 1)
+  } else {
+    detectionHysteresisCounter = Math.max(-HYSTERESIS_FRAMES, detectionHysteresisCounter - 1)
+  }
+
+  if (detectionHysteresisCounter >= HYSTERESIS_FRAMES) {
+    humanDetected.value = true
+  } else if (detectionHysteresisCounter <= -HYSTERESIS_FRAMES) {
+    humanDetected.value = false
+  }
+
+  if (humanDetected.value) {
     const effectiveSignal = rawMotion * (1 - occlusion * 0.7)
     microMotionSignal.value = -30 + effectiveSignal * 12
-    humanDetected.value = true
   } else {
     microMotionSignal.value = Math.max(-60, microMotionSignal.value - dt * 20)
-    humanDetected.value = false
   }
 
   updateHumanAnimation(dt)
