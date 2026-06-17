@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap');
+
+:root {
+  font-family: 'Noto Sans SC', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: #FAF3E0;
+  color: #3E2723;
+}
+
+@layer components {
+  .card {
+    @apply bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-earth-200/50 p-6 transition-all duration-300;
+  }
+  .card:hover {
+    @apply shadow-md;
+  }
+  .btn-primary {
+    @apply bg-soil-green text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all duration-300 hover:bg-soil-green-dark hover:-translate-y-0.5 hover:shadow-md active:translate-y-0;
+  }
+  .btn-secondary {
+    @apply bg-earth-200 text-earth-500 px-6 py-2.5 rounded-lg font-medium transition-all duration-300 hover:bg-earth-300 hover:-translate-y-0.5 active:translate-y-0;
+  }
+  .input-field {
+    @apply w-full px-4 py-2.5 rounded-lg border border-earth-200 bg-white/60 focus:border-soil-green focus:ring-2 focus:ring-soil-green/20 outline-none transition-all duration-200;
+  }
+  .label-text {
+    @apply block text-sm font-medium text-earth-500 mb-1.5;
+  }
+  .grade-excellent {
+    @apply bg-soil-green-light/30 text-soil-green-dark;
+  }
+  .grade-good {
+    @apply bg-green-100 text-green-800;
+  }
+  .grade-medium {
+    @apply bg-amber-100 text-amber-800;
+  }
+  .grade-poor {
+    @apply bg-red-100 text-red-800;
+  }
+}
