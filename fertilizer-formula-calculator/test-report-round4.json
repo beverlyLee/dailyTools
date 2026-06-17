@@ -1,0 +1,128 @@
+{
+  "passed": [
+    {
+      "name": "页面加载成功",
+      "detail": ""
+    },
+    {
+      "name": "自定义作物产量上限动态调整为10000",
+      "detail": ""
+    },
+    {
+      "name": "番茄3000公斤计算成功",
+      "detail": ""
+    },
+    {
+      "name": "结果中包含番茄名称",
+      "detail": ""
+    },
+    {
+      "name": "多生育期显示正确",
+      "detail": "4个: 基肥, 苗肥, 花果肥, 壮果肥"
+    },
+    {
+      "name": "节本金额为正",
+      "detail": "908.83元"
+    },
+    {
+      "name": "内置作物产量上限保持2000",
+      "detail": ""
+    },
+    {
+      "name": "超限产量自动修正为上限",
+      "detail": ""
+    },
+    {
+      "name": "已保存作物列表显示",
+      "detail": "1个作物"
+    },
+    {
+      "name": "编辑按钮存在",
+      "detail": ""
+    },
+    {
+      "name": "删除按钮存在",
+      "detail": ""
+    },
+    {
+      "name": "编辑模式标签正确",
+      "detail": ""
+    },
+    {
+      "name": "编辑时表单已填充作物名称",
+      "detail": "番茄"
+    },
+    {
+      "name": "编辑保存成功提示",
+      "detail": ""
+    },
+    {
+      "name": "编辑后下拉选项已更新",
+      "detail": ""
+    },
+    {
+      "name": "删除确认弹窗显示",
+      "detail": ""
+    },
+    {
+      "name": "小麦尿素用量正常",
+      "detail": "37.06公斤/亩"
+    },
+    {
+      "name": "采购清单与施肥方案一致",
+      "detail": ""
+    },
+    {
+      "name": "节本金额为正",
+      "detail": "267.69元"
+    },
+    {
+      "name": "中低产田尿素正常",
+      "detail": "31.36公斤/亩"
+    },
+    {
+      "name": "高产田尿素正常",
+      "detail": "42.76公斤/亩"
+    },
+    {
+      "name": "黄瓜5000公斤计算成功",
+      "detail": ""
+    }
+  ],
+  "failed": [
+    {
+      "name": "空表单提交无提示",
+      "detail": "没有显示错误提示",
+      "severity": "medium"
+    },
+    {
+      "name": "验证失败字段无高亮",
+      "detail": "可能是高亮已消失（2.5秒超时）",
+      "severity": "low"
+    },
+    {
+      "name": "删除未生效",
+      "detail": "数量未变化: 1",
+      "severity": "high"
+    }
+  ],
+  "issues": [
+    {
+      "category": "空表单提交无提示",
+      "description": "没有显示错误提示",
+      "severity": "medium"
+    },
+    {
+      "category": "验证失败字段无高亮",
+      "description": "可能是高亮已消失（2.5秒超时）",
+      "severity": "low"
+    },
+    {
+      "category": "删除未生效",
+      "description": "数量未变化: 1",
+      "severity": "high"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": []
+}

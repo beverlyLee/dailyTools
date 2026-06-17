@@ -95,6 +95,7 @@ function renderSavedCropsList() {
   
   if (crops.length === 0) {
     section.classList.add('hidden');
+    list.innerHTML = '';
     return;
   }
   
