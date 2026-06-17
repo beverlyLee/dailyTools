@@ -112,7 +112,7 @@ function buildCalendar(
 }
 
 export function generatePrescription(data: SoilData): Prescription {
-  const result = calculateSHI(data)
+  void calculateSHI(data)
 
   const acidification = calcAcidification(data.ph)
   const compaction = calcCompaction(data.organicMatter)

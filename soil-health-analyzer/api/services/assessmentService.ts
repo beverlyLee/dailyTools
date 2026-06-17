@@ -74,13 +74,13 @@ export function calculateSHI(data: SoilData): SHIResult {
     potassium: 0.20,
   }
 
-  const shi = Math.round(
+  const shi = Math.round((
     scores.ph * weights.ph +
     scores.organicMatter * weights.organicMatter +
     scores.nitrogen * weights.nitrogen +
     scores.phosphorus * weights.phosphorus +
     scores.potassium * weights.potassium
-  * 10) / 10
+  ) * 10) / 10
 
   const grade = getGrade(shi)
   const degradationTypes = identifyDegradation(data, scores)

@@ -1,5 +1,49 @@
 import { getDb } from '../database.js'
-import type { SoilData, SHIResult, TrackingRecord } from '../../shared/types.js'
+import type { SoilData, SHIResult, TrackingRecord, SoilRecord } from '../../shared/types.js'
+
+interface SoilRecordDbRow {
+  id: number
+  ph: number
+  organic_matter: number
+  total_nitrogen: number
+  available_phosphorus: number
+  available_potassium: number
+  shi: number
+  grade: string
+  test_date: string
+  ph_score: number
+  om_score: number
+  n_score: number
+  p_score: number
+  k_score: number
+  created_at: string
+}
+
+interface TrackingDbRow {
+  test_date: string
+  shi: number
+  grade: string
+  ph_score: number
+  om_score: number
+  n_score: number
+  p_score: number
+  k_score: number
+}
+
+function dbRowToSoilRecord(row: SoilRecordDbRow): SoilRecord {
+  return {
+    id: row.id,
+    ph: row.ph,
+    organicMatter: row.organic_matter,
+    totalNitrogen: row.total_nitrogen,
+    availablePhosphorus: row.available_phosphorus,
+    availablePotassium: row.available_potassium,
+    shi: row.shi,
+    grade: row.grade,
+    testDate: row.test_date,
+    created_at: row.created_at,
+  }
+}
 
 export function saveRecord(data: SoilData, result: SHIResult): number {
   const db = getDb()
@@ -45,18 +89,20 @@ export function savePrescription(recordId: number, prescription: {
   )
 }
 
-export function getAllRecords(): any[] {
+export function getAllRecords(): SoilRecord[] {
   const db = getDb()
-  return db.prepare(`
+  const rows = db.prepare(`
     SELECT * FROM soil_records ORDER BY test_date DESC
-  `).all()
+  `).all() as SoilRecordDbRow[]
+  return rows.map(dbRowToSoilRecord)
 }
 
-export function getLatestRecord(): any | null {
+export function getLatestRecord(): SoilRecord | null {
   const db = getDb()
-  return db.prepare(`
+  const row = db.prepare(`
     SELECT * FROM soil_records ORDER BY test_date DESC LIMIT 1
-  `).get() as any | null
+  `).get() as SoilRecordDbRow | undefined
+  return row ? dbRowToSoilRecord(row) : null
 }
 
 export function getTrackingData(): TrackingRecord[] {
@@ -64,7 +110,7 @@ export function getTrackingData(): TrackingRecord[] {
   const rows = db.prepare(`
     SELECT test_date, shi, grade, ph_score, om_score, n_score, p_score, k_score
     FROM soil_records ORDER BY test_date ASC
-  `).all() as any[]
+  `).all() as TrackingDbRow[]
 
   return rows.map(row => ({
     testDate: row.test_date,

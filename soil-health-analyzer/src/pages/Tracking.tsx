@@ -71,7 +71,7 @@ export default function Tracking() {
       setYearA(years[0]);
       setYearB(years[0]);
     }
-  }, [years]);
+  }, [years, yearA]);
 
   if (loading) {
     return (

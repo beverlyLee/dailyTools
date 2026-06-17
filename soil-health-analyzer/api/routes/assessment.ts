@@ -26,7 +26,7 @@ router.post('/', (req: Request, res: Response): void => {
     const recordId = saveRecord(data, result)
 
     res.json({ success: true, data: { ...result, recordId } })
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: '计算失败' })
   }
 })

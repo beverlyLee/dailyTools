@@ -34,7 +34,7 @@ router.post('/', (req: Request, res: Response): void => {
     }
 
     res.json({ success: true, data: prescription })
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: '处方生成失败' })
   }
 })
