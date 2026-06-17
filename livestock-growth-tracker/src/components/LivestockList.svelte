@@ -6,6 +6,7 @@
   export let livestockList = []
   let searchTerm = ''
   let filterBreed = ''
+  let diseaseRecords = []
 
   const dispatch = createEventDispatcher()
   const breedOptions = Object.keys(BREED_CONFIG)
@@ -57,6 +58,23 @@
     dispatch('select', l)
   }
 
+  $: activeDiseasesMap = diseaseRecords
+    .filter(d => d.status !== 'recovered')
+    .reduce((map, d) => {
+      const key = String(d.livestockId)
+      if (!map[key]) map[key] = []
+      map[key].push(d)
+      return map
+    }, {})
+
+  function getActiveDiseases(livestockId) {
+    return activeDiseasesMap[String(livestockId)] || []
+  }
+
+  async function loadDiseaseRecords() {
+    diseaseRecords = await getAll(STORES.DISEASE_RECORDS)
+  }
+
   async function loadStats() {
     for (const l of livestockList) {
       const stats = await getLivestockStats(l)
@@ -72,6 +90,7 @@
 
   onMount(() => {
     loadStats()
+    loadDiseaseRecords()
   })
 
   $: if (livestockList.length > 0) {
@@ -143,6 +162,13 @@
                   <span class="value">{(livestock._deviation * 100).toFixed(1)}%</span>
                 </div>
               {/if}
+            {/if}
+            {#if getActiveDiseases(livestock.id).length > 0}
+              <div class="disease-row">
+                {#each getActiveDiseases(livestock.id) as d}
+                  <span class="disease-badge severity-{d.severity}">🏥 {d.diseaseName}</span>
+                {/each}
+              </div>
             {/if}
           </div>
           <div class="card-actions">
@@ -284,6 +310,37 @@
   .deviation-row.negative .value {
     color: var(--danger);
     font-weight: 700;
+  }
+
+  .disease-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding-top: 6px;
+    margin-top: 4px;
+    border-top: 1px dashed var(--border);
+  }
+
+  .disease-badge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .disease-badge.severity-mild {
+    background: #fff3e0;
+    color: #e65100;
+  }
+
+  .disease-badge.severity-moderate {
+    background: #ffebee;
+    color: #c62828;
+  }
+
+  .disease-badge.severity-severe {
+    background: #b71c1c;
+    color: white;
   }
 
   .card-actions {

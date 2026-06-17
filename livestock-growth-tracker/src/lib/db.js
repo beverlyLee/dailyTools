@@ -1,21 +1,28 @@
 const DB_NAME = 'livestock_growth_tracker'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 const STORES = {
   LIVESTOCK: 'livestock',
   WEIGHT_RECORDS: 'weight_records',
   FEED_RECORDS: 'feed_records',
   VACCINE_RECORDS: 'vaccine_records',
-  VACCINE_SCHEDULES: 'vaccine_schedules'
+  VACCINE_SCHEDULES: 'vaccine_schedules',
+  DISEASE_RECORDS: 'disease_records',
+  TREATMENT_RECORDS: 'treatment_records'
 }
 
 let dbInstance = null
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    if (dbInstance) {
+    if (dbInstance && dbInstance.version === DB_VERSION) {
       resolve(dbInstance)
       return
+    }
+
+    if (dbInstance) {
+      dbInstance.close()
+      dbInstance = null
     }
 
     const request = indexedDB.open(DB_NAME, DB_VERSION)
@@ -58,6 +65,20 @@ function openDB() {
       if (!db.objectStoreNames.contains(STORES.VACCINE_SCHEDULES)) {
         const store = db.createObjectStore(STORES.VACCINE_SCHEDULES, { keyPath: 'id', autoIncrement: true })
         store.createIndex('breed', 'breed', { unique: false })
+      }
+
+      if (!db.objectStoreNames.contains(STORES.DISEASE_RECORDS)) {
+        const store = db.createObjectStore(STORES.DISEASE_RECORDS, { keyPath: 'id', autoIncrement: true })
+        store.createIndex('livestockId', 'livestockId', { unique: false })
+        store.createIndex('diseaseDate', 'diseaseDate', { unique: false })
+        store.createIndex('status', 'status', { unique: false })
+      }
+
+      if (!db.objectStoreNames.contains(STORES.TREATMENT_RECORDS)) {
+        const store = db.createObjectStore(STORES.TREATMENT_RECORDS, { keyPath: 'id', autoIncrement: true })
+        store.createIndex('diseaseId', 'diseaseId', { unique: false })
+        store.createIndex('livestockId', 'livestockId', { unique: false })
+        store.createIndex('treatmentDate', 'treatmentDate', { unique: false })
       }
     }
   })

@@ -139,9 +139,40 @@
   }
 
   let svgContainer
+  let tooltipEl
+  let tooltipData = null
+
   afterUpdate(() => {
     drawChart()
   })
+
+  function handleSvgMouseMove(e) {
+    if (!tooltipEl) return
+    const rect = svgContainer.parentElement.getBoundingClientRect()
+    const x = e.clientX - rect.left + 16
+    const y = e.clientY - rect.top - 10
+    tooltipEl.style.left = x + 'px'
+    tooltipEl.style.top = y + 'px'
+  }
+
+  function showPointTooltip(rAge, r) {
+    const stdW = getStandardWeight(livestock.breed, rAge)
+    const dev = calculateDeviation(r.weight, stdW)
+    const config = BREED_CONFIG[livestock?.breed] || BREED_CONFIG['地方品种']
+    const isWarningPoint = checkWarning(dev, config.warningThreshold)
+    tooltipData = {
+      date: r.recordDate,
+      age: rAge,
+      actual: r.weight.toFixed(2),
+      standard: stdW.toFixed(2),
+      deviation: (dev * 100).toFixed(1),
+      isWarning: isWarningPoint
+    }
+  }
+
+  function hideTooltip() {
+    tooltipData = null
+  }
 
   function drawChart() {
     if (!svgContainer || curvePoints.length === 0) return
@@ -201,8 +232,13 @@
         const config = BREED_CONFIG[livestock?.breed] || BREED_CONFIG['地方品种']
         const pointWarning = checkWarning(dev, config.warningThreshold)
 
-        svg += `<circle cx="${x}" cy="${y}" r="6" fill="${pointWarning ? '#f44336' : '#2196f3'}" stroke="white" stroke-width="2"/>`
-        svg += `<title>${r.recordDate}: ${r.weight.toFixed(2)}kg (偏离${(dev * 100).toFixed(1)}%)</title>`
+        if (pointWarning) {
+          svg += `<circle cx="${x}" cy="${y}" r="12" fill="rgba(244,67,54,0.15)" stroke="none" data-point="${i}"/>`
+          svg += `<polygon points="${x},${y - 10} ${x + 8},${y + 6} ${x - 8},${y + 6}" fill="#f44336" stroke="white" stroke-width="2" data-point="${i}"/>`
+          svg += `<text x="${x}" y="${y - 16}" text-anchor="middle" fill="#f44336" font-size="10" font-weight="bold">⚠</text>`
+        } else {
+          svg += `<circle cx="${x}" cy="${y}" r="5" fill="#2196f3" stroke="white" stroke-width="2" data-point="${i}"/>`
+        }
       })
       if (sorted.length >= 2) {
         svg += `<path d="${actualPath}" fill="none" stroke="#2196f3" stroke-width="2"/>`
@@ -220,6 +256,19 @@
 
     svgContainer.innerHTML = svg
     svgContainer.setAttribute('viewBox', `0 0 ${width} ${height}`)
+
+    svgContainer.querySelectorAll('[data-point]').forEach(el => {
+      el.style.cursor = 'pointer'
+      el.addEventListener('mouseenter', () => {
+        const idx = parseInt(el.getAttribute('data-point'))
+        const sorted = [...weightRecords].sort((a, b) => new Date(a.recordDate) - new Date(b.recordDate))
+        if (sorted[idx]) {
+          const rAge = calculateAgeDays(livestock.birthDate, sorted[idx].recordDate)
+          showPointTooltip(rAge, sorted[idx])
+        }
+      })
+      el.addEventListener('mouseleave', hideTooltip)
+    })
   }
 </script>
 
@@ -294,11 +343,28 @@
         <div class="chart-legend">
           <span class="legend-item"><span class="legend-color" style="background:#4caf50"></span>标准曲线</span>
           <span class="legend-item"><span class="legend-color" style="background:#2196f3"></span>实测数据</span>
-          <span class="legend-item"><span class="legend-color" style="background:#f44336"></span>预警点</span>
+          <span class="legend-item"><span class="legend-color" style="background:#f44336"></span>预警点 (偏离超阈值)</span>
         </div>
       </div>
       <div class="chart-container">
-        <svg bind:this={svgContainer} class="growth-chart"></svg>
+        <svg bind:this={svgContainer} class="growth-chart" role="img" aria-label="生长曲线图" on:mousemove={handleSvgMouseMove}></svg>
+        {#if tooltipData}
+          <div class="chart-tooltip" bind:this={tooltipEl}>
+            <div class="tip-date">{tooltipData.date}</div>
+            <div class="tip-row"><span>日龄:</span><span>{tooltipData.age} 天</span></div>
+            <div class="tip-row"><span>实测体重:</span><span class="tip-val">{tooltipData.actual} kg</span></div>
+            <div class="tip-row"><span>标准体重:</span><span>{tooltipData.standard} kg</span></div>
+            <div class="tip-row tip-deviation">
+              <span>偏离差异:</span>
+              <span class={tooltipData.isWarning ? 'text-danger' : (parseFloat(tooltipData.deviation) < 0 ? 'text-warning' : 'text-success')}>
+                {tooltipData.deviation}%
+              </span>
+            </div>
+            {#if tooltipData.isWarning}
+              <div class="tip-warning">⚠ 触发生长预警</div>
+            {/if}
+          </div>
+        {/if}
       </div>
     </div>
 
@@ -534,11 +600,62 @@
   .chart-container {
     width: 100%;
     overflow-x: auto;
+    position: relative;
   }
 
   .growth-chart {
     width: 100%;
     height: 360px;
+  }
+
+  .chart-tooltip {
+    position: absolute;
+    background: rgba(33, 33, 33, 0.92);
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 100;
+    min-width: 180px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  }
+
+  .tip-date {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .tip-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 2px 0;
+  }
+
+  .tip-row span:first-child {
+    color: rgba(255,255,255,0.7);
+  }
+
+  .tip-val {
+    font-weight: 700;
+    color: #64b5f6;
+  }
+
+  .tip-deviation span:last-child {
+    font-weight: 700;
+  }
+
+  .tip-warning {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(244,67,54,0.4);
+    color: #ef5350;
+    font-weight: 700;
+    text-align: center;
   }
 
   .records-section {
