@@ -32,8 +32,8 @@ app.get('/api/products', (req, res) => {
   res.json(PRODUCT_THRESHOLDS);
 });
 
-app.get('/api/status', (req, res) => {
-  res.json({
+function getState() {
+  return {
     currentTemp: model.currentTemp,
     doorOpen: model.doorOpen,
     refrigerationPower: model.refrigerationPower,
@@ -41,8 +41,13 @@ app.get('/api/status', (req, res) => {
     threshold: model.threshold,
     time: model.time,
     isAlert: model.currentTemp > model.threshold,
-    totalAlertDuration: model.getTotalAlertDuration()
-  });
+    totalAlertDuration: model.getTotalAlertDuration(),
+    alertHistory: model.alertHistory.map(a => ({ ...a }))
+  };
+}
+
+app.get('/api/status', (req, res) => {
+  res.json(getState());
 });
 
 app.get('/api/report', (req, res) => {
@@ -124,15 +129,7 @@ function generateHash(report, signature, receiverName) {
 function broadcastState() {
   const state = {
     type: 'state',
-    currentTemp: model.currentTemp,
-    doorOpen: model.doorOpen,
-    refrigerationPower: model.refrigerationPower,
-    ambientTemp: model.ambientTemp,
-    threshold: model.threshold,
-    time: model.time,
-    isAlert: model.currentTemp > model.threshold,
-    totalAlertDuration: model.getTotalAlertDuration(),
-    alertHistory: model.alertHistory.map(a => ({ ...a }))
+    ...getState()
   };
   wss.clients.forEach(client => {
     if (client.readyState === 1) {
@@ -159,16 +156,7 @@ wss.on('connection', (ws) => {
   ws.send(JSON.stringify({
     type: 'init',
     history: model.temperatureHistory,
-    state: {
-      currentTemp: model.currentTemp,
-      doorOpen: model.doorOpen,
-      refrigerationPower: model.refrigerationPower,
-      ambientTemp: model.ambientTemp,
-      threshold: model.threshold,
-      time: model.time,
-      isAlert: model.currentTemp > model.threshold,
-      totalAlertDuration: model.getTotalAlertDuration()
-    },
+    state: getState(),
     products: PRODUCT_THRESHOLDS
   }));
 
@@ -182,6 +170,10 @@ wss.on('connection', (ws) => {
           break;
         case 'power':
           model.setRefrigerationPower(data.power);
+          broadcastState();
+          break;
+        case 'ambient':
+          model.setAmbientTemp(data.temp);
           broadcastState();
           break;
         case 'product':
