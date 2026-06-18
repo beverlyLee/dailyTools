@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>冷链温度监测系统</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="header">
+        <h1>❄️ 冷链温度监测系统</h1>
+        <p>生鲜农产品运输温控追溯平台 · 保障断链追责有据可依</p>
+      </div>
+
+      <div class="main-grid">
+        <div>
+          <div class="panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div class="panel-title" style="margin-bottom: 0;">实时温度监控</div>
+              <span id="connectionStatus" class="connection-status disconnected">
+                <span class="connection-dot"></span>连接中...
+              </span>
+            </div>
+
+            <div id="alertBanner" class="alert-banner hidden">
+              <span class="alert-icon">🚨</span>
+              <div class="alert-content">
+                <div id="alertTitle"></div>
+                <div id="alertDesc"></div>
+              </div>
+            </div>
+
+            <div class="temp-display">
+              <span id="tempValue" class="temp-value">--</span>
+              <span class="temp-unit">°C</span>
+              <span id="tempStatus" class="temp-status normal">温度正常</span>
+              <span id="doorIndicator" class="door-indicator closed">
+                <span class="door-dot"></span>车门已关闭
+              </span>
+            </div>
+
+            <div class="chart-container">
+              <canvas id="tempChart" class="chart-canvas"></canvas>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">运输统计</div>
+            <div class="stat-grid">
+              <div class="stat-item">
+                <div class="stat-label">运输时长</div>
+                <div id="timeElapsed" class="stat-value">0秒</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">越界累计时长</div>
+                <div id="alertDuration" class="stat-value success">0秒</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">越界次数</div>
+                <div id="alertCount" class="stat-value success">0</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">外界气温</div>
+                <div id="ambientTemp" class="stat-value">30°C</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">最低温度</div>
+                <div id="minTemp" class="stat-value">--</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">最高温度</div>
+                <div id="maxTemp" class="stat-value">--</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">平均温度</div>
+                <div id="avgTemp" class="stat-value">--</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">制冷功率</div>
+                <div id="powerValue" class="stat-value">800W</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="panel">
+            <div class="panel-title">货物类型</div>
+            <div id="productList" class="product-select"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">模拟控制</div>
+
+            <div class="control-group">
+              <button id="doorBtn" class="btn btn-success">开启车门</button>
+              <button id="resetBtn" class="btn btn-outline" style="margin-left: 8px;">重置模拟</button>
+            </div>
+
+            <div class="slider-container">
+              <label class="control-label">制冷功率调节</label>
+              <input id="powerSlider" class="slider" type="range" min="0" max="1500" value="800" step="50" />
+              <div class="slider-value">
+                <span>0W</span>
+                <span>1500W</span>
+              </div>
+            </div>
+
+            <div class="slider-container">
+              <label class="control-label">外界气温调节</label>
+              <input id="ambientSlider" class="slider" type="range" min="0" max="45" value="30" step="1" />
+              <div class="slider-value">
+                <span>0°C</span>
+                <span>45°C</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">越界记录</div>
+            <div id="alertList" class="alert-list">
+              <div style="color: #64748b; font-size: 13px; text-align: center; padding: 20px 0;">暂无温度越界记录</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">电子交接</div>
+            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 14px;">
+              运输结束后生成交接凭证，支持收货方电子签名确认
+            </p>
+            <button id="handoffBtn" class="btn btn-primary" style="width: 100%;">生成交接单 / 电子签收</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="modal" class="modal-overlay hidden">
+        <div class="modal">
+          <div class="modal-header">
+            <h2>📋 冷链运输电子交接单</h2>
+            <button class="close-btn" id="closeModal">×</button>
+          </div>
+
+          <div id="handoffContent"></div>
+
+          <div id="nameInputContainer" class="form-group">
+            <label class="form-label">收货人姓名</label>
+            <input id="receiverName" class="form-input" type="text" placeholder="请输入收货人姓名" />
+          </div>
+
+          <div id="notesInputContainer" class="form-group">
+            <label class="form-label">备注信息（可选）</label>
+            <textarea id="notes" class="form-input form-textarea" placeholder="输入备注信息..."></textarea>
+          </div>
+
+          <div id="signaturePadContainer" class="form-group">
+            <label class="form-label">电子签名</label>
+            <canvas id="signatureCanvas" class="signature-pad"></canvas>
+            <div class="signature-hint">请在上方区域手写签名</div>
+            <button id="clearSignature" class="btn btn-outline" style="margin-top: 10px;">清除签名</button>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-top: 20px;">
+            <button id="submitHandoff" class="btn btn-primary" style="flex: 1;">确认签收</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
