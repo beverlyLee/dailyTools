@@ -443,7 +443,8 @@ class ColdChainApp {
           let hasOngoing = false;
           for (const alert of this.state.alertHistory) {
             if (alert.ongoing) {
-              total += data.record.time - alert.startTime;
+              const elapsed = data.record.time - alert.startTime;
+              total += elapsed === 0 ? 60 : elapsed;
               hasOngoing = true;
             } else if (alert.endTime !== null) {
               total += alert.endTime - alert.startTime;
