@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { ClipboardList, Droplets, Leaf, Wheat, Calendar, AlertTriangle, CheckCircle, ArrowRight } from 'lucide-react'
 import { useSoilStore } from '@/store/useSoilStore'
@@ -6,24 +6,55 @@ import { useSoilStore } from '@/store/useSoilStore'
 export default function Prescription() {
   const { currentData, shiResult, prescription, setPrescription, recordId } = useSoilStore()
   const [prescriptionData, setPrescriptionData] = useState(prescription)
+  const [loading, setLoading] = useState(false)
+  const [fetchError, setFetchError] = useState<string | null>(null)
+  const lastFetchedKey = useRef<string | null>(null)
 
   useEffect(() => {
-    if (shiResult && !prescription && currentData) {
-      fetch('/api/prescription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...currentData, recordId }),
+    if (!shiResult || !currentData) return
+
+    const cacheKey = `${recordId ?? ''}-${currentData.testDate}-${currentData.ph}-${currentData.organicMatter}`
+    if (lastFetchedKey.current === cacheKey) {
+      if (prescription) setPrescriptionData(prescription)
+      return
+    }
+
+    if (prescription) {
+      setPrescriptionData(prescription)
+      lastFetchedKey.current = cacheKey
+      return
+    }
+
+    lastFetchedKey.current = cacheKey
+    setLoading(true)
+    setFetchError(null)
+
+    fetch('/api/prescription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...currentData, recordId }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`请求失败：${res.status}`)
+        return res.json()
       })
-        .then((res) => res.json())
-        .then((json) => {
+      .then((json) => {
+        if (json.success && json.data) {
           const rx = json.data
           setPrescription(rx)
           setPrescriptionData(rx)
-        })
-    } else if (prescription) {
-      setPrescriptionData(prescription)
-    }
-  }, [shiResult, prescription, currentData, recordId, setPrescription])
+        } else {
+          throw new Error(json.error || '处方生成失败')
+        }
+      })
+      .catch((err) => {
+        const msg = err instanceof Error ? err.message : '网络异常，请稍后重试'
+        setFetchError(msg)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [shiResult, currentData, prescription, recordId, setPrescription])
 
   if (!shiResult) {
     return (
@@ -38,10 +69,33 @@ export default function Prescription() {
     )
   }
 
-  if (!prescriptionData) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="animate-spin rounded-full h-10 w-10 border-4 border-soil-green border-t-transparent" />
+      </div>
+    )
+  }
+
+  if (fetchError) {
+    return (
+      <div className="card max-w-md mx-auto mt-10 border-l-4 border-l-red-400">
+        <div className="flex items-center gap-2 mb-3">
+          <AlertTriangle className="w-6 h-6 text-red-500" />
+          <h3 className="text-lg font-semibold text-earth-500">处方生成失败</h3>
+        </div>
+        <p className="text-earth-500 mb-4">{fetchError}</p>
+        <Link to="/assessment" className="btn-secondary inline-flex items-center gap-2">
+          返回到评价页 <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+    )
+  }
+
+  if (!prescriptionData) {
+    return (
+      <div className="flex items-center justify-center py-20 text-earth-300">
+        暂无处方数据
       </div>
     )
   }

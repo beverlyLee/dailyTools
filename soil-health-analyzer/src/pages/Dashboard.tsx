@@ -13,7 +13,7 @@ import {
   Tooltip,
   Filler,
 } from 'chart.js'
-import type { SoilRecord, TrackingRecord } from '@shared/types'
+import type { SoilRecord, TrackingRecord, SoilData, SHIResult, SHIScores } from '@shared/types'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler)
 
@@ -25,13 +25,18 @@ const gradeBg: Record<string, string> = {
   '未检测': 'bg-gradient-to-br from-gray-400 to-gray-500',
 }
 
+const gradeClass: Record<string, string> = {
+  '优': 'grade-excellent',
+  '良': 'grade-good',
+  '中': 'grade-medium',
+  '差': 'grade-poor',
+}
+
 export default function Dashboard() {
   const navigate = useNavigate()
-  const { shiResult, currentData } = useSoilStore()
+  const { shiResult, currentData, setCurrentData, setShiResult, setRecordId } = useSoilStore()
   const [records, setRecords] = useState<SoilRecord[]>([])
   const [tracking, setTracking] = useState<TrackingRecord[]>([])
-
-  const grade = shiResult?.grade ?? '未检测'
 
   useEffect(() => {
     fetch('/api/records')
@@ -46,6 +51,49 @@ export default function Dashboard() {
       .then((json) => setTracking(json.data ?? []))
       .catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (shiResult && currentData) return
+    fetch('/api/records/latest')
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success && json.data) {
+          const rec = json.data as SoilRecord
+          const data: SoilData = {
+            ph: rec.ph,
+            organicMatter: rec.organicMatter,
+            totalNitrogen: rec.totalNitrogen,
+            availablePhosphorus: rec.availablePhosphorus,
+            availablePotassium: rec.availablePotassium,
+            testDate: rec.testDate,
+          }
+          const scores: SHIScores = {
+            ph: rec.shi ? 0 : 0,
+            organicMatter: rec.shi ? 0 : 0,
+            nitrogen: rec.shi ? 0 : 0,
+            phosphorus: rec.shi ? 0 : 0,
+            potassium: rec.shi ? 0 : 0,
+          }
+          const result: SHIResult = {
+            shi: rec.shi,
+            grade: rec.grade as SHIResult['grade'],
+            scores,
+            degradationTypes: [],
+          }
+          if (rec.ph < 6.5) result.degradationTypes.push('酸化')
+          if (rec.ph > 8.0) result.degradationTypes.push('碱化')
+          if (rec.organicMatter < 15) result.degradationTypes.push('板结')
+          if (result.degradationTypes.length === 0) result.degradationTypes.push('无明显退化')
+
+          setCurrentData(data)
+          setShiResult(result)
+          if (rec.id) setRecordId(rec.id)
+        }
+      })
+      .catch(() => {})
+  }, [shiResult, currentData, setCurrentData, setShiResult, setRecordId])
+
+  const grade = shiResult?.grade ?? '未检测'
 
   const statCards = [
     { label: 'SHI健康指数', value: shiResult?.shi?.toFixed(1) ?? '--', icon: Activity },
@@ -136,7 +184,7 @@ export default function Dashboard() {
                       <td className="py-2">{r.organicMatter}</td>
                       <td className="py-2">{r.shi?.toFixed(1)}</td>
                       <td className="py-2">
-                        <span className={`grade-${({ '优': 'excellent', '良': 'good', '中': 'medium', '差': 'poor' } as Record<string, string>)[r.grade] ?? 'medium'} px-2 py-0.5 rounded-full text-xs font-medium`}>
+                        <span className={`${gradeClass[r.grade] ?? 'grade-medium'} px-2 py-0.5 rounded-full text-xs font-medium`}>
                           {r.grade}
                         </span>
                       </td>
