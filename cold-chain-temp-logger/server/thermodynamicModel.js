@@ -96,7 +96,8 @@ export class ColdChainThermodynamicModel {
   getTotalAlertDuration() {
     return this.alertHistory.reduce((total, alert) => {
       if (alert.ongoing) {
-        return total + (this.time - alert.startTime);
+        const elapsed = this.time - alert.startTime;
+        return total + (elapsed === 0 ? 60 : elapsed);
       }
       return total + (alert.endTime - alert.startTime);
     }, 0);

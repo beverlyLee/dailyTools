@@ -203,11 +203,12 @@ let lastIsAlert = false;
 
 setInterval(() => {
   const record = model.step(SIMULATION_DT);
-  broadcastTick(record);
-  if (record.isAlert !== lastIsAlert || record.isAlert) {
+  const shouldBroadcastState = record.isAlert !== lastIsAlert || record.isAlert;
+  if (shouldBroadcastState) {
     broadcastState();
     lastIsAlert = record.isAlert;
   }
+  broadcastTick(record);
 }, TICK_INTERVAL);
 
 const PORT = 3001;
