@@ -37,19 +37,29 @@ function toNumberOrNaN(value: string): number {
   return n
 }
 
+const SAMPLE_DEFAULTS = {
+  ph: '6.5',
+  organicMatter: '12',
+  totalNitrogen: '1.0',
+  availablePhosphorus: '15',
+  availablePotassium: '100',
+}
+
 export default function Assessment() {
   const { currentData, shiResult, setCurrentData, setShiResult, setRecordId, reset } = useSoilStore()
 
   const today = new Date().toISOString().split('T')[0]
 
-  const [form, setForm] = useState({
-    ph: currentData?.ph != null ? String(currentData.ph) : '',
-    organicMatter: currentData?.organicMatter != null ? String(currentData.organicMatter) : '',
-    totalNitrogen: currentData?.totalNitrogen != null ? String(currentData.totalNitrogen) : '',
-    availablePhosphorus: currentData?.availablePhosphorus != null ? String(currentData.availablePhosphorus) : '',
-    availablePotassium: currentData?.availablePotassium != null ? String(currentData.availablePotassium) : '',
+  const getInitialForm = () => ({
+    ph: currentData?.ph != null ? String(currentData.ph) : SAMPLE_DEFAULTS.ph,
+    organicMatter: currentData?.organicMatter != null ? String(currentData.organicMatter) : SAMPLE_DEFAULTS.organicMatter,
+    totalNitrogen: currentData?.totalNitrogen != null ? String(currentData.totalNitrogen) : SAMPLE_DEFAULTS.totalNitrogen,
+    availablePhosphorus: currentData?.availablePhosphorus != null ? String(currentData.availablePhosphorus) : SAMPLE_DEFAULTS.availablePhosphorus,
+    availablePotassium: currentData?.availablePotassium != null ? String(currentData.availablePotassium) : SAMPLE_DEFAULTS.availablePotassium,
     testDate: currentData?.testDate ?? today,
   })
+
+  const [form, setForm] = useState(getInitialForm)
 
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
@@ -71,8 +81,34 @@ export default function Assessment() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
-    setErrors((prev) => ({ ...prev, [name]: undefined }))
     setSubmitError(null)
+    // 实时校验当前字段，输入异常立即提示
+    setErrors((prevErrors) => {
+      const next = { ...prevErrors }
+      if (name === 'testDate') {
+        if (!value) {
+          next.testDate = '请选择检测日期'
+        } else {
+          delete next.testDate
+        }
+        return next
+      }
+      const n = toNumberOrNaN(value)
+      if (value === '' || Number.isNaN(n)) {
+        next[name as keyof FormErrors] = `请输入有效的${
+          name === 'ph' ? 'pH' : name === 'organicMatter' ? '有机质' : name === 'totalNitrogen' ? '全氮' : name === 'availablePhosphorus' ? '有效磷' : '速效钾'
+        }数值`
+      } else if (name === 'ph' && (n < 0 || n > 14)) {
+        next.ph = `pH值必须在 0-14 范围内（当前 ${n}）`
+      } else if (name !== 'ph' && n < 0) {
+        next[name as keyof FormErrors] = `${
+          name === 'organicMatter' ? '有机质' : name === 'totalNitrogen' ? '全氮' : name === 'availablePhosphorus' ? '有效磷' : '速效钾'
+        }不能为负数（当前 ${n}）`
+      } else {
+        delete next[name as keyof FormErrors]
+      }
+      return next
+    })
   }
 
   const validate = (): { ok: boolean; numeric: Partial<Record<keyof FormErrors, number>> } => {
