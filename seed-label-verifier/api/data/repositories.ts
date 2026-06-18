@@ -77,6 +77,7 @@ export function getAllBlacklistedCompanies(): BlacklistedCompany[] {
   
   return rows.map(row => ({
     id: row.id,
+    manufacturerId: row.manufacturer_id,
     name: row.name,
     reason: row.reason,
     dateAdded: row.date_added,
@@ -102,6 +103,7 @@ export function searchBlacklistedCompanies(keyword: string): BlacklistedCompany[
   
   return rows.map(row => ({
     id: row.id,
+    manufacturerId: row.manufacturer_id,
     name: row.name,
     reason: row.reason,
     dateAdded: row.date_added,

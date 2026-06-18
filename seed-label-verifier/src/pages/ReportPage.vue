@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { api } from '@/api/client';
-import { AlertTriangle, FileText, Download, Copy, CheckCircle, RefreshCw, Camera, Info } from 'lucide-vue-next';
+import { useVerifyCache } from '@/composables/useVerifyCache';
+import { AlertTriangle, FileText, Download, Copy, CheckCircle, RefreshCw, Camera, Info, XCircle } from 'lucide-vue-next';
 import html2canvas from 'html2canvas';
 import type { ReportLetter, VerifyResponse, LabelCheckResponse, SeedInfo } from '../../shared/types';
+
+const { getCachedResult, setCachedResult } = useVerifyCache();
 
 const qrInput = ref('');
 const isGenerating = ref(false);
@@ -11,28 +14,103 @@ const reportLetter = ref<ReportLetter | null>(null);
 const copied = ref(false);
 const screenshotUrl = ref<string | null>(null);
 const reportContainer = ref<HTMLDivElement | null>(null);
+const toastMessage = ref('');
+const toastType = ref<'success' | 'error' | 'warning'>('success');
+const showToast = ref(false);
+const isVerifying = ref(false);
+const usingCached = ref(false);
 
-const mockVerifyResult = ref<VerifyResponse>({
-  success: true,
-  message: '未查询到备案信息，谨防假冒',
-  isRegistered: false
-});
+const currentVerifyResult = ref<VerifyResponse | null>(null);
+const currentLabelResult = ref<LabelCheckResponse | null>(null);
+const currentSeedInfo = ref<Partial<SeedInfo>>({});
 
-const mockLabelResult = ref<LabelCheckResponse | null>(null);
+function displayToast(message: string, type: 'success' | 'error' | 'warning' = 'success') {
+  toastMessage.value = message;
+  toastType.value = type;
+  showToast.value = true;
+  setTimeout(() => {
+    showToast.value = false;
+  }, 4000);
+}
 
-const seedInfo = ref<Partial<SeedInfo>>({});
+async function fallbackCopy(text: string): Promise<boolean> {
+  try {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-9999px';
+    textArea.style.top = '-9999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textArea);
+    return successful;
+  } catch (e) {
+    console.error('Fallback copy error:', e);
+    return false;
+  }
+}
+
+async function ensureVerified(qrContent: string): Promise<{
+  verifyResult: VerifyResponse;
+  labelCheckResult?: LabelCheckResponse;
+  seedInfo?: Partial<SeedInfo>;
+}> {
+  const trimmedQr = qrContent.trim();
+  
+  const cached = getCachedResult(trimmedQr);
+  if (cached) {
+    usingCached.value = true;
+    return {
+      verifyResult: cached.verifyResult,
+      labelCheckResult: cached.labelCheckResult,
+      seedInfo: cached.seedInfo
+    };
+  }
+  
+  usingCached.value = false;
+  isVerifying.value = true;
+  
+  const verifyResult = await api.verifySeed({ qrContent: trimmedQr });
+  
+  let labelCheckResult: LabelCheckResponse | undefined;
+  let seedInfo: Partial<SeedInfo> | undefined;
+  
+  if (verifyResult.seed) {
+    seedInfo = { ...verifyResult.seed };
+    try {
+      labelCheckResult = await api.checkLabel({ qrContent: trimmedQr });
+    } catch (e) {
+      console.error('Label check error:', e);
+    }
+  }
+  
+  setCachedResult(trimmedQr, verifyResult, labelCheckResult, seedInfo);
+  
+  return { verifyResult, labelCheckResult, seedInfo };
+}
 
 async function handleGenerate() {
   if (!qrInput.value.trim()) return;
   
   isGenerating.value = true;
   try {
+    const { verifyResult, labelCheckResult, seedInfo } = await ensureVerified(qrInput.value);
+    
+    currentVerifyResult.value = verifyResult;
+    currentLabelResult.value = labelCheckResult;
+    currentSeedInfo.value = seedInfo || {};
+    
     reportLetter.value = await api.generateReport({
       qrContent: qrInput.value.trim(),
-      verifyResult: mockVerifyResult.value,
-      labelCheckResult: mockLabelResult.value,
-      seedInfo: seedInfo.value
+      verifyResult,
+      labelCheckResult,
+      seedInfo
     });
+    
+    displayToast('举报信生成成功', 'success');
   } catch (e) {
     reportLetter.value = {
       title: '生成失败',
@@ -40,8 +118,10 @@ async function handleGenerate() {
       timestamp: new Date().toISOString(),
       evidence: []
     };
+    displayToast('举报信生成失败，请稍后重试', 'error');
   } finally {
     isGenerating.value = false;
+    isVerifying.value = false;
   }
 }
 
@@ -54,21 +134,36 @@ async function handleScreenshot() {
       scale: 2
     });
     screenshotUrl.value = canvas.toDataURL('image/png');
+    displayToast('证据截图生成成功', 'success');
   } catch (e) {
     console.error('Screenshot error:', e);
+    displayToast('截图生成失败，请手动截图保存', 'error');
   }
 }
 
 async function handleCopy() {
   if (!reportLetter.value) return;
+  
   try {
     await navigator.clipboard.writeText(reportLetter.value.content);
     copied.value = true;
+    displayToast('内容已复制到剪贴板', 'success');
     setTimeout(() => {
       copied.value = false;
     }, 2000);
   } catch (e) {
-    console.error('Copy error:', e);
+    console.error('Clipboard copy error:', e);
+    
+    const fallbackSuccess = await fallbackCopy(reportLetter.value.content);
+    if (fallbackSuccess) {
+      copied.value = true;
+      displayToast('内容已复制到剪贴板（兼容模式）', 'success');
+      setTimeout(() => {
+        copied.value = false;
+      }, 2000);
+    } else {
+      displayToast('复制失败：浏览器不支持剪贴板操作，请手动选中内容复制', 'warning');
+    }
   }
 }
 
@@ -83,6 +178,7 @@ function handleDownload() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    displayToast('举报信已下载', 'success');
   }
 }
 
@@ -94,6 +190,7 @@ function handleDownloadScreenshot() {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+    displayToast('证据截图已下载', 'success');
   }
 }
 
@@ -101,15 +198,40 @@ function handleReset() {
   qrInput.value = '';
   reportLetter.value = null;
   screenshotUrl.value = null;
+  currentVerifyResult.value = null;
+  currentLabelResult.value = null;
+  currentSeedInfo.value = {};
+  usingCached.value = false;
 }
 
 function loadExample() {
   qrInput.value = 'fake-seed-999';
 }
+
+function loadBlacklistExample() {
+  qrInput.value = 'blacklist-seed-001';
+}
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="space-y-4 relative">
+    <transition name="toast">
+      <div
+        v-if="showToast"
+        class="fixed top-4 left-4 right-4 z-50 px-5 py-4 rounded-xl shadow-lg flex items-center gap-3"
+        :class="{
+          'bg-green-500 text-white': toastType === 'success',
+          'bg-red-500 text-white': toastType === 'error',
+          'bg-amber-500 text-white': toastType === 'warning'
+        }"
+      >
+        <CheckCircle v-if="toastType === 'success'" class="w-5 h-5 flex-shrink-0" />
+        <XCircle v-else-if="toastType === 'error'" class="w-5 h-5 flex-shrink-0" />
+        <AlertTriangle v-else class="w-5 h-5 flex-shrink-0" />
+        <span class="font-medium">{{ toastMessage }}</span>
+      </div>
+    </transition>
+
     <div class="bg-gradient-to-r from-red-500 to-rose-500 rounded-2xl p-6 text-white shadow-lg">
       <h2 class="text-lg font-bold mb-2">📝 举报取证</h2>
       <p class="text-red-100 text-sm">生成举报信模板，打包截图证据，维护合法权益</p>
@@ -138,27 +260,56 @@ function loadExample() {
           </div>
         </div>
 
-        <button
-          @click="loadExample"
-          class="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-xl font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
-        >
-          <Info class="w-5 h-5" />
-          加载示例数据（fake-seed-999）
-        </button>
+        <div class="grid grid-cols-2 gap-3">
+          <button
+            @click="loadExample"
+            class="bg-gray-100 text-gray-700 py-3 px-4 rounded-xl font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2 text-sm"
+          >
+            <Info class="w-4 h-4" />
+            未备案示例
+          </button>
+          <button
+            @click="loadBlacklistExample"
+            class="bg-red-100 text-red-700 py-3 px-4 rounded-xl font-medium hover:bg-red-200 transition-colors flex items-center justify-center gap-2 text-sm"
+          >
+            <AlertTriangle class="w-4 h-4" />
+            黑名单企业示例
+          </button>
+        </div>
 
         <button
           @click="handleGenerate"
           :disabled="!qrInput.trim() || isGenerating"
           class="w-full bg-gradient-to-r from-red-500 to-rose-500 text-white py-4 px-6 rounded-xl font-bold text-lg shadow-lg hover:from-red-600 hover:to-rose-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          <RefreshCw v-if="isGenerating" class="w-5 h-5 animate-spin" />
+          <RefreshCw v-if="isGenerating || isVerifying" class="w-5 h-5 animate-spin" />
           <FileText v-else class="w-5 h-5" />
-          {{ isGenerating ? '生成中...' : '生成举报信' }}
+          {{ isVerifying ? '正在核验种子信息...' : isGenerating ? '生成中...' : '生成举报信' }}
         </button>
       </div>
     </div>
 
     <div v-if="reportLetter" class="space-y-4">
+      <div v-if="usingCached" class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <div class="flex items-start gap-3">
+          <Info class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p class="text-blue-800 font-medium text-sm">使用缓存核验结果</p>
+            <p class="text-blue-600 text-xs mt-1">系统检测到该二维码最近已核验，自动复用核验结果。如需重新核验，请点击"重新生成"。</p>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="currentVerifyResult && !currentVerifyResult.isRegistered" class="bg-red-50 border border-red-200 rounded-xl p-4">
+        <div class="flex items-start gap-3">
+          <AlertTriangle class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p class="text-red-800 font-medium text-sm">未查询到备案信息</p>
+            <p class="text-red-600 text-xs mt-1">该种子未在农业农村部门备案系统中查询到信息，请谨慎购买。</p>
+          </div>
+        </div>
+      </div>
+
       <div ref="reportContainer" class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
         <div class="border-b border-dashed border-gray-300 rounded-xl p-6 bg-gray-50">
           <pre class="whitespace-pre-wrap text-sm text-gray-800 font-mono leading-relaxed">{{ reportLetter.content }}</pre>
@@ -232,3 +383,20 @@ function loadExample() {
     </div>
   </div>
 </template>
+
+<style scoped>
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-enter-from {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.toast-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+</style>

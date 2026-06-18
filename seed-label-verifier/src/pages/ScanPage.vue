@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useQrScanner } from '@/composables/useQrScanner';
+import { useVerifyCache } from '@/composables/useVerifyCache';
 import { api } from '@/api/client';
 import { Camera, CameraOff, RefreshCw, Search, CheckCircle, XCircle, AlertTriangle, Package, Factory, Calendar, Scale, Shield } from 'lucide-vue-next';
 import type { VerifyResponse, SeedInfo } from '../../shared/types';
+
+const { setCachedResult } = useVerifyCache();
 
 const videoRef = ref<HTMLVideoElement | null>(null);
 const manualInput = ref('');
@@ -43,7 +46,11 @@ async function verifySeed(qrContent: string) {
   
   isVerifying.value = true;
   try {
-    verifyResult.value = await api.verifySeed({ qrContent: qrContent.trim() });
+    const result = await api.verifySeed({ qrContent: qrContent.trim() });
+    verifyResult.value = result;
+    
+    const seedInfo = result.seed ? { ...result.seed } : undefined;
+    setCachedResult(qrContent, result, undefined, seedInfo);
   } catch (e) {
     verifyResult.value = {
       success: false,
@@ -126,7 +133,7 @@ function isBlacklistedResult(): boolean {
             <p class="text-amber-800 font-medium text-sm">示例测试数据</p>
             <p class="text-amber-700 text-xs mt-1">• 合法备案：valid-seed-001</p>
             <p class="text-amber-700 text-xs">• 未备案测试：fake-seed-999</p>
-            <p class="text-amber-700 text-xs">• 黑名单企业：valid-seed-002 (M002)</p>
+            <p class="text-amber-700 text-xs">• 黑名单企业：blacklist-seed-001 (河南金种子集团)</p>
           </div>
         </div>
       </div>

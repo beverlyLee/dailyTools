@@ -44,6 +44,7 @@ export interface LabelCheckResponse {
 
 export interface BlacklistedCompany {
   id: string;
+  manufacturerId: string;
   name: string;
   reason: string;
   dateAdded: string;
