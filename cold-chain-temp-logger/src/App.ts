@@ -437,8 +437,16 @@ class ColdChainApp {
         this.state.time = data.record.time;
         this.state.isAlert = data.record.isAlert;
         this.state.threshold = data.record.threshold;
-        if (data.record.isAlert) {
-          this.state.totalAlertDuration += 60;
+        if (this.state.alertHistory && this.state.alertHistory.length > 0) {
+          let total = 0;
+          for (const alert of this.state.alertHistory) {
+            if (alert.ongoing) {
+              total += data.record.time - alert.startTime;
+            } else if (alert.endTime !== null) {
+              total += alert.endTime - alert.startTime;
+            }
+          }
+          this.state.totalAlertDuration = total;
         }
         break;
       case 'state':

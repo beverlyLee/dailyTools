@@ -199,12 +199,14 @@ wss.on('connection', (ws) => {
 
 const TICK_INTERVAL = 1000;
 const SIMULATION_DT = 60;
+let lastIsAlert = false;
 
 setInterval(() => {
   const record = model.step(SIMULATION_DT);
   broadcastTick(record);
-  if (record.isAlert) {
+  if (record.isAlert !== lastIsAlert || record.isAlert) {
     broadcastState();
+    lastIsAlert = record.isAlert;
   }
 }, TICK_INTERVAL);
 
