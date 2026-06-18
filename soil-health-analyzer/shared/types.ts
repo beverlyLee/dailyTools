@@ -64,6 +64,8 @@ export interface SoilRecord extends SoilData {
   shi: number
   grade: string
   created_at: string
+  scores?: SHIScores
+  degradationTypes?: string[]
 }
 
 export interface TrackingRecord {

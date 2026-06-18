@@ -1,5 +1,5 @@
 import { getDb } from '../database.js'
-import type { SoilData, SHIResult, TrackingRecord, SoilRecord } from '../../shared/types.js'
+import type { SoilData, SHIResult, TrackingRecord, SoilRecord, SHIScores } from '../../shared/types.js'
 
 interface SoilRecordDbRow {
   id: number
@@ -30,7 +30,26 @@ interface TrackingDbRow {
   k_score: number
 }
 
+function buildDegradationTypes(ph: number, om: number, scores: SHIScores): string[] {
+  const types: string[] = []
+  if (ph < 6.5) types.push('酸化')
+  if (ph > 8.0) types.push('碱化')
+  if (om < 15) types.push('板结')
+  if (scores.nitrogen < 50 && scores.phosphorus < 50 && scores.potassium < 50) {
+    types.push('贫瘠')
+  }
+  if (types.length === 0) types.push('无明显退化')
+  return types
+}
+
 function dbRowToSoilRecord(row: SoilRecordDbRow): SoilRecord {
+  const scores: SHIScores = {
+    ph: row.ph_score,
+    organicMatter: row.om_score,
+    nitrogen: row.n_score,
+    phosphorus: row.p_score,
+    potassium: row.k_score,
+  }
   return {
     id: row.id,
     ph: row.ph,
@@ -42,6 +61,8 @@ function dbRowToSoilRecord(row: SoilRecordDbRow): SoilRecord {
     grade: row.grade,
     testDate: row.test_date,
     created_at: row.created_at,
+    scores,
+    degradationTypes: buildDegradationTypes(row.ph, row.organic_matter, scores),
   }
 }
 

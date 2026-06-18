@@ -31,17 +31,23 @@ interface FormErrors {
   testDate?: string
 }
 
+function toNumberOrNaN(value: string): number {
+  if (value === '' || value === null || value === undefined) return NaN
+  const n = Number(value)
+  return n
+}
+
 export default function Assessment() {
   const { currentData, shiResult, setCurrentData, setShiResult, setRecordId, reset } = useSoilStore()
 
   const today = new Date().toISOString().split('T')[0]
 
   const [form, setForm] = useState({
-    ph: currentData?.ph ?? 7,
-    organicMatter: currentData?.organicMatter ?? 0,
-    totalNitrogen: currentData?.totalNitrogen ?? 0,
-    availablePhosphorus: currentData?.availablePhosphorus ?? 0,
-    availablePotassium: currentData?.availablePotassium ?? 0,
+    ph: currentData?.ph != null ? String(currentData.ph) : '',
+    organicMatter: currentData?.organicMatter != null ? String(currentData.organicMatter) : '',
+    totalNitrogen: currentData?.totalNitrogen != null ? String(currentData.totalNitrogen) : '',
+    availablePhosphorus: currentData?.availablePhosphorus != null ? String(currentData.availablePhosphorus) : '',
+    availablePotassium: currentData?.availablePotassium != null ? String(currentData.availablePotassium) : '',
     testDate: currentData?.testDate ?? today,
   })
 
@@ -52,11 +58,11 @@ export default function Assessment() {
   useEffect(() => {
     if (currentData) {
       setForm({
-        ph: currentData.ph,
-        organicMatter: currentData.organicMatter,
-        totalNitrogen: currentData.totalNitrogen,
-        availablePhosphorus: currentData.availablePhosphorus,
-        availablePotassium: currentData.availablePotassium,
+        ph: String(currentData.ph),
+        organicMatter: String(currentData.organicMatter),
+        totalNitrogen: String(currentData.totalNitrogen),
+        availablePhosphorus: String(currentData.availablePhosphorus),
+        availablePotassium: String(currentData.availablePotassium),
         testDate: currentData.testDate,
       })
     }
@@ -64,48 +70,83 @@ export default function Assessment() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setForm((prev) => ({ ...prev, [name]: name === 'testDate' ? value : Number(value) }))
+    setForm((prev) => ({ ...prev, [name]: value }))
     setErrors((prev) => ({ ...prev, [name]: undefined }))
     setSubmitError(null)
   }
 
-  const validate = (): boolean => {
+  const validate = (): { ok: boolean; numeric: Partial<Record<keyof FormErrors, number>> } => {
     const next: FormErrors = {}
+    const numeric: Partial<Record<keyof FormErrors, number>> = {}
 
-    if (Number.isNaN(form.ph) || form.ph < 0 || form.ph > 14) {
-      next.ph = 'pH值必须在 0-14 范围内'
+    const ph = toNumberOrNaN(form.ph)
+    numeric.ph = ph
+    if (form.ph === '' || Number.isNaN(ph)) {
+      next.ph = '请输入有效的pH数值'
+    } else if (ph < 0 || ph > 14) {
+      next.ph = `pH值必须在 0-14 范围内（当前 ${ph}）`
     }
-    if (Number.isNaN(form.organicMatter) || form.organicMatter < 0) {
-      next.organicMatter = '有机质不能为负数'
+
+    const organicMatter = toNumberOrNaN(form.organicMatter)
+    numeric.organicMatter = organicMatter
+    if (form.organicMatter === '' || Number.isNaN(organicMatter)) {
+      next.organicMatter = '请输入有效的有机质数值'
+    } else if (organicMatter < 0) {
+      next.organicMatter = `有机质不能为负数（当前 ${organicMatter}）`
     }
-    if (Number.isNaN(form.totalNitrogen) || form.totalNitrogen < 0) {
-      next.totalNitrogen = '全氮不能为负数'
+
+    const totalNitrogen = toNumberOrNaN(form.totalNitrogen)
+    numeric.totalNitrogen = totalNitrogen
+    if (form.totalNitrogen === '' || Number.isNaN(totalNitrogen)) {
+      next.totalNitrogen = '请输入有效的全氮数值'
+    } else if (totalNitrogen < 0) {
+      next.totalNitrogen = `全氮不能为负数（当前 ${totalNitrogen}）`
     }
-    if (Number.isNaN(form.availablePhosphorus) || form.availablePhosphorus < 0) {
-      next.availablePhosphorus = '有效磷不能为负数'
+
+    const availablePhosphorus = toNumberOrNaN(form.availablePhosphorus)
+    numeric.availablePhosphorus = availablePhosphorus
+    if (form.availablePhosphorus === '' || Number.isNaN(availablePhosphorus)) {
+      next.availablePhosphorus = '请输入有效的有效磷数值'
+    } else if (availablePhosphorus < 0) {
+      next.availablePhosphorus = `有效磷不能为负数（当前 ${availablePhosphorus}）`
     }
-    if (Number.isNaN(form.availablePotassium) || form.availablePotassium < 0) {
-      next.availablePotassium = '速效钾不能为负数'
+
+    const availablePotassium = toNumberOrNaN(form.availablePotassium)
+    numeric.availablePotassium = availablePotassium
+    if (form.availablePotassium === '' || Number.isNaN(availablePotassium)) {
+      next.availablePotassium = '请输入有效的速效钾数值'
+    } else if (availablePotassium < 0) {
+      next.availablePotassium = `速效钾不能为负数（当前 ${availablePotassium}）`
     }
+
     if (!form.testDate) {
       next.testDate = '请选择检测日期'
     }
 
     setErrors(next)
-    return Object.keys(next).length === 0
+    return { ok: Object.keys(next).length === 0, numeric }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitError(null)
-    if (!validate()) return
+    const { ok, numeric } = validate()
+    if (!ok) return
     reset()
     setLoading(true)
     try {
+      const soilData: SoilData = {
+        ph: numeric.ph as number,
+        organicMatter: numeric.organicMatter as number,
+        totalNitrogen: numeric.totalNitrogen as number,
+        availablePhosphorus: numeric.availablePhosphorus as number,
+        availablePotassium: numeric.availablePotassium as number,
+        testDate: form.testDate,
+      }
       const res = await fetch('/api/assessment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(soilData),
       })
       if (!res.ok) {
         throw new Error(`服务器错误：${res.status}`)
@@ -115,7 +156,6 @@ export default function Assessment() {
         throw new Error(json.error || '计算失败，请稍后重试')
       }
       const result = json.data as SHIResult
-      const soilData: SoilData = { ...form }
       setCurrentData(soilData)
       setShiResult(result)
       if (json.data.recordId) setRecordId(json.data.recordId)
@@ -194,51 +234,124 @@ export default function Assessment() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div>
               <label className="label-text">pH值 (0-14)</label>
-              <input type="number" name="ph" min={0} max={14} step={0.1}
-                value={form.ph} onChange={handleChange} className={inputClass('ph')} />
-              {errors.ph && <p className="mt-1 text-xs text-red-500">{errors.ph}</p>}
+              <input
+                type="number"
+                name="ph"
+                step="0.1"
+                value={form.ph}
+                onChange={handleChange}
+                className={inputClass('ph')}
+                placeholder="请输入pH值，如 5.0"
+              />
+              {errors.ph && (
+                <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
+                  <XCircle className="w-3 h-3" />
+                  {errors.ph}
+                </div>
+              )}
             </div>
 
             <div>
               <label className="label-text">有机质 (g/kg)</label>
-              <input type="number" name="organicMatter" min={0} step={0.1}
-                value={form.organicMatter} onChange={handleChange} className={inputClass('organicMatter')} />
-              {errors.organicMatter && <p className="mt-1 text-xs text-red-500">{errors.organicMatter}</p>}
+              <input
+                type="number"
+                name="organicMatter"
+                step="0.1"
+                value={form.organicMatter}
+                onChange={handleChange}
+                className={inputClass('organicMatter')}
+                placeholder="请输入有机质含量，如 12.0"
+              />
+              {errors.organicMatter && (
+                <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
+                  <XCircle className="w-3 h-3" />
+                  {errors.organicMatter}
+                </div>
+              )}
             </div>
 
             <div>
               <label className="label-text">全氮 (g/kg)</label>
-              <input type="number" name="totalNitrogen" min={0} step={0.01}
-                value={form.totalNitrogen} onChange={handleChange} className={inputClass('totalNitrogen')} />
-              {errors.totalNitrogen && <p className="mt-1 text-xs text-red-500">{errors.totalNitrogen}</p>}
+              <input
+                type="number"
+                name="totalNitrogen"
+                step="0.01"
+                value={form.totalNitrogen}
+                onChange={handleChange}
+                className={inputClass('totalNitrogen')}
+                placeholder="请输入全氮含量，如 0.80"
+              />
+              {errors.totalNitrogen && (
+                <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
+                  <XCircle className="w-3 h-3" />
+                  {errors.totalNitrogen}
+                </div>
+              )}
             </div>
 
             <div>
               <label className="label-text">有效磷 (mg/kg)</label>
-              <input type="number" name="availablePhosphorus" min={0} step={0.1}
-                value={form.availablePhosphorus} onChange={handleChange} className={inputClass('availablePhosphorus')} />
-              {errors.availablePhosphorus && <p className="mt-1 text-xs text-red-500">{errors.availablePhosphorus}</p>}
+              <input
+                type="number"
+                name="availablePhosphorus"
+                step="0.1"
+                value={form.availablePhosphorus}
+                onChange={handleChange}
+                className={inputClass('availablePhosphorus')}
+                placeholder="请输入有效磷含量，如 8.0"
+              />
+              {errors.availablePhosphorus && (
+                <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
+                  <XCircle className="w-3 h-3" />
+                  {errors.availablePhosphorus}
+                </div>
+              )}
             </div>
 
             <div>
               <label className="label-text">速效钾 (mg/kg)</label>
-              <input type="number" name="availablePotassium" min={0} step={0.1}
-                value={form.availablePotassium} onChange={handleChange} className={inputClass('availablePotassium')} />
-              {errors.availablePotassium && <p className="mt-1 text-xs text-red-500">{errors.availablePotassium}</p>}
+              <input
+                type="number"
+                name="availablePotassium"
+                step="0.1"
+                value={form.availablePotassium}
+                onChange={handleChange}
+                className={inputClass('availablePotassium')}
+                placeholder="请输入速效钾含量，如 60.0"
+              />
+              {errors.availablePotassium && (
+                <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
+                  <XCircle className="w-3 h-3" />
+                  {errors.availablePotassium}
+                </div>
+              )}
             </div>
 
             <div>
               <label className="label-text">检测日期</label>
-              <input type="date" name="testDate"
-                value={form.testDate} onChange={handleChange} className={inputClass('testDate')} />
-              {errors.testDate && <p className="mt-1 text-xs text-red-500">{errors.testDate}</p>}
+              <input
+                type="date"
+                name="testDate"
+                value={form.testDate}
+                onChange={handleChange}
+                className={inputClass('testDate')}
+              />
+              {errors.testDate && (
+                <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
+                  <XCircle className="w-3 h-3" />
+                  {errors.testDate}
+                </div>
+              )}
             </div>
 
-            <button type="submit" disabled={loading}
-              className="btn-primary w-full mt-4 disabled:opacity-50">
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full mt-4 disabled:opacity-50"
+            >
               {loading ? '计算中...' : '计算健康指数'}
             </button>
           </form>
@@ -254,10 +367,23 @@ export default function Assessment() {
         ) : (
           <>
             <div className="card flex flex-col items-center">
-              <div className={`w-40 h-40 rounded-full flex flex-col items-center justify-center border-4 ${config?.bg ?? ''}`}
-                style={{ borderColor: grade === '优' ? '#4C7844' : grade === '良' ? '#3B82F6' : grade === '中' ? '#D97706' : '#DC2626' }}>
+              <div
+                className={`w-40 h-40 rounded-full flex flex-col items-center justify-center border-4 ${config?.bg ?? ''}`}
+                style={{
+                  borderColor:
+                    grade === '优'
+                      ? '#4C7844'
+                      : grade === '良'
+                        ? '#3B82F6'
+                        : grade === '中'
+                          ? '#D97706'
+                          : '#DC2626',
+                }}
+              >
                 <span className={`text-4xl font-bold ${config?.color ?? ''}`}>{shiResult.shi}</span>
-                <span className={`text-lg font-semibold mt-1 px-3 py-0.5 rounded-full ${config?.css ?? ''}`}>{grade}</span>
+                <span className={`text-lg font-semibold mt-1 px-3 py-0.5 rounded-full ${config?.css ?? ''}`}>
+                  {grade}
+                </span>
               </div>
               <p className="mt-3 text-earth-500 font-medium">土壤健康指数</p>
             </div>
@@ -282,7 +408,10 @@ export default function Assessment() {
                   <p className="text-earth-300 text-sm">退化类型：</p>
                   <div className="flex flex-wrap gap-2">
                     {shiResult.degradationTypes.map((dt) => (
-                      <span key={dt} className="px-3 py-1 rounded-full text-sm bg-soil-yellow/20 text-amber-800">
+                      <span
+                        key={dt}
+                        className="px-3 py-1 rounded-full text-sm bg-soil-yellow/20 text-amber-800"
+                      >
                         {dt}
                       </span>
                     ))}
@@ -293,7 +422,15 @@ export default function Assessment() {
                       .filter(([, v]) => v < 60)
                       .map(([k]) => (
                         <li key={k}>
-                          {k === 'ph' ? 'pH' : k === 'organicMatter' ? '有机质' : k === 'nitrogen' ? '全氮' : k === 'phosphorus' ? '有效磷' : '速效钾'}
+                          {k === 'ph'
+                            ? 'pH'
+                            : k === 'organicMatter'
+                              ? '有机质'
+                              : k === 'nitrogen'
+                                ? '全氮'
+                                : k === 'phosphorus'
+                                  ? '有效磷'
+                                  : '速效钾'}
                         </li>
                       ))}
                   </ul>

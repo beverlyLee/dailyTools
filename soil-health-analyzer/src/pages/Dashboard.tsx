@@ -13,7 +13,7 @@ import {
   Tooltip,
   Filler,
 } from 'chart.js'
-import type { SoilRecord, TrackingRecord, SoilData, SHIResult, SHIScores } from '@shared/types'
+import type { SoilRecord, TrackingRecord, SoilData, SHIResult } from '@shared/types'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler)
 
@@ -34,7 +34,13 @@ const gradeClass: Record<string, string> = {
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const { shiResult, currentData, setCurrentData, setShiResult, setRecordId } = useSoilStore()
+  const {
+    shiResult,
+    currentData,
+    setCurrentData,
+    setShiResult,
+    setRecordId,
+  } = useSoilStore()
   const [records, setRecords] = useState<SoilRecord[]>([])
   const [tracking, setTracking] = useState<TrackingRecord[]>([])
 
@@ -43,14 +49,14 @@ export default function Dashboard() {
       .then((r) => r.json())
       .then((json) => setRecords((json.data ?? []).slice(0, 5)))
       .catch(() => {})
-  }, [])
+  }, [shiResult])
 
   useEffect(() => {
     fetch('/api/records/tracking')
       .then((r) => r.json())
       .then((json) => setTracking(json.data ?? []))
       .catch(() => {})
-  }, [])
+  }, [shiResult])
 
   useEffect(() => {
     if (shiResult && currentData) return
@@ -67,24 +73,18 @@ export default function Dashboard() {
             availablePotassium: rec.availablePotassium,
             testDate: rec.testDate,
           }
-          const scores: SHIScores = {
-            ph: rec.shi ? 0 : 0,
-            organicMatter: rec.shi ? 0 : 0,
-            nitrogen: rec.shi ? 0 : 0,
-            phosphorus: rec.shi ? 0 : 0,
-            potassium: rec.shi ? 0 : 0,
-          }
           const result: SHIResult = {
             shi: rec.shi,
             grade: rec.grade as SHIResult['grade'],
-            scores,
-            degradationTypes: [],
+            scores: rec.scores ?? {
+              ph: 0,
+              organicMatter: 0,
+              nitrogen: 0,
+              phosphorus: 0,
+              potassium: 0,
+            },
+            degradationTypes: rec.degradationTypes ?? [],
           }
-          if (rec.ph < 6.5) result.degradationTypes.push('酸化')
-          if (rec.ph > 8.0) result.degradationTypes.push('碱化')
-          if (rec.organicMatter < 15) result.degradationTypes.push('板结')
-          if (result.degradationTypes.length === 0) result.degradationTypes.push('无明显退化')
-
           setCurrentData(data)
           setShiResult(result)
           if (rec.id) setRecordId(rec.id)
@@ -98,7 +98,14 @@ export default function Dashboard() {
   const statCards = [
     { label: 'SHI健康指数', value: shiResult?.shi?.toFixed(1) ?? '--', icon: Activity },
     { label: '等级评定', value: grade, icon: FlaskConical },
-    { label: '主要退化类型', value: shiResult?.degradationTypes?.join('、') ?? '未检测', icon: AlertTriangle },
+    {
+      label: '主要退化类型',
+      value:
+        (shiResult?.degradationTypes?.length ?? 0) > 0
+          ? shiResult?.degradationTypes?.join('、')
+          : '未检测',
+      icon: AlertTriangle,
+    },
     { label: '检测日期', value: currentData?.testDate ?? '--', icon: ClipboardList },
   ]
 
@@ -108,18 +115,22 @@ export default function Dashboard() {
     { label: '地力演变追踪', path: '/tracking', icon: TrendingUp },
   ]
 
-  const chartData = tracking.length > 0 ? {
-    labels: tracking.map((t) => t.testDate),
-    datasets: [{
-      label: 'SHI',
-      data: tracking.map((t) => t.shi),
-      borderColor: '#2E7D32',
-      backgroundColor: 'rgba(46,125,50,0.1)',
-      fill: true,
-      tension: 0.4,
-      pointRadius: 3,
-    }],
-  } : null
+  const chartData = tracking.length > 0
+    ? {
+        labels: tracking.map((t) => t.testDate),
+        datasets: [
+          {
+            label: 'SHI',
+            data: tracking.map((t) => t.shi),
+            borderColor: '#2E7D32',
+            backgroundColor: 'rgba(46,125,50,0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+          },
+        ],
+      }
+    : null
 
   return (
     <div className="space-y-8">
@@ -131,7 +142,9 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card) => (
           <div key={card.label} className="card flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-lg ${gradeBg[grade]} flex items-center justify-center text-white`}>
+            <div
+              className={`w-12 h-12 rounded-lg ${gradeBg[grade]} flex items-center justify-center text-white`}
+            >
               <card.icon size={22} />
             </div>
             <div>
@@ -178,13 +191,18 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {records.map((r) => (
-                    <tr key={r.id ?? r.testDate} className="border-b border-earth-100 last:border-0">
+                    <tr
+                      key={r.id ?? r.testDate}
+                      className="border-b border-earth-100 last:border-0"
+                    >
                       <td className="py-2">{r.testDate}</td>
                       <td className="py-2">{r.ph}</td>
                       <td className="py-2">{r.organicMatter}</td>
                       <td className="py-2">{r.shi?.toFixed(1)}</td>
                       <td className="py-2">
-                        <span className={`${gradeClass[r.grade] ?? 'grade-medium'} px-2 py-0.5 rounded-full text-xs font-medium`}>
+                        <span
+                          className={`${gradeClass[r.grade] ?? 'grade-medium'} px-2 py-0.5 rounded-full text-xs font-medium`}
+                        >
                           {r.grade}
                         </span>
                       </td>
@@ -199,12 +217,16 @@ export default function Dashboard() {
         <div className="card">
           <h2 className="text-lg font-semibold text-earth-500 mb-4">SHI趋势</h2>
           {chartData ? (
-            <Line data={chartData} options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { display: false }, title: { display: false } },
-              scales: { y: { beginAtZero: false, min: 0, max: 100 } },
-            }} style={{ height: '200px' }} />
+            <Line
+              data={chartData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, title: { display: false } },
+                scales: { y: { beginAtZero: false, min: 0, max: 100 } },
+              }}
+              style={{ height: '200px' }}
+            />
           ) : (
             <p className="text-earth-300 text-center py-8">暂无趋势数据</p>
           )}
